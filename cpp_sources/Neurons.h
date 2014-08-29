@@ -1,0 +1,153 @@
+#ifndef NEURONS_H
+#define NEURONS_H
+#include <vector>
+#include <random> // <boost/random.hpp>
+#include <string> // "" for string, '' for char
+
+#include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
+
+class NeuronNetwork; //forward declaration, better than #include "NeuronNetwork.h", if you do not need to access the internal of the class
+class ChemicalSynapses;
+// class ElectricalSynapses;
+class SimulatorInterface;
+using namespace std;
+
+// Leaky integrate-and-fire point neuron populations
+// Two types of synapses are supported:
+// 1) chemical synapses, both excitatory and inhibitory, conductance-based, with transmission delay, post-synaptic conductance described by alpha-function
+// 2) electrical synapses (the most common type is modelled, i.e., gap junction)
+class Neurons
+{
+public:
+	Neurons(); //default constructor
+	Neurons(int pop_ind, int N_input, double dt_input, int step_tot); // parameterised constructor
+	friend class NeuronNetwork; // Let NeuronNetwork access its private members
+	friend class ChemicalSynapses; // considers ChemicalSynapses as its friend so that ChemicalSynapses can access its private members.
+	//friend class ElectricalSynapses;
+	friend class SimulatorInterface;
+
+	void init(); // initialise neurons, called by constructor after parameter assignment
+	void set_para(string para, char delim); // set parameters if not using default ones
+
+
+	string dump_para(char delim); // dump all the parameter values used
+	void output_results(ofstream& output_file, char delim, char indicator);
+	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
+	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
+	void write2file(ofstream& output_file, char delim, vector<int>& v);
+
+	void random_V(double firing_probability); // Generate random initial condition for V
+
+
+
+	void update_spikes(int step_current); // Find the firing neurons, record them, reset their potential and update nonref
+	// Following member(s) should not be inherited
+private:
+	void update_V(int step_current); // Update potential
+
+public:
+	void set_gaussian_I_ext(double mean, double std);
+	
+	void add_neuron_sampling(vector<int> neuron_sample_ind, vector<bool> neuron_sample_type); // add individual neuron membrane potential and currents data sampling
+	void add_pop_sampling(vector<bool> pop_sample_ind); // add population membrane potential sampling
+
+	void sample_data(int step_current);
+
+
+	void init_runaway_killer(int runaway_steps, double runaway_num_ref); // kill the simulation when runaway activity of the network is detected: mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
+	void runaway_check(int step_current);
+
+protected:
+	// Space and time
+	int // actually we can use "unsigned int" here
+		pop_ind,
+		N; // total number of neurons in the population
+	double
+		dt; // simulation time step (ms)
+	int
+		step_tot; // total number of simulation steps
+
+	// Intrinsic neuron properties of the population
+	double
+		tau_ref;     // Refractory time (ms)
+	double
+		Cm, // membrane capacitance (uF=1000nF)
+		// Potential constants (mV)
+		V_rt, // Reset, usually same as leak reversal, use -75 to model relative refractory period??
+		V_lk, // Leak reversal
+		V_th, //  Threshold
+		// Leak conductance 
+		g_lk; // (nS)
+
+
+
+	// Bookkeeping
+	vector<double>
+		V,   // Membrane potential
+		I_leak, // leaky current
+		I_AMPA, // current due to AMPA chemical synapses
+		I_GABA, // current due to AMPA chemical synapses
+		I_NMDA, // current due to AMPA chemical synapses
+		I_GJ, // current due to gap junction (GJ)
+		I_ext; // external input current (usually noise)
+	int
+		ref_steps; // number of simulation steps that a neuron remains refractory after firing
+	vector<int>
+		ref_step_left; // neurons' state
+		// ref_left = 0 for non-refractory, ref_left > 0 for time steps left in refraction 
+	vector<int>
+		spikes_current; // index vector of current spiking neurons
+	vector<int>
+		spike_hist_tot, // entire history of spikes from all populations, only recorded when necessary; 
+		// a compact data structure, requiring vector "num_spikes_pop" to unpack it.
+		num_spikes_pop, // number of spikes at each time step
+		num_ref_pop; // number of refractory neurons at each time step
+
+
+	// parameters for Generate Gaussian random external current
+	double 
+		I_ext_mean,
+		I_ext_std;
+
+	// Data containers
+	vector<int>
+		neuron_sample_ind; // membrane potential sampling index vector
+	vector<bool>
+		neuron_sample_type; // boolean vector indicating which data to be sampled
+				    // must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
+	vector< vector< vector<double> > >
+		neuron_sample; // membrane currents sampling container, types of currents x VI_sample_ind.size() x step_tot
+
+	vector<bool>
+		pop_sample_ind; // population membrane potential sampling, logical vector as long as time vector
+	vector< vector<double> >
+		pop_sample;
+
+	// random number generator
+	int 
+		my_seed;
+	typedef default_random_engine
+		base_generator_type; // A typedef is used so that base generator type can be changed
+      	base_generator_type 
+		gen;
+	
+
+	// runaway-killer parameters
+	bool killer_license; // you need a license to kill
+	bool runaway_killed; // true for killed
+	int step_killed; // if killing, record when
+	int runaway_steps;
+	double runaway_mean_num_ref; // actually it's the mean percentage instead of absolute quantity
+	int min_pop_size; // No women, no kids;
+	
+	
+
+
+
+}; //class declaration must end with a semi-colon.
+
+
+
+inline Neurons::Neurons(){}; // default constructor
+
+#endif

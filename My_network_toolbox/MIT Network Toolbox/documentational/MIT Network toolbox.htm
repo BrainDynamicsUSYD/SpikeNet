@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>MIT Strategic Engineering Research Group: Olivier L. de Weck</title>
+<link media="screen" rel="stylesheet" href="MIT%20Network%20toolbox_files/style.css">
+<link rel="icon" type="image/png" href="http://strategic.mit.edu/images/favicon.png">
+<script src="MIT%20Network%20toolbox_files/ga.js" async="" type="text/javascript"></script><script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20459185-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body>
+	<div id="wrapper">
+				<div id="header">
+			<div id="logo"><a href="http://strategic.mit.edu/index.php"><img src="MIT%20Network%20toolbox_files/logo.gif" alt="MIT Strategic Engineering: Designing Systems for an Uncertain Future"></a></div>
+			<div id="info">
+				Strategic Engineering Research Group (SERG)<br>
+				Massachusetts Institute of Technology<br>
+				77 Massachusetts Avenue, E40-229 and 33-410<br>
+				Cambridge, MA 02139, U.S.A.
+			</div>
+		</div>
+		<div id="content">
+			<h1>MIT Strategic Engineering</h1>
+			<div style="text-align:center"><img id="randHeader" src="MIT%20Network%20toolbox_files/header04.jpg" alt=""></div>
+            			<h2>Matlab Tools for Network Analysis (2006-2011)</h2>
+			<p>This toolbox was first written in 2006. The last version, posted 
+here, is from November 2011. These routines are useful for someone who 
+wants to start hands-on work with networks fairly quickly, explore 
+simple graph statistics, distributions, simple visualization and compute
+ common network theory metrics. The code is not object-oriented, and 
+should be easy to use, read and improve upon. There is some overlap with
+ the <a href="http://www.mathworks.com/matlabcentral/fileexchange/4266">grTheory toolbox</a> and the <a href="http://www.mathworks.com/matlabcentral/fileexchange/10922">MatlabBGL library</a> published on <a href="http://www.mathworks.com/matlabcentral/fileexchange/">Matlab Central</a>.
+ Different authorship is indicated in the header. No code is perfect so 
+please contact gergana at alum dot mit.edu if you notice errors or have 
+pointers to better routines.</p>
+
+<p> This code is published under the BSD <a href="http://strategic.mit.edu/docs/matlab_networks/license.txt">license</a>. The license text is also available at the end of this page.</p>
+			
+			<h3>Downloads</h3>
+            <!--<div style="background-color:#900;color:white;font-weight:bold;padding:1em;">The Matlab Tools for Network Analysis downloads are temporarily unavailable online.</div>-->       
+            <p>The code is classified by functionality as follows (121 
+routines total, last version Nov 6, 2011). All functions can be 
+downloaded <a href="http://strategic.mit.edu/docs/matlab_networks/matlab_networks_routines.zip">here</a>.</p>
+            <h4>Basic network routines (17)</h4>
+       		<ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/getNodes.m">getNodes.m</a> - return the list of nodes for varying graph representations;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/getEdges.m">getEdges.m</a> - return the list of edges for varying graph representations;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/numnodes.m">numnodes.m</a> - number of vertices/nodes in the network; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/numedges.m">numedges.m</a> - number of edges/links in the network; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/link_density.m">link_density.m</a> - the density of links of the graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/selfloops.m">selfloops.m</a> - number of selfloops, i.e. nodes connected to themselves;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/multiedges.m">multiedges.m</a> - number of arcs (i,j) with multiple edges across them; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/average_degree.m">average_degree.m</a> - the average degree (# links) across all nodes; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/num_conn_comp.m">num_conn_comp.m</a> - number of connected components (using algebraic connectivity); </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/find_conn_comp.m">find_conn_comp.m</a> - the number of connected components in an undirected graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/giant_component.m">giant_component.m</a> - extract the giant component only (undirected graph); </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/tarjan.m">tarjan.m</a> - find the strongly connected components in a directed graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_complement.m">graph_complement.m</a> - the complement graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_dual.m">graph_dual.m</a> - the graph dual (or line graph, adjoint graph); </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/subgraph.m">subgraph.m</a> - return the subgraph adjacency given the graph and the subgraph nodes;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/leaf_nodes.m">leaf_nodes.m</a> - nodes connected to only one other node;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/leaf_edges.m">leaf_edges.m</a> - edges with only one adjacent edge;</li>
+        	</ul>
+            <h4>Diagnostics (11)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/issimple.m">issimple.m</a> - check whether the graph has selfloops and multiple edges;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/isdirected.m">isdirected.m</a> - directed or undirected graph (right now uses issymmetric.m); </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/issymmetric.m">issymmetric.m</a> - check whether a matrix is symmetric; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/isconnected.m">isconnected.m</a> - check whether a graph is connected; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/isweighted.m">isweighted.m</a> - determine whether the graph has weighted links;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/isregular.m">isregular.m</a> - check whether it's a regular graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/iscomplete.m">iscomplete.m</a> - check whether the graph is complete; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/iseulerian.m">iseulerian.m</a> - find out whether it's an eulerian graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/istree.m">istree.m</a> - check whether the graph is a tree;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/isgraphic.m">isgraphic.m</a> - check whether a sequence of numbers is graphic;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/isbipartite.m">isbipartite.m</a> - check whether a graph is bipartite;</li>
+            </ul>
+            <h4>Conversion routines (14)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2adjL.m">adj2adjL.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/adjL2adj.m">adjL2adj.m</a>) - convert an adjacency matrix to an adjacency list; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2edgeL.m">adj2edgeL.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/edgeL2adj.m">edgeL2adj.m</a>) - convert an adjacency matrix to an edge list; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2inc.m">adj2inc.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/inc2adj.m">inc2adj.m</a>) - convert adjacency matrix to incidence matrix and vice-versa; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2str.m">adj2str.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/str2adj.m">str2adj.m</a>) - convert adjacency matrix to a string graph representation;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adjL2edgeL.m">adjL2edgeL.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/edgeL2adjL.m">edgeL2adjL.m</a>) - convert adjacency list to edge list;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/inc2edgeL.m">inc2edgeL.m</a> - convert incidence matrix to an edge list; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2simple.m">adj2simple.m</a> - Remove selfloops and multiedges from an adjacency matrix;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/edgeL2simple.m">edgeL2simple.m</a> - remove selfloops and multiedges from an edge list; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/add_edge_weights.m">add_edge_weights.m</a> - adding edges that occur multiple times in an edgelist; </li>
+            </ul>
+            <h4>Centrality measures &amp; Distributions (15)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/degrees.m">degrees.m</a> - total degree, in- and out-degree sequence of an arbitrary graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/rewire.m">rewire.m</a> - degree-preserving rewiring; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/rewire_assort.m">rewire_assort.m</a> - degree-preserving rewiring with increasing assortativity; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/rewire_disassort.m">rewire_disassort.m</a> - degree-preserving rewiring with decreasing assortativity;<p>(for degree preserving rewiring, see also <a href="http://www.cmth.bnl.gov/%7Emaslov/matlab.htm">code by Maslov</a>); </p></li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/ave_neighbor_deg.m">ave_neighbor_deg.m</a> - the average degree of neighboring nodes for every vertex; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/closeness.m">closeness.m</a> - computes the closeness centrality for all vertices;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/node_betweenness_slow.m">node_betweenness.m</a> - node betweenness, (number of shortest paths definition); </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/node_betweenness_faster.m">node_betweenness.m</a> - a faster node betweenness algorithm; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/edge_betweenness.m">edge_betweenness.m</a> - edge betweenness, (number of shortest paths definition);  </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/eigencentrality.m">eigencentrality.m</a> - eigenvector corresponding to the largest eigenvalue; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/clust_coeff.m">clust_coeff.m</a> - two clustering coefficients: based on loops and local clustering; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/weighted_clust_coeff.m">weighted_clust_coeff.m</a> - weighted clustering coefficient; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/pearson.m">pearson.m</a> - pearson degree correlation; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/rich_club_metric.m">rich_club_metric.m</a></li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/s_metric.m">s_metric.m</a> - the sum of products of nodal degrees across all edges; </li>
+            </ul>
+            <h4>Spectral properties (6)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/laplacian_matrix.m">laplacian_matrix.m</a> - the Laplacian of the graph: degree matrix minus the adjacency; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_spectrum.m">graph_spectrum.m</a> - the sorted eigenvalues of the Laplacian; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/algebraic_connectivity.m">algebraic_connectivity.m</a> - the second smallest eigenvalue of the Laplacian; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/fiedler_vector.m">fiedler_vector.m</a> - the eigenvector corresponding to the algebraic connectivity; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/eigencentrality.m">eigencentrality.m</a> - see Centrality measures &amp; Distributions </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_energy.m">graph_energy.m</a>  </li>
+            </ul>
+            <h4>Distances (12)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/simple_dijkstra.m">simple_dijkstra.m</a> - simple Dijkstra, does not remember the path; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/dijkstra.m">dijkstra.m</a> - Dijkstra which also returns the shortest paths; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/shortest_pathDP.m">shortest_pathDP.m</a> - shortest path algorithm using dynamic programming; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/kneighbors.m">kneighbors.m</a> - returns the indices of all neighbors <i>k</i> links away (for a given node);</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/kmin_neighbors.m">kmin_neighbors.m</a> - indices of all neighbors minimum <i>k</i> links away (for a given node);</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/diameter.m">diameter.m</a> - the longest shortest path in the graph;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/ave_path_length.m">ave_path_length.m</a> - the average shortest path in the graph;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/smooth_diameter.m">smooth_diameter.m</a> - a smoothed definition of diameter (effective diameter);</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/closeness.m">closeness.m</a> - see Centrality measures &amp; Distributions;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/vertex_eccentricity.m">vertex_eccentricity.m</a> - the maximum distance to any other vertex; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_radius.m">graph_radius.m</a> - the minimum vertex eccentricity; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/distance_distribution.m">distance_distribution.m</a> - fraction of nodes at a given distance; </li>
+            </ul>
+            <h4>Comparing graphs (1)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_similarity.m">graph_similarity.m</a> - hubs and authorities based graph similarity matrix; </li>
+             </ul>
+             <h4>Modularity (6)</h4>
+             <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/simple_spectral_partitioning.m">spectral_partitioning.m</a> simple spectral partitioning; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/newmangirvan.m">Newman-Girvan algorithm</a> for community finding; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/newman_eigenvector_method.m">Newman eigenvector</a> modularity routine; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/newman_comm_fast.m">newman_comm_fast.m</a> faster community finding (Newman, 2003/4); </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/modularity_metric.m">modularity_metric.m</a> - as defined in Newman/Girvan above; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/louvain_community_finding.m">louvain_community_finding.m</a> </li>
+            </ul>
+<div class="image center"><a href="http://strategic.mit.edu/docs/matlab_networks/simple_spectral_partitioning.m"><img src="MIT%20Network%20toolbox_files/spectral_partitioning_example.png" height="120"></a><div class="caption">Example of Spectral Partitioning</div></div>
+            <h4>Motifs (4)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/loops3.m">loops3.m</a> - count all loops of size 3 in the graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/loops4.m">loops4.m</a> - returns all loops of size 4; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/num_loops.m">num_loops.m</a> - number of independent loops; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/num_star_motifs.m">num_star_motifs.m</a> - number of star motifs of given size; </li>
+            </ul>
+            <h4>Building graphs (16)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/random_graph.m">random_graph.m</a> - generate a random graph adjacency matrix using various models;<br>
+<p style="line-height:10.5pt">random_graph(n) - Erdos-Renyi graph with <b>n</b> nodes and probability of attachment 0.5;<br>random_graph(n,p) - Erdos-Renyi graph with <b>n</b> nodes and probability of attachment <b>p</b>; <br>random_graph(n,[ ],E) - random graph with E number of edges;<br>random_graph(n,[
+ ],[ ],distribution) - nodal degrees are drawn from a particular 
+distribution (uniform, normal, binomial, exponential);<br>random_graph(n,[ ],[ ],'sequence',deg_seq) - the degrees match a given sequence;</p> </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/random_directed_graph.m">random_directed_graph.m</a> - simple random directed graph routine; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/random_modular_graph.m">random_modular_graph.m</a> - random graph with modules; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/graph_from_degree_sequence.m">graph_from_degree_sequence.m</a> - build deterministic graph given the nodal degrees; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/canonical_nets.m">canonical_nets.m</a> - simple graphs such as trees, lattices and hierarchical trees; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/kregular.m">kregular.m</a> - simple routine for building k-regular graphs; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/PriceModel.m">PriceModel.m</a> - Price's citations growth model; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/preferential_attachment.m">preferential_attachment.m</a> - preferential attachment graph; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/exponential_growth_model.m">exponential_growth_model.m</a>; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/master_equation_growth_model.m">master_equation.m</a> - a generalization of the degree-based random growth models; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/newmangastner.m">newmangastner.m</a> - Newman-Gastner spatial distribution growth model; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/fabrikant_model.m">fabrikant_model.m</a> - another spatial distribution growth model; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/DoddsWattsSabel.m">DoddsWattsSabel.m</a> - building randomized hierarchies, the Dodds-Watts-Sabel model; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/build_smax_graph.m">s-max graph</a> - graph with the same degree sequence but maximum s-metric; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/forestFireModel.m">forest fire model</a><a>; </a></li><a>
+                </a><li><a></a><a href="http://strategic.mit.edu/docs/matlab_networks/nested_hierarchies_model.m">nested hierarchies model</a> by Sales-Pardo et al, 2007; </li>
+            </ul>
+            <div class="center">
+            	<div class="image left"><a href="http://strategic.mit.edu/docs/matlab_networks/canonical_nets.m"><img src="MIT%20Network%20toolbox_files/hexlattice.jpg" height="120"></a><div class="caption">Hex Lattice</div></div>
+                <div class="image left"><a href="http://strategic.mit.edu/docs/matlab_networks/random_modular_graph.m"><img src="MIT%20Network%20toolbox_files/random_modular_graph.png" height="120"></a><div class="caption">Random Modular Graph</div></div>
+                <div class="image left"><a href="http://strategic.mit.edu/docs/matlab_networks/newmangastner.m"><img src="MIT%20Network%20toolbox_files/NGexample.png" height="120"></a><div class="caption">Newman Gastner Example</div></div>
+            </div>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <h4>Drawing graphs (13)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/pdf_cdf_rank.m">pdf_cdf_rank.m</a> - pdf, cdf and rank distributions of a given sequence;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2pajek.m">adj2pajek.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/pajek2adj.m">pajek2adj.m</a>) - adjacency matrix to Pajek format: output .net file;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/edgeL2pajek.m">edgeL2pajek.m</a>, (<a href="http://strategic.mit.edu/docs/matlab_networks/pajek2edgeL.m">pajek2edgeL.m</a>) - edge list to Pajek format: output .net file;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/pajek2xyz.m">pajek2xyz.m</a> - Extract node x,y,z coordinates from a Pajek .net file; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/el2geom.m">el2geom.m</a> - plot an edge list geographically with color-coding of edge weights; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/edgeL2cyto.m">edgeL2cyto.m</a> - convert edge list to Cytoscape text input; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/adj2dl.m">adj2dl.m</a> - adjacency to UCINET format; by D. Whitney; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/edgelist2dl.m">edgelist2dl.m</a> - edge list to UCINET format; by D. Whitney; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/draw_circ_graph.m">draw_circ_graph.m</a> - draw a graph with all nodes in a circle, ordered by degree; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/dot_matrix_plot.m">dot_matrix_plot.m</a> - sparsity plots with nodes sorted by degree, betw-ness, modularity; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/radial_plot.m">radial_plot.m</a> - best for trees and sparse graphs; </li>
+            </ul>
+            <div class="image center"><a href="http://strategic.mit.edu/docs/matlab_networks/dot_matrix_plot.m"><img src="MIT%20Network%20toolbox_files/dot_matrix_example.png" height="120"></a><div class="caption">Dot Matrix Example</div></div>
+            <div class="center">
+            	<div class="image left"><a href="http://strategic.mit.edu/docs/matlab_networks/draw_circ_graph.m"><img src="MIT%20Network%20toolbox_files/circle_draw_example.png" height="120"></a><div class="caption">Circle Draw Example</div></div>
+            	<div class="image left"><a href="http://strategic.mit.edu/docs/matlab_networks/el2geom.m"><img src="MIT%20Network%20toolbox_files/continentalUS.png" height="120"></a><div class="caption">Continental US</div></div>
+            	<div class="image left"><a href="http://strategic.mit.edu/docs/matlab_networks/radial_plot.m"><img src="MIT%20Network%20toolbox_files/radial_plot_example.jpg" height="120"></a><div class="caption">Radial Plot Example</div></div>
+            </div>
+            <h4 style="clear:left;">Auxiliary (8)</h4>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/symmetrize.m">symmetrize.m</a> - symmetrize a matrix;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/symmetrize_edgeL.m">symmetrize_edgeL.m</a> - symmetrize an edge list (make it undirected);</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/num_conn_triples.m">num_conn_triples.m</a> - the number of connected triples of nodes;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/purge.m">purge.m</a> - remove elements from a list, while preserving the order; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/min_span_tree.m">min_span_tree.m</a> - construct a minimum spanning tree given the adjacency matrix; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/BFS.m">BFS.m</a> - breadth-first tree; </li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/sort_nodes_by_sum_neighbor_degrees.m"> sort nodes by the sum of neighbor degrees</a>;</li>
+                <li><a href="http://strategic.mit.edu/docs/matlab_networks/sort_nodes_by_max_neighbor_degree.m"> sort nodes by the maximum neighbor degree</a>;</li>
+            </ul>
+			<h3>Links</h3>
+            <ul style="margin:10pt; padding:0; line-height:9pt">
+            	<li><a href="http://www.mathworks.com/matlabcentral/fileexchange/4266">grTheory: Matlab Central</a></li>
+				<li><a href="http://www.mathworks.com/matlabcentral/fileexchange/10922">MatlabBGL</a></li>
+				<li><a href="http://www.mathworks.com/products/bioinfo/demos.html?file=/products/demos/shipping/bioinfo/graphtheorydemo.html#4">Bioinformatics toolbox: graph theory functions</a></li>
+				<li><a href="http://www.ams.jhu.edu/%7Eers/matgraph/">Matgraph by Ed Scheinerman</a></li>
+				<li><a href="https://sites.google.com/a/brain-connectivity-toolbox.net/bct/Home">Brain connectivity toolbox</a></li>
+				<li><a href="http://code.google.com/p/graphviz4matlab/">graphviz4matlab</a></li>
+            </ul>
+
+<br><h3> Current version </h3>
+<p> The new and current version of this code is available in Octave (GNU Octave Version 3.4.0 and Gnuplot 4.2.5) <a href="http://aeolianine.github.com/octave-networks-toolbox/">here</a>.
+ Some parts of the code are restructured and updated. All functions are 
+generally better documented. The Octave toolbox also includes a <a href="https://github.com/aeolianine/octave-networks-toolbox/blob/master/functions_manual.pdf">manual</a> with background information and examples. </p>
+           
+			<h3>Publications</h3>
+			<ol class="citation">
+			  <li>Bounova, G., de Weck, O.L. <a href="http://pre.aps.org/abstract/PRE/v85/i1/e016117">"Overview of metrics and their correlation patterns for multiple-metric topology
+analysis on heterogeneous graph ensembles"</a>, Phys. Rev. E 85, 016117 (2012).</li>
+			</ol>
+<br>
+<p align="left">Copyright (c) 2011, Massachusetts Institute of Technology.<br>
+All rights reserved.<br>
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are 
+met:<br>
+</p><ul>
+<li> Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>
+<li> Redistributions in binary form must reproduce the above copyright 
+notice, this list of conditions and the following disclaimer in the 
+documentation and/or other materials provided with the distribution.</li>
+<li> Neither the name of the Massachusetts Institute of Technology nor 
+the names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.</li>
+</ul>
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS 
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.<p></p>
+
+            		</div>
+				<div id="nav">
+			<ul>
+				<li><a href="http://strategic.mit.edu/index.php">Home</a></li>
+				<li><a href="http://strategic.mit.edu/research.php">Research</a>
+					<ul>
+                        <li><a href="http://strategic.mit.edu/systems.php">Systems Architecture and Engineering</a></li>
+                        <li><a href="http://strategic.mit.edu/simulation.php">Integrated Modeling and Simulation</a></li>
+                        <li><a href="http://strategic.mit.edu/optimization.php">Multidisciplinary Design Optimization</a></li>
+						<li><a href="http://strategic.mit.edu/changeability.php">System Lifecycle Properties</a></li>
+						<li><a href="http://strategic.mit.edu/commonality.php">Product Platforms and Commonality </a></li>
+						<li><a href="http://strategic.mit.edu/logistics.php">Space Systems Logistics</a></li>
+					</ul>
+				</li>
+				<li><a href="http://strategic.mit.edu/people.php">People</a>
+					<ul>
+						<li><a href="http://strategic.mit.edu/deweck.php">Prof. de Weck</a></li>
+						<li><a href="http://strategic.mit.edu/students.php">Students</a></li>
+						<li><a href="http://strategic.mit.edu/alumni.php">Alumni</a></li>
+						<li><a href="http://strategic.mit.edu/staff.php">Staff</a></li>
+						<li><a href="http://strategic.mit.edu/sponsors.php">Sponsors</a></li>
+					</ul>
+				</li>
+				<li><a href="http://strategic.mit.edu/projects.php">Projects</a>
+					<ul>
+						<li><a href="http://strategic.mit.edu/spacelogistics/">Space Logistics</a></li>
+						<li><a href="http://strategic.mit.edu/hmp2005/">Haughton Mars 2005</a></li>
+						<li><a href="http://strategic.mit.edu/spacenet/">SpaceNet</a></li>
+					</ul>
+				</li>
+				<li><a href="http://strategic.mit.edu/publications.php">Publications</a>
+                     <ul>
+                        <li><a href="http://strategic.mit.edu/books.php">Books</a></li>
+                        <li><a href="http://strategic.mit.edu/bytopic.php">by Topic</a></li>
+                        <li><a href="http://strategic.mit.edu/bydate.php">by Date</a></li>
+                        <li><a href="http://strategic.mit.edu/bytype.php">by Type</a></li>
+                        <li><a href="http://strategic.mit.edu/bib-network.html" onclick="target='new'">Visualization Web App</a></li>
+                     </ul>
+                </li>
+				<li><a href="http://strategic.mit.edu/downloads.php">Downloads</a>
+                     <ul>
+                        <li><a href="http://strategic.mit.edu/downloads.php?page=nexus_telescope">Nexus Space Telescope</a></li>
+                        <li class="current"><a href="http://strategic.mit.edu/downloads.php?page=matlab_networks">Matlab Network Analysis</a></li>
+                        <!--<li><a href="downloads.php?page=fastlsim">Fastlsim</a></li>
+                        <li><a href="downloads.php?page=spacenet">SpaceNet</a></li>
+                        <li><a href="downloads.php?page=tdn">Time-Expanded Decision Network</a></li>
+                        <li><a href="downloads.php?page=ism">Integrated Screening Model</a></li>
+                        <li><a href="downloads.php?page=citynet">City.Net</a></li>-->
+                     </ul>
+                </li>
+				<li><a href="http://strategic.mit.edu/education.php">Education</a></li>
+				<li><a href="http://strategic.mit.edu/news.php">News</a></li>
+				<li><a href="http://strategic.mit.edu/contact.php">Contact</a></li>
+				<li><a href="http://strategic.mit.edu/links.php">Links</a></li>
+			</ul>
+		</div>
+		<div id="content-bottom"></div>
+	</div>
+		<div id="footer">
+		Page last updated Tuesday, January 15, 2013<br>
+    	Copyright © 2014 MIT Strategic Engineering Research Group: Olivier L. de Weck, All Rights Reserved
+	</div>
+
+
+</body></html>

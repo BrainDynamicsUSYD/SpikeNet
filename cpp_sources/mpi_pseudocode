@@ -1,0 +1,72 @@
+#include "mpi.h"
+#include <iostream>
+#include <unistd.h> 
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+
+int main(int argc, char **argv){
+
+	// Initiate MPI environment and do error check
+	int ierr;
+	ierr = MPI_Init( &argc, &argv );//MPI::Init();
+	if (ierr != MPI_SUCCESS) {
+		cout << "Error starting MPI program. Terminating." << endl;
+		MPI_Abort( MPI_COMM_WORLD, ierr );
+	}
+	// Get communicator size (number of tasks) and current process rank (task id)
+	int size, rank;
+	MPI_Comm_size( MPI_COMM_WORLD, &size ); //size = MPI::COMM_WORLD.Get_size();
+	MPI_Comm_rank( MPI_COMM_WORLD, &rank ); //rank = MPI::COMM_WORLD.Get_rank();
+	// Extract the original group handle
+	MPI_Group orig_group; // group handle
+	MPI_Comm_group(MPI_COMM_WORLD, &orig_group); 
+
+	/*******************************************************************************/
+	/*******************************************************************************/
+	
+	/*
+	1) Master-process read input data
+
+	2) Master-process send data to other process to create NeuronPop
+
+	3) Master-process send data to other process to create ChemicalSynapse
+	
+	4) Group management (?)
+		a) [pre-pop, synapses, post-pop] as a unit group
+		b) [NeuronPops]  and [ChemicalSynapses] as two groups: cartesian topology (i,j)?
+
+	5) Start simulation
+		a) pre-pops send [V,spikes_current] to synapses
+		b) synapses update
+		c) synapses send [I] to post-pops
+		d) pops update
+
+	No...I need a toy mode to test the idea
+
+
+
+
+
+
+
+
+
+
+
+
+	/*******************************************************************************/
+	/*******************************************************************************/
+
+	// Close MPI environment
+	// No more MPI routines should be called after this
+	MPI_Finalize( ); //MPI::Finalize();
+	// Master process says goodbye
+	if (rank == 0){
+		cout << "Master process sends its regards!" << endl;
+	}
+	return 0;
+}
+
+
