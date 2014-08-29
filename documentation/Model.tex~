@@ -1,0 +1,164 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{tabulary}
+\usepackage{listings}
+
+\title{Project1 Manual}
+\author{Yifan Gu  \\
+	Complex System Group, School of Physics, USYD  \\
+	}
+
+\date{\today} 
+
+\begin{document}
+ \maketitle
+
+
+\section{Model}
+
+\subsection{Neuron Model}
+\numberwithin{equation}{section}
+
+Neurons are modeled as conductance-based leaky integrate-and-fire units. The membrane potential $V^{\alpha}_{i}$ of the $i$-th neuron ($i=1,\cdots,N_{\alpha}$) from population $\alpha=E,I,X$ (excitatory, inhibitory and external population, respectively) evolves according to
+
+\begin{equation}
+C_{m}\frac{dV^{\alpha}_{i}}{dt} = -g_{L}(V^{\alpha}_{i}-V_{L}) + I^{\alpha}_{i,syn}(t) + I^{\alpha}_{i,app}(t), \text{ if } V^{\alpha}_{i} < V_{th}
+\end{equation}
+
+When neurons reach the threshold $V_{th}$, a spike is emitted and they are reset to $V_{rt}$ for an absolute refractory period $\tau_{ref}$. The spike times $t^{\alpha}_{i}$ are recorded.
+
+The synaptic currents received by a neuron are given by
+
+
+\begin{align}
+I^{\alpha}_{i,syn}(t) &= \sum_{\beta=1}^{P}I^{\alpha\beta}_{i}(t) \\
+ &= \sum_{\beta=1}^{P}[-g_{i}^{\alpha\beta}(V^{\alpha}_{i}-V_{rev}^{\beta})] \\
+ &= \sum_{\beta=1}^{P}\{-[\sum_{j=1}^{N_{\beta}}a_{ij}^{\alpha\beta}g_{ij}^{\alpha\beta}s_{ij}^{\alpha\beta}(t)](V^{\alpha}_{i}-V_{rev}^{\beta})\}\label{eq:I_syn}
+\end{align}
+
+
+\noindent
+where $V_{rev}^{\beta}$ is the reversal potential of the corresponding current $I^{\alpha\beta}_{i}$ induced by pre-synaptic population $\beta$ and mathematically models the excitatory/inhibitory nature of it. $a_{ij}^{\alpha\beta}$ is a binary variable which determines the existence of synapse from the $j$-th neuron in population $\beta$ to the $i$-th neuron in  population $\alpha$, while $g_{ij}^{\alpha\beta}$ reflects the (maximal) strength of the synaptic conductance. The gating variable $s_{ij}^{\alpha\beta}(t)$ models the instananeous value of synaptic conductance in terms of the fraction of open channels, described by
+
+\begin{equation}
+\frac{ds_{ij}^{\alpha\beta}}{dt} = -\frac{s_{ij}^{\alpha\beta}}{\tau_{d}^{\beta}}+\sum_{t^{\beta}_{j}}h^{\beta}(t-t^{\beta}_{j}-d^{\alpha\beta}_{ij})(1-s_{ij}^{\alpha\beta})
+\label{eq:gating}
+\end{equation}
+
+\noindent
+where $h$ models the concentration time-course of the channel-opening neurotransmitters, arrived with a conduction delay $d^{\alpha\beta}_{ij}$ after the pre-synaptic spike time $t^{\beta}_{j}$. The $(1-s_{ij}^{\alpha\beta})$ term introduces saturation effect. Following the simplification in \cite{destexhe1994efficient}, a rectangular pulse with unitary area is used for $h$
+
+\begin{equation}
+h(t) = 
+\begin{cases}
+1/\tau_{r},& \text{ if } 0\leq t \leq \tau_{r}\\
+0,& \text{ otherwise}
+\end{cases}
+\end{equation}
+
+
+The values of the constant parameters are summarized in Table \ref{table:model constants}. Note that consistant units are ms for time, mV for voltage, nA for current, nF for capacitance and ${\mu}$S for conductance. 
+
+
+
+\begin{table}
+\begin{center}
+  \begin{tabulary}{3.0\textwidth}{RRR}
+	$\alpha$  & E & I \\
+	\hline
+	$N_{\alpha}$ & 4000 & 1000 \\
+	$\tau_{r}^{\alpha}$ (ms) & 1 & 1\\
+	$\tau_{d}^{\alpha}$ (ms) & 5 & 3 \\
+	$V_{rev}^{\alpha}$ (mV) & 0 & -80 \\
+	
+	$\tau_{ref}$ (ms) & \multicolumn{2}{c}{2} \\
+	$C_{m}$ (nF) & \multicolumn{2}{c}{0.25} \\
+	$g_{L}$ ($\mu$S) & \multicolumn{2}{c}{0.0167} \\
+	$V_{L}$ (mV) & \multicolumn{2}{c}{-70} \\
+	$V_{rt}$ (mV) & \multicolumn{2}{c}{-60} \\
+	$\theta$ (mV) & \multicolumn{2}{c}{-50} \\
+  \end{tabulary}  
+  \caption{Model constants}
+  \label{table:model constants}
+\end{center}
+\end{table}
+
+Simulations of the model is performed using Euler method with a time-step of 0.1 ms\cite{litwin2012slow}, using custom software written in C++.
+
+
+\section{Input File Format}
+
+Input files are text files.
+Default input filename is ``input\_filename.ygin''.
+Default synapse definition filename is ``input\_filename.ygin\_syn'' or use ``SYNF001'' command to specify a non-default synapse definition file path and name.
+
+\lstset{
+  basicstyle=\fontsize{9}{11}\selectfont\ttfamily
+}
+
+\begin{lstlisting}[mathescape]
+
+> INIT001 # number of neurons in each population
+	N1, N2, ...,
+
+> INIT002 # time step length and total number of steps
+	dt (ms), step_tot,
+
+> INIT003 # random initial distributions for V
+	p_fire_pop1 (range (0,1]), ..., p_fire_popN, 
+
+> INIT004 # external Gaussian currents
+	pop_ind, mean (nA), std (nA), 
+
+> INIT005 # external Poissonian spikes
+	pop_ind, type_ext, K_ext ($\mu$S), Num_ext,
+	rate_1 (Hz), rate_2, ..., rate_step_tot
+
+> INIT006 # chemical connection definition
+	type, pop_ind_pre, pop_ind_post,
+	I (row vector),
+	J (row vector),
+	K (row vector),
+	D (row vector),
+
+> SYNF001 # non-default synapse definition file name
+	path/file_name,
+
+> KILL001 # runaway killer setting
+	runaway_steps, runaway_mean_num_ref (range (0,1]),
+
+> PARA001 # non-default neuron population parameter
+	pop_ind, number_of_parameters,
+	variable_name1, value1,
+	variable_name2, value2,
+	...
+
+> PARA002 # non-default synapse parameter
+	number_of_parameters,
+	variable_name1, value1,
+	variable_name2, value2,
+	...
+
+> SAMP001 # neuronal V and I sampling 
+	pop_ind,
+	ind1, ind2, ..., indX, (sample neuron indices)
+
+> SAMP002 # populational potential sampling
+	pop_ind,
+	1, 1, 0, 0, ..., (1-by-step_tot logical values)
+
+> COPY001 # copy following lines into output file
+	number_of_lines,
+	line_to_be_copied,
+	line_to_be_copied,
+	...
+
+\end{lstlisting}
+
+\bibliography{Model}{}
+\bibliographystyle{plain}
+
+
+
+\end{document}

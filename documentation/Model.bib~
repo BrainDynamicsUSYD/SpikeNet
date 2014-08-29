@@ -1,0 +1,51 @@
+@article{destexhe1994efficient,
+  title={An efficient method for computing synaptic conductances based on a kinetic model of receptor binding},
+  author={Destexhe, Alain and Mainen, Zachary F and Sejnowski, Terrence J},
+  journal={Neural Computation},
+  volume={6},
+  number={1},
+  pages={14--18},
+  year={1994},
+  publisher={MIT Press}
+}
+
+
+@article{litwin2012slow,
+  title={Slow dynamics and high variability in balanced cortical networks with clustered connections},
+  author={Litwin-Kumar, Ashok and Doiron, Brent},
+  journal={Nature neuroscience},
+  volume={15},
+  number={11},
+  pages={1498--1505},
+  year={2012},
+  publisher={Nature Publishing Group}
+}
+
+@article{packer2011dense,
+  title={Dense, unspecific connectivity of neocortical parvalbumin-positive interneurons: a canonical microcircuit for inhibition?},
+  author={Packer, Adam M and Yuste, Rafael},
+  journal={The Journal of Neuroscience},
+  volume={31},
+  number={37},
+  pages={13260--13271},
+  year={2011},
+  publisher={Soc Neuroscience}
+}
+
+@article{buzsaki2014log,
+  title={The log-dynamic brain: how skewed distributions affect network operations},
+  author={Buzs{\'a}ki, Gy{\"o}rgy and Mizuseki, Kenji},
+  journal={Nature Reviews Neuroscience},
+  year={2014},
+  publisher={Nature Publishing Group}
+}
+
+
+@article{kaiser2010hierarchy,
+  title={Hierarchy and dynamics of neural networks},
+  author={Kaiser, Marcus and Hilgetag, Claus C and K{\"o}tter, Rolf},
+  journal={Frontiers in neuroinformatics},
+  volume={4},
+  year={2010},
+  publisher={Frontiers Research Foundation}
+}

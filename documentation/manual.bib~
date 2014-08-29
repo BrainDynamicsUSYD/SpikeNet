@@ -1,0 +1,10 @@
+@article{destexhe1994efficient,
+  title={An efficient method for computing synaptic conductances based on a kinetic model of receptor binding},
+  author={Destexhe, Alain and Mainen, Zachary F and Sejnowski, Terrence J},
+  journal={Neural Computation},
+  volume={6},
+  number={1},
+  pages={14--18},
+  year={1994},
+  publisher={MIT Press}
+}
