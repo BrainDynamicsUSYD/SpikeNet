@@ -38,7 +38,7 @@ function PostPostProcessYG(stdin)
 var = 'up_down_analysis.up_C_label';
 [V, loop_num] = CollectVectorYG(var);
 var = 'up_down_analysis.up_overlapping';
-[overlap, ~] = CollectVectorYG(var);
+[overlap, dummy] = CollectVectorYG(var);
 
 save('Lesion-half-400sec-100runs','V','loop_num','overlap');
 
