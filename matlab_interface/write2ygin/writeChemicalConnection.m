@@ -1,4 +1,16 @@
 function writeChemicalConnection(FID, type, i_pre, j_post, I, J, K, D)
+%      FID: file id for writing data
+%     type: type of chemical connection (1:AMPA, 2:GABA, 3:NMDA)
+%    i_pre: pre-synaptic population index
+%   j_post: post-synaptic population index
+%        I: pre-synaptic neuron index vector
+%        J: post-synaptic neuron index vector
+%        K: synaptic connection strength vector
+%        D: synaptic delay vector
+%
+% Note that (I,J,K) defines a (sparse) adjacency matrix
+%  and that (I,J,D) defines a delay matrix
+
 % for C/C++ index convetion
 type = type -1;
 i_pre = i_pre -1;

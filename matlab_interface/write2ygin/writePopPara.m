@@ -1,4 +1,11 @@
 function writePopPara(FID, pop_ind, varargin)
+% write non-default neuron model parameters
+%       FID: file id for writing data
+%   pop_ind: neuron population index
+%  varargin: var_name1, var_value1, var_name2, var_value2, ...
+%
+% For example, writePopPara(FID, 1, "Cm", 1.0, "tau_ref", 3.0)
+%
 % defualt parameters (using coherent units: msec+mV+nF+miuS+nA)
 % Cm = 0.25; % nF
 % tau_ref = 2.0; % absolute refractory time (ms), 3.0

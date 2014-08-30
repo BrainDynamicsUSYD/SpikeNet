@@ -1,4 +1,10 @@
 function writeSynPara(FID, varargin)
+% write non-default synapse parameters
+%       FID: file id for writing data
+%  varargin: var_name1, var_value1, var_name2, var_value2, ...
+%
+% For example, writeSynPara(FID, "V_ex", 1.0, "V_in", -85.0)
+%
 % defualt parameters (using coherent units: msec+mV+nF+miuS+nA)
 % % Potential constants (mV)
 % V_ex = 0.0;     % Excitatory reversal, 0.0
