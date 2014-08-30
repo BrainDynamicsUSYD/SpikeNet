@@ -1,5 +1,6 @@
 function RasterYG( Result_cell, save_figure )
-%UNTITLED Summary of this function goes here
+%   -1 for no figure, 0 for displaying figure, 1 for saving figure
+%
 %   If the firing history is too long, data will be segmented into several
 %   history fractions and plotted separately.
 disp('RasterYG...');
