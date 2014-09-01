@@ -35,7 +35,8 @@ for r_num = 1:Result_num
             ind = VI_sample.ind(i,2);
             pop = VI_sample.ind(i,1);
             figure_name = sprintf('Activity of sample cell No.%g of Pop %g',ind, pop);
-            h_VI = figure('NumberTitle','off','Name', figure_name, 'units','normalized','position',[0 0 1 1], 'visible', figure_visibility, 'Color','w');
+            h_VI = figure('NumberTitle','off','Name', figure_name, 'units','normalized','position',[0 0 1 1], ...
+                'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
             
             axes_matrix = zeros(3, 1);
             

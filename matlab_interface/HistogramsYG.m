@@ -35,7 +35,8 @@ for r_num = 1:Result_num
     
     %-------------------------------------------------------------------------%
     % Plot
-    h_hist = figure('NumberTitle','Off','Name','Histograms','units','normalized','position',[0 0 1 1], 'visible', figure_visibility, 'Color','w');
+    h_hist = figure('NumberTitle','Off','Name','Histograms','units','normalized','position',[0 0 1 1], ...
+        'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
     axes_matrix = zeros(3,Num_pop);
     for pop_ind = 1:Num_pop
         if isempty(ISI_dist{pop_ind}) % if empty, skip plotting
@@ -99,7 +100,7 @@ for r_num = 1:Result_num
     % save figure
     if save_figure == 1
         fprintf('\t Saving figure...');
-        print(h_hist, '-dpsc2', strcat('data/', R_temp.name{1}, '_hist')); 
+        print(h_hist, '-pdf', strcat('data/', R_temp.name{1}, '_hist')); 
         delete(h_hist);
         fprintf('Saving done.\n');
     else

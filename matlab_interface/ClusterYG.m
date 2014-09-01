@@ -41,7 +41,8 @@ for r_num = 1:Result_num
     %%%%%%%%%%%% plot rate
     if save_figure ~= -1 && ~isempty(Result_cell{r_num}.up_down_analysis.up_C_label)
         
-        h_rate = figure('NumberTitle','Off','Name','cluster mean rate','units','normalized','position',[0 0 1 1], 'visible', figure_visibility, 'Color','w');
+        h_rate = figure('NumberTitle','Off','Name','cluster mean rate','units','normalized','position',[0 0 1 1], ...
+            'visible', figure_visibility, 'Color','w','PaperPositionMode', 'default');
         subplot(5,1,1:4);hold on;
         
         edges = 1:R.ExplVar.Mnum;

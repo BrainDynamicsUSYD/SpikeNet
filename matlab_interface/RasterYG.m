@@ -60,7 +60,8 @@ for r_num = 1:Result_num
         
         %-------------------------------------------------------------------------%
         % Plot
-        h_raster = figure('NumberTitle','Off','Name','Raster plot','units','normalized','position',[0 0 1 1], 'visible', figure_visibility, 'Color','w');
+        h_raster = figure('NumberTitle','Off','Name','Raster plot','units','normalized','position',[0 0 1 1], ...
+            'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
         
         axes_matrix = zeros(3,Num_pop);
         for pop_ind = 1:Num_pop
@@ -170,7 +171,7 @@ for r_num = 1:Result_num
             
             % Good solution
             % set(h_raster,'PaperPosition',[0.25 0.25 6 4]); % default PaperUnits is inches, defualt PaperOrientation is portrait
-            print(h_raster, '-dpsc2', strcat( R_temp.stamp, '_raster_',num2str(seg)));
+            print(h_raster, '-pdf', strcat( R_temp.stamp, '_raster_',num2str(seg)));
             % Generating PostScript file only demands a memory proportional to
             % the information content of the plot in instead of to the
             % unnecessarily large amount of pixels when MATLAB generating .jpg
