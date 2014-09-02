@@ -20,7 +20,7 @@ else
 end
 
 % save figures
-save_fig = -1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
+save_fig = 1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
 
 
 % Start processing 

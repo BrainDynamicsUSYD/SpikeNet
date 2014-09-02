@@ -1,9 +1,7 @@
 #include "NeuronNetwork.h"
 #include "SimulatorInterface.h"
-#include "RunTimeVisual.h"
 
 #include <chrono> // #include <boost/chrono.hpp>
-
 
 using namespace std;
 
@@ -383,11 +381,6 @@ void SimulatorInterface::simulate(){
 	// simulate
 	for (int i = 0; i < network.step_tot; ++i){
 		network.update(i);
-
-		// test run time visualisation
-		if (i%10 == 0){
-			run_time_visual("Pop1 V", network.NeuronPopArray[0].V, 50, 80,-80.0, -50.0);
-		}
 	}
 	cout << "Simulation done." << endl;
 }
