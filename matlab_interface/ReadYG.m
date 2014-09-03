@@ -113,6 +113,14 @@ for id_out = 1:length(files)
                 for n = 1:length(data_name)
                     OutData{id_out}.neuron_sample.(data_name{n}){pop_ind,1} = cell2mat(OutData{id_out}.neuron_sample.(data_name{n}){pop_ind,1});
                 end
+            elseif strfind(tline,'SAMP001')
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%d','Delimiter',',');
+                pop_ind = scan_temp{1}+1; % be careful here!
+                fgetl(FID); % skip line
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%f','Delimiter',',');
+                OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
             elseif strfind(tline,'POPD002')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%d %d','Delimiter',',');

@@ -135,7 +135,7 @@ for r_num = 1:Result_num
         % save figure
         if save_figure == 1
             fprintf('\t Saving figure...');
-            print(h_pop_V, '-dpsc2', strcat( R.stamp, '_cluster_potential'));
+            print(h_pop_V, '-dpdf', strcat( R.stamp, '_cluster_potential'));
             delete(h_pop_V);
             fprintf('Saving done.\n');
         else

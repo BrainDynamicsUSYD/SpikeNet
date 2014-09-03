@@ -1,0 +1,225 @@
+function RasterYG( Result_cell, save_figure )
+%   -1 for no figure, 0 for displaying figure, 1 for saving figure
+%
+%   If the firing history is too long, data will be segmented into several
+%   history fractions and plotted separately.
+disp('RasterYG...');
+tic;
+
+
+if nargin == 0
+    Result_cell = CollectRYG();
+end
+if nargin <= 1
+    save_figure = 1; % default
+end
+if save_figure == 1
+    figure_visibility = 'off'; % 'on', 'off'
+else
+    figure_visibility = 'on';
+end
+
+Result_num = length(Result_cell);
+
+for r_num = 1:Result_num
+    R = Result_cell{r_num};
+    reduced_step_tot = R.reduced_step_tot;
+    comments = R.comments;
+    % Num_pop = R_temp.Num_pop; % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    Num_pop = 1;
+    
+    sample_size = 500; % sample neurons for raster plot
+    seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
+    seg_num = ceil(reduced_step_tot/seg_size);
+    for seg = 1:seg_num
+        
+        %-------------------------------------------------------------------------%
+        % Plot
+        h_raster = figure('NumberTitle','Off','Name','Raster plot','units','normalized','position',[0 0 1 1], ...
+            'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
+        axes_matrix = zeros(3,Num_pop);
+        for pop_ind = 1:Num_pop
+            % Plot raster plot
+            axes_matrix(1,pop_ind) = subplot(7,Num_pop,(0:3)*Num_pop+pop_ind);hold on;
+            raster_plot(R, pop_ind, seg, seg_size, sample_size);
+            % Plot number of spikes
+            axes_matrix(2,pop_ind) = subplot(7,Num_pop,4*Num_pop+pop_ind);hold on;
+            num_spikes_plot(R, pop_ind, seg, seg_size);
+            % Plot number of refractory neurons
+            axes_matrix(3,pop_ind) = subplot(7,Num_pop,5*Num_pop+pop_ind);hold on;
+            num_ref_plot(R, pop_ind, seg, seg_size);
+        end
+        
+        % Link axes to synchronise them when zooming
+        for pop_ind = 1:Num_pop
+            linkaxes(axes_matrix(1:3,pop_ind),'x');
+        end
+        
+        % Keep tick lables while remove tick marks
+        for pop_ind = 1:Num_pop
+            for i = 1:3
+                set(axes_matrix(i,pop_ind), 'Ticklength', [0 0]);
+            end
+        end
+        
+%         % Set initial y-axes to be same, since only one property can be linked
+%         for i = 2:3
+%             ylimData = [inf -inf]; % initialise ylim
+%             % find common ylim
+%             for pop_ind = 1:Num_pop
+%                 ylimData_new = ylim(axes_matrix(i,pop_ind));
+%                 ylimData(1) = min(ylimData(1),ylimData_new(1));
+%                 ylimData(2) = max(ylimData(2),ylimData_new(2));
+%             end
+%             % set common ylim
+%             for pop_ind = 1:Num_pop
+%                 ylim(axes_matrix(i,pop_ind),ylimData);
+%             end
+%         end
+        
+        
+        % Write comments
+        subplot(7,Num_pop,6*Num_pop+(1:Num_pop), 'visible','off')
+        text(0.5, 0.5, comments, ...
+            'VerticalAlignment', 'top', ...
+            'HorizontalAlignment', 'center',...
+            'FontSize',10,'FontWeight','normal', 'interpreter', 'none'); % ...'interpreter', 'none'... to show underscore
+        
+        
+        % save figure
+        if save_figure == 1
+            fprintf('\t Saving figure...');
+            print(h_raster, '-dpdf', strcat( R.stamp, '_raster_',num2str(seg)));
+            delete(h_raster);
+            fprintf('done.\n');
+        else
+            next = input('\t Next figure?');
+            delete(h_raster);
+        end
+        
+    end
+end
+
+toc;
+
+end
+
+
+
+
+
+
+
+
+
+
+
+function neuron_V_barplot(R, pop_ind, sample_ind)
+% subplot(6,8,8);hold on;  
+
+bin_num = 100;
+
+% Dump fields
+dt = R.dt;
+V = R.neuron_sample{pop_ind}.V(sample_ind,:);
+V_th = R.PopPara.V_th(pop_ind);
+tau_ref = R.PopPara.tau_ref(pop_ind);
+ref_steps = round(tau_ref/dt);
+
+% plot
+V_remove = RemoveSpikeRef(V, V_th, ref_steps); % remove spike and refractory data
+bin_edge = linspace(min(V_remove), max(V_remove), bin_num+1);
+bin_count = histc(V_remove,bin_edge);
+barh(bin_edge, bin_count, 'histc');
+ylim(ylim(axes_matrix(1)));
+set(gca,'xtick',[],'box','off')
+
+        
+end
+
+function V = RemoveSpikeRef(V, theta, ref_steps)
+% logical vector of spiking event
+spike = [(V(1:end-1) < theta) & (V(2:end) >= theta), false];
+% logical vector of being refractory
+ref = spike;
+for i = 1:ref_steps
+    ref = ref | [false(1,i) spike(1:end-i)];
+end
+% delete refractoriness from V
+V(ref) = [];
+end
+
+
+
+
+
+
+% 
+% 
+% function neuron_rate_plot(R,pop_ind)
+% 
+% 
+% % Dump fields
+% dt = R.dt;
+% step_tot = R.step_tot;
+% spike_hist = R.spike_hist;
+% T = (1:step_tot)*dt;
+% 
+% 
+% PopPara = R.PopPara;
+% comments = R.comments;
+% VI_sample = R.VI_sample;
+% 
+% 
+% % Gaussian filter
+% sigma_gaussian = 50; % ms, which is width???
+% kernel = spike_train_kernel_YG(sigma_gaussian, dt, 'gaussian');
+% 
+% 
+% % Plot VI
+% sample_size = length(VI_sample.ind(:,1));
+% for i = 1:sample_size
+%     
+%     ind = VI_sample.ind(i,2);
+%     pop_ind = VI_sample.ind(i,1);
+%     figure_name = sprintf('Activity of sample cell No.%g of Pop %g',ind, pop_ind);
+%     
+%     
+%     
+%     
+%     %             % multitaper estimation of power spectrum
+%     %             pmtm(V_remove);set(gca,'xscale','log');
+%     
+%     
+%     
+%     
+%     
+%     % current plot
+%     axes_matrix(3) = subplot(6, 8, [17:23, 25:31, 33:39]); hold on;grid on;
+%     marker = {'r','g','b','y','k','c','m'}; % for 6 different currents
+%     fname_cell = fieldnames(VI_sample);
+%     for f = 1:length(fname_cell)-2 % skip first two fields
+%         fn = fname_cell{f+2};
+%         if nnz(VI_sample.(fn)(i,:)) > 0
+%             plot(T,VI_sample.(fn)(i,:),marker{f});
+%         else
+%             plot(0,0,'w');
+%         end
+%     end
+%     
+%     set(gca,'box','off')
+%     
+%     
+%     
+%    
+% 
+% 
+% 
+% 
+% end
+% 
+
+
+
+
+
