@@ -49,8 +49,13 @@ if nnz(reduced_num_spikes) > 0
             ylabel('Sample neuron index');
         end
     end
-    set(gca, 'xtick', []);
+    
     xlim([reduced_T(1), reduced_T(1)+(length(seg_ind)-1)*reduced_dt]); % make sure all the plots have the same axis scale
+    
+    % Keep tick lables while remove tick marks
+    set(gca, 'xtick', [], 'Ticklength', [0 0], 'TickDir','out');
+    
+        
 end
 
 end

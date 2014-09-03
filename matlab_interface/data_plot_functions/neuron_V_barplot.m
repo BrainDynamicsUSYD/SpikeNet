@@ -15,12 +15,17 @@ ref_steps = round(tau_ref/dt);
 V_remove = RemoveSpikeRef(V, V_th, ref_steps); % remove spike and refractory data
 bin_edge = linspace(min(V_remove), max(V_remove), bin_num+1);
 bin_count = histc(V_remove,bin_edge);
+bin_count = bin_count/sum(bin_count); % normalization
 barh(bin_edge, bin_count, 'histc');
-set(gca,'xtick',[],'box','off');
 
 if nargin == 4
     set(gca,'YLim',YLim);
 end
+set(gca,'xtick',[],'box','off', 'TickDir','out', 'XColor','w');
+set(gcf, 'InvertHardCopy', 'off'); % prevent the x-axis line to reappear when printed
+
+
+ylabel('mV');
 
 end
 

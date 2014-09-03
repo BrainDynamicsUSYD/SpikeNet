@@ -30,9 +30,10 @@ reduced_T = seg_ind*reduced_dt;
 
 %  Plot number of spikes
 line([reduced_T; reduced_T], [zeros(1, length(reduced_T)); reduced_num_spikes/N(pop_ind)*100], 'Color', Color);
-if pop_ind == 1
-    ylabel('% Firing');
-end
-set(gca, 'xtick', []);
+
+
+ylabel('% Firing');
+set(gca, 'TickDir','out');
+xlabel('t (ms)');
 
 end

@@ -62,20 +62,7 @@ for r_num = 1:Result_num
             end
         end
         
-%         % Set initial y-axes to be same, since only one property can be linked
-%         for i = 2:3
-%             ylimData = [inf -inf]; % initialise ylim
-%             % find common ylim
-%             for pop_ind = 1:Num_pop
-%                 ylimData_new = ylim(axes_matrix(i,pop_ind));
-%                 ylimData(1) = min(ylimData(1),ylimData_new(1));
-%                 ylimData(2) = max(ylimData(2),ylimData_new(2));
-%             end
-%             % set common ylim
-%             for pop_ind = 1:Num_pop
-%                 ylim(axes_matrix(i,pop_ind),ylimData);
-%             end
-%         end
+
         
         
         % Write comments
@@ -105,7 +92,20 @@ toc;
 end
 
 
-
+%         % Set initial y-axes to be same, since only one property can be linked
+%         for i = 2:3
+%             ylimData = [inf -inf]; % initialise ylim
+%             % find common ylim
+%             for pop_ind = 1:Num_pop
+%                 ylimData_new = ylim(axes_matrix(i,pop_ind));
+%                 ylimData(1) = min(ylimData(1),ylimData_new(1));
+%                 ylimData(2) = max(ylimData(2),ylimData_new(2));
+%             end
+%             % set common ylim
+%             for pop_ind = 1:Num_pop
+%                 ylim(axes_matrix(i,pop_ind),ylimData);
+%             end
+%         end
 
 
 

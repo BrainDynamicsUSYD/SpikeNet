@@ -100,15 +100,12 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             %                                     writeExtCurrentSettings(FID, 2, I_ext_strength, 0);
                             %                                     % writeExtCurrentSettings(FID, 3, I_ext_strength, 0);
                             
-                            %%%%%%% VI sampling
+                            %%%%%%% data sampling
                             writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100:500:4000]);
                             writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100;600]);
-
-                            
-                            %                                     %%%%%%% Pop_V sampling
-                            %                                     pop_V_index = zeros(1,step_tot);
-                            %                                     pop_V_index(1:20:step_tot) = 1;
-                            %                                     writePopSampling(FID,1,pop_V_index);
+                            pop_V_index = zeros(1,step_tot);
+                            pop_V_index(1:20:step_tot) = 1;
+                            writePopSampling(FID,1,pop_V_index);
                             
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)

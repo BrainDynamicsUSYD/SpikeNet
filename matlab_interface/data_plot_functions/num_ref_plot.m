@@ -30,10 +30,11 @@ reduced_num_ref = R.reduced_num_ref{pop_ind}(seg_ind);
 
 % Plot number of refractory neurons
 line([reduced_T; reduced_T], [zeros(1, length(reduced_T)); reduced_num_ref/N(pop_ind)*100], 'Color', Color);
-if pop_ind == 1
-    ylabel('% Refractory');
-end
-xlabel(['t (ms), pop No.', num2str(pop_ind)]);
+
+
+ylabel('% Refractory');
+xlabel('t (ms)');
+set(gca, 'TickDir','out');
 
 end
 

@@ -204,8 +204,8 @@ fprintf('\t Re-formatting data...\n');
 Result_num = length(OutData);
 for r_num = 1:Result_num
     
-    % Re-format VI_sample into coloum matrix
-    OutData{r_num} = ReformatVI_sample(OutData{r_num});
+%     % Re-format VI_sample into coloum matrix
+%     OutData{r_num} = ReformatVI_sample(OutData{r_num});
 
     % Reformat spike history data
     OutData{r_num} = ReformatSpikeHistory(OutData{r_num});
@@ -224,16 +224,16 @@ toc;
 end
 
 
-function Data = ReformatVI_sample(Data)
-    % Re-format VI_sample into coloum matrix
-    if any( strcmp(fieldnames(Data), 'VI_sample') ) && ~isempty(Data.VI_sample) 
-        fname_cell = fieldnames(Data.VI_sample);
-        for f = 1:length(fname_cell)
-            fn = fname_cell{f};
-            Data.VI_sample.(fn) = cell2mat(Data.VI_sample.(fn));
-        end
-    end
-end
+% function Data = ReformatVI_sample(Data)
+%     % Re-format VI_sample into coloum matrix
+%     if any( strcmp(fieldnames(Data), 'VI_sample') ) && ~isempty(Data.VI_sample) 
+%         fname_cell = fieldnames(Data.VI_sample);
+%         for f = 1:length(fname_cell)
+%             fn = fname_cell{f};
+%             Data.VI_sample.(fn) = cell2mat(Data.VI_sample.(fn));
+%         end
+%     end
+% end
 
 function Data = ReformatSpikeHistory(Data)
     % Re-format the raw (compressed) spike history data into natural structure
@@ -268,6 +268,7 @@ function Data = DiscardTransientData(Data)
             Data.ExplVar.discard_transient > 0
         discard_transient = Data.ExplVar.discard_transient;
         step_tot_dis = round(Data.step_tot*(1-discard_transient));
+        % spiking history
         for pop_ind = 1:Data.Num_pop
             Data.spike_hist{pop_ind} = Data.spike_hist{pop_ind}(:,end-step_tot_dis+1:end);
             if nnz(Data.num_spikes{pop_ind}) > 0
@@ -276,13 +277,14 @@ function Data = DiscardTransientData(Data)
             Data.num_spikes{pop_ind} = Data.num_spikes{pop_ind}(end-step_tot_dis+1:end);
             Data.num_ref{pop_ind} = Data.num_ref{pop_ind}(end-step_tot_dis+1:end);
         end
-        if any( strcmp(fieldnames(Data), 'VI_sample') ) && ~isempty(Data.VI_sample) 
-            fname_cell = fieldnames(Data.VI_sample);
-            for f = 2:length(fname_cell) % skip first field
-                fn = fname_cell{f};
-                Data.VI_sample.(fn) = Data.VI_sample.(fn)(:,end-step_tot_dis+1:end);
-            end
-        end
+%         % sampled data
+%         if any( strcmp(fieldnames(Data), 'VI_sample') ) && ~isempty(Data.VI_sample) 
+%             fname_cell = fieldnames(Data.VI_sample);
+%             for f = 2:length(fname_cell) % skip first field
+%                 fn = fname_cell{f};
+%                 Data.VI_sample.(fn) = Data.VI_sample.(fn)(:,end-step_tot_dis+1:end);
+%             end
+%         end
         Data.step_tot = step_tot_dis;
     end
 end
