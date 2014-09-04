@@ -12,26 +12,26 @@ if nargin < 3
 end
 
 % Dump fields
-reduced_dt = R.reduced_dt;
-reduced_step_tot = R.reduced_step_tot;
+dt = R.reduced.dt;
+step_tot = R.reduced.step_tot;
 N = R.N;
 rate_sorted = R.Analysis.rate_sorted;
 
 % Segmetation
-seg_num = ceil(reduced_step_tot/seg_size);
+seg_num = ceil(step_tot/seg_size);
 if seg < seg_num
     seg_ind = ((seg-1)*seg_size+1):(seg*seg_size);
 else
-    seg_ind = ((seg-1)*seg_size+1):(reduced_step_tot);
+    seg_ind = ((seg-1)*seg_size+1):(step_tot);
 end
 
 % Dump fields
-reduced_num_spikes = R.reduced_num_spikes{pop_ind}(seg_ind);
-reduced_spike_hist = R.reduced_spike_hist{pop_ind}(:,seg_ind);
-reduced_T = seg_ind*reduced_dt;
+num_spikes = R.reduced.num_spikes{pop_ind}(seg_ind);
+spike_hist = R.reduced.spike_hist{pop_ind}(:,seg_ind);
+T = seg_ind*dt;
 
 % Plot raster plot
-if nnz(reduced_num_spikes) > 0
+if nnz(num_spikes) > 0
     % down-sampling
     if N(pop_ind) >= sample_size
         ind_sample = sort(randperm(N(pop_ind),sample_size));
@@ -39,8 +39,8 @@ if nnz(reduced_num_spikes) > 0
         ind_sample = 1:1:N(pop_ind);
     end
     
-    [Y,X,~] = find(reduced_spike_hist(ind_sample,:));
-    line(([X(:)'; X(:)']+seg_ind(1)-1)*reduced_dt,[Y(:)'-1;Y(:)'],'Color','k');
+    [Y,X,~] = find(spike_hist(ind_sample,:));
+    line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)'],'Color','k');
     ylim([0,length(ind_sample)]);
     ylabel('Neurons')
 %     if pop_ind == 1
@@ -51,7 +51,7 @@ if nnz(reduced_num_spikes) > 0
 %         end
 %     end
     
-    xlim([reduced_T(1), reduced_T(1)+(length(seg_ind)-1)*reduced_dt]); % make sure all the plots have the same axis scale
+    xlim([T(1), T(1)+(length(seg_ind)-1)*dt]); % make sure all the plots have the same axis scale
     
     % Keep tick lables while remove tick marks
     % set(gca, 'xtick', [], 'Ticklength', [0 0], 'TickDir','out');

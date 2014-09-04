@@ -23,14 +23,14 @@ Result_num = length(Result_cell);
 
 for r_num = 1:Result_num
     R = Result_cell{r_num};
-    reduced_step_tot = R.reduced_step_tot;
+    step_tot = R.reduced.step_tot;
     comments = R.comments;
     % Num_pop = R_temp.Num_pop; % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Num_pop = 1;
     
     sample_size = 500; % sample neurons for raster plot
     seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
-    seg_num = ceil(reduced_step_tot/seg_size);
+    seg_num = ceil(step_tot/seg_size);
     for seg = 1:seg_num
         
         %-------------------------------------------------------------------------%

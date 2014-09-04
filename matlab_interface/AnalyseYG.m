@@ -102,7 +102,7 @@ if re_arrange == 1
             % re-arrange spike_hist accrodingly
             R.spike_hist{pop_ind} = R.spike_hist{pop_ind}(rate_sort_ind,:);
             % reduced_spike_hist
-            R.reduced_spike_hist{pop_ind} = R.reduced_spike_hist{pop_ind}(rate_sort_ind,:);
+            R.reduced.spike_hist{pop_ind} = R.reduced.spike_hist{pop_ind}(rate_sort_ind,:);
         end
     end
     R.Analysis.rate_sorted = 1;
@@ -162,14 +162,14 @@ CC_kernel_width = 40; % ms, kernel length
 
 % Dumpe fields
 N = R.N;
-reduced_spike_hist = R.reduced_spike_hist;
-reduced_dt = R.reduced_dt;
+spike_hist = R.reduced.spike_hist;
+dt = R.reduced.dt;
 Num_pop = R.Num_pop;
 num_spikes = R.num_spikes;
 
 % Define kernel
 kernel_type = 'square';
-CC_kernel = spike_train_kernel_YG(CC_kernel_width, reduced_dt, kernel_type);
+CC_kernel = spike_train_kernel_YG(CC_kernel_width, dt, kernel_type);
 
 %%%%%%%%%% sample pairs from entire network (all the populations)
 NNZ_product = 1;
@@ -183,7 +183,7 @@ if NNZ_product > 0
     % Calculate pair-wise corrcoef
     CC_sample = zeros(1,corrcoef_sample_num);
     for i = 1:corrcoef_sample_num
-        CC_sample(i) = CorrCoefYG(reduced_spike_hist{popA(i)}(indA(i),:), reduced_spike_hist{popB(i)}(indB(i),:), CC_kernel);
+        CC_sample(i) = CorrCoefYG(spike_hist{popA(i)}(indA(i),:), spike_hist{popB(i)}(indB(i),:), CC_kernel);
 %         %%%%%%% display progress
 %         if i > 1
 %             fprintf(repmat('\b',1,10));
@@ -212,7 +212,7 @@ for pop_ind = 1:Num_pop
         CC_pop_sample_matrix{pop_ind} = zeros(sample_size);
         for A = 1:sample_size-1
             for B = (A+1):sample_size
-                CC_pop_sample_matrix{pop_ind}(A,B) = CorrCoefYG(reduced_spike_hist{pop_ind}(sample(A),:), reduced_spike_hist{pop_ind}(sample(B),:), CC_kernel);
+                CC_pop_sample_matrix{pop_ind}(A,B) = CorrCoefYG(spike_hist{pop_ind}(sample(A),:), spike_hist{pop_ind}(sample(B),:), CC_kernel);
                 CC_pop_sample_matrix{pop_ind}(B,A) = CC_pop_sample_matrix{pop_ind}(A,B); % symmetry
                 % display progress
                 AB = (A-1)*sample_size+B;

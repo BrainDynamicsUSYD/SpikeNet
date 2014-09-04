@@ -12,24 +12,24 @@ end
 Color = [255 30 30]/255;
 
 % Dump fields
-reduced_dt = R.reduced_dt;
-reduced_step_tot = R.reduced_step_tot;
+dt = R.reduced.dt;
+step_tot = R.reduced.step_tot;
 N = R.N;
 
 % Segmetation
-seg_num = ceil(reduced_step_tot/seg_size);
+seg_num = ceil(step_tot/seg_size);
 if seg < seg_num
     seg_ind = ((seg-1)*seg_size+1):(seg*seg_size);
 else
-    seg_ind = ((seg-1)*seg_size+1):(reduced_step_tot);
+    seg_ind = ((seg-1)*seg_size+1):(step_tot);
 end
 
 % Dump fields
-reduced_num_spikes = R.reduced_num_spikes{pop_ind}(seg_ind);
-reduced_T = seg_ind*reduced_dt;
+num_spikes = R.reduced.num_spikes{pop_ind}(seg_ind);
+T = seg_ind*dt;
 
 %  Plot number of spikes
-line([reduced_T; reduced_T], [zeros(1, length(reduced_T)); reduced_num_spikes/N(pop_ind)*100], 'Color', Color);
+line([T; T], [zeros(1, length(T)); num_spikes/N(pop_ind)*100], 'Color', Color);
 
 
 ylabel('% Firing');

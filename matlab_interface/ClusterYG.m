@@ -48,7 +48,7 @@ for r_num = 1:Result_num
         edges = 1:R.ExplVar.Mnum;
         count = histc(Result_cell{r_num}.up_down_analysis.up_C_label,edges);
         bar(edges,count,'histc');
-%         T = (1:R.reduced_step_tot)*R.reduced_dt/1000;
+%         T = (1:R.reduced.step_tot)*R.reduced.dt/1000;
 %         plot(T,C_rate); ylabel('Hz');xlabel('sec');
 %         legend(num2str(transpose(1:R.ExplVar.Mnum)));
 %         
@@ -105,7 +105,7 @@ for r_num = 1:Result_num
         end
         
         % plot mean&std
-        %T = (1:R.reduced_step_tot)*R.reduced_dt/1000;
+        %T = (1:R.reduced.step_tot)*R.reduced.dt/1000;
         h_pop_V = figure('NumberTitle','Off','Name','cluster potential distribution: 1st to 4th moment','units','normalized','position',[0 0 1 1], 'visible', figure_visibility, 'Color','w');
         
         %     linprop={'r','g','b','r','c','m','k','y'};
@@ -158,15 +158,15 @@ function R = cluster_rate(R)
     % kernel for rate estimation
     CC_kernel_width = 50; % ms, kernel length
     choice = 'gaussian';
-    kernel = spike_train_kernel_YG(CC_kernel_width, R.reduced_dt, choice);
+    kernel = spike_train_kernel_YG(CC_kernel_width, R.reduced.dt, choice);
     
     % cluster mean rate
     C_label = ceil((1:R.N(1))./round(R.N(1)/R.ExplVar.Mnum)); % cluster membership label
-    C_rate = zeros(R.ExplVar.Mnum, R.reduced_step_tot);
+    C_rate = zeros(R.ExplVar.Mnum, R.reduced.step_tot);
     for cc = 1:R.ExplVar.Mnum
         C_begin = find(C_label == cc, 1, 'first');
         C_end = find(C_label == cc, 1, 'last');
-        C_rate(cc,:) = SpikeTrainConvolve(sum(R.reduced_spike_hist{1}(C_begin:C_end,:), 1)/(C_end-C_begin+1), kernel);
+        C_rate(cc,:) = SpikeTrainConvolve(sum(R.reduced.spike_hist{1}(C_begin:C_end,:), 1)/(C_end-C_begin+1), kernel);
     end
     % record results
     R.C_label = C_label;
@@ -179,7 +179,7 @@ function result = cluster_up_down_state_analysis(R, theta)
 % A: cluster up-state beginning time vector index
 % B: cluster up-state endding time vector index
 
-    dt = R.reduced_dt;
+    dt = R.reduced.dt;
 
     % thresholding
     result.theta = theta;

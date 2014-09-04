@@ -12,8 +12,8 @@ end
 
 
 % Dump fields
-dt = R.reduced_dt;
-step_tot = R.reduced_step_tot;
+dt = R.reduced.dt;
+step_tot = R.reduced.step_tot;
 
 % Segmetation
 seg_num = ceil(step_tot/seg_size);
@@ -26,7 +26,7 @@ end
 
 % Dump fields
 T = seg_ind*dt;
-spike_hist = R.reduced_spike_hist{pop_ind}(neuron_ind,seg_ind);
+spike_hist = R.reduced.spike_hist{pop_ind}(neuron_ind,seg_ind);
 
 % Gaussian filter
 kernel = spike_train_kernel_YG(sigma_gaussian, dt, 'gaussian');

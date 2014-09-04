@@ -28,10 +28,10 @@ function Data = ReduceSolution(Data)
         end
     end
 
-    Data.reduced_dt = reduced_dt;
-    Data.reduced_step_tot = reduced_step_tot;
-    Data.reduced_spike_hist = reduced_spike_hist;
-    Data.reduced_num_spikes = reduced_num_spikes;
-    Data.reduced_num_ref = reduced_num_ref;
+    Data.reduced.dt = reduced_dt;
+    Data.reduced.step_tot = reduced_step_tot;
+    Data.reduced.spike_hist = reduced_spike_hist;
+    Data.reduced.num_spikes = reduced_num_spikes;
+    Data.reduced.num_ref = reduced_num_ref;
 
 end

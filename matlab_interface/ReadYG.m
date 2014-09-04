@@ -154,7 +154,7 @@ for id_out = 1:length(files)
                     scan_temp = textscan(tline, '%s %f', 'Delimiter', ',');
                     para_name = scan_temp{1}{1};
                     para_value = scan_temp{2};
-                    OutData{id_out}.PopPara{pop_ind}.(para_name) = para_value;
+                    OutData{id_out}.PopPara{pop_ind,1}.(para_name) = para_value;
                 end
                 
             elseif strfind(tline,'SYND001')
@@ -167,7 +167,7 @@ for id_out = 1:length(files)
                     scan_temp = textscan(tline, '%s %f', 'Delimiter', ',');
                     para_name = scan_temp{1}{1};
                     para_value = scan_temp{2};
-                    OutData{id_out}.SynPara{num_syn}.(para_name) = para_value;
+                    OutData{id_out}.SynPara{num_syn,1}.(para_name) = para_value;
                 end
                 
             elseif strfind(tline,'INIT002')
