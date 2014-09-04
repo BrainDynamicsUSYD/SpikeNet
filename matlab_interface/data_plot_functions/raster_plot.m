@@ -42,18 +42,20 @@ if nnz(reduced_num_spikes) > 0
     [Y,X,~] = find(reduced_spike_hist(ind_sample,:));
     line(([X(:)'; X(:)']+seg_ind(1)-1)*reduced_dt,[Y(:)'-1;Y(:)'],'Color','k');
     ylim([0,length(ind_sample)]);
-    if pop_ind == 1
-        if rate_sorted == 1
-            ylabel('Rate-sorted sample neuron index');
-        else
-            ylabel('Sample neuron index');
-        end
-    end
+    ylabel('Neurons')
+%     if pop_ind == 1
+%         if rate_sorted == 1
+%             ylabel('Rate-sorted sample neuron index');
+%         else
+%             ylabel('Sample neuron index');
+%         end
+%     end
     
     xlim([reduced_T(1), reduced_T(1)+(length(seg_ind)-1)*reduced_dt]); % make sure all the plots have the same axis scale
     
     % Keep tick lables while remove tick marks
-    set(gca, 'xtick', [], 'Ticklength', [0 0], 'TickDir','out');
+    % set(gca, 'xtick', [], 'Ticklength', [0 0], 'TickDir','out');
+    axis off; box off;
     
         
 end

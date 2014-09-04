@@ -1,4 +1,4 @@
-function neuron_rate_plot(R, pop_ind, sample_ind, seg, seg_size)
+function mean_rate_plot(R, pop_ind, neuron_ind, seg, seg_size)
  
 sigma_gaussian = 50; % ms, which is width???
 
@@ -12,8 +12,8 @@ end
 
 
 % Dump fields
-dt = R.dt;
-step_tot = R.step_tot;
+dt = R.reduced_dt;
+step_tot = R.reduced_step_tot;
 
 % Segmetation
 seg_num = ceil(step_tot/seg_size);
@@ -26,17 +26,19 @@ end
 
 % Dump fields
 T = seg_ind*dt;
-ind = R.neuron_sample.neuron_ind{pop_ind}(sample_ind); % need to record neuron_ind!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-spike_hist = R.spike_hist{pop_ind}(ind,  seg_ind);
+spike_hist = R.reduced_spike_hist{pop_ind}(neuron_ind,seg_ind);
 
 % Gaussian filter
 kernel = spike_train_kernel_YG(sigma_gaussian, dt, 'gaussian');
+
+% mean rate
+cluster_rate = SpikeTrainConvolve(sum(spike_hist, 1)/length(neuron_ind), kernel);
             
 % rate plot
-rate = SpikeTrainConvolve(spike_hist, kernel);
-plot(T, rate);
+plot(T, cluster_rate);
+
 ylabel('Hz'); xlabel('t (ms)');
-set(gca,'box','off','TickDir','out');
+set(gca,'box','off', 'TickDir','out');
 
 
 end

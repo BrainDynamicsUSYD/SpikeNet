@@ -40,43 +40,43 @@ for r_num = 1:Result_num
         axes_matrix = zeros(3,Num_pop);
         for pop_ind = 1:Num_pop
             % Plot raster plot
-            axes_matrix(1,pop_ind) = subplot(7,Num_pop,(0:3)*Num_pop+pop_ind);hold on;
+            axes_matrix(1,pop_ind) = subplot(5,Num_pop,(0:3)*Num_pop+pop_ind);hold on;
             raster_plot(R, pop_ind, seg, seg_size, sample_size);
             % Plot number of spikes
-            axes_matrix(2,pop_ind) = subplot(7,Num_pop,4*Num_pop+pop_ind);hold on;
+            axes_matrix(2,pop_ind) = subplot(5,Num_pop,4*Num_pop+pop_ind);hold on;
             num_spikes_plot(R, pop_ind, seg, seg_size);
-            % Plot number of refractory neurons
-            axes_matrix(3,pop_ind) = subplot(7,Num_pop,5*Num_pop+pop_ind);hold on;
-            num_ref_plot(R, pop_ind, seg, seg_size);
+%             % Plot number of refractory neurons
+%             axes_matrix(3,pop_ind) = subplot(7,Num_pop,5*Num_pop+pop_ind);hold on;
+%             num_ref_plot(R, pop_ind, seg, seg_size);
         end
         
         % Link axes to synchronise them when zooming
         for pop_ind = 1:Num_pop
-            linkaxes(axes_matrix(1:3,pop_ind),'x');
+            linkaxes(axes_matrix(1:2,pop_ind),'x');
         end
         
-        % Keep tick lables while remove tick marks
-        for pop_ind = 1:Num_pop
-            for i = 1:3
-                set(axes_matrix(i,pop_ind), 'Ticklength', [0 0]);
-            end
-        end
+%         % Keep tick lables while remove tick marks
+%         for pop_ind = 1:Num_pop
+%             for i = 1:2
+%                 set(axes_matrix(i,pop_ind), 'Ticklength', [0 0]);
+%             end
+%         end
         
 
         
         
-        % Write comments
-        subplot(7,Num_pop,6*Num_pop+(1:Num_pop), 'visible','off')
-        text(0.5, 0.5, comments, ...
-            'VerticalAlignment', 'top', ...
-            'HorizontalAlignment', 'center',...
-            'FontSize',10,'FontWeight','normal', 'interpreter', 'none'); % ...'interpreter', 'none'... to show underscore
+%         % Write comments
+%         subplot(7,Num_pop,6*Num_pop+(1:Num_pop), 'visible','off')
+%         text(0.5, 0.5, comments, ...
+%             'VerticalAlignment', 'top', ...
+%             'HorizontalAlignment', 'center',...
+%             'FontSize',10,'FontWeight','normal', 'interpreter', 'none'); % ...'interpreter', 'none'... to show underscore
         
         
         % save figure
         if save_figure == 1
             fprintf('\t Saving figure...');
-            print(h_raster, '-dpdf', strcat( R.stamp, '_raster_',num2str(seg)));
+            print(h_raster, '-dpdf', strcat( R.stamp, '_raster_',sprintf('%02g-', num2str(seg))));
             delete(h_raster);
             fprintf('done.\n');
         else

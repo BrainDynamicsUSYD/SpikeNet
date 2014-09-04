@@ -107,11 +107,11 @@ for id_out = 1:length(files)
                     for sample_ind = 1:sample_size
                         tline = fgetl(FID); % read next line
                         scan_temp = textscan(tline, '%f', 'Delimiter', ',');
-                        OutData{id_out}.neuron_sample.(data_name{n}){pop_ind,1}{sample_ind}= transpose(scan_temp{1});
+                        OutData{id_out}.neuron_sample.(data_name{n}){pop_ind}{sample_ind}= transpose(scan_temp{1});
                     end
                 end
                 for n = 1:length(data_name)
-                    OutData{id_out}.neuron_sample.(data_name{n}){pop_ind,1} = cell2mat(OutData{id_out}.neuron_sample.(data_name{n}){pop_ind,1});
+                    OutData{id_out}.neuron_sample.(data_name{n}){pop_ind} = cell2mat(OutData{id_out}.neuron_sample.(data_name{n}){pop_ind});
                 end
             elseif strfind(tline,'SAMP001')
                 tline = fgetl(FID);
@@ -121,6 +121,29 @@ for id_out = 1:length(files)
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
+
+                
+            elseif strfind(tline,'POPD003')
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%d %d','Delimiter',',');
+                pop_ind = scan_temp{1}+1; % be careful here!
+                sample_num = scan_temp{2}; % number of time points
+                OutData{id_out}.pop_sample.V{pop_ind,1} = cell(1,sample_num);
+                for s = 1:sample_num
+                    tline = fgetl(FID); % read next line
+                    scan_temp = textscan(tline, '%f', 'Delimiter', ',');
+                    OutData{id_out}.pop_sample.V{pop_ind}{s} = scan_temp{1}; % column vector
+                end
+                OutData{id_out}.pop_sample.V{pop_ind} = cell2mat(OutData{id_out}.pop_sample.V{pop_ind});
+                
+            elseif strfind(tline,'SAMP002')
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%d','Delimiter',',');
+                pop_ind = scan_temp{1}+1; % be careful here!
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%f','Delimiter',',');
+                OutData{id_out}.pop_sample.t_ind{pop_ind,1} = find(scan_temp{1});
+                                
             elseif strfind(tline,'POPD002')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%d %d','Delimiter',',');
@@ -133,6 +156,7 @@ for id_out = 1:length(files)
                     para_value = scan_temp{2};
                     OutData{id_out}.PopPara{pop_ind}.(para_name) = para_value;
                 end
+                
             elseif strfind(tline,'SYND001')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline, '%d %s', 'Delimiter', ',');
@@ -145,17 +169,6 @@ for id_out = 1:length(files)
                     para_value = scan_temp{2};
                     OutData{id_out}.SynPara{num_syn}.(para_name) = para_value;
                 end
-            elseif strfind(tline,'POPD003')
-                tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d %d','Delimiter',',');
-                pop_ind = scan_temp{1}+1; % be careful here!
-                sample_num = scan_temp{2}; % number of parameters
-                for s = 1:sample_num
-                    tline = fgetl(FID); % read next line
-                    scan_temp = textscan(tline, '%f', 'Delimiter', ',');
-                    OutData{id_out}.pop_sample{pop_ind}(:,s) = scan_temp{1};
-                end
-
                 
             elseif strfind(tline,'INIT002')
                 tline = fgetl(FID);
@@ -235,96 +248,10 @@ end
 %     end
 % end
 
-function Data = ReformatSpikeHistory(Data)
-    % Re-format the raw (compressed) spike history data into natural structure
-    % (logical sparse matrix)
-    % Dump relevant fields
-    Num_pop = Data.Num_pop;
-    step_tot = Data.step_tot;
-    N = Data.N;
-    spike_hist = Data.spike_hist;
-    num_spikes = Data.num_spikes;
-    
-    % Re-format the raw spike history data into natural structure
-    spike_hist_natural = cell(Num_pop,1);
-    for pop_ind = 1:Num_pop
-        if nnz(num_spikes{pop_ind}) > 0
-            T_ind_full = cell2mat(arrayfun(@(x, y) repmat(x, [1 y]), 1:step_tot, num_spikes{pop_ind}, 'UniformOutput', false));
-            spike_hist_natural{pop_ind} = sparse(spike_hist{pop_ind}, T_ind_full, true(size(T_ind_full)), N(pop_ind), step_tot);
-        else
-            spike_hist_natural{pop_ind} = sparse(false(N(pop_ind), step_tot));
-        end
-    end
-    Data.spike_hist_compressed = Data.spike_hist;
-    Data.spike_hist = spike_hist_natural; % overwrite spike history data (logical sparse matrix)
-end
 
 
-function Data = DiscardTransientData(Data)
-    % Discard trainsient data
-    if any( strcmp(fieldnames(Data), 'ExplVar') ) && ...
-            ~isempty(Data.ExplVar) && ...
-            any( strcmp(fieldnames(Data.ExplVar), 'discard_transient') ) && ...
-            Data.ExplVar.discard_transient > 0
-        discard_transient = Data.ExplVar.discard_transient;
-        step_tot_dis = round(Data.step_tot*(1-discard_transient));
-        % spiking history
-        for pop_ind = 1:Data.Num_pop
-            Data.spike_hist{pop_ind} = Data.spike_hist{pop_ind}(:,end-step_tot_dis+1:end);
-            if nnz(Data.num_spikes{pop_ind}) > 0
-                Data.spike_hist_compressed{pop_ind} = Data.spike_hist_compressed{pop_ind}(sum(Data.num_spikes{pop_ind}(1:end-step_tot_dis))+1:end);
-            end
-            Data.num_spikes{pop_ind} = Data.num_spikes{pop_ind}(end-step_tot_dis+1:end);
-            Data.num_ref{pop_ind} = Data.num_ref{pop_ind}(end-step_tot_dis+1:end);
-        end
-%         % sampled data
-%         if any( strcmp(fieldnames(Data), 'VI_sample') ) && ~isempty(Data.VI_sample) 
-%             fname_cell = fieldnames(Data.VI_sample);
-%             for f = 2:length(fname_cell) % skip first field
-%                 fn = fname_cell{f};
-%                 Data.VI_sample.(fn) = Data.VI_sample.(fn)(:,end-step_tot_dis+1:end);
-%             end
-%         end
-        Data.step_tot = step_tot_dis;
-    end
-end
 
 
-function Data = ReduceSolution(Data)
-    % Re-format the raw spike history data into natural structure with
-    % reduced resolution
-    % Dump relevant fields
-    Num_pop = Data.Num_pop;
-    step_tot = Data.step_tot;
-    N = Data.N;
-    dt = Data.dt;
-    spike_hist_compressed = Data.spike_hist_compressed;
-    num_spikes = Data.num_spikes;
-    num_ref = Data.num_ref;
-    
-    reduced_dt = 1; % (ms)
-    reduced_step_length = round(reduced_dt/dt);
-    reduced_step_tot = ceil(step_tot/reduced_step_length);
-    reduced_spike_hist = cell(Num_pop,1);
-    reduced_num_spikes = cell(Num_pop,1);
-    reduced_num_ref = cell(Num_pop,1);
-    
-    for pop_ind = 1:Num_pop
-        if nnz(num_spikes{pop_ind}) > 0
-            reduced_num_spikes_temp = [num_spikes{pop_ind} zeros(1, reduced_step_tot*reduced_step_length-step_tot)]; % padding
-            reduced_num_spikes_temp = sum(reshape(reduced_num_spikes_temp, reduced_step_length, reduced_step_tot),1);
-            reduced_T_ind_full = cell2mat(arrayfun(@(x, y) repmat(x, [1 y]), 1:reduced_step_tot, reduced_num_spikes_temp, 'UniformOutput', false));
-            reduced_spike_hist{pop_ind} = sparse(spike_hist_compressed{pop_ind}, reduced_T_ind_full, true(size(reduced_T_ind_full)), N(pop_ind), reduced_step_tot);
-            reduced_num_spikes{pop_ind} = full(sum(reduced_spike_hist{pop_ind},1));
-            reduced_num_ref{pop_ind} = num_ref{pop_ind}(round(linspace(1,step_tot,reduced_step_tot))); % down-sampling
-        end
-    end
 
-    Data.reduced_dt = reduced_dt;
-    Data.reduced_step_tot = reduced_step_tot;
-    Data.reduced_spike_hist = reduced_spike_hist;
-    Data.reduced_num_spikes = reduced_num_spikes;
-    Data.reduced_num_ref = reduced_num_ref;
 
-end
 
