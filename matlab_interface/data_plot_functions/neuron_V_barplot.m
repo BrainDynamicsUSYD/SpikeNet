@@ -24,7 +24,7 @@ end
 set(gca,'xtick',[],'box','off', 'TickDir','out', 'XColor','w');
 set(gcf, 'InvertHardCopy', 'off'); % prevent the x-axis line to reappear when printed
 
-
+ylim([-70,-50]);
 ylabel('mV');
 
 end

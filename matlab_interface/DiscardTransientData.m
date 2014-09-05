@@ -7,7 +7,7 @@ function Data = DiscardTransientData(Data)
         
         discard_transient = Data.ExplVar.discard_transient;
         step_tot_dis = round(Data.step_tot*(1-discard_transient));
-        step_transient = step_tot - step_tot_dis;
+        step_transient = Data.step_tot - step_tot_dis;
         
         % spiking history
         for pop_ind = 1:Data.Num_pop
@@ -36,7 +36,9 @@ function Data = DiscardTransientData(Data)
         if any( strcmp(fieldnames(Data), 'pop_sample') ) && ~isempty(Data.pop_sample)
             for pop_ind = 1:length(Data.pop_sample.V)
                 if ~isempty(Data.pop_sample.V{pop_ind})
-                    Data.pop_sample.V{pop_ind}(:,Data.pop_sample.t_ind{pop_ind} <= step_transient) = [];
+                    t_dis = find(Data.pop_sample.t_ind{pop_ind} <= step_transient);
+                    Data.pop_sample.V{pop_ind}(:, t_dis) = [];
+                    Data.pop_sample.t_ind{pop_ind}(t_dis) = [];
                 end
             end
         end

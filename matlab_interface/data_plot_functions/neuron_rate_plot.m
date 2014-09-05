@@ -1,4 +1,4 @@
-function neuron_rate_plot(R, pop_ind, sample_ind, seg, seg_size)
+function neuron_rate_plot(R, pop_ind, neuron_ind, seg, seg_size)
  
 sigma_gaussian = 50; % ms, which is width???
 
@@ -26,8 +26,7 @@ end
 
 % Dump fields
 T = seg_ind*dt;
-ind = R.neuron_sample.neuron_ind{pop_ind}(sample_ind); % need to record neuron_ind!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-spike_hist = R.spike_hist{pop_ind}(ind,  seg_ind);
+spike_hist = R.spike_hist{pop_ind}(neuron_ind,  seg_ind);
 
 % Gaussian filter
 kernel = spike_train_kernel_YG(sigma_gaussian, dt, 'gaussian');

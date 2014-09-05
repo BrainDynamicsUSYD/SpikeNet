@@ -31,8 +31,8 @@ V_th = R.PopPara{pop_ind}.V_th;
 plot(T, V);
 
 % show spkies
-V_spike_gap = 5; % mV
-spike_length = 10; % mV
+V_spike_gap = 2; % mV
+spike_length = 3; % mV
 X_a = T([(V(1:end-1) < V_th) & (V(2:end) >= V_th), false]);
 X_b = X_a;
 Y_a = ones(size(X_a))*V_th + V_spike_gap;
@@ -44,6 +44,8 @@ line([X_a;X_b], [Y_a;Y_b],'Color', 'k');
 ylim([  min( -70, min(V) ) V_th+10  ]); % [reset spike_peak]
 
 % use scale bar instead axis label and ticks
-scalebar( [10,10], {'10 ms','10 mV'}); 
+% scalebar( [10,10], {'10 ms','10 mV'}); 
+% scalebar( [1000,10], {'1 sec','10 mV'}); 
+scalebar( [0,10], { '','10 mV'}); 
         
 end
