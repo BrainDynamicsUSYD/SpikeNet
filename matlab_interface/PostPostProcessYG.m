@@ -35,11 +35,27 @@ function PostPostProcessYG(stdin)
 %     
 % end
 
-var = 'up_down_analysis.up_C_label';
-[V, loop_num] = CollectVectorYG(var);
-var = 'up_down_analysis.up_overlapping';
-[overlap, dummy] = CollectVectorYG(var);
+% var = 'Analysis.Hz_overall';
+% [Hz, loop_num] = CollectVectorYG(var);
+% var = 'ExplVar.EE_factor';
+% [EE, dummy] = CollectVectorYG(var);
+% var = 'ExplVar.II_factor';
+% [II, dummy] = CollectVectorYG(var);
+% 
+% save('balance_Hz','Hz','loop_num','EE','II');
 
-save('Lesion-half-400sec-100runs','V','loop_num','overlap');
+
+var = 'up_down_analysis.up_C_label';
+
+[up_C_label, loop_num_1] = CollectVectorYG(var);
+
+var = 'up_down_analysis.high_ratio';
+
+[high_ratio, loop_num_2] = CollectVectorYG(var);
+
+save('phase_diagram_data','up_C_label','high_ratio','loop_num_1','loop_num_2');
+
+
+
 
 end

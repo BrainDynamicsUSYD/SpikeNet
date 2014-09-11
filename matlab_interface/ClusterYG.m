@@ -184,6 +184,7 @@ function result = cluster_up_down_state_analysis(R, theta)
     % thresholding
     result.theta = theta;
     c_bin = R.C_rate > theta; % bin: binary
+    result.high_ratio = sum(sum(c_bin,1) > 0)/length(c_bin(1,:)); % ratio of high activity state
     
     % begining-ending points (A&B points) detection
     Mnum = length(c_bin(:,1));

@@ -7,6 +7,7 @@ loop_max = max(loop_num);
 S{1} = zeros(1,loop_max);
 S{2} = zeros(1,loop_max);
 S{3} = zeros(1,loop_max);
+S{4} = zeros(1,loop_max);
 Up_tot = zeros(1,loop_max);
 for i = 1:loop_max
     %%%% Total
@@ -14,47 +15,55 @@ for i = 1:loop_max
     %%%% L4
     % (1,2,3,4) <-> (5,6,7,8)
     C_temp = C_label(loop_num == i);
-    S{3}(i) = sum(FindSwitching(C_temp, 4));
+    S{4}(i) = sum(FindSwitching(C_temp, 4));
     
     %%%% L3
     % (1,2) <-> (3,4)
     C_temp = C_label(loop_num == i);
     C_temp(C_temp>4) = NaN;
-    S{2}(i) = S{2}(i) + sum(FindSwitching(C_temp, 2));
+    S{3}(i) = S{2}(i) + sum(FindSwitching(C_temp, 2));
     
     % (5,6) <-> (7,8)
     C_temp = C_label(loop_num == i);
     C_temp(C_temp<=4) = NaN;
-    S{2}(i) = S{2}(i) + sum(FindSwitching(C_temp, 6));
+    S{3}(i) = S{2}(i) + sum(FindSwitching(C_temp, 6));
     
     %%%% L2
     % 1 <-> 2
     C_temp = C_label(loop_num == i);
     C_temp(C_temp>2) = NaN;
-    S{1}(i) = S{1}(i) + sum(FindSwitching(C_temp, 1));
+    S{2}(i) = S{1}(i) + sum(FindSwitching(C_temp, 1));
     
     % 3 <-> 4
     C_temp = C_label(loop_num == i);
     C_temp(C_temp<=2) = NaN;
     C_temp(C_temp>4) = NaN;
-    S{1}(i) = S{1}(i) + sum(FindSwitching(C_temp, 3));
+    S{2}(i) = S{1}(i) + sum(FindSwitching(C_temp, 3));
     
     % 5 <-> 6
     C_temp = C_label(loop_num == i);
     C_temp(C_temp<=4) = NaN;
     C_temp(C_temp>6) = NaN;
-    S{1}(i) = S{1}(i) + sum(FindSwitching(C_temp, 5));
+    S{2}(i) = S{1}(i) + sum(FindSwitching(C_temp, 5));
     
     % 7 <-> 8
     C_temp = C_label(loop_num == i);
     C_temp(C_temp<=6) = NaN;
-    S{1}(i) = S{1}(i) + sum(FindSwitching(C_temp, 7));
+    S{2}(i) = S{1}(i) + sum(FindSwitching(C_temp, 7));
+    
+    %%%% L1
+    % i <-> i
+    C_temp = C_label(loop_num == i);
+    S{1}(i) = sum([false, C_temp(1:end-1) == C_temp(2:end)]);
+        
+    
     
 end
 
-for i = 1:3
+for i = 1:4
     S{i} = transpose(vec2mat(S{i},r_num));
 end
+
 Up_tot = transpose(vec2mat(Up_tot,r_num));
 
 
