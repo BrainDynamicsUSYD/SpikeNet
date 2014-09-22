@@ -49,11 +49,11 @@ var = 'up_down_analysis.up_C_label';
 
 [up_C_label, loop_num_1] = CollectVectorYG(var);
 
-var = 'up_down_analysis.high_ratio';
+var = 'Analysis.Hz_overall';
 
-[high_ratio, loop_num_2] = CollectVectorYG(var);
+[Hz, loop_num_2] = CollectVectorYG(var);
 
-save('phase_diagram_data','up_C_label','high_ratio','loop_num_1','loop_num_2');
+save('phase_diagram_data_2','up_C_label','Hz','loop_num_1','loop_num_2');
 
 
 

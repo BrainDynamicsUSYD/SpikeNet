@@ -87,13 +87,7 @@ for r_num = 1:Result_num
         %%%%%%%%%%% spike train CC sample
         axes_matrix(3,pop_ind) = subplot(3,Num_pop,2*Num_pop+(1:Num_pop));hold on;
         if pop_ind == 1 % only need to plot once
-            bin_num = 100;
-            bin_edge = linspace(min(CC_network_sample), max(CC_network_sample), bin_num);
-            bin_count = histc(CC_network_sample,bin_edge);
-            bar(bin_edge, bin_count, 'histc');
-            label_temp = sprintf('Spike-train correlation coefficient with mean value %g \n %g pairs sampled from network, %s with \\Delta = %g (ms)', CC_network_sample_mean, length(CC_network_sample), CC_kernel_type, CC_kernel_width);
-            xlabel(label_temp);
-            set(gca,'ytick',[],'Ycolor','w','box','off');
+           network_corr_plot(R_temp);
         end
     end
 
@@ -111,5 +105,11 @@ end
 toc;
 
 end
+
+
+
+
+
+
 
 

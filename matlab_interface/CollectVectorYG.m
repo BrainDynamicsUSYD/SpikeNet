@@ -8,24 +8,21 @@ for id_out = 1:num_files
     files{id_out} = dir_strut(id_out).name;
 end
 
-% Post-postprocess data
-save_fig = 1;
 V = [];
 loop_num = [];
 for i = 1:num_files
     % fprintf('Loading RYG.mat file %s...\n', files{i});
-    load(files{i}); 
-    % disp('Loading done.');
-    %%%%%%% collect data here
-    eval(sprintf('data_tmp = R_temp.%s;',var));
-    data_tmp = data_tmp(:)'; % row vector
-    V = [V, data_tmp ];
-    loop_num = [loop_num, ones(1,length(data_tmp))*R_temp.ExplVar.loop_num];
-    %%%%%%% visualise results
-    % RasterYG(R, save_fig);
-    % ClusterYG(R,save_fig);
-    % HistogramsYG(R,save_fig);
-    
+    load(files{i});
+    if exist('R_temp','var'); % see warning in "else"
+        % disp('Loading done.');
+        eval(sprintf('data_tmp = R_temp.%s;',var));
+        data_tmp = data_tmp(:)'; % row vector
+        V = [V, data_tmp ];
+        loop_num = [loop_num, ones(1,length(data_tmp))*R_temp.ExplVar.loop_num];
+        clear R_temp; % clear it! Otherwise it could be misused by the consecutive loops.
+    else
+        warning('R_temp not found in %s! This could be due to its size being larger than 2GB.', files{i});
+    end
 end
 
 end
