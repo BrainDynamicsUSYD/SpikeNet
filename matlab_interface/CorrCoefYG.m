@@ -31,8 +31,14 @@ function [ CC, RateA, RateB ] = CorrCoefYG( SpikeTrainA, SpikeTrainB, kernel, ti
 
 kernel = kernel(:)'; % row vector
 
-RateA = SpikeTrainConvolve(SpikeTrainA, kernel);
-RateB = SpikeTrainConvolve(SpikeTrainB, kernel);
+if length(kernel) == 1 && kernel(1) == 0 % no kernel required
+    RateA = SpikeTrainA;
+    RateB = SpikeTrainB;
+else
+    RateA = SpikeTrainConvolve(SpikeTrainA, kernel);
+    RateB = SpikeTrainConvolve(SpikeTrainB, kernel);
+end
+
 
 
 if nargin == 3 || (nargin == 4 && time_series == 0) %

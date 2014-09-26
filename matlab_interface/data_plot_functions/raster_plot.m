@@ -15,7 +15,7 @@ end
 dt = R.reduced.dt;
 step_tot = R.reduced.step_tot;
 N = R.N;
-rate_sorted = R.Analysis.rate_sorted;
+% rate_sorted = R.Analysis.rate_sorted;
 
 % Segmetation
 seg_num = ceil(step_tot/seg_size);

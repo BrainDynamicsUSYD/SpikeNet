@@ -34,7 +34,6 @@ for r_num = 1:Result_num
     
     
     %%%%%%%%%%%% cluster up and down state analysis
-    theta = 7; % Hz
     Result_cell{r_num}.up_down_analysis = cluster_up_down_state_analysis(Result_cell{r_num}, theta);
     R = Result_cell{r_num};
     

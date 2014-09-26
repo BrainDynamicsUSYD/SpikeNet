@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2012.11.29)  27 AUG 2014 12:01
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2012.11.29)  22 SEP 2014 18:16
 entering extended mode
 **P1_documentation.tex
 (./P1_documentation.tex
@@ -164,7 +164,7 @@ Here is how much of TeX's memory you used:
  5427 multiletter control sequences out of 10000+50000
  10058 words of font info for 37 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
- 27i,11n,42p,655b,1447s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 27i,11n,42p,290b,1447s stack positions out of 1500i,500n,5000p,200000b,5000s
 PDF statistics:
  55 PDF objects out of 300000
  0 named destinations out of 131072
@@ -179,4 +179,4 @@ usr/share/texmf/fonts/type1/bluesky/cm/cmex10.pfb></usr/share/texmf/fonts/type1
 uesky/cm/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/sh
 are/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/fonts/type1/bluesk
 y/cm/cmr17.pfb>
-Output written on P1_documentation.pdf (5 pages, 91918 bytes).
+Output written on P1_documentation.pdf (5 pages, 91516 bytes).
