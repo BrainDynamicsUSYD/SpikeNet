@@ -1,4 +1,4 @@
-function [ Result_cell ] = AnalyseYG( Result_cell )
+function [ Result_cell ] = AnalyseYG( Result_cell, varargin )
 %
 %   Detailed explanation goes here
 disp('AnalyseYG...');
@@ -7,7 +7,11 @@ tic;
 
 % choices
 re_arrange = 0;
-get_corrcoef = 1;
+get_corrcoef = 0;
+
+for i = 1:(length(varargin)/2)
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
+end
 
 
 Result_num = length(Result_cell);

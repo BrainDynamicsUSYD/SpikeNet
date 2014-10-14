@@ -1,15 +1,21 @@
-function raster_plot(R, pop_ind, seg, seg_size, sample_size)
+function raster_plot(R, pop_ind, seg, sample_color, varargin)
 
 % Input check and default values
-if nargin < 5
-    sample_size = 500; % sample neurons for raster plot
-end
-if nargin < 4
-    seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
-end
 if nargin < 3
     seg = 1;
 end
+
+sample_size = 500; % sample neurons for raster plot
+seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
+
+
+
+text_fontsize = 12;
+for i = 1:(length(varargin)/2)
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
+end
+
+
 
 % Dump fields
 dt = R.reduced.dt;
@@ -18,12 +24,7 @@ N = R.N;
 % rate_sorted = R.Analysis.rate_sorted;
 
 % Segmetation
-seg_num = ceil(step_tot/seg_size);
-if seg < seg_num
-    seg_ind = ((seg-1)*seg_size+1):(seg*seg_size);
-else
-    seg_ind = ((seg-1)*seg_size+1):(step_tot);
-end
+seg_ind = get_seg(step_tot, seg_size, seg);
 
 % Dump fields
 num_spikes = R.reduced.num_spikes{pop_ind}(seg_ind);
@@ -34,15 +35,31 @@ T = seg_ind*dt;
 if nnz(num_spikes) > 0
     % down-sampling
     if N(pop_ind) >= sample_size
-        ind_sample = sort(randperm(N(pop_ind),sample_size));
+        ind_sample = ceil(linspace(1,N(pop_ind),sample_size));
     else
         ind_sample = 1:1:N(pop_ind);
     end
     
-    [Y,X,~] = find(spike_hist(ind_sample,:));
-    line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)'],'Color','k');
+    if isempty(sample_color)
+        [Y,X,~] = find(spike_hist(ind_sample,:));
+        line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)'],'Color','k');
+    else
+        hold on;
+        sample_color = (sample_color-min(sample_color))/(diff(minmax(sample_color)));
+        sample_color(sample_color == 0) = eps;
+        jetmap = colormap('jet(1000)');
+        
+        for i = 1:length(ind_sample)
+            color_tmp = jetmap(ceil(sample_color(i)*1000),:);
+            [Y,X,~] = find(spike_hist(ind_sample(i),:));
+            line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)']+i-1, 'Color', color_tmp);
+        end
+        colormap('jet');
+    end
+    
+    
     ylim([0,length(ind_sample)]);
-    ylabel('Neurons')
+    ylabel('Neurons','fontsize',text_fontsize)
 %     if pop_ind == 1
 %         if rate_sorted == 1
 %             ylabel('Rate-sorted sample neuron index');
@@ -51,11 +68,13 @@ if nnz(num_spikes) > 0
 %         end
 %     end
     
-    xlim([T(1), T(1)+(length(seg_ind)-1)*dt]); % make sure all the plots have the same axis scale
+    xlim([T(1)-dt, T(1)+(length(seg_ind)-1)*dt]); % make sure all the plots have the same axis scale
     
     % Keep tick lables while remove tick marks
     % set(gca, 'xtick', [], 'Ticklength', [0 0], 'TickDir','out');
-    axis off; box off;
+    set(gca,'xtick',[],'ytick',[],'ydir','reverse');
+    box on;
+
     
         
 end

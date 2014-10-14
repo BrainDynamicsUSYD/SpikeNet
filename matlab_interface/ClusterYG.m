@@ -30,7 +30,7 @@ Result_num = length(Result_cell);
 for r_num = 1:Result_num
     
     %%%%%%%%%%% cluster mean rate
-    Result_cell{r_num} = cluster_rate( Result_cell{r_num} );
+    Result_cell{r_num} = get_cluster_rate( Result_cell{r_num} );
     
     
     %%%%%%%%%%%% cluster up and down state analysis
@@ -153,24 +153,7 @@ end
 
 
 
-function R = cluster_rate(R)
-    % kernel for rate estimation
-    CC_kernel_width = 50; % ms, kernel length
-    choice = 'gaussian';
-    kernel = spike_train_kernel_YG(CC_kernel_width, R.reduced.dt, choice);
-    
-    % cluster mean rate
-    C_label = ceil((1:R.N(1))./round(R.N(1)/R.ExplVar.Mnum)); % cluster membership label
-    C_rate = zeros(R.ExplVar.Mnum, R.reduced.step_tot);
-    for cc = 1:R.ExplVar.Mnum
-        C_begin = find(C_label == cc, 1, 'first');
-        C_end = find(C_label == cc, 1, 'last');
-        C_rate(cc,:) = SpikeTrainConvolve(sum(R.reduced.spike_hist{1}(C_begin:C_end,:), 1)/(C_end-C_begin+1), kernel);
-    end
-    % record results
-    R.C_label = C_label;
-    R.C_rate = C_rate;
-end
+
 
 
 
@@ -191,11 +174,20 @@ function result = cluster_up_down_state_analysis(R, theta)
     beginning = [padding, c_bin(:,1:end-1) == 0 & c_bin(:,2:end) == 1];  % if ...01111..., detect first 1
     ending = [c_bin(:,1:end-1) == 1 & c_bin(:,2:end) == 0, padding]; % if ...11110...., detect last 1
     
-    % up and down detection
+    
+    
+    
+    % up and down detection (for each cluster individually)
     result.up_overlapping = 0;
     AB_lumped = []; % populational up-state A&B points
     AB_lumped_C_label = []; % cluster label for A&B points
     AB_lumped_01 = []; % 0 for A point and 1 for B point
+    result.up_duration = [];
+    result.upA = [];
+    result.upB = [];
+    result.up_C_label = [];
+    result.down_duration = [];
+    
     for i = 1:Mnum
         A_temp = find(beginning(i,:)); % beginning point of up state
         A_temp = A_temp(:)'; % row vector
@@ -207,32 +199,70 @@ function result = cluster_up_down_state_analysis(R, theta)
         [AB_lumped, AB_ind] = sort(AB_lumped);             % A B a b, A a B b, A a b B,
         AB_lumped_01 = AB_lumped_01(AB_ind);   % 0 1 0 1, 0 0 1 1, 0 0 1 1, the last two cases are overlapping
         AB_lumped_C_label = AB_lumped_C_label(AB_ind);
-        if ~isempty(AB_lumped)
-            if nnz(AB_lumped_01(1:end-1) == 0 & AB_lumped_01(2:end) == 0)
-                warning('overlapping in cluster rate up-states!');
-                result.up_overlapping = 1;
-                break;
-            end
-        end
+        
+        cluster_label = ones(size(A_temp))*i;
+        [up_duration, upA, upB, up_C_label] = duration_from_AB(A_temp,B_temp,dt, cluster_label);
+        [down_duration] = duration_from_AB(B_temp,A_temp,dt, cluster_label );
+        
+        result.up_duration    = [ result.up_duration up_duration(:)' ];
+        result.upA            = [ result.upA upA(:)' ];
+        result.upB            = [ result.upB upB(:)' ];
+        result.up_C_label     = [ result.up_C_label up_C_label(:)' ];
+        result.down_duration  = [ result.down_duration down_duration(:)' ];
     end
     
-    if result.up_overlapping == 0
-        A = AB_lumped(AB_lumped_01==0);
-        B = AB_lumped(AB_lumped_01==1);
-        A_label = AB_lumped_C_label(AB_lumped_01==0);
-        % up state duration
-        [result.up_duration, result.upA, result.upB, result.up_C_label] = duration_from_AB(A,B,dt,A_label);
-        % down state duration
-        % Note that A point of up state is B point of down state and vice
-        % versa. However, for down state, only duration is meaningful.
-        [result.down_duration] = duration_from_AB(B,A,dt);
-    else
-        result.up_duration = [];
-        result.upA = [];
-        result.upB = [];
-        result.up_C_label = [];
-        result.down_duration = [];
+    if ~isempty(AB_lumped)
+        if nnz(AB_lumped_01(1:end-1) == 0 & AB_lumped_01(2:end) == 0)
+            warning('overlapping in cluster rate up-states!');
+            result.up_overlapping = 1;
+        end
     end
+        
+        
+    
+%     % up and down detection % old version, requires non-overlapping
+%     result.up_overlapping = 0;
+%     AB_lumped = []; % populational up-state A&B points
+%     AB_lumped_C_label = []; % cluster label for A&B points
+%     AB_lumped_01 = []; % 0 for A point and 1 for B point
+%     for i = 1:Mnum
+%         A_temp = find(beginning(i,:)); % beginning point of up state
+%         A_temp = A_temp(:)'; % row vector
+%         B_temp = find(ending(i,:)); % ending point of up state
+%         B_temp = B_temp(:)'; % row vector
+%         AB_lumped = [AB_lumped, A_temp, B_temp]; % addding cluster up-states into populational ones
+%         AB_lumped_C_label = [AB_lumped_C_label, ones(1,length(A_temp))*i, ones(1,length(B_temp))*i];
+%         AB_lumped_01 = [AB_lumped_01, zeros(1,length(A_temp)), ones(1,length(B_temp))];% overlapping detection and warning
+%         [AB_lumped, AB_ind] = sort(AB_lumped);             % A B a b, A a B b, A a b B,
+%         AB_lumped_01 = AB_lumped_01(AB_ind);   % 0 1 0 1, 0 0 1 1, 0 0 1 1, the last two cases are overlapping
+%         AB_lumped_C_label = AB_lumped_C_label(AB_ind);
+%         if ~isempty(AB_lumped)
+%             if nnz(AB_lumped_01(1:end-1) == 0 & AB_lumped_01(2:end) == 0)
+%                 warning('overlapping in cluster rate up-states!');
+%                 result.up_overlapping = 1;
+%                 break;
+%             end
+%         end
+%     end
+%     if result.up_overlapping == 0
+%         A = AB_lumped(AB_lumped_01==0);
+%         B = AB_lumped(AB_lumped_01==1);
+%         A_label = AB_lumped_C_label(AB_lumped_01==0);
+%         % up state duration
+%         [result.up_duration, result.upA, result.upB, result.up_C_label] = duration_from_AB(A,B,dt,A_label);
+%         % down state duration
+%         % Note that A point of up state is B point of down state and vice
+%         % versa. However, for down state, only duration is meaningful.
+%         [result.down_duration] = duration_from_AB(B,A,dt);
+%     else
+%         result.up_duration = [];
+%         result.upA = [];
+%         result.upB = [];
+%         result.up_C_label = [];
+%         result.down_duration = [];
+%     end
+
+
 
 end
 

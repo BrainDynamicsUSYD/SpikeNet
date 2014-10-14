@@ -10,6 +10,7 @@ end
 
 V = [];
 loop_num = [];
+fprintf('Collecting data %s from %d files: \n', var, num_files);
 for i = 1:num_files
     % fprintf('Loading RYG.mat file %s...\n', files{i});
     load(files{i});
@@ -23,6 +24,8 @@ for i = 1:num_files
     else
         warning('R_temp not found in %s! This could be due to its size being larger than 2GB.', files{i});
     end
+    fprintf('%d,',i);
 end
 
+fprintf('\n');
 end

@@ -1,5 +1,10 @@
-function scalebar( bar_length, bar_text)
+function scalebar( bar_length, bar_text, varargin)
 % Yifa Gu
+
+text_fontsize = 12;
+for i = 1:(length(varargin)/2)
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
+end
 
 axis off;
 
@@ -23,7 +28,7 @@ if bar_length(1) > 0
     Y_b = Y_a;
     line([X_a;X_b], [Y_a,Y_b]);
     Htext = text((X_a+X_b)/2, Y_a, bar_text{1});
-    set(Htext, 'HorizontalAlignment','center','VerticalAlignment', 'top');
+    set(Htext, 'HorizontalAlignment','center','VerticalAlignment', 'top', 'fontsize',text_fontsize);
 end
 
 % Vertical scale bar
@@ -34,7 +39,7 @@ if bar_length(2) > 0
     Y_b = Y_a + bar_length(2);
     line([X_a;X_b], [Y_a,Y_b]);
     Htext = text(X_a, (Y_a+Y_b)/2, bar_text{2});
-    set(Htext,'Rotation',90, 'HorizontalAlignment','center','VerticalAlignment', 'bottom');
+    set(Htext,'Rotation',90, 'HorizontalAlignment','center','VerticalAlignment', 'bottom', 'fontsize',text_fontsize);
 end
 
 set(gca,'XLim',XLim);

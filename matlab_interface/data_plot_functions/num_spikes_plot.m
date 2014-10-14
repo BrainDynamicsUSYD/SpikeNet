@@ -17,12 +17,7 @@ step_tot = R.reduced.step_tot;
 N = R.N;
 
 % Segmetation
-seg_num = ceil(step_tot/seg_size);
-if seg < seg_num
-    seg_ind = ((seg-1)*seg_size+1):(seg*seg_size);
-else
-    seg_ind = ((seg-1)*seg_size+1):(step_tot);
-end
+seg_ind = get_seg(step_tot, seg_size, seg);
 
 % Dump fields
 num_spikes = R.reduced.num_spikes{pop_ind}(seg_ind);

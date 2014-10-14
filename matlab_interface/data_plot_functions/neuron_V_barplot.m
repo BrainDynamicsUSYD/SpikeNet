@@ -1,8 +1,17 @@
 
-function neuron_V_barplot(R, pop_ind, sample_ind, YLim)
+function neuron_V_barplot(R, pop_ind, sample_ind, YLim, varargin)
 % subplot(6,8,8);hold on;  
 
 bin_num = 100;
+
+if nargin == 4
+    set(gca,'YLim',YLim);
+end
+
+text_fontsize = 12;
+for i = 1:(length(varargin)/2)
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
+end
 
 % Dump fields
 dt = R.dt;
@@ -18,14 +27,12 @@ bin_count = histc(V_remove,bin_edge);
 bin_count = bin_count/sum(bin_count); % normalization
 barh(bin_edge, bin_count, 'histc');
 
-if nargin == 4
-    set(gca,'YLim',YLim);
-end
+
 set(gca,'xtick',[],'box','off', 'TickDir','out', 'XColor','w');
 set(gcf, 'InvertHardCopy', 'off'); % prevent the x-axis line to reappear when printed
 
 ylim([-70,-50]);
-ylabel('mV');
+ylabel('mV','fontsize', text_fontsize);
 
 end
 
