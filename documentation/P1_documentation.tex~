@@ -123,7 +123,7 @@ Input data format is as following.
 	pop_ind, mean (nA), std (nA), 
 
 > INIT005 # external Poissonian spikes
-	pop_ind, type_ext, K_ext ($\mu$S), Num_ext, ia, ib
+	pop_ind, type_ext, K_ext ($\mu$S), Num_ext, ia, ib,
 	rate_1 (Hz), rate_2, ..., rate_step_tot
 
 > INIT006 # chemical connection definition

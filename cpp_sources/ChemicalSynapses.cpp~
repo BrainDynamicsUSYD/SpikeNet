@@ -210,9 +210,12 @@ void ChemicalSynapses::update(int step_current){
 		// Contribution of external spikes, assuming square pulse transmitter release
 		// Generate current random number generator, note that rate_ext_t is in Hz
 		gen.seed(my_seed + step_current);// reseed random engine!!!
-		binomial_distribution<int> binml_dist(Num_ext, rate_ext_t[step_current] * (dt / 1000.0));
-		auto ext_spikes = bind(binml_dist, gen);
+
 		
+		// binomial_distribution<int> dist(Num_ext, rate_ext_t[step_current] * (dt / 1000.0)); // this is not exactly right and not fast!!
+		poisson_distribution<int> dist(Num_ext * rate_ext_t[step_current] * (dt / 1000.0));		
+		auto ext_spikes = bind(dist, gen);
+
 		// Generate current spikes
 		int t_ring = int(step_current % history_steps);// index of the history time
 		for (int j = ia; j <= ib; ++j){

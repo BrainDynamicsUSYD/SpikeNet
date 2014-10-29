@@ -12,7 +12,14 @@ if nargin == 1
 end
 
 % dump fields
-num_spikes = R.num_spikes{1};
+for i = 1:R.Num_pop% the entire network
+    if i == 1
+        num_spikes = R.num_spikes{i};
+    end
+    num_spikes = num_spikes + R.num_spikes{i};
+end
+
+
 dt = R.dt;
 step_tot = R.step_tot;
 
@@ -21,12 +28,12 @@ step_tot = R.step_tot;
 % average spike intervals in the network (use population maybe?)
 p_rate = sum(num_spikes)/step_tot;
 
-step_sep = ceil(p_rate);
+step_sep = ceil(1/p_rate);
 
 % segementation based on step_sep
 
 if step_sep == 1
-    warning('step_sep is only one!')
+    warning('step_sep is only one! The simulation step length is too small!')
 end
 
 [A1, B1, D1, D0] = cut_binary( (num_spikes >= 1), step_sep );
@@ -57,23 +64,32 @@ if plot_figure == 1
     bin_edge = 1:bin_size:max(ava_size);
     bin_count = histc(ava_size,bin_edge);
     bin_count = bin_count/sum(bin_count);
-    
-    
-    poisson_size_dist = (1-exp(p_rate)).^(1:1:max(ava_size))*exp(p_rate);
-    poisson_size_dist = poisson_size_dist(poisson_size_dist >= min(bin_count(bin_count>0)) );
-
     plot(bin_edge,bin_count,'.');
     set(gca,'xscale','log','yscale','log');
     ylim([10^floor(log10(min(bin_count))), 1]);
     hold on;
+    
+    % poisson network avalanche size distribution
+    poisson_size_dist = (1-exp(-1)).^(1:1:max(ava_size)-1)*exp(-1);
+    poisson_size_dist = poisson_size_dist(poisson_size_dist >= min(bin_count(bin_count>0)) );
     plot(1:length(poisson_size_dist),poisson_size_dist,'r--');
-
     avalanche.poisson_size_dist = poisson_size_dist;
     
+    % linear regression
+    x = bin_edge;
+    y = bin_count;
+    seg = x >= 10 & x <= 80 & y > 0;
+    y = y(seg);
+    x = x(seg);
+    p = polyfit(log10(x),log10(y),1);
+    shift = 0.7; % decade
+    plot(x, 10.^(p(1).*log10(x)+shift), 'k');
+    
+%     % plot -3/2 power law % not very solid theory!!!
+%     x = 1:max(ava_size);
+%     plot(x, x.^(-3/2),'k');
+    
 end
-
-
-
 
 
 end

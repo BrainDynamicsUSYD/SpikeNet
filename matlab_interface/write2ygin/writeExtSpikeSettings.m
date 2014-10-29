@@ -6,7 +6,8 @@ function writeExtSpikeSettings(FID, pop_ind, type_ext, K_ext,  Num_ext, rate_ext
 %    K_ext: strength for external chemical connection
 %  Num_ext: number of external neurons connected to each neuron in pop_ind
 % rate_ext: spiking rate for each external neurons
-%
+%       ia: start neuron index
+%       i:  end neuron index
 % Note that each external neuron is independent Poissonian neuron
 
 pop_ind = pop_ind - 1;
