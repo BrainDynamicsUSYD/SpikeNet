@@ -16,7 +16,7 @@ step_tot = 400*sec;
 % Loop number for PBS array job
 Num_pop = length(N);
 loop_num = 0;
-discard_transient = 0.005; % discard transient data (0~1)
+discard_transient = 500; % ms
 
 
 for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]

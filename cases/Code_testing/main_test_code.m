@@ -25,6 +25,7 @@ step_tot = 500;
 N = [2; 6];
 writeBasicPara(FID, dt, step_tot, N)
 Num_pop = length(N);
+discard_transient = 10; % ms
 
 % write pop para
 writePopPara(FID, 1,  'tau_ref', 3.1);
@@ -37,15 +38,15 @@ I_ext_strength = 1.4; % nA
 writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
-writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot));
+writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot), 1, N(1) );
 
 % neuronal data sampling
 writeNeuronSampling(FID, 1, ones(1,7), 1:2);
 writeNeuronSampling(FID, 2, ones(1,7), 1:6);
 
 % populational data sampling
-writePopSampling(FID, 1, ones(1,step_tot));
-writePopSampling(FID, 2, ones(1,step_tot));
+writePopSampling(FID, 1, ones(1,7), ones(1,step_tot));
+writePopSampling(FID, 2, ones(1,7), ones(1,step_tot));
 
 % initial firing rate
 writeInitV(FID,[0.2,0.2]);
@@ -60,10 +61,10 @@ writeChemicalConnection(FID_syn, 1,  1,2,   I,J,K,D); % (FID, type, i_pre, j_pos
 
 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
 % Record explanatory variables, also called "controlled variables"
-writeExplVar(FID, 'k', k);
+writeExplVar(FID, 'discard_transient', discard_transient, 'k', k);
 % writeExplVar(FID, 'I_ext_strength', I_ext_strength);
 writeExplVar(FID, 'comments', 'calibration');
-
+    
 % append this file self into .ygin for future reference
 appendThisMatlabFile(FID)
 

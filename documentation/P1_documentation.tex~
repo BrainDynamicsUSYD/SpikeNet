@@ -159,9 +159,13 @@ Input data format is as following.
 	# and it must correspond to 
 	# [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 
-> SAMP002 # populational data sampling (V)
+> SAMP002 # populational data sampling
 	pop_ind,
+	data_type (logical vector),
 	1, 1, 0, 0, ..., (1-by-step_tot logical values)
+	# Note that data_type specifies sample data types
+	# and it must correspond to 
+	# [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 
 \end{lstlisting}
 
@@ -189,9 +193,11 @@ The output data format is as following.
 
 > POPD003 # sampled populational data
 	pop_ind, number_of_time_points,
-	V_pop_t1 (row vector),
-	V_pop_t2 (row vector),
+	data_name1, ..., data_nameX,
+	data_1 (neurons-by-sample_size matrix),
+	data_2 (neurons-by-sample_size matrix),
 	...
+	data_X (neurons-by-sample_size matrix),
 
 > POPD004 # sampled neuronal data
 	pop_ind, number_of_sample_neurons,

@@ -157,14 +157,14 @@ for id_out = 1:length(files)
                     end
                 end
                 for n = 1:length(data_name)
-                    OutData{id_out}.pop_sample.(data_name{n}){pop_ind} = transpose(cell2mat(OutData{id_out}.pop_sample.(data_name{n}){pop_ind}));
+                    OutData{id_out}.pop_sample.(data_name{n}){pop_ind} = cell2mat(OutData{id_out}.pop_sample.(data_name{n}){pop_ind});
                 end
             elseif strfind(tline,'SAMP002')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%d','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
-                fgetl(FID); % skip line
-                tline = fgetl(FID);
+                                fgetl(FID); % skip line
+                tline = fgetl(FID);tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 OutData{id_out}.pop_sample.t_ind{pop_ind,1} = find(scan_temp{1}); % extract t_ind for pop_sample
                                 

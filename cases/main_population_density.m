@@ -16,7 +16,7 @@ step_tot = 100*sec;
 % Loop number for PBS array job
 Num_pop = length(N);
 loop_num = 0;
-discard_transient = 0.005; % discard transient data (0~1)
+discard_transient = 500; % (ms)
 
 
 for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
@@ -106,7 +106,7 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             
                             pop_V_t_index = zeros(1,step_tot);
                             pop_V_t_index(round(linspace(50*sec,60*sec,1000))) = 1; % 100 sec in total
-                            writePopSampling(FID,1,pop_V_t_index);
+                            writePopSampling(FID,1, [1,1,1,1,0,0,1], pop_V_t_index);  % [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
                             
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)
