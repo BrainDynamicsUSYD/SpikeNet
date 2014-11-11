@@ -100,9 +100,9 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             %                                     writeExtCurrentSettings(FID, 2, I_ext_strength, 0);
                             %                                     % writeExtCurrentSettings(FID, 3, I_ext_strength, 0);
                             
-                            %%%%%%% data sampling
-                            %writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100:500:4000]);
-                            %writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1],[100;600]);
+                            %%%%%% data sampling
+                            writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100:500:4000]);
+                            writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1],[100;600]);
                             
                             pop_V_t_index = zeros(1,step_tot);
                             pop_V_t_index(round(linspace(50*sec,60*sec,1000))) = 1; % 100 sec in total

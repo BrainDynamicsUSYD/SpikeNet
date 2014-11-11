@@ -50,7 +50,7 @@ if nnz(num_spikes) > 0
         jetmap = colormap('jet(1000)');
         
         for i = 1:length(ind_sample)
-            color_tmp = jetmap(ceil(sample_color(i)*1000),:);
+            color_tmp = jetmap( ceil(sample_color(i)*1000),:);
             [Y,X,~] = find(spike_hist(ind_sample(i),:));
             line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)']+i-1, 'Color', color_tmp);
         end

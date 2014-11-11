@@ -28,26 +28,25 @@ for r_num = 1:Result_num
     % Num_pop = R_temp.Num_pop; % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Num_pop = 1;
     
-    sample_size = 500; % sample neurons for raster plot
     seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
     seg_num = ceil(step_tot/seg_size);
     for seg = 1:seg_num
         
         %-------------------------------------------------------------------------%
         % Plot
-        h_raster = figure('NumberTitle','Off','Name','Raster plot','units','normalized','position',[0 0 1 1], ...
+        h_raster = figure('NumberTitle','Off','Name',strcat('Raster plot:', R.stamp),'units','normalized','position',[0 0 1 1], ...
             'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
         axes_matrix = zeros(3,Num_pop);
         for pop_ind = 1:Num_pop
             % Plot raster plot
-            axes_matrix(1,pop_ind) = subplot(5,Num_pop,(0:3)*Num_pop+pop_ind);hold on;
-            raster_plot(R, pop_ind, seg, seg_size, sample_size);
+            axes_matrix(1,pop_ind) = subplot(6,Num_pop,(0:3)*Num_pop+pop_ind);hold on;
+            raster_plot(R, pop_ind, seg, [] );
             % Plot number of spikes
-            axes_matrix(2,pop_ind) = subplot(5,Num_pop,4*Num_pop+pop_ind);hold on;
+            axes_matrix(2,pop_ind) = subplot(6,Num_pop,4*Num_pop+pop_ind);hold on;
             num_spikes_plot(R, pop_ind, seg, seg_size);
-%             % Plot number of refractory neurons
-%             axes_matrix(3,pop_ind) = subplot(7,Num_pop,5*Num_pop+pop_ind);hold on;
-%             num_ref_plot(R, pop_ind, seg, seg_size);
+            %             % Plot number of refractory neurons
+            %             axes_matrix(3,pop_ind) = subplot(7,Num_pop,5*Num_pop+pop_ind);hold on;
+            %             num_ref_plot(R, pop_ind, seg, seg_size);
         end
         
         % Link axes to synchronise them when zooming
@@ -55,23 +54,22 @@ for r_num = 1:Result_num
             linkaxes(axes_matrix(1:2,pop_ind),'x');
         end
         
-%         % Keep tick lables while remove tick marks
-%         for pop_ind = 1:Num_pop
-%             for i = 1:2
-%                 set(axes_matrix(i,pop_ind), 'Ticklength', [0 0]);
-%             end
-%         end
+        %         % Keep tick lables while remove tick marks
+        %         for pop_ind = 1:Num_pop
+        %             for i = 1:2
+        %                 set(axes_matrix(i,pop_ind), 'Ticklength', [0 0]);
+        %             end
+        %         end
+        
         
 
-        
-        
-%         % Write comments
-%         subplot(7,Num_pop,6*Num_pop+(1:Num_pop), 'visible','off')
-%         text(0.5, 0.5, comments, ...
-%             'VerticalAlignment', 'top', ...
-%             'HorizontalAlignment', 'center',...
-%             'FontSize',10,'FontWeight','normal', 'interpreter', 'none'); % ...'interpreter', 'none'... to show underscore
-        
+        % Write comments
+        subplot(6,Num_pop,5*Num_pop+(1:Num_pop), 'visible','off')
+        text(0.5, 0.5, comments, ...
+            'VerticalAlignment', 'top', ...
+            'HorizontalAlignment', 'center',...
+            'FontSize',10,'FontWeight','normal', 'interpreter', 'none'); % ...'interpreter', 'none'... to show underscore
+
         
         % save figure
         if save_figure == 1

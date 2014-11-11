@@ -18,14 +18,14 @@ function Data = ReduceSolution(Data)
     reduced_num_ref = cell(Num_pop,1);
     
     for pop_ind = 1:Num_pop
-        if nnz(num_spikes{pop_ind}) > 0
+        %if nnz(num_spikes{pop_ind}) > 0
             reduced_num_spikes_temp = [num_spikes{pop_ind} zeros(1, reduced_step_tot*reduced_step_length-step_tot)]; % padding
             reduced_num_spikes_temp = sum(reshape(reduced_num_spikes_temp, reduced_step_length, reduced_step_tot),1);
             reduced_T_ind_full = cell2mat(arrayfun(@(x, y) repmat(x, [1 y]), 1:reduced_step_tot, reduced_num_spikes_temp, 'UniformOutput', false));
             reduced_spike_hist{pop_ind} = sparse(spike_hist_compressed{pop_ind}, reduced_T_ind_full, true(size(reduced_T_ind_full)), N(pop_ind), reduced_step_tot);
             reduced_num_spikes{pop_ind} = full(sum(reduced_spike_hist{pop_ind},1));
             reduced_num_ref{pop_ind} = num_ref{pop_ind}(round(linspace(1,step_tot,reduced_step_tot))); % down-sampling
-        end
+        %end
     end
 
     Data.reduced.dt = reduced_dt;

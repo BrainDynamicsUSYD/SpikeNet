@@ -20,7 +20,7 @@ else
 end
 
 % save figures
-save_fig = -1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
+save_fig = 1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
 
 
 % Start processing 
@@ -29,7 +29,7 @@ for id_out = 1:num_files
     fprintf('\t File name: %s\n', files{id_out});
     R = ReadYG( files(id_out) ); % read .ygout file into matlab data struct
     R = AnalyseYG(R); % do some simple analysis
-    % RasterYG(R, save_fig); % generate raster plot for spiking history
+    RasterYG(R, save_fig); % generate raster plot for spiking history
     % R = ClusterYG(R, save_fig); 
     % HistogramsYG(R,save_fig);
     SaveRYG(R);

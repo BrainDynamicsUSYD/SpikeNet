@@ -111,6 +111,8 @@ protected:
 		I_ext_std;
 
 	// Data containers
+	int
+		neuron_sample_step; // defines sampling frequency
 	vector<int>
 		neuron_sample_ind; // membrane potential sampling index vector
 	vector<bool>

@@ -1,4 +1,4 @@
-function [ Rate ] = SpikeTrainConvolve(SpikeTrain, kernel)
+function [ Y ] = SpikeTrainConvolve(SpikeTrain, kernel)
 % SpikeTrain is (sparse) row vectors, coloumn index is time step, e.g
 %
 % [0 0 1 1 1 0 1 0 0 0; for single neuron spike train
@@ -15,18 +15,31 @@ kernel_length = length(kernel);
 kernel_half_length = (kernel_length-1)/2;
 kernel_t = -kernel_half_length:kernel_half_length;
 
-q = length(SpikeTrain);
-RatePadded = zeros(1,q+2*kernel_half_length);% padding
-% Using sparse is slow!!! RatePadded = spalloc(1,q+2*kernel_half_length, nnz(SpikeTrain)*kernel_length);% padding
+[num, q] = size(SpikeTrain);
+Y = zeros(num,q);
 
-[~,timing,num_spikes] = find(SpikeTrain);
-if ~isempty(timing)
-    for i = 1:kernel_length
-        RatePadded(1, timing+kernel_half_length+kernel_t(i)) = RatePadded(1, timing+kernel_half_length+kernel_t(i))+num_spikes*kernel(i);
+
+
+% if nnz(SpikeTrain) > 0.1*num*q % ???
+%     
+%     SpikeTrain = double(full(SpikeTrain));
+%     for n = 1:num
+%         Y(n,:) = conv( SpikeTrain(n,:), kernel_t, 'same');
+%     end
+%     
+% else
+    RatePadded = zeros(1,q+2*kernel_half_length);% padding
+    for n = 1:num
+        [~,timing,num_spikes] = find(SpikeTrain(n,:));
+        if ~isempty(timing)
+            for i = 1:kernel_length
+                RatePadded(1, timing+kernel_half_length+kernel_t(i)) = RatePadded(1, timing+kernel_half_length+kernel_t(i))+num_spikes*kernel(i);
+            end
+        end
+        Y(n,:) = RatePadded((kernel_half_length+1):(end-kernel_half_length));
     end
-end
+% end
 
-Rate = RatePadded((kernel_half_length+1):(end-kernel_half_length));
 
 end
 

@@ -201,6 +201,12 @@ void Neurons::update_V(int step_current){
 	// Collect Currents from all pre-synapses!!!!!!!!!!!!!!!
 
 
+
+	// Data sampling
+	sample_data(step_current); // this must be here
+	// we want to sample the V[] before it's updated!
+
+
 	// update menbrane potentials
 	double Vdot;
 	for (int i = 0; i < N; ++i){
