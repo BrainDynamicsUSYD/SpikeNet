@@ -13,6 +13,8 @@ function R = get_cluster_rate(R)
         C_rate(cc,:) = SpikeTrainConvolve(sum(R.reduced.spike_hist{1}(C_begin:C_end,:), 1)/(C_end-C_begin+1), kernel);
     end
     % record results
-    R.C_label = C_label;
-    R.C_rate = C_rate;
+    R.cluster.label = C_label;
+    R.cluster.rate = C_rate;
+    R.cluster.kernel_width = CC_kernel_width;
+    R.cluster.kernel_name = choice;
 end

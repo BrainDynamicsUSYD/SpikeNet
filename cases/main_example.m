@@ -15,7 +15,7 @@ step_tot = 400*sec;
 
 % Loop number for PBS array job
 % Num_pop = length(N);
-loop_num = 0;
+loop_num = 10;
 discard_transient = 500; % ms
 
 
@@ -31,7 +31,7 @@ for lesion_1 = 1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                             for rr = [0.6]
                                 for Mnum = 8 %!!!
                                     % for I_ext_strength = 2:0.5:2.5 %0.5:0.5:2.5; %nA   run-away at 3.0!!!!
-                                    for rate_ext = 4.4*ones(1,10) %linspace(4.0,4.0,45) %4.0:0.025:4.5 %4.1:0.025:4.5; % Hz
+                                    for rate_ext = 4.4*ones(1,40) %linspace(4.0,4.0,45) %4.0:0.025:4.5 %4.1:0.025:4.5; % Hz
                                         
                                         loop_num = loop_num + 1;
                                         
