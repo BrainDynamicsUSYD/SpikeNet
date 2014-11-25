@@ -1,4 +1,5 @@
 function PostPostProcessYG(stdin)
+% This function is not very useful
 
  % Prepare files
  if nargin == 0
@@ -21,22 +22,24 @@ function PostPostProcessYG(stdin)
      end
  end
  
-% % Post-postprocess data
-% save_fig = -1;
-% for i = 1:num_files
-%     fprintf('Loading RYG.mat file %s...\n', files{i});
-%     load(files{i}); 
-%     disp('Loading done.');
-%     %%%%%%% do something here
-%     R = ClusterYG({R_temp},save_fig);
-%     R_temp = R{1};
-%     save(files{i},'R_temp');
-%     %%%%%%% visualise results
-%     % RasterYG(R, save_fig);
-%     % ClusterYG(R,save_fig);
-%     % HistogramsYG(R,save_fig);
-%     
-% end
+ % Post-postprocess data
+ save_fig = -1;
+ for i = 1:num_files
+     fprintf('Loading RYG.mat file %s...\n', files{i});
+     R_temp = load(files{i});
+     
+     disp('Loading done.');
+     %%%%%%% do something here
+     % R = ClusterYG({R_temp},save_fig);
+     R_temp = cluster_sorted_rate(R_temp);
+     % R_temp = R{1};
+     save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
+     %%%%%%% visualise results
+     % RasterYG(R, save_fig);
+     % ClusterYG(R,save_fig);
+     % HistogramsYG(R,save_fig);
+     
+ end
 
 % var = 'Analysis.Hz_overall';
 % [Hz, loop_num] = CollectVectorYG(var);
@@ -48,20 +51,23 @@ function PostPostProcessYG(stdin)
 % save('balance_Hz','Hz','loop_num','EE','II');
 
 
-var = 'up_down_analysis.up_C_label';
-[up_C_label, loop_num_up_C_label] = CollectVectorYG(var);
-var = 'up_down_analysis.up_duration';
-[up_duration, dummy] = CollectVectorYG(var);
-var = 'up_down_analysis.down_duration';
-[down_duration, dummy] = CollectVectorYG(var);
-var = 'up_down_analysis.up_overlapping';
-[up_overlapping, dummy] = CollectVectorYG(var);
-var = 'Analysis.Hz_overall';
-[Hz, loop_num_Hz] = CollectVectorYG(var);
-save('phase_diagram_data_2','up_C_label','up_duration','down_duration',...
-	'up_overlapping','Hz','loop_num_up_C_label','loop_num_Hz');
+% var = 'up_down_analysis.up_C_label';
+% [up_C_label, loop_num_up_C_label] = CollectVectorYG(var);
+% var = 'up_down_analysis.up_duration';
+% [up_duration, dummy] = CollectVectorYG(var);
+% var = 'up_down_analysis.down_duration';
+% [down_duration, dummy] = CollectVectorYG(var);
+% var = 'up_down_analysis.up_overlapping';
+% [up_overlapping, dummy] = CollectVectorYG(var);
+% var = 'Analysis.Hz_overall';
+% [Hz, loop_num_Hz] = CollectVectorYG(var);
+% save('phase_diagram_data_2','up_C_label','up_duration','down_duration',...
+% 	'up_overlapping','Hz','loop_num_up_C_label','loop_num_Hz');
 
-
-
+% 
+% var = 'cluster.low_du{1}';
+% [low_du, loop_num] = CollectVectorYG(var);
+%  
+% save('low_du','low_du','loop_num');
 
 end

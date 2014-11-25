@@ -1,8 +1,5 @@
-function main_constant_current_1(varargin)
-% Do it!!!
-% Find it!!!
-% Hunt it down!!!
-
+function main_example_phiEI(varargin)
+% <<Asynchronous states in cortex>>
 
 % varargin is for PBS arrary job
 if nargin == 0
@@ -14,24 +11,26 @@ end % Basic parameters
 N = [4000; 1000]; %!!!
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 10*sec; % use 10 second!
+step_tot = 100*sec;
 
 % Loop number for PBS array job
-Num_pop = length(N);
+% Num_pop = length(N);
 loop_num = 0;
 discard_transient = 500; % ms
+EE_factor =  0.6; %0.4:0.1:0.6;
+II_factor = 0.8; %0.7:0.1:0.9;
+kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
+rr = 0.6;
+Mnum = 8; %!!!
 
+for phi_I = 1:0.1:1.5
+    for phi_E = phi_I
+        for lesion_1 = 1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
+            for lesion_2 = 1    %+(-0.05:0.05:0.05)
+                for lesion_3 = 1    %+(-0.05:0.05:0.05)
+                    for lesion_4 = 0.5  %+(-0.05:0.05:0.05)
 
-for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
-    % for P_random_control = 0:0.01:0.2
-    for EE_factor = 0.6:0.1:0.8 % 0.8:0.1:1.2;
-        for II_factor = 0.6:0.1:0.8 % 0.8:0.1:1.2;
-            for kk = 1 %2:5; % use 2 to roughly compensate synaptic saturation
-                %for pp = 0.2
-                for rr = [0.6:0.1:0.9]
-                    for Mnum = 8 %!!!
-                        for I_ext_strength = 1.5:0.5:3.5 %0.5:0.5:2.5; %nA   run-away at 3.0!!!!
-                           
+                        for rate_ext = 4.4*ones(1,5) %4.4*ones(1,1) %linspace(4.0,4.0,45) %4.0:0.025:4.5 %4.1:0.025:4.5; % Hz
                             
                             loop_num = loop_num + 1;
                             
@@ -53,7 +52,7 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             % Otherwise overwriting may occur when using PBS.
                             name = [ sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF')];
                             
-                            fprintf('Data file name is: /n%s/n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
+                            fprintf('Data file name is: \n%s\n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
                             FID = fopen([name,'.ygin'], 'w'); % creat file
                             FID_syn = fopen([name,'.ygin_syn'], 'w'); % creat file
                             
@@ -66,26 +65,44 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             writeSynPara(FID, 'tau_decay_GABA', 3);
                             
                             %%%%%%% write runaway killer
-                            runaway_steps = round(50/dt); % 50 ms
-                            runaway_mean_num_ref = 0.2;
+                            runaway_steps = round(50/dt);
+                            runaway_mean_num_ref = 0.4;
                             writeRunawayKiller(FID, runaway_steps, runaway_mean_num_ref);
-                            %%%%%%%%%%%%%%%%%%%%%%%
+                            %%%%%%%%%%%%%%%%%%%%%%%%
                             
                             
                             
                             Kmat = [2.4*EE_factor  1.4;
-                                    4.5  5.7*II_factor]*kk*10^-3; % miuSiemens
-                            
+                                4.5  5.7*II_factor]*kk*10^-3; % miuSiemens
+                            Kmat(1,:) = Kmat(1,:)*phi_E;
+                            Kmat(2,:) = Kmat(2,:)*phi_I;
                             Pmat = [0.2 0.5;
-                                    0.5 0.5];
+                                0.5 0.5];
                             
                             TYPEmat = [1 2];
                             
                             
                             
-                            % External current
-                            writeExtCurrentSettings(FID, 1, I_ext_strength, 0)
-                            writeExtCurrentSettings(FID, 2, I_ext_strength, 0)
+                            %%%%%%% external spikes settings (FID, pop_ind, type_ext, K_ext, Num_ext, rate_ext)
+                            Num_ext = 400;
+                            K_ext = Kmat(1,1);
+                            rate_t = zeros(1,step_tot);
+                            
+                            rate_t(:) = rate_ext;
+                            
+                            
+                            
+                            writeExtSpikeSettings(FID, 1, 1, K_ext,  Num_ext, rate_t, 1, N(1));
+                            writeExtSpikeSettings(FID, 2, 1, K_ext,  Num_ext, rate_t, 1, N(2));
+                            % writeExtSpikeSettings(FID, 3, 1, K_ext,  Num_ext, rate_ext);
+                            
+                            %%%%%%% data sampling
+%                             writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100:500:4000]);
+%                             writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1],[100;600]);
+                            %                                         pop_V_t_index = zeros(1,step_tot);
+                            %                                         pop_V_t_index(1:sec:step_tot) = 1;
+                            %                                         writePopSampling(FID,1,pop_V_t_index);
+                            
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                             p_fire = 0.00*ones(size(N)); % between [0,1], 0.05
@@ -99,6 +116,8 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                                 for j_post = 1:2
                                     
                                     if i_pre == 1 && j_post == 1
+                                        % hierarchical structure
+                                        % A11 = MyHierarchyGraph('N', N(i_pre), 'Mnum', Mnum, 'P0', Pmat(i_pre,j_post), 'r', rr);
                                         
                                         %%%%%%%% Hierarchical Connection and Lesion%%%%%%%%%%%%%%%%%
                                         % Get the guts out of
@@ -107,16 +126,16 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                                         P0 = Pmat(i_pre,j_post);
                                         
                                         % Generate vector of first-level module size
-                                        Msize = Mnum_2_Msize( Mnum, N(i_pre) );
+                                        Msize = Mnum_2_Msize(Mnum, N(i_pre));
                                         
                                         % Generate inter modular connection probability matrix
                                         [P, CL] = inter_module_Pmatrix(Msize, P0, rr);
                                         
                                         % Do lesion here
-                                        P(CL==4) = P(CL==4)*lesion_left; % highest level connection
-                                        %P(CL==3) = P(CL==3)*lesion_left;  %*lesion_left;  % second-highest level connection
-                                        %P(CL==2) = P(CL==2)*lesion_left;% third-highest level connection
-                                        %P(CL>1) = P_random_control;
+                                        P(CL==4) = P(CL==4)*lesion_4; % highest level connection
+                                        P(CL==3) = P(CL==3)*lesion_3;  %*lesion_left;  % second-highest level connection
+                                        P(CL==2) = P(CL==2)*lesion_2; % third-highest level connection
+                                        P(CL==1) = P(CL==1)*lesion_1;
                                         
                                         
                                         disp('Lesion in the hierarchical network!');
@@ -125,7 +144,7 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                                         A11 = P_2_A(P,Msize);
                                         
                                         % Display
-                                        fprintf('Hierarchical Graph: N=%d, Mnum=%d, P0=%g, r=%g\n', N, Mnum, P0, rr);
+                                        fprintf('Hierarchical Graph: N=%d, Mnum=%d, P0=%g, r=%g\n', N(1), Mnum, P0, rr);
                                         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                                         [I, J, ~] = find(A11);
                                         % % save A11
@@ -135,7 +154,17 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                                     end
                                     
                                     
+                                    %                                             if lognormal_syn == 1
+                                    %                                                 % lognorm synaptic weight
+                                    %                                                 miu = Kmat(i_pre,j_post); % mean
+                                    %                                                 sigma = miu*0.5; % std
+                                    %                                                 K = lognrnd(log(miu^2 / sqrt(sigma^2+miu^2)), sqrt(log(sigma^2/miu^2 + 1)), size(I));
+                                    %                                             else
+                                    % Identical synaptic weight
                                     K = ones(size(I))*Kmat(i_pre,j_post);
+                                    %                                             end
+                                    
+                                    
                                     D = rand(size(I))*1;
                                     writeChemicalConnection(FID_syn, TYPEmat(i_pre),  i_pre,j_post,   I,J,K,D); % (FID, type, i_pre, j_post, I, J, K, D)
                                     clear I J K D;
@@ -150,12 +179,14 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             writeExplVar(FID, 'discard_transient', discard_transient, ...
                                 'loop_num', loop_num, ...
                                 'k', kk,...
+                                'rate_ext', rate_ext,...
                                 'r', rr, ...
                                 'Mnum', Mnum, ...
                                 'EE_factor', EE_factor, ...
-                                'II_factor', II_factor, ...
-                                'I_ext_strength', I_ext_strength, ...
-                                'lesion_left',lesion_left);
+                                'II_factor', II_factor,...
+                                'phi_I', phi_I,'phi_E', phi_E,...
+                                'lesion_4',lesion_4,'lesion_3',lesion_3,'lesion_2',lesion_2,'lesion_1',lesion_1);
+                            
                             
                             
                             % Adding comments in raster plot
@@ -167,24 +198,25 @@ for lesion_left = 0.5 %1.1:0.1:1.4 % range [0-1]
                             % append this file self into .ygin for future reference
                             appendThisMatlabFile(FID)
                             
-                            
                         end
                     end
                 end
+                
             end
         end
     end
 end
-%end
+%     end
+% end
 
 end
 
 
 % This function must be here!
 function appendThisMatlabFile(FID)
-breaker = ['>',repmat('#',1,80)];
+breaker = repmat('#',1,80);
 fprintf(FID, '%s\n', breaker);
-fprintf(FID, '%s\n', '> MATLAB script generating this file: ');
+fprintf(FID, '%s\n', '# MATLAB script generating this file: ');
 fprintf(FID, '%s\n', breaker);
 Fself = fopen([mfilename('fullpath'),'.m'],'r');
 while ~feof(Fself)
