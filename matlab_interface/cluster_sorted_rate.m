@@ -50,99 +50,11 @@ function R = cluster_sorted_rate( R )
     R.cluster.low_du = low_du;
     R.cluster.sorted_rate = sorted_rate;
     R.cluster.sym_seq = cluster_sequence;
+    R.cluster.sym_seq_1st_theta = seq_1st;
     R.cluster.rate_rank = cluster_rank;
     
 end
 
-
-
-function [switch_seq, high_du, low_du] = seq_postprocess(seq, dt)
-% symbolic sequence postprocesing
-% start from simple solutions!
-
-% cut head and tail
-if ~isempty(seq)
-    head = seq(1);
-    h = 0;
-    for i = 1:length(seq)
-        if seq(i) == head
-            h = i;
-        else
-            break;
-        end
-    end
-    seq(1:h) = [];
-end
-
-if ~isempty(seq)
-    tail = seq(end);
-    t = 0;
-    for i = length(seq):-1:1
-        if seq(i) == tail
-            t = i;
-        else
-            break;
-        end
-    end
-    seq(t:end) = [];
-end
-
-% cut low state from head and tail
-if ~isempty(seq)
-    head = seq(1);
-    if head == 0 % low state
-        h = 0;
-        for i = 1:length(seq)
-            if seq(i) == head
-                h = i;
-            else
-                break;
-            end
-        end
-        seq(1:h) = [];
-    end
-end
-if ~isempty(seq)
-    tail = seq(end);
-    if tail == 0 % low state
-        t = 0;
-        for i = length(seq):-1:1
-            if seq(i) == tail
-                t = i;
-            else
-                break;
-            end
-        end
-        seq(t:end) = [];
-    end
-end
-
-% contract sequence and find durations
-if isempty(seq)
-    switch_seq = [];
-    du = [];
-else
-    switch_seq = seq(1);
-    du = 1;
-    for i = 2:length(seq)
-        if seq(i) == seq(i-1)
-            du(end) = du(end)+1;
-        elseif seq(i)*seq(i-1) == 0 % a normal transition (high-low or low-high)
-            du = [du 1]; % new duration counter
-            switch_seq = [switch_seq seq(i)]; % new entry in switch sequence
-        else % a direction transition (take-over: high-high)
-            du = [du 0 1]; % insert a low state but with zero length
-            switch_seq = [switch_seq 0 seq(i)]; % insert a low state but with zero length
-        end
-    end
-end
-
-% differentiate high and low states
-high_du = du(switch_seq > 0)*dt;
-low_du = du(switch_seq == 0)*dt;
-switch_seq(switch_seq == 0) = []; % only high states
-
-end
 
 
 function [switch_level] = switch_level_detect(seq)

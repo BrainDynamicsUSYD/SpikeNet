@@ -42,7 +42,9 @@ if nnz(num_spikes) > 0
     
     if isempty(sample_color)
         [Y,X,~] = find(spike_hist(ind_sample,:));
-        line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)'],'Color','k');
+        xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt/1000; % sec
+        ydata = [Y(:)'-1;Y(:)'];
+        line(xdata, ydata,'Color','k');
     else
         hold on;
         sample_color = (sample_color-min(sample_color))/(diff(minmax(sample_color)));
@@ -52,7 +54,9 @@ if nnz(num_spikes) > 0
         for i = 1:length(ind_sample)
             color_tmp = jetmap( ceil(sample_color(i)*1000),:);
             [Y,X,~] = find(spike_hist(ind_sample(i),:));
-            line(([X(:)'; X(:)']+seg_ind(1)-1)*dt,[Y(:)'-1;Y(:)']+i-1, 'Color', color_tmp);
+            xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt/1000; % sec
+            ydata = [Y(:)'-1;Y(:)']+i-1;
+            line(xdata, ydata, 'Color', color_tmp);
         end
         colormap('jet');
     end
@@ -72,7 +76,8 @@ if nnz(num_spikes) > 0
     
     % Keep tick lables while remove tick marks
     % set(gca, 'xtick', [], 'Ticklength', [0 0], 'TickDir','out');
-    set(gca,'xtick',[],'ytick',[],'ydir','reverse');
+    set(gca,'ytick',[],'ydir','reverse');
+    % set(gca,'xtick',[]);
     box on;
 
     

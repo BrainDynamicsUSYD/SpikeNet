@@ -29,9 +29,14 @@ for id_out = 1:num_files
     R_temp = load(files{i});
     disp('done.');
     %%%%%%% do something here
-    R_temp = cluster_sorted_rate(R_temp);
-    save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
+    
+%     R_temp = cluster_sorted_rate(R_temp);
+%     save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
+    RasterYG({R_temp}, save_fig);
+    
+    %%%%%%% do something above
     disp('Data processed and saved.');
+    
 end
 
 
