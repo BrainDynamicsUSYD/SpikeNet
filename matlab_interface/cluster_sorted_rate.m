@@ -1,11 +1,15 @@
 function R = cluster_sorted_rate( R )
     % get cluster rate
     R = get_cluster_rate( R );
+    
+    % dump constants
     dt = R.reduced.dt;
-    C_rate = R.cluster.rate;
-        
+    step_tot = R.reduced.step_tot;
+    rate = R.cluster.rate;
+    Mnum = R.ExplVar.Mnum;
+    
     % sort the rate and each time point
-    [sorted_rate, cluster_sequence] = sort(C_rate, 'descend');
+    [sorted_rate, cluster_sequence] = sort(rate, 'descend');
     
     % cluster rank
     [a_ind, b_ind] = size(cluster_sequence);
@@ -14,6 +18,23 @@ function R = cluster_sorted_rate( R )
         cluster_rank(cluster_sequence(:,i),i) = (1:a_ind)';
     end
 
+    
+    % symbolic autocorrelation
+    sample_step = 10;
+    t_sample = 1:sample_step:step_tot; % down sampling the data!
+    dt_sample = dt*sample_step;
+    lag = 1:1:round(length(t_sample)/3);
+    symb_acc = [];
+    lag_ms = lag*dt_sample;
+    for i = 1:Mnum
+        [cc_tmp] = es_autocorrcoef(cluster_sequence(i,t_sample),lag); % this may take some time
+        symb_acc = [symb_acc; cc_tmp];
+    end
+    
+    % correlation matrix for sort rate
+    cc_sorted_rate = corrcoef(sorted_rate');
+    cc_rate = corrcoef(rate');
+    
     % threshold the 1st symbolic sequence based on 1st sorted rate
     theta = 5:1:15; % Hz, threshold
     lt = length(theta);
@@ -29,6 +50,7 @@ function R = cluster_sorted_rate( R )
     high_du = cell(1,lt);
     low_du = cell(1,lt);
     switch_level = cell(1,lt);
+    order_para = zeros(1,lt);
     for i = 1:lt
         [seq_tmp, high_du_tmp, low_du_tmp] = seq_postprocess( seq_1st(i,:), dt );
         
@@ -37,21 +59,35 @@ function R = cluster_sorted_rate( R )
         high_du{i} = high_du_tmp;
         low_du{i} = low_du_tmp;
         
-        % switch frequency (order parameter?)
-        switch_freq(i) = length(seq_tmp)/(sum([high_du_tmp low_du_tmp]));
+        % switch frequency (not a very goof order parameter)
+        switch_freq(i) = length(seq_tmp)/(sum([high_du_tmp low_du_tmp])*10^-3); % in Hz
+        
+        % switching dynamics order parameter
+        H2 = symbolic_block_entropy(seq_tmp, Mnum);
+        order_para(i) = H2*switch_freq(i);
     end
     
+    
     % output results
+    R.cluster.sorted_rate = sorted_rate;
+    R.cluster.sym_seq = cluster_sequence;
+    R.cluster.rate_rank = cluster_rank;
+    
+    R.cluster.symb_acc = symb_acc;
+    R.cluster.acc_lag = lag_ms;
+    R.cluster.cc_sorted_rate = cc_sorted_rate;
+    R.cluster.cc_rate = cc_rate;
+    
     R.cluster.threshold = theta;
     R.cluster.switch_freq = switch_freq;
+    R.cluster.order_para = order_para;
     R.cluster.switch_seq = switch_seq;
     R.cluster.switch_level = switch_level;
     R.cluster.high_du = high_du;
     R.cluster.low_du = low_du;
-    R.cluster.sorted_rate = sorted_rate;
-    R.cluster.sym_seq = cluster_sequence;
     R.cluster.sym_seq_1st_theta = seq_1st;
-    R.cluster.rate_rank = cluster_rank;
+    
+
     
 end
 

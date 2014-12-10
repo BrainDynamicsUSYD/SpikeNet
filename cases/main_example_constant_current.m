@@ -18,7 +18,7 @@ step_tot = 400*sec; % use 10 second!
 
 % Loop number for PBS array job
 Num_pop = length(N);
-loop_num = 100;
+loop_num = 200;
 discard_transient = 500; % ms
 EE_factor = 0.6;
 II_factor = 0.8;
@@ -32,7 +32,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
         for lesion_3 = 1    %+(-0.05:0.05:0.05)
             for lesion_4 = 0.6  %+(-0.05:0.05:0.05)
 
-                for I_ext_strength = 1.5*ones(1,100)
+                for I_ext_strength = 1.5*ones(1,50)
                     
                     
                     loop_num = loop_num + 1;
@@ -88,6 +88,13 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                     % External current
                     writeExtCurrentSettings(FID, 1, I_ext_strength, 0)
                     writeExtCurrentSettings(FID, 2, I_ext_strength, 0)
+                    
+                    
+                           
+                    %%%%%%% data sampling
+                    writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100:500:4000]);
+                    writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1],[100;600]);
+                    
                     
                     %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                     p_fire = 0.00*ones(size(N)); % between [0,1], 0.05

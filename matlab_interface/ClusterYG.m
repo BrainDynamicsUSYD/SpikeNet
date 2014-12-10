@@ -22,8 +22,6 @@ else
 end
 
 
-
-
 Result_num = length(Result_cell);
 for r_num = 1:Result_num
     Result_cell{r_num} = cluster_sorted_rate( Result_cell{r_num} );

@@ -16,6 +16,9 @@ dt = R.reduced.dt;
 step_tot = R.reduced.step_tot;
 N = R.N;
 
+%
+dt = dt/1000; % sec
+
 % Segmetation
 seg_ind = get_seg(step_tot, seg_size, seg);
 

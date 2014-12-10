@@ -3,7 +3,6 @@ function corr_hist_plot(R_temp, pop, varargin)
 hold on;
 
 
-
 text_fontsize = 12;
 for i = 1:(length(varargin)/2)
     eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
@@ -21,6 +20,10 @@ else
     CC_kernel_type = R_temp.Analysis.CC_pop_kernel_type;
     CC_kernel_width = R_temp.Analysis.CC_pop_kernel_width;
 end
+
+% deal with NaN occuring when one spike train is empty
+CC(isnan(CC)) = 0; % be careful here!!
+
 
 % histogram
 bin_num = 100;

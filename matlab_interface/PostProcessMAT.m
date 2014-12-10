@@ -31,9 +31,21 @@ for id_out = 1:num_files
     %%%%%%% do something here
     
 %     R_temp = cluster_sorted_rate(R_temp);
-%     save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
-    RasterYG({R_temp}, save_fig);
+%     cluster = R_temp.cluster;
+%     save(files{i},'cluster', '-append');
     
+    R_temp = get_CC_pop(R_temp);
+    R_temp = get_EI_current_crosscorr(R_temp);
+    Balance = R_temp.Balance;
+    Analysis = R_temp.Analysis;
+    save(files{i},'Balance', 'Analysis', '-append');
+
+    
+    % save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
+   % RasterYG({R_temp}, save_fig);
+    
+   
+   
     %%%%%%% do something above
     disp('Data processed and saved.');
     

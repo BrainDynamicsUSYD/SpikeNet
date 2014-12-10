@@ -23,6 +23,9 @@ step_tot = R.reduced.step_tot;
 N = R.N;
 % rate_sorted = R.Analysis.rate_sorted;
 
+% 
+dt = dt/1000;
+
 % Segmetation
 seg_ind = get_seg(step_tot, seg_size, seg);
 
@@ -42,7 +45,7 @@ if nnz(num_spikes) > 0
     
     if isempty(sample_color)
         [Y,X,~] = find(spike_hist(ind_sample,:));
-        xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt/1000; % sec
+        xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt; % sec
         ydata = [Y(:)'-1;Y(:)'];
         line(xdata, ydata,'Color','k');
     else
@@ -54,7 +57,7 @@ if nnz(num_spikes) > 0
         for i = 1:length(ind_sample)
             color_tmp = jetmap( ceil(sample_color(i)*1000),:);
             [Y,X,~] = find(spike_hist(ind_sample(i),:));
-            xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt/1000; % sec
+            xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt; % sec
             ydata = [Y(:)'-1;Y(:)']+i-1;
             line(xdata, ydata, 'Color', color_tmp);
         end

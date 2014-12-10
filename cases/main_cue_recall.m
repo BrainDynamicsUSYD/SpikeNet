@@ -11,12 +11,12 @@ end % Basic parameters
 N = [4000; 1000]; %!!!
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 1*sec;
+step_tot = 5*sec;
 
 % Loop number for PBS array job
 Num_pop = length(N);
 loop_num = 0;
-discard_transient = 0.00;
+discard_transient = 500; % ms
 
 % Hierarchical structure
 hierarchy_model = 1;
@@ -33,7 +33,7 @@ for noise_k = 0.9:0.1:1.6
                         for rr = [0.6]
                             for Mnum = 8 %!!!
                                 % for I_ext_strength = 2:0.5:2.5 %0.5:0.5:2.5; %nA   run-away at 3.0!!!!
-                                for rate_ext = 4.4*ones(1,5) %linspace(4.0,4.0,45) %4.0:0.025:4.5 %4.1:0.025:4.5; % Hz
+                                for rate_ext = 4.4*ones(1,50) %linspace(4.0,4.0,45) %4.0:0.025:4.5 %4.1:0.025:4.5; % Hz
                                     
                                     loop_num = loop_num + 1;
                                     
