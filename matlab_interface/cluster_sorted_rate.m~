@@ -85,7 +85,6 @@ function R = cluster_sorted_rate( R )
     R.cluster.cc_sorted_rate = cc_sorted_rate;
     R.cluster.cc_rate = cc_rate;
     
-    R.cluster.high_du_min = high_du_min;
     R.cluster.threshold = theta;
     R.cluster.switch_freq = switch_freq;
     R.cluster.order_para = order_para;
@@ -151,13 +150,13 @@ if ~isempty(i_first) && i_first < n
        if seq(i) == seq(i-1) && seq(i) ~= 0 
            high_du_tmp = high_du_tmp + 1; % keep counting the length of it
            
-       % at the end of a high state
-       elseif seq(i) == 0 && seq(i-1) ~= 0 
+       % at the end of high state
+       elseif seq(i) == 0 && seq(i-1)~= 0 
            if high_du_tmp < min_steps % if not meet the persistence requirement
-               seq( i_begin:(i-1) ) = 0; % delete this high state
+               seq( i_begin:(i_begin+high_du_tmp-1) ) = 0; % delete this high state
            end
            
-       % at the beginning of a high state
+       % at the beginning of high state
        elseif seq(i) ~=0 && seq(i-1) == 0 
            high_du_tmp = 1; % reset length counter 
            i_begin = i; % reset the starting index
@@ -165,13 +164,13 @@ if ~isempty(i_first) && i_first < n
        % direct switch between two high states
        elseif seq(i) ~= seq(i-1) && seq(i) ~= 0  && seq(i-1) ~= 0  
             if high_du_tmp < min_steps % if not meet the persistence requirement
-               seq( i_begin:(i-1) ) = 0; % delete the previous high state
+               seq( i_begin:(i_begin+high_du_tmp-1) ) = 0; % delete the previous high state
             end
             high_du_tmp = 1; % reset length counter 
             i_begin = i; % reset the starting index
            
-       % in the middle of a low state
-       elseif seq(i) == 0 && seq(i-1) == 0 
+       % in the middle of low state
+       elseif seq(i) == 0 && seq(i-1) ==0 
            continue; % do nothing
        end
            
@@ -181,8 +180,5 @@ if ~isempty(i_first) && i_first < n
 end
 
 end
-
-
-
 
 

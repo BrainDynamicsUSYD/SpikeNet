@@ -23,9 +23,9 @@ kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
 rr = 0.6;
 Mnum = 8; %!!!
 
-        for lesion_1 = 1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
-            for lesion_2 = 1.1
-                for lesion_3 = 1.1    %+(-0.05:0.05:0.05)
+        for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
+            for lesion_2 = 1
+                for lesion_3 = 1    %+(-0.05:0.05:0.05)
                     for lesion_4 = 0.6  %+(-0.05:0.05:0.05)
 
                         for rate_ext = 4.4*ones(1,5) %4.4*ones(1,1) %linspace(4.0,4.0,45) %4.0:0.025:4.5 %4.1:0.025:4.5; % Hz
