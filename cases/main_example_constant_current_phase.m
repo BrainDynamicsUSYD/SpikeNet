@@ -33,7 +33,7 @@ lesion_4 = 0.6;  %+(-0.05:0.05:0.05)
                 
                 
 for phi_I = 0.5:0.1:1.5
-    for phi_E = phi_I + (-0.1:0.1:0.1)
+    for phi_E = phi_I + [-0.2:0.1:0.2];
 
         for I_ext_strength = 1.5*ones(1, 10)
             

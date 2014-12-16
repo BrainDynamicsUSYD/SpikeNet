@@ -35,16 +35,36 @@ function R = cluster_sorted_rate( R )
     cc_sorted_rate = corrcoef(sorted_rate');
     cc_rate = corrcoef(rate');
     
+    
     % threshold the 1st symbolic sequence based on 1st sorted rate
-    theta = 5:1:15; % Hz, threshold
-    lt = length(theta);
-    seq_1st = repmat(cluster_sequence(1,:), lt, 1); 
+    % this should be done in 3-steps
+    
+    % step 1: domination requirement
+    % normalize the sorted rates at every time step
+    % and the largest component must be larger than some threhold
+    % this is essentially testing if there is any truly dominating
+    % component at all.
+    % note that the normalized components are the cos(.) values of the
+    % angles between the vector and each axis!
+    cos_thre = 0.7;
+    sorted_rate_norm = normc(sorted_rate); % normalize each column
+    seq_1st_dominant = cluster_sequence(1,:);
+    seq_1st_dominant(sorted_rate_norm(1,:) < cos_thre ) = 0;
+    
+    
+    % step 2: absolute firing requirement
+    % test if the dominating component has a firing
+    % rate high enough
+    Hz_thre = 5:1:10; % Hz, threshold
+    lt = length(Hz_thre);
+    seq_1st = repmat(seq_1st_dominant, lt, 1); 
     for i = 1:lt
-        seq_1st(i, sorted_rate(1,:) < theta(i)  ) = 0; % or NaN?
+        seq_1st(i, sorted_rate(1,:) < Hz_thre(i)  ) = 0; % or NaN?
     end
     
+    % step 3: persistence requirement
     % apply persistence requirement on the symbolic sequence
-    high_du_min = 200; % ms
+    high_du_min = 0; % ms
     high_du_min_steps =  round(high_du_min/dt);
     for i = 1:lt
         seq_1st(i, :) = persistence_requirement( seq_1st(i, :), high_du_min_steps );
@@ -86,7 +106,8 @@ function R = cluster_sorted_rate( R )
     R.cluster.cc_rate = cc_rate;
     
     R.cluster.high_du_min = high_du_min;
-    R.cluster.threshold = theta;
+    R.cluster.cos_thre = cos_thre;
+    R.cluster.Hz_thre = Hz_thre;
     R.cluster.switch_freq = switch_freq;
     R.cluster.order_para = order_para;
     R.cluster.switch_seq = switch_seq;

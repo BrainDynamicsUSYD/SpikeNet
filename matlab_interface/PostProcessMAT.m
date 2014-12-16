@@ -19,6 +19,7 @@ else
         files{i} = cell2mat(files{i});
     end
 end
+
 % save figures
 save_fig = 1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
 % Start processing
@@ -34,11 +35,15 @@ for id_out = 1:num_files
 %     cluster = R_temp.cluster;
 %     save(files{i},'cluster', '-append');
     
-    R_temp = get_CC_pop(R_temp);
-    R_temp = get_EI_current_crosscorr(R_temp);
-    Balance = R_temp.Balance;
-    Analysis = R_temp.Analysis;
-    save(files{i},'Balance', 'Analysis', '-append');
+%     R_temp = get_CC_pop(R_temp);
+%     R_temp = get_EI_current_crosscorr(R_temp);
+%     Balance = R_temp.Balance;
+%     Analysis = R_temp.Analysis;
+%     save(files{i},'Balance', 'Analysis', '-append');
+
+    R_temp = cluster_sorted_rate(R_temp);
+    cluster = R_temp.cluster;
+    save(files{i},'cluster', '-append');
 
     
     % save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
