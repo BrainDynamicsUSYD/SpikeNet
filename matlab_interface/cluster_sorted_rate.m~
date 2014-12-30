@@ -1,4 +1,5 @@
 function R = cluster_sorted_rate( R )
+
     % get cluster rate
     R = get_cluster_rate( R );
     
@@ -55,7 +56,7 @@ function R = cluster_sorted_rate( R )
     % step 2: absolute firing requirement
     % test if the dominating component has a firing
     % rate high enough
-    Hz_thre = 5:1:15; % Hz, threshold
+    Hz_thre = 5:1:10; % Hz, threshold
     lt = length(Hz_thre);
     seq_1st = repmat(seq_1st_dominant, lt, 1); 
     for i = 1:lt
@@ -74,6 +75,7 @@ function R = cluster_sorted_rate( R )
     % statistical analysis on the thresholded 1st symbolic sequence
     switch_seq = cell(1,lt);
     switch_freq = zeros(1,lt);
+    H2 = zeros(1,lt);
     high_du = cell(1,lt);
     low_du = cell(1,lt);
     switch_level = cell(1,lt);
@@ -90,8 +92,9 @@ function R = cluster_sorted_rate( R )
         switch_freq(i) = length(seq_tmp)/(sum([high_du_tmp low_du_tmp])*10^-3); % in Hz
         
         % switching dynamics order parameter
-        H2 = symbolic_block_entropy(seq_tmp, Mnum);
-        order_para(i) = H2*switch_freq(i);
+        H2(i) = symbolic_block_entropy(seq_tmp, Mnum);
+        scope(i) = length( uniqe() )
+        order_para(i) = H2(i)*switch_freq(i);
     end
     
     
@@ -109,6 +112,7 @@ function R = cluster_sorted_rate( R )
     R.cluster.cos_thre = cos_thre;
     R.cluster.Hz_thre = Hz_thre;
     R.cluster.switch_freq = switch_freq;
+    R.cluster.H2 = H2;
     R.cluster.order_para = order_para;
     R.cluster.switch_seq = switch_seq;
     R.cluster.switch_level = switch_level;

@@ -1,4 +1,5 @@
 function R = cluster_sorted_rate( R )
+
     % get cluster rate
     R = get_cluster_rate( R );
     
@@ -46,7 +47,7 @@ function R = cluster_sorted_rate( R )
     % component at all.
     % note that the normalized components are the cos(.) values of the
     % angles between the vector and each axis!
-    cos_thre = 0.7;
+    cos_thre = 0.8;
     sorted_rate_norm = normc(sorted_rate); % normalize each column
     seq_1st_dominant = cluster_sequence(1,:);
     seq_1st_dominant(sorted_rate_norm(1,:) < cos_thre ) = 0;
@@ -64,7 +65,7 @@ function R = cluster_sorted_rate( R )
     
     % step 3: persistence requirement
     % apply persistence requirement on the symbolic sequence
-    high_du_min = 0; % ms
+    high_du_min = 200; % ms
     high_du_min_steps =  round(high_du_min/dt);
     for i = 1:lt
         seq_1st(i, :) = persistence_requirement( seq_1st(i, :), high_du_min_steps );
@@ -74,10 +75,12 @@ function R = cluster_sorted_rate( R )
     % statistical analysis on the thresholded 1st symbolic sequence
     switch_seq = cell(1,lt);
     switch_freq = zeros(1,lt);
+    H2 = zeros(1,lt);
     high_du = cell(1,lt);
     low_du = cell(1,lt);
     switch_level = cell(1,lt);
-    order_para = zeros(1,lt);
+    % order_para = zeros(1,lt);
+    scope = zeros(1,lt); % scope is the number of different clusters the system visits
     for i = 1:lt
         [seq_tmp, high_du_tmp, low_du_tmp] = seq_postprocess( seq_1st(i,:), dt );
         
@@ -90,8 +93,9 @@ function R = cluster_sorted_rate( R )
         switch_freq(i) = length(seq_tmp)/(sum([high_du_tmp low_du_tmp])*10^-3); % in Hz
         
         % switching dynamics order parameter
-        H2 = symbolic_block_entropy(seq_tmp, Mnum);
-        order_para(i) = H2*switch_freq(i);
+        H2(i) = symbolic_block_entropy(seq_tmp, Mnum);
+        scope(i) = length( unique(seq_tmp) );
+        % order_para(i) = H2(i)*switch_freq(i);
     end
     
     
@@ -109,7 +113,9 @@ function R = cluster_sorted_rate( R )
     R.cluster.cos_thre = cos_thre;
     R.cluster.Hz_thre = Hz_thre;
     R.cluster.switch_freq = switch_freq;
-    R.cluster.order_para = order_para;
+    R.cluster.scope = scope;
+    R.cluster.H2 = H2;
+    % R.cluster.order_para = order_para;
     R.cluster.switch_seq = switch_seq;
     R.cluster.switch_level = switch_level;
     R.cluster.high_du = high_du;

@@ -14,9 +14,8 @@ end
 seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
 
 
-
 for i = 1:(length(varargin)/2)
-    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}), ';' ]);
 end
 
 
@@ -31,7 +30,9 @@ dt = dt/1000;
 seg_ind = get_seg(step_tot, seg_size, seg);
 
 
-R = cluster_sorted_rate(R);
+% R = cluster_sorted_rate(R);
+
+
 pop = 1;
 
 

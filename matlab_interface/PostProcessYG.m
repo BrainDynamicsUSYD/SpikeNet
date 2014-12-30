@@ -19,6 +19,7 @@ else
         files{i} = cell2mat(files{i});
     end
 end
+
 % save figures
 save_fig = 1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
 % Start processing
@@ -30,6 +31,7 @@ for id_out = 1:num_files
     R = AnalyseYG(R); % do some simple analysis
 %    RasterYG(R, save_fig); % generate raster plot for spiking history
     R = ClusterYG(R, save_fig);
+    ClusterRasterYG(R, save_fig);
     % HistogramsYG(R,save_fig);
     SaveRYG(R);
     disp('Done');

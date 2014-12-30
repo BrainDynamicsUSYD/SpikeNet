@@ -31,9 +31,13 @@ for id_out = 1:num_files
     disp('done.');
     %%%%%%% do something here
     
-%     R_temp = cluster_sorted_rate(R_temp);
-%     cluster = R_temp.cluster;
-%     save(files{i},'cluster', '-append');
+    R_temp = cluster_sorted_rate(R_temp);
+    cluster = R_temp.cluster;
+    save(files{i},'cluster', '-append');
+    
+    
+    % R_temp = rmfield(R_temp,{'C_rate','C_label','up_down_analysis'});
+    
     
 %     R_temp = get_CC_pop(R_temp);
 %     R_temp = get_EI_current_crosscorr(R_temp);
@@ -41,13 +45,17 @@ for id_out = 1:num_files
 %     Analysis = R_temp.Analysis;
 %     save(files{i},'Balance', 'Analysis', '-append');
 
-    R_temp = cluster_sorted_rate(R_temp);
-    cluster = R_temp.cluster;
-    save(files{i},'cluster', '-append');
-
+%     R_temp = cluster_sorted_rate(R_temp);
+%     cluster = R_temp.cluster;
+%     save(files{i},'cluster', '-append');
+%     ClusterRasterYG({R_temp}, save_fig);
+%     RasterYG({R_temp}, save_fig);
     
-    % save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
-   % RasterYG({R_temp}, save_fig);
+    %save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
+  
+%     R_temp = get_neuron_sample_stats(R_temp);
+%     neuron_sample_stats = R_temp.neuron_sample_stats;
+%     save(files{i},'neuron_sample_stats', '-append');
     
    
    

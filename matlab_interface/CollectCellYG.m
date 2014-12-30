@@ -1,8 +1,8 @@
-function [data_cell, loop_num] = CollectCellYG(var, data)
+function [V, loop_num] = CollectCellYG(var, data)
+% Collect data into a cell
 % example:
 % var = 'cluster'
 % data = 'cluster.high_du{3}'
-
 
 % Prepare files
 dir_strut = dir('*RYG.mat');
@@ -12,7 +12,7 @@ for id_out = 1:num_files
     files{id_out} = dir_strut(id_out).name;
 end
 
-data_cell = cell(1,num_files);
+V = cell(1,num_files);
 loop_num = [];
 fprintf('Collecting data %s from %d files: \n', data, num_files);
 for i = 1:num_files
@@ -23,11 +23,9 @@ for i = 1:num_files
     
     eval(sprintf('data_tmp = %s;', data));
     
-    data_cell{i} = data_tmp;
+    V{i} = data_tmp;
     loop_num = [loop_num, ExplVar.loop_num];
     clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
-    
-    
 end
 
 fprintf('\n');
