@@ -18,7 +18,7 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 	pop_ind = pop_ind_input;
 	N = N_input;
 	dt = dt_input;
-	step_tot = step_tot_input;
+	step_tot = step_tot_input; // this parameter is designed to be self-adapting, so should be any other stuff that relies on it!!
 	
 	// Using consistant units: msec+mV+nF+miuS+nA
 	// Initialise default parameters
@@ -57,9 +57,10 @@ void Neurons::init(){
 	I_ext.assign(N, 0.0);
 	ref_step_left.assign(N, 0);
 	ref_steps = (int)round(tau_ref / dt);
-	num_spikes_pop.assign(step_tot, 0);
+
 	spike_hist_tot.reserve(step_tot*50); // reserve!
-	num_ref_pop.assign(step_tot, 0);
+	num_ref_pop.reserve(step_tot); // reserve and push_back so that it won't be affected by adapting step_tot
+	num_spikes_pop.reserve(step_tot); // reserve and push_back so that it won't be affected by adapting step_tot
 
 	// Random seed (random engine should be feed with DIFFERENT seed at every implementation)
 	random_device rd; // random number from operating system for seed
@@ -154,7 +155,7 @@ void Neurons::update_spikes(int step_current){
 		}
 	}
 	// record number of spikes
-	num_spikes_pop[step_current] = spike_counter; 
+	num_spikes_pop.push_back(spike_counter); 
 
 	// Collect total spike history data
 	if (spike_counter > 0){
@@ -172,7 +173,7 @@ void Neurons::update_spikes(int step_current){
 			num_ref_temp += 1;
 		}
 	}
-	num_ref_pop[step_current] = num_ref_temp;
+	num_ref_pop.push_back(num_ref_temp);
 
 		
 	// runaway check
@@ -228,9 +229,6 @@ void Neurons::update_V(int step_current){
 void Neurons::add_neuron_sampling(vector<int> neuron_sample_ind_input, vector<bool> neuron_sample_type_input){
 	neuron_sample_ind = neuron_sample_ind_input;
 	neuron_sample_type = neuron_sample_type_input;
-	// initialise sampling frequency
-		
-
 	// initialise neuron_sample
 	int sample_size = neuron_sample_ind.size();
 	int data_type_tot = neuron_sample_type.size(); // 7 different data types
@@ -238,7 +236,7 @@ void Neurons::add_neuron_sampling(vector<int> neuron_sample_ind_input, vector<bo
 	for (int c = 0; c < data_type_tot; ++c){
 		if (neuron_sample_type[c]){
 			neuron_sample[c].resize(sample_size);
-			for (int i = 0; i < sample_size; ++i){ neuron_sample[c][i].resize(step_tot); }
+			for (int i = 0; i < sample_size; ++i){ neuron_sample[c][i].reserve(step_tot); } // reserve and push_back so that it won't be affected by adapting step_tot
 		}
 	}
 }
@@ -246,19 +244,20 @@ void Neurons::add_neuron_sampling(vector<int> neuron_sample_ind_input, vector<bo
 void Neurons::add_pop_sampling(vector<bool> pop_sample_ind_input, vector<bool> pop_sample_type_input){
 	pop_sample_ind = pop_sample_ind_input;
 	pop_sample_type = pop_sample_type_input;
+	pop_sample_size = 0; // accumulator
+
 	// initialise pop_sample
-	pop_sample_size = 0;// count non zero elements
+	int max_pop_sample_size = 0;// count non zero elements
 	for (unsigned int i = 0; i < pop_sample_ind.size(); ++i){
 		if (pop_sample_ind[i]){
-			pop_sample_size += 1;
+			max_pop_sample_size += 1;
 		}
 	}
-
 	int data_type_tot = pop_sample_type.size(); // 7 different data types
 	pop_sample.resize(data_type_tot); 
 	for (int c = 0; c < data_type_tot; ++c){
 		if (pop_sample_type[c]){
-			pop_sample[c].reserve(pop_sample_size*N); // reserve and push_back
+			pop_sample[c].reserve(max_pop_sample_size*N); // reserve and push_back so that it won't be affected by adapting step_tot
 		}
 	}
 }
@@ -268,18 +267,19 @@ void Neurons::sample_data(int step_current){
 	if (!neuron_sample_ind.empty()){
 		for (unsigned int i = 0; i < neuron_sample_ind.size(); ++i){
 			int ind_temp = neuron_sample_ind[i];
-			if (neuron_sample_type[0]){neuron_sample[0][i][step_current] = V[ind_temp];}
-			if (neuron_sample_type[1]){neuron_sample[1][i][step_current] = I_leak[ind_temp];}
-			if (neuron_sample_type[2]){neuron_sample[2][i][step_current] = I_AMPA[ind_temp];}
-			if (neuron_sample_type[3]){neuron_sample[3][i][step_current] = I_GABA[ind_temp];}
-			if (neuron_sample_type[4]){neuron_sample[4][i][step_current] = I_NMDA[ind_temp];}
-			if (neuron_sample_type[5]){neuron_sample[5][i][step_current] = I_GJ[ind_temp];}
-			if (neuron_sample_type[6]){neuron_sample[6][i][step_current] = I_ext[ind_temp];}
+			if (neuron_sample_type[0]){neuron_sample[0][i].push_back( V[ind_temp] );}
+			if (neuron_sample_type[1]){neuron_sample[1][i].push_back( I_leak[ind_temp] );}
+			if (neuron_sample_type[2]){neuron_sample[2][i].push_back( I_AMPA[ind_temp] );}
+			if (neuron_sample_type[3]){neuron_sample[3][i].push_back( I_GABA[ind_temp] );}
+			if (neuron_sample_type[4]){neuron_sample[4][i].push_back( I_NMDA[ind_temp] );}
+			if (neuron_sample_type[5]){neuron_sample[5][i].push_back( I_GJ[ind_temp] );}
+			if (neuron_sample_type[6]){neuron_sample[6][i].push_back( I_ext[ind_temp] );}
 		}
 	}
 
 	if (!pop_sample_ind.empty()){
 		if (pop_sample_ind[step_current]){
+			pop_sample_size += 1;
 			if (pop_sample_type[0]){pop_sample[0].push_back(V);}
 			if (pop_sample_type[1]){pop_sample[1].push_back(I_leak);}
 			if (pop_sample_type[2]){pop_sample[2].push_back(I_AMPA);}
@@ -300,30 +300,34 @@ void Neurons::set_gaussian_I_ext(double mean, double std){
 
 
 
-void Neurons::init_runaway_killer(int steps, double mean_num_ref){
+void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
+
 	min_pop_size = 100;
 	if (N > min_pop_size){
 		killer_license = true;
-		runaway_steps = steps;
-		runaway_mean_num_ref = mean_num_ref;
+		min_steps = int(round(min_ms / dt));
+		runaway_Hz = Hz;
+		Hz_steps = int(round(Hz_ms / dt));
+
 	}
 }
 
 
 
 void Neurons::runaway_check(int step_current){
-	if (killer_license == true && runaway_killed == false && step_current > runaway_steps){
+	if (killer_license == true && runaway_killed == false && step_current > min_steps && step_current > Hz_steps){
 		// find mean value of num_ref over the last runaway_steps
 		vector<int>::const_iterator first, last;
 		// first element to be accumulated
-		first = num_ref_pop.begin() + (step_current - runaway_steps + 1); 
+		first = num_spikes_pop.begin() + (step_current - Hz_steps + 1); 
 		// one element pass the last element to be accumulated
-		last = num_ref_pop.begin() + (step_current + 1); 
-		double mean_num_ref = accumulate(first, last, 0.0) / double(runaway_steps);
+		last = num_spikes_pop.begin() + (step_current + 1); 
+		double mean_Hz = accumulate(first, last, 0.0) / (double(Hz_steps) * dt * 0.001 * N); // 0.001 for converting from ms to sec.
 		//be careful!! accumulate range is : [first,last)
-		if (mean_num_ref >= runaway_mean_num_ref*N){
+		if (mean_Hz >= runaway_Hz){
 			runaway_killed = true;
 			step_killed = step_current;
+			step_tot =  step_current; // adapt step_tot!!!
 			cout << "warning: runaway killed at " << step_current*dt << " (ms)..."<< flush;
 		}
 	}
@@ -379,7 +383,8 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 		output_file << indicator << " POPD004" << endl;
 		output_file << pop_ind << delim << neuron_sample_ind.size() << delim << endl;
 
-		// data_type: [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
+			
+		/*/ data_type: [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 		if (neuron_sample_type[0] == true){output_file << "V" << delim;}
 		if (neuron_sample_type[1] == true){output_file << "I_leak" << delim;}
 		if (neuron_sample_type[2] == true){output_file << "I_AMPA" << delim;}
@@ -388,7 +393,16 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 		if (neuron_sample_type[5] == true){output_file << "I_GJ" << delim;}
 		if (neuron_sample_type[6] == true){output_file << "I_ext" << delim;}
 		output_file << endl;
-		// any clever way to do the above? (use map?)
+		// any clever way to do the above? (use map?) */
+
+
+  		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext" };
+		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
+			if (neuron_sample_type[tt] == true){output_file << data_types[tt] << delim;}
+		}
+		output_file << endl;
+
+
 		for (unsigned int c = 0; c < neuron_sample_type.size(); ++c){
 			if (!neuron_sample[c].empty()){
 				write2file(output_file, delim, neuron_sample[c]); // 2D matrix

@@ -53,8 +53,7 @@ public:
 
 	void sample_data(int step_current);
 
-
-	void init_runaway_killer(int runaway_steps, double runaway_num_ref); // kill the simulation when runaway activity of the network is detected: 
+	void init_runaway_killer(double min_ms, double Hz, double Hz_ms); // kill the simulation when runaway activity of the network is detected: 
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 	void runaway_check(int step_current);
 
@@ -122,7 +121,7 @@ protected:
 	vector<bool>
 		pop_sample_ind; // population membrane potential sampling, logical vector as long as time vector
 	int
-		pop_sample_size; // number of non-zero entries in pop_sample_ind
+		pop_sample_size; // the actual number of steps sampled
 	vector<bool>
 		pop_sample_type; // boolean vector indicating which data to be sampled
 				    // must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
@@ -142,8 +141,9 @@ protected:
 	bool killer_license; // you need a license to kill
 	bool runaway_killed; // true for killed
 	int step_killed; // if killing, record when
-	int runaway_steps;
-	double runaway_mean_num_ref; // actually it's the mean percentage instead of absolute quantity
+	int Hz_steps; // the number of steps used to calculate population firing rate (Hz)
+	double runaway_Hz; // if the population firing rate is higher than this, kill the simulation
+	int min_steps; // minimum number of steps the simulation should run before killed
 	int min_pop_size; // No women, no kids;
 	
 	

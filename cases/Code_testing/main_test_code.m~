@@ -21,8 +21,8 @@ k = 1*2.4e-3; % miuSiemens
 
 % Basic parameters
 dt = 0.1;
-step_tot = 500;
-N = [120; 6]; % use N(1) larger than 100 to test runaway killer
+step_tot = 5000;
+N = [200; 6]; % use N(1) larger than 100 to test runaway killer
 writeBasicPara(FID, dt, step_tot, N)
 Num_pop = length(N);
 discard_transient = 10; % ms

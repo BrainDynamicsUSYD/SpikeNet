@@ -31,6 +31,8 @@ for id_out = 1:num_files
     disp('done.');
     %%%%%%% do something here
     
+    R_temp = rmfield(R_temp,'cluster');
+    
     R_temp = cluster_sorted_rate(R_temp);
     cluster = R_temp.cluster;
     save(files{i},'cluster', '-append');

@@ -12,7 +12,7 @@ seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
 
 text_fontsize = 12;
 for i = 1:(length(varargin)/2)
-    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}) ]);
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}), ';' ]);
 end
 
 

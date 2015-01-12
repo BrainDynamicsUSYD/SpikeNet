@@ -36,7 +36,7 @@ void NeuronNetwork::update(int step_current){
 			// ElectricalSynapsesArray[i_pre][i_pre].update_action_potential(NeuronPopArray[i_pre], step_current);
 
 			// check runaway activity
-			runaway_killed |= NeuronPopArray[pop_ind].runaway_killed;
+			runaway_killed |= NeuronPopArray[pop_ind].runaway_killed; // Bitwise OR assignment, a |= b meaning  a = a | b
 			if (runaway_killed == true){
 				step_killed = step_current;
 			}
@@ -63,20 +63,21 @@ void NeuronNetwork::update(int step_current){
 			// Update membrane potential
 			NeuronPopArray[pop_ind].update_V(step_current); 
 		}
-	
+
+		/*------------------------------------------------------------------------------------------------------*/
+		// Countdown
+		if (step_current == 0){
+			cout << "Commencing countdown, engines on..." << flush;	
+			// if not "flush", output will be delayed in buffer
+		}
+		int steps_left = step_tot-step_current-1;
+		if ((steps_left % (step_tot/10)) == 0){
+			cout << steps_left/(step_tot/10) << "..." << flush;
+		}
+		if (steps_left == 0){cout << endl;}
+
 	} // if not runaway_killed
 
-
-	// Countdown
-	if (step_current == 0){
-		cout << "Commencing countdown, engines on..." << flush;	
-		// if not "flush", output will be delayed in buffer
-	}
-	int steps_left = step_tot-step_current-1;
-	if ((steps_left % (step_tot/10)) == 0){
-		cout << steps_left/(step_tot/10) << "..." << flush;
-	}
-	if (steps_left == 0){cout << endl;}
 }
 
 

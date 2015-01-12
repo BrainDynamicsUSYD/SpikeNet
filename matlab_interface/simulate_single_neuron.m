@@ -135,14 +135,18 @@ for seg = seg_input
     ax1 = subplot(4,1,1);
     plot(x, I_E_mean, 'r', x, I_I_mean, 'b')
     xlim([min(seg_ind) max(seg_ind)]);
+    ylabel('E/I current mean')
     
     ax2 = subplot(4,1,2);
     plot(x, I_E_std, 'r', x, I_I_std, 'b')
+    ylabel('E/I current std')
+    
     
     ax3 = subplot(4,1,3);
     line([spikes; spikes], [zeros(size(spikes)); ones(size(spikes))]);
     xlim([min(seg_ind) max(seg_ind)]);
     num_spikes = nnz(spikes>=min(seg_ind) & spikes<=max(seg_ind))
+    ylabel('spikes')
     
     ax4 = subplot(4,1,4);
     hold on;
@@ -154,6 +158,7 @@ for seg = seg_input
     ymax = max(V_seg);
     yrange = ymax - ymin;
     ylim([ymin-0.2*yrange,  ymax+0.2*yrange]);
+    ylabel('membrane potential')
     
     linkaxes([ax1, ax2, ax3, ax4],'x');
     

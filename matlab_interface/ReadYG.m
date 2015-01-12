@@ -79,8 +79,8 @@ for id_out = 1:length(files)
             
             if strfind(tline,'KILL002');
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d','Delimiter',',');
-                OutData{id_out}.step_killed = scan_temp{1};
+                scan_temp = textscan(tline,'%f','Delimiter',','); % using %d will give step_killed a type int32, which will bring trouble!
+                OutData{id_out}.step_killed = scan_temp{1} + 1; % Be careful here! C/C++ index convection!
                 
                 
                 
@@ -88,7 +88,7 @@ for id_out = 1:length(files)
                 
             elseif strfind(tline,'POPD001')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d','Delimiter',',');
+                scan_temp = textscan(tline,'%f','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 tline = fgetl(FID);
                 scan_temp = textscan(tline, '%f', 'Delimiter', ',');
@@ -107,7 +107,7 @@ for id_out = 1:length(files)
                        
             elseif strfind(tline,'POPD004')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d %d','Delimiter',',');
+                scan_temp = textscan(tline,'%f %f','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 sample_size = scan_temp{2};
                 tline = fgetl(FID);
@@ -126,7 +126,7 @@ for id_out = 1:length(files)
                 end
             elseif strfind(tline,'SAMP001')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d','Delimiter',',');
+                scan_temp = textscan(tline,'%f','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 fgetl(FID); % skip line
                 tline = fgetl(FID);
@@ -142,7 +142,7 @@ for id_out = 1:length(files)
                 
             elseif strfind(tline,'POPD003')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d %d','Delimiter',',');
+                scan_temp = textscan(tline,'%f %f','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 sample_size = scan_temp{2};
                 tline = fgetl(FID);
@@ -161,7 +161,7 @@ for id_out = 1:length(files)
                 end
             elseif strfind(tline,'SAMP002')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d','Delimiter',',');
+                scan_temp = textscan(tline,'%f','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 fgetl(FID); % skip line
                 tline = fgetl(FID);
@@ -178,7 +178,7 @@ for id_out = 1:length(files)
                 
             elseif strfind(tline,'POPD002')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline,'%d %d','Delimiter',',');
+                scan_temp = textscan(tline,'%f %f','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 num_para = scan_temp{2};
                 for p = 1:num_para
@@ -190,7 +190,7 @@ for id_out = 1:length(files)
                 end
             elseif strfind(tline,'SYND001')
                 tline = fgetl(FID);
-                scan_temp = textscan(tline, '%d %s', 'Delimiter', ',');
+                scan_temp = textscan(tline, '%f %s', 'Delimiter', ',');
                 num_para = scan_temp{1}; % number of parameters
                 num_syn = length(OutData{id_out}.SynPara)+1;
                 for p = 1:num_para
@@ -257,6 +257,8 @@ for id_out = 1:length(files)
     
     end
     fclose(FID);
+
+        
 end
 
 
@@ -266,6 +268,12 @@ end
 fprintf('\t Re-formatting data...\n');
 Result_num = length(OutData);
 for r_num = 1:Result_num
+    
+        
+    % adaptation of step_killed
+    if OutData{r_num}.step_killed > 0
+        OutData{r_num}.step_tot = OutData{r_num}.step_killed;
+    end
     
 %     % Re-format VI_sample into coloum matrix
 %     OutData{r_num} = ReformatVI_sample(OutData{r_num});

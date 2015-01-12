@@ -22,6 +22,9 @@ for i = 1:num_files
     fprintf('done.\n');
     
         eval(sprintf('data_tmp = %s;', data));
+        if isempty(data_tmp)
+            warning('empty data')
+        end
         data_tmp = data_tmp(:)'; % row vector
         V = [V, data_tmp ];
         loop_num = [loop_num, ones(1,length(data_tmp))*ExplVar.loop_num];

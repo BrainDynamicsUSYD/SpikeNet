@@ -64,6 +64,9 @@ function Data = DiscardTransientData(Data)
         
         % update step_tot
         Data.step_tot = step_tot_dis;
+        if Data.step_killed > 0
+            Data.step_killed = Data.step_killed - step_transient;
+        end
         
     end
 end

@@ -32,6 +32,6 @@ line([T; T], [zeros(1, length(T)); num_spikes/N(pop_ind)*100], 'Color', Color);
 
 ylabel('% Firing');
 set(gca, 'TickDir','out');
-xlabel('t (ms)');
+xlabel('t (sec)');
 
 end

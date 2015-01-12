@@ -157,7 +157,7 @@ bool SimulatorInterface::import(string in_filename_input){
 			found = line_str.find("KILL001");
 			if (found != string::npos){
 				cout << "\t Reading runaway killer setting..." << endl;
-				// double steps, mean_num_ref;
+				// double min_ms, double Hz, double Hz_ms
 				read_next_line_as_vector(runaway_killer_setting);
 				continue;
 			}
@@ -274,10 +274,6 @@ bool SimulatorInterface::import(string in_filename_input){
 
 
 
-
-
-
-
 	// build NeuronNetwork based on data imported
 	network = NeuronNetwork(N_array, dt, step_tot);
 	cout << "\t Network created." << endl;
@@ -372,7 +368,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	// initialise runaway-killer
 	if (runaway_killer_setting.size() != 0){
 		for (int ind = 0; ind < network.Num_pop; ++ind){
-			network.NeuronPopArray[ind].init_runaway_killer(int(runaway_killer_setting[0]), runaway_killer_setting[1]);
+			network.NeuronPopArray[ind].init_runaway_killer(runaway_killer_setting[0], runaway_killer_setting[1], runaway_killer_setting[2]);
 		}
 		cout << "\t Runaway killer licensed." << endl;
 		cout << "\t \t No women, no kids." << endl;
