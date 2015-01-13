@@ -1,0 +1,87 @@
+#!/bin/bash
+#PBS -N all_in_one
+##PBS -q yossarian
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=240:59:00
+#PBS -l mem=1500MB
+#PBS -V
+#PBS -e PBSout/one_err
+#PBS -o PBSout/one_out
+##PBS -t 1-3
+
+set -x
+cd "$PBS_O_WORKDIR"
+DATA_DIR="example_noisy_400sec"
+MATLAB_MAIN_FUNC="main_example_noisy"
+
+
+# copy this script to data directory
+me=`basename $0`;
+THIS_FILE=$(echo ${me});
+cp ${THIS_FILE} ${DATA_DIR}/${THIS_FILE}.log;
+
+
+
+echo "%%%%%%%%%%%%%%%%%%%%%%%>>>>>>>>>>>>>>>>>>%%%%%%%%%%%%%%%%%%%%%%%%%%"
+A=`date '+%s'`
+echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+echo "All_in_one: Current PBS_ARRAYID is ${PBS_ARRAYID}"
+printf "\n"
+
+ID=`printf "%03d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
+
+
+cd ${DATA_DIR};
+matdone=`ls *mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
+ygoutdone=`ls *ygout | sed -n '/^'${ID}'-.*ygout$/p'| wc -l`;
+cd ${PBS_O_WORKDIR};
+
+
+if [ "${matdone}" == "1" ]; then
+	echo ${ID} has been processed till mat;
+
+elif [ "${ygoutdone}" == "1" ]; then
+	echo ${ID} has been processed till ygout;
+	INPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout); # Simulate and output .ygout file
+	echo "BASH INPUTFILE=${INPUTFILE}" # Note that echo actually does some processing!
+	matlab  -r "addpath(genpath(cd)), PostProcessYG('${INPUTFILE}'), exit"
+else
+	echo  ${ID} has not been processed yet;
+	rm ${ID}-*.ygin ${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
+	matlab  -r "addpath(genpath(cd)), cd('${DATA_DIR}'), ${MATLAB_MAIN_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
+	simulator ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
+	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
+	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
+	# double quote here allows the real value of ${var} to be shown, otherwise echo will process it
+	# data post-process in matlab
+	# double quote "" prevents shell from expanding meta-characters like "*" and "?"
+	# single quote '' prevents almost anything from happening to the text
+	# back quote `` means command substitution
+	matlab  -r "addpath(genpath(cd)), PostProcessYG('${OUTPUTFILE}'), exit"
+	# the single quote here is for matlab to recognize string
+	# the double quote here is for shell to expand macros.
+fi 
+
+
+# zip files if mat done # It's NOT safe to use zip in PBS array job!!!!1
+# cd ${DATA_DIR};
+# matdone=`ls *mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
+# if [ "${matdone}" == "1" ]; then
+#	echo zipping ygfiles with loop number ${ID}...;
+#	zip -T -q -m ${PBS_O_WORKDIR}/${DATA_DIR}/ygfiles ${ID}-*.ygin ${ID}-*.ygin_syn ${ID}-*.ygout;
+#	echo zipping done.
+#fi
+# cd ${PBS_O_WORKDIR};
+
+
+printf "\n"
+echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+B=`date '+%s'`
+C=`expr $B - $A`
+printf 'Total elapsed time is %s sec.\n' $C
+date
+echo "%%%%%%%%%%%%%%%%%%%%%%%<<<<<<<<<<<<<<<<<<%%%%%%%%%%%%%%%%%%%%%%%%%%"
+printf "\n\n\n"
+set +x
+
+ 
