@@ -22,7 +22,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "Importing " << in_filename << "..." << endl;
 	}
 	else {
-		cout << "Error: cannot open file" << in_filename << endl;
+		cout << "Error: cannot open file " << in_filename << endl;
 		return 0;
 	}
 	
@@ -45,7 +45,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector< vector<bool> > pop_sampling_t_ind; // the length of time vector
 	vector< vector<bool> > pop_sampling_type; //
 	string syn_filename; // name of file that defines synaptic connection
-	vector<double> runaway_killer_setting; // [runaway_steps, runaway_mean_num_ref]
+	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
 
 	// read data
 	string line_str, entry_str; // temporary container for the entire while loop
@@ -158,7 +158,8 @@ bool SimulatorInterface::import(string in_filename_input){
 			if (found != string::npos){
 				cout << "\t Reading runaway killer setting..." << endl;
 				// double min_ms, double Hz, double Hz_ms
-				read_next_line_as_vector(runaway_killer_setting);
+				runaway_killer_setting.resize(runaway_killer_setting.size()+1);
+				read_next_line_as_vector(runaway_killer_setting.back());
 				continue;
 			}
 
@@ -203,7 +204,8 @@ bool SimulatorInterface::import(string in_filename_input){
 			found = line_str.find("SYNF001");
 			if (found != string::npos){
 				cout << "\t Reading non-default synapse definition file name..." << endl;
-				getline(inputfile, syn_filename); // Read next line 
+				getline(inputfile, syn_filename); // Read next line
+				cout << "\t\t non-default synapse definition: " << syn_filename << endl;
 				continue;
 			}
 
@@ -222,11 +224,10 @@ bool SimulatorInterface::import(string in_filename_input){
 		syn_filename = in_filename;
 		syn_filename.append("_syn"); // .ygin_syn
 	}
-
 	inputfile.open(syn_filename, ifstream::in); // close, clear and then open: reusing is a bad practice?
 	if (inputfile){}
 	else {
-		cout << "Error: cannot open file" << in_filename << endl;
+		cout << "Error: cannot open syn file " << syn_filename << endl;
 		return 0;
 	}
 	
@@ -360,17 +361,20 @@ bool SimulatorInterface::import(string in_filename_input){
 		for (unsigned int ind = 0; ind < pop_sampling_pop_ind.size(); ++ind){
 			int pop_ind = pop_sampling_pop_ind[ind];
 			network.NeuronPopArray[pop_ind].add_pop_sampling(pop_sampling_t_ind[ind], pop_sampling_type[ind]);
-			cout << ind+1 << "...";
+			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}
 
 	// initialise runaway-killer
 	if (runaway_killer_setting.size() != 0){
-		for (int ind = 0; ind < network.Num_pop; ++ind){
-			network.NeuronPopArray[ind].init_runaway_killer(runaway_killer_setting[0], runaway_killer_setting[1], runaway_killer_setting[2]);
+		cout << "\t Runaway killer licensing for pop...";
+		for (unsigned int ind = 0; ind < runaway_killer_setting.size(); ++ind){
+			int pop_ind = int(runaway_killer_setting[ind][0]);
+			network.NeuronPopArray[pop_ind].init_runaway_killer(runaway_killer_setting[ind][1], runaway_killer_setting[ind][2], runaway_killer_setting[ind][3]);
+			cout << pop_ind+1 << "...";
 		}
-		cout << "\t Runaway killer licensed." << endl;
+		cout << "done." << endl;
 		cout << "\t \t No women, no kids." << endl;
 	}
 

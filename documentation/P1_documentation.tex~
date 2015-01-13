@@ -134,10 +134,10 @@ Input data format is as following.
 	D (row vector),
 
 > SYNF001 # non-default synapse definition file name
-	path/file_name,
+	path/to/file_name (no comma!)
 
 > KILL001 # runaway killer setting
-	min_ms, runaway_Hz, Hz_ms,
+	pop_ind, min_ms, runaway_Hz, Hz_ms,
 
 > PARA001 # non-default neuron population parameter
 	pop_ind, number_of_parameters,

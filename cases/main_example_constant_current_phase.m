@@ -69,11 +69,13 @@ for phi_I = 0.5:0.1:1.5
             % write synapse para
             writeSynPara(FID, 'tau_decay_GABA', 3);
             
-%             %%%%%%% write runaway killer
-%             runaway_steps = round(50/dt); % 50 ms
-%             runaway_mean_num_ref = 0.2;
-%             writeRunawayKiller(FID, runaway_steps, runaway_mean_num_ref);
-%             %%%%%%%%%%%%%%%%%%%%%%%
+            
+            %%%%%%% write runaway killer
+            min_ms = 5*1000; % 5 sec
+            runaway_Hz = 15; % ??
+            Hz_ms = 1000; % ms
+            writeRunawayKiller(FID, min_ms, runaway_Hz, Hz_ms);
+            %%%%%%%%%%%%%%%%%%%%%%%
             
             
             

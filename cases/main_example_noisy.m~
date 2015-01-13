@@ -48,9 +48,19 @@ for rate_ext = 4.4*ones(1,100) %l
         end
     end
     
-    % Creat ygin file
     % seed the matlab rand function! The seed is global.
-    [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
+    % Be very careful about that!!!!!!!!!!!
+    rand_seed = loop_num*10^5+eval(datestr(now,'SSFFF'));
+    rng(rand_seed,'twister');
+    
+    % Creat ygin file
+    % using loop_num in filename to ensure unique naming!
+    % Otherwise overwriting may occur when using PBS.
+    name = [ sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF')];
+    
+    fprintf('Data file name is: /n%s/n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
+    FID = fopen([name,'.ygin'], 'w'); % creat file
+    FID_syn = fopen([name,'.ygin_syn'], 'w'); % creat file
     
     % write basic parameters
     writeBasicPara(FID, dt, step_tot, N)
@@ -59,6 +69,7 @@ for rate_ext = 4.4*ones(1,100) %l
     writePopPara(FID, 2,  'tau_ref', 2);
     % write synapse para
     writeSynPara(FID, 'tau_decay_GABA', 3);
+    
     
     
     Kmat = [2.4*EE_factor  1.4;

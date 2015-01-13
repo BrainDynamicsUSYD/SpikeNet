@@ -30,6 +30,7 @@ spike_hist = R.reduced.spike_hist{pop_ind}(neuron_ind,seg_ind);
 
 % Gaussian filter
 kernel = spike_train_kernel_YG(sigma_gaussian, dt, 'gaussian');
+kernel = spike_train_kernel_YG(1000, dt, 'square');
 
 % mean rate
 cluster_rate = SpikeTrainConvolve(sum(spike_hist, 1)/length(neuron_ind), kernel);

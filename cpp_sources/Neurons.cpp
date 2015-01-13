@@ -18,7 +18,7 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 	pop_ind = pop_ind_input;
 	N = N_input;
 	dt = dt_input;
-	step_tot = step_tot_input; // this parameter is designed to be self-adapting, so should be any other stuff that relies on it!!
+	step_tot = step_tot_input; // this parameter is designed to be self-adapting (step_killed), so should be any other stuff that relies on it!!
 	
 	// Using consistant units: msec+mV+nF+miuS+nA
 	// Initialise default parameters
@@ -308,7 +308,6 @@ void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
 		min_steps = int(round(min_ms / dt));
 		runaway_Hz = Hz;
 		Hz_steps = int(round(Hz_ms / dt));
-
 	}
 }
 
@@ -322,13 +321,13 @@ void Neurons::runaway_check(int step_current){
 		first = num_spikes_pop.begin() + (step_current - Hz_steps + 1); 
 		// one element pass the last element to be accumulated
 		last = num_spikes_pop.begin() + (step_current + 1); 
-		double mean_Hz = accumulate(first, last, 0.0) / (double(Hz_steps) * dt * 0.001 * N); // 0.001 for converting from ms to sec.
+		double mean_Hz = accumulate(first, last, 0.0) / (Hz_steps * dt * 0.001 * N); // 0.001 for converting from ms to sec.
 		//be careful!! accumulate range is : [first,last)
 		if (mean_Hz >= runaway_Hz){
 			runaway_killed = true;
 			step_killed = step_current;
-			step_tot =  step_current; // adapt step_tot!!!
-			cout << "warning: runaway killed at " << step_current*dt << " (ms)..."<< flush;
+			cout << "warning: runaway killed at " << step_current*dt << " (ms) in population" << pop_ind << flush;
+			cout << "\t with firing rate at " << mean_Hz << " Hz."<< flush;
 		}
 	}
 }

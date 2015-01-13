@@ -120,6 +120,8 @@ protected:
 
 	vector<bool>
 		pop_sample_ind; // population membrane potential sampling, logical vector as long as time vector
+	int
+		pop_sample_size; // the actual number of steps sampled
 	vector<bool>
 		pop_sample_type; // boolean vector indicating which data to be sampled
 				    // must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
