@@ -1,5 +1,6 @@
 function R = get_neuron_sample_stats( R )
-
+% autocorrelation is calculated instead of power spectral density
+% note that Fourier transform of the autocorrelation function of a signal is the power spectrum of the signal
 
 dt = R.dt;
 

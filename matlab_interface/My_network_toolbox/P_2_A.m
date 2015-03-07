@@ -21,8 +21,9 @@ A = logical(sparse(I,J,ones(size(I)),sum(Msize),sum(Msize)));
 if nargin < 3
     non_self = 1;
 end
+
 if non_self == 1
-    A(logical(eye(size(A)))) = 0; 
+    A(logical(eye(size(A)))) = false; 
 end
 
 end

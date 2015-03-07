@@ -82,8 +82,8 @@ for rate_ext = 4.4*ones(1,100) %l
     
     
     %%%%%%% data sampling
-    writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1],[100:500:4000]);
-    writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1],[100;600]);
+    writeNeuronSampling(FID, 1, [1,1,1,1,0,0,1], round(linspace(1, N(1)/Mnum, 10)) ); % sample 10 neurons from one cluster
+    % writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1],[100;600]);
     
     
     %%%%%%% random initial condition settings (int pop_ind, double p_fire)

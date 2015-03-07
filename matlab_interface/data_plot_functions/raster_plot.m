@@ -1,4 +1,5 @@
 function raster_plot(R, pop_ind, seg, sample_color, varargin)
+% sample color should be the size of sample neurons or empty
 
 % Input check and default values
 if nargin < 3
@@ -8,7 +9,9 @@ end
 sample_size = 500; % sample neurons for raster plot
 seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
 
-
+sample_color_unit_range = 0;
+% if 1, the default color range [0, 1] will be used 
+% if 0, sample_color vector will be scaled to [0, 1] automatically
 
 text_fontsize = 12;
 for i = 1:(length(varargin)/2)
@@ -50,8 +53,10 @@ if nnz(num_spikes) > 0
         line(xdata, ydata,'Color','k');
     else
         hold on;
-        sample_color = (sample_color-min(sample_color))/(diff(minmax(sample_color)));
-        sample_color(sample_color == 0) = eps;
+        if sample_color_unit_range == 0 % automatically scale to [0,1]
+            sample_color = (sample_color-min(sample_color))/(diff(minmax(sample_color)));
+        end
+        sample_color(sample_color == 0) = eps; % otherwise ceil() will give 0
         jetmap = colormap('jet(1000)');
         
         for i = 1:length(ind_sample)
@@ -59,7 +64,7 @@ if nnz(num_spikes) > 0
             [Y,X,~] = find(spike_hist(ind_sample(i),:));
             xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt; % sec
             ydata = [Y(:)'-1;Y(:)']+i-1;
-            line(xdata, ydata, 'Color', color_tmp);
+            line(xdata, ydata, 'Color', color_tmp,'linewidth',0.1);
         end
         colormap('jet');
     end

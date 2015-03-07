@@ -1,4 +1,4 @@
-function main_example_constant_current_phase_selected(varargin)
+function main_cc_phase_all_visiting(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -35,7 +35,7 @@ loop_num = 0;
 
 for syn_i = 1:8
     syn_filename = sprintf('cc_phase_all_visiting/all_visiting-00%d.ygin_syn', syn_i);
-    
+
     for phi_I = 0.5:0.1:1.5
         for phi_E = 0.5:0.1:1.5
             
@@ -52,8 +52,24 @@ for syn_i = 1:8
                     end
                 end
                 
+                
                 % seed the matlab rand function! The seed is global.
                 [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
+                
+                
+                
+                syn_cell = read_ygin_syn(syn_filename);
+                for s = 1:length(syn_cell)
+                    if syn_cell{s}.type ==  1 % excitatory
+                        syn_cell{s}.K = syn_cell{s}.K*phi_E;
+                    elseif syn_cell{s}.type ==  2 % inhibitory
+                        syn_cell{s}.K = syn_cell{s}.K*phi_I;
+                    end
+                    writeChemicalConnection(FID_syn,  syn_cell{s}.type, syn_cell{s}.pop_pre,  syn_cell{s}.pop_post,...
+                        syn_cell{s}.I, syn_cell{s}.J, syn_cell{s}.K, syn_cell{s}.D); % (FID, type, i_pre, j_post, I, J, K, D)
+                end
+                    
+
                 
                 % write basic parameters
                 writeBasicPara(FID, dt, step_tot, N)
@@ -72,20 +88,7 @@ for syn_i = 1:8
                 % writeRunawayKiller(FID, 2, min_ms, runaway_Hz*2, Hz_ms);
                 %%%%%%%%%%%%%%%%%%%%%%%
                 
-                
-                
-                Kmat = [2.4*EE_factor  1.4;
-                    4.5  5.7*II_factor]*kk*10^-3; % miuSiemens
-                
-                Kmat(1,:) = Kmat(1,:)*phi_E;
-                Kmat(2,:) = Kmat(2,:)*phi_I;
-                
-                Pmat = [0.2 0.5;
-                    0.5 0.5];
-                
-                TYPEmat = [1 2];
-                
-                
+
                 
                 % External current
                 writeExtCurrentSettings(FID, 1, I_ext_strength, 0)
@@ -101,6 +104,18 @@ for syn_i = 1:8
                 %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                 p_fire = 0.00*ones(size(N)); % between [0,1], 0.05
                 writeInitV(FID, p_fire);
+                
+                 
+%                 Kmat = [2.4*EE_factor  1.4;
+%                     4.5  5.7*II_factor]*kk*10^-3; % miuSiemens
+%                 
+%                 Kmat(1,:) = Kmat(1,:)*phi_E;
+%                 Kmat(2,:) = Kmat(2,:)*phi_I;
+%                 
+%                 Pmat = [0.2 0.5;
+%                     0.5 0.5];
+%                 
+%                 TYPEmat = [1 2];
                 
                 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
                 % type(1:AMAP, 2:GABAa, 3:NMDA)
@@ -154,7 +169,7 @@ for syn_i = 1:8
                 %             end
                 
                 
-                writeSynFilename(FID, syn_filename);
+               
                 
                 
                 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing

@@ -11,6 +11,7 @@
 
 
 #include "Neurons.h"
+#include <functional> // for bind() 
 // no need to include what have been included in the header file
 
 Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_input){
