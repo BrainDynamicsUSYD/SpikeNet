@@ -31,13 +31,18 @@ for id_out = 1:num_files
     disp('done.');
     %%%%%%% do something here
     
-    R_temp = rmfield(R_temp,'cluster');
+%     R_temp = rmfield(R_temp,'cluster');
+%     R_temp = cluster_sorted_rate(R_temp);
+%     cluster = R_temp.cluster;
+%     save(files{i},'cluster', '-append');
     
-    R_temp = cluster_sorted_rate(R_temp);
-    cluster = R_temp.cluster;
-    save(files{i},'cluster', '-append');
-    
-    
+
+    R_temp = get_CC_network(R_temp);
+    R_temp = get_CC_pop(R_temp);
+    Analysis = R_temp.Analysis;
+    save(files{i},'Analysis', '-append');
+
+
     % R_temp = rmfield(R_temp,{'C_rate','C_label','up_down_analysis'});
     
     

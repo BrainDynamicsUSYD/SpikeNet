@@ -1,6 +1,6 @@
 function [R] = get_CC_network(R)
 fprintf('\t Getting correlation coefficient distribution (network-wide sampling)...\n');
-corrcoef_sample_num = 10^4; % number of sampling pairs
+corrcoef_sample_num = 10^3; %10^4; % number of sampling pairs
 CC_kernel_width = 40; % ms, kernel length
 
 % Dumpe fields
