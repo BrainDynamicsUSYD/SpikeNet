@@ -19,13 +19,15 @@ for i = 1:num_files
     fprintf('\t Loading data %s from file %s...', data, files{i});
     load(files{i}, var, 'ExplVar');
     
-    fprintf('done.\n');
+    
     
     eval(sprintf('data_tmp = %s;', data));
     
     V{i} = data_tmp;
     loop_num = [loop_num, ExplVar.loop_num];
     clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
+    
+    fprintf('done.\n');
 end
 
 fprintf('\n');
