@@ -1,8 +1,8 @@
-function [R] = get_CC_pop(R)
+function [R] = get_CC_pop(R, pops)
 
 fprintf('\t Getting correlation coefficient distribution for each population...\n');
 
-corrcoef_sample_num = 10^3; %10^4; % number of sampling pairs
+corrcoef_sample_num = 10^4; % number of sampling pairs
 CC_kernel_width = 40; % ms, kernel length
 
 % Dumpe fields
@@ -18,7 +18,13 @@ CC_kernel = spike_train_kernel_YG(CC_kernel_width, dt, kernel_type);
 
 % corrcoef within each population
 CC_pop = cell(Num_pop,1);
-for pop_ind = 1:Num_pop
+
+
+if nargin == 1
+    pops = 1:Num_pop;
+end
+
+for pop_ind = pops
     if nnz(num_spikes{pop_ind}) > 0
 
         pairs = rand_unique_pairs( N(pop_ind), corrcoef_sample_num );
@@ -27,6 +33,7 @@ for pop_ind = 1:Num_pop
         for i = 1:corrcoef_sample_num
             CC_pop{pop_ind}(1,i) = CorrCoefYG(spike_hist{pop_ind}(pairs(1,i),:), spike_hist{pop_ind}(pairs(2,i),:), CC_kernel);
             % display progress
+            
             if i > 1
                 fprintf(repmat('\b',1,10));
             end

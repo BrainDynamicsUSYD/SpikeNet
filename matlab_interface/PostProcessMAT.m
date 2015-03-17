@@ -37,8 +37,9 @@ for id_out = 1:num_files
 %     save(files{i},'cluster', '-append');
     
 
-    R_temp = get_CC_network(R_temp);
-    R_temp = get_CC_pop(R_temp);
+    % R_temp = get_CC_network(R_temp);
+    R_temp = get_CC_pop(R_temp, 1);
+    R_temp = get_CV2_ISI(R_temp);
     Analysis = R_temp.Analysis;
     save(files{i},'Analysis', '-append');
 

@@ -31,7 +31,7 @@ for r_num = 1:Result_num
     
     
 %     % Irregularity measures for the network based on CV_ISI
-%     Result_cell{r_num} = get_CV_ISI(Result_cell{r_num});
+%     Result_cell{r_num} = get_CV2_ISI(Result_cell{r_num});
 %     
     % Correlation coefficient (zero time-lag)
     if get_corrcoef == 1
