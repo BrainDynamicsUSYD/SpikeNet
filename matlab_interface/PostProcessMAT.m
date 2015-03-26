@@ -8,8 +8,8 @@ if nargin == 0
     dir_strut = dir('*.mat');
     num_files = length(dir_strut);
     files = cell(1,num_files);
-    for id_out = 1:num_files
-        files{id_out} = dir_strut(id_out).name;
+    for i = 1:num_files
+        files{i} = dir_strut(i).name;
     end
 else
     % stdin, i.e., file pathes and names separated by space
@@ -23,7 +23,7 @@ end
 % save figures
 save_fig = 1; % -1 for no figure, 0 for displaying figure, 1 for saving figure
 % Start processing
-for id_out = 1:num_files
+for i = 1:num_files
     
     % start form .mat files
     fprintf('Loading RYG.mat file %s...', files{i});
@@ -40,10 +40,15 @@ for id_out = 1:num_files
     % R_temp = get_CC_network(R_temp);
     % R_temp = get_CC_pop(R_temp, 1);
     % R_temp = get_CV2_ISI(R_temp);
-    R_temp = get_ISI_low_high(R_temp);
-    Analysis = R_temp.Analysis;
-    save(files{i},'Analysis', '-append');
+%     R_temp = get_ISI_low_high(R_temp);
+%     Analysis = R_temp.Analysis;
+%     save(files{i},'Analysis', '-append');
 
+        
+    R_temp = avalanche_detect(R_temp);
+    avalanche = R_temp.avalanche;
+    save(files{i},'avalanche', '-append');
+        
 
     % R_temp = rmfield(R_temp,{'C_rate','C_label','up_down_analysis'});
     
