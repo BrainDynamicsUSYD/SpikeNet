@@ -1,11 +1,16 @@
-function [V, loop_num] = CollectVectorYG(var, data)
+function [V, loop_num] = CollectVectorYG(var, data, filenames)
 % example:
 % var = 'cluster'
 % data = 'cluster.high_du{3}'
 
 
 % Prepare files
-dir_strut = dir('*RYG.mat');
+if nargin == 2
+    dir_strut = dir('*RYG.mat');
+elseif nargin == 3
+    dir_strut = dir(filenames);
+end
+
 num_files = length(dir_strut);
 files = cell(1,num_files);
 for id_out = 1:num_files
@@ -17,6 +22,7 @@ loop_num = [];
 fprintf('Collecting data %s from %d files: \n', data, num_files);
 for i = 1:num_files
     fprintf('\t Loading data %s from file %s...', data, files{i});
+    
     load(files{i}, var, 'ExplVar');
 
     fprintf('done.\n');
@@ -27,10 +33,15 @@ for i = 1:num_files
         end
         data_tmp = data_tmp(:)'; % row vector
         V = [V, data_tmp ];
-        loop_num = [loop_num, ones(1,length(data_tmp))*ExplVar.loop_num];
-        clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
         
-    
+        if exist('ExplVar')
+            loop_num = [loop_num, ones(1,length(data_tmp))*ExplVar.loop_num];
+        else
+            loop_num = [];
+        end
+        
+        clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
+
 end
 
 fprintf('\n');
