@@ -1,4 +1,4 @@
-function avalanche = avalanche_detect(R, plot_figure)
+function [ R ]= avalanche_detect(R, plot_figure)
 % Let's do it!!!
 % Reference:
 % [1] Benayoun et al, 2010, Avalanches in a Stochastic Model of Spiking
@@ -33,7 +33,8 @@ step_sep = ceil(1/p_rate);
 % segementation based on step_sep
 
 if step_sep == 1
-    warning('step_sep is only one! The simulation step length is too small!')
+    warning('step_sep is only one! The simulation step length is not small enough!')
+    fprintf('The simulation length should be at least %.2f%% of current value \n', 1/p_rate*100);
 end
 
 [A1, B1, D1, D0] = cut_binary( (num_spikes >= 1), step_sep );
@@ -51,9 +52,9 @@ end
 
 avalanche.size = ava_size;
 avalanche.dt_sep = step_sep*dt;
-avalanche.duration = ava_duration;
-avalanche.interval = IAI;
-avalanche.time_course = ava_tt;
+% avalanche.duration = ava_duration;
+% avalanche.interval = IAI;
+% avalanche.time_course = ava_tt;
 
 
 if plot_figure == 1
@@ -73,7 +74,7 @@ if plot_figure == 1
     poisson_size_dist = (1-exp(-1)).^(1:1:max(ava_size)-1)*exp(-1);
     poisson_size_dist = poisson_size_dist(poisson_size_dist >= min(bin_count(bin_count>0)) );
     plot(1:length(poisson_size_dist),poisson_size_dist,'r--');
-    avalanche.poisson_size_dist = poisson_size_dist;
+    % avalanche.poisson_size_dist = poisson_size_dist;
     
     % linear regression
     x = bin_edge;
@@ -85,12 +86,16 @@ if plot_figure == 1
     shift = 0.7; % decade
     plot(x, 10.^(p(1).*log10(x)+shift), 'k');
     
+    avalanche.fit = p;
 %     % plot -3/2 power law % not very solid theory!!!
 %     x = 1:max(ava_size);
 %     plot(x, x.^(-3/2),'k');
     
 end
 
+
+% record results
+R.avalanche = avalanche;
 
 end
 
