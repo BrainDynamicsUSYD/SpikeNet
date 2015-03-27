@@ -57,7 +57,7 @@ for phi_I = 0.5:0.1:1.5
             % Otherwise overwriting may occur when using PBS.
             name = [ sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF')];
             
-            fprintf('Data file name is: /n%s/n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
+            fprintf('Data file name is: \n%s\n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
             FID = fopen([name,'.ygin'], 'w'); % creat file
             FID_syn = fopen([name,'.ygin_syn'], 'w'); % creat file
             
@@ -74,7 +74,7 @@ for phi_I = 0.5:0.1:1.5
             min_ms = 5*1000; % 5 sec
             runaway_Hz = 15; % ??
             Hz_ms = 1000; % ms
-            writeRunawayKiller(FID, min_ms, runaway_Hz, Hz_ms);
+            writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
             %%%%%%%%%%%%%%%%%%%%%%%
             
             

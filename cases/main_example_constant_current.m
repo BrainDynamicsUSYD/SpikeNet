@@ -67,11 +67,11 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                     % write synapse para
                     writeSynPara(FID, 'tau_decay_GABA', 3);
                     
-                    %%%%%%% write runaway killer
-                    runaway_steps = round(50/dt); % 50 ms
-                    runaway_mean_num_ref = 0.2;
-                    writeRunawayKiller(FID, runaway_steps, runaway_mean_num_ref);
-                    %%%%%%%%%%%%%%%%%%%%%%%
+%                     %%%%%%% write runaway killer
+%                     runaway_steps = round(50/dt); % 50 ms
+%                     runaway_mean_num_ref = 0.2;
+%                     writeRunawayKiller(FID, runaway_steps, runaway_mean_num_ref);
+%                     %%%%%%%%%%%%%%%%%%%%%%%
                     
                     
                     

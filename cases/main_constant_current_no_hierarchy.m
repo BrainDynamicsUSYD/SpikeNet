@@ -32,8 +32,8 @@ lesion_1 = 1.1;
 % lesion_3 = 1;    
 % lesion_4 = 0.6;  
 
-for lesion_rest = 0.5:0.05:1.0
-    for I_ext_strength = 1.5*ones(1,10)
+for lesion_rest = 0.5:0.025:0.7
+    for I_ext_strength = [1.3:0.05:1.5 1.3:0.05:1.5]
         
         
         loop_num = loop_num + 1;
@@ -56,7 +56,7 @@ for lesion_rest = 0.5:0.05:1.0
         % Otherwise overwriting may occur when using PBS.
         name = [ sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF')];
         
-        fprintf('Data file name is: /n%s/n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
+        fprintf('Data file name is: \n%s\n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
         FID = fopen([name,'.ygin'], 'w'); % creat file
         FID_syn = fopen([name,'.ygin_syn'], 'w'); % creat file
         
@@ -69,9 +69,10 @@ for lesion_rest = 0.5:0.05:1.0
         writeSynPara(FID, 'tau_decay_GABA', 3);
         
         %%%%%%% write runaway killer
-        runaway_steps = round(50/dt); % 50 ms
-        runaway_mean_num_ref = 0.2;
-        writeRunawayKiller(FID, runaway_steps, runaway_mean_num_ref);
+        min_ms = 5*1000; % 5 sec
+        runaway_Hz = 15; % ??
+        Hz_ms = 1000; % ms
+        writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
         %%%%%%%%%%%%%%%%%%%%%%%
         
         

@@ -10,4 +10,8 @@ norm_factor = mean(abs(freqz(1,a,Nsamples)).^2);
 % max(imag(filter_output)./real(filter_output)) %possible small complex component
 % Take square root of power normalisation to obtain unit variance
 out = real(filter_output) / sqrt(norm_factor); 
+
+% variance and mean
+out = out - mean(out);
+out = out/std(out);
 end
