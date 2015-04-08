@@ -1,5 +1,5 @@
-function [ cc, lag ] = es_autocorrcoef( sym_seq, lag )
-% equal-symbol auto-correlation coefficients
+function [ cc, lag ] = es_acf( sym_seq, lag )
+% equal-symbol auto-correlation function
 % reference: Voss, R.F., 1992, Evolution of Long-Rang Fractal Correlation
 % and 1/f Noise in DNA Base Sequences
 % sym_seq: symbolic sequence

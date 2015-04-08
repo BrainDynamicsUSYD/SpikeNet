@@ -63,21 +63,11 @@ CV_hist =  zeros(N_pop, step_tot);
 % initial condition
 miu_V(:,1) = ones(N_pop,1)*5.124;
 sigma2_V(:,1) = ones(N_pop,1)*5.496^2;
-
-
 % external inputs
 mu_ext  = ones(1,step_tot)*5; %mV
 sigma_ext = ones(1,step_tot)*5;  %mV
-
-
-mu_ext  = 2*rand(1,step_tot)*5; %mV
-% sigma_ext = 2*rand(1,step_tot)*5;  %mV
-
-
 sigma_ext(5000:6000) = 7; %mV, elevated from 5 to 7
 sigma_ext(20000:21000) = 3; %mV, elevated from 5 to 7
-
-
 
 %% simulation
 tic;  % 4e4 steps take about 1 min to finish
