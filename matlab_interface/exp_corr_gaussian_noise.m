@@ -18,5 +18,7 @@ for i = 2:N
 end
 
 r = (r - mean(r))/std(r); % is this necessary?
+
+
 end
 
