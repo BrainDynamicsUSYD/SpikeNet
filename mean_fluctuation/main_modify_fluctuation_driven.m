@@ -47,7 +47,7 @@ c = [1 1;    % [EE  IE
     1 1];   %  EI  II]
 % j is the connection strength
 j = [16.56 16.56;    % [EE  IE
-    -11.56 -11.56];   %  EI  II]  
+    -13.56 -11.56];   %  EI  II]  
 % j_EI can be changed to -13.56 and the results are still similar
 
 % the above c and j values give c_miu = 5 and c_sigma = 20.2
@@ -70,8 +70,8 @@ mu_ext  = ones(1,step_tot)*5; %mV
 sigma_ext = ones(1,step_tot)*5;  %mV
 
 
-mu_ext  = 2*rand(1,step_tot)*5; %mV
-% sigma_ext = 2*rand(1,step_tot)*5;  %mV
+mu_ext  = 3+4*rand(1,step_tot); %mV
+sigma_ext = 3+4*rand(1,step_tot);  %mV
 
 
 sigma_ext(5000:6000) = 7; %mV, elevated from 5 to 7

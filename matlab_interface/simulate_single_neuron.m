@@ -176,8 +176,8 @@ for seg = seg_input
     lagNum = 0.1*10^4; % up to 100ms
     sliceNum = 10^3; % the more the better
     [mid_points, lags, acc_mat] = moving_autocorr(I_E, window_length, lagNum, sliceNum);
-    imagesc( x(mid_points), lags*dt*10^-3, acc_mat);
-    
+    imagesc( x(mid_points), lags*dt, acc_mat);
+    ylabel('lags (ms)');
     xlim([min(x) max(x)]);
 
     
