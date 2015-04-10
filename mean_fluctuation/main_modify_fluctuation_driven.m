@@ -4,7 +4,7 @@
 % Mean-driven and fluctuation-driven persistent activity in recurrent networks
 % That is, an example of fluctuation driven bistability.
 
-clc;close;clear all;
+clc;close all;clear all;
 
 %% load pre-calculated table for (eq 3.4)
 table = load('v_CV_tables.mat');
@@ -47,7 +47,7 @@ c = [1 1;    % [EE  IE
     1 1];   %  EI  II]
 % j is the connection strength
 j = [16.56 16.56;    % [EE  IE
-    -13.56 -11.56];   %  EI  II]  
+    -11.56 -11.56];   %  EI  II]  
 % j_EI can be changed to -13.56 and the results are still similar
 
 % the above c and j values give c_miu = 5 and c_sigma = 20.2
@@ -69,15 +69,16 @@ sigma2_V(:,1) = ones(N_pop,1)*5.496^2;
 mu_ext  = ones(1,step_tot)*5; %mV
 sigma_ext = ones(1,step_tot)*5;  %mV
 
-
-mu_ext  = 3+4*rand(1,step_tot); %mV
-sigma_ext = 3+4*rand(1,step_tot);  %mV
-
-
-sigma_ext(5000:6000) = 7; %mV, elevated from 5 to 7
-sigma_ext(20000:21000) = 3; %mV, elevated from 5 to 7
+% % random external input
+% mu_ext  = 3+4*rand(1,step_tot); %mV
+% sigma_ext = 3+4*rand(1,step_tot);  %mV
 
 
+% sigma_ext(5000:6000) = 7; %mV, elevated from 5 to 7
+% sigma_ext(20000:21000) = 3; %mV, elevated from 5 to 7
+
+mu_ext(5000:6000) = 7; %mV, elevated from 5 to 7
+mu_ext(20000:21000) = 3; %mV, elevated from 5 to 7
 
 %% simulation
 tic;  % 4e4 steps take about 1 min to finish
