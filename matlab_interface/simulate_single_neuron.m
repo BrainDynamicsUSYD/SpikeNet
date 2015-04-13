@@ -237,10 +237,31 @@ for seg = seg_input
 
     
     
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% why does it convery so little
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% information?
-%     figure(2);
-%     spectrogram(I_E,window_length,round(window_length/2));
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% The following does not seem to be
+%     % right
+%     figure(3);
+%    
+%     freq_range = 1:0.2:100; % Hz
+%     fs = 1/dt*1000; % sampling frequency in Hz
+%     [~,ff,tt,pp] = spectrogram(I_E, window_length,round(window_length*0.9), freq_range, fs, 'yaxis');  % 
+%     % Setting 'yaxis' to display frequency on the y-axis and time on the x-axis
+%     % pp is a matrix representing the Power Spectral Density (PSD) of each segment
+%     
+%     tt_jump = 1;
+%     tt = tt(1:tt_jump:end);
+%     pp_db = transpose(10*log10(abs(pp(:,1:tt_jump:end))));
+%     
+%     subplot(2,1,1)
+%     waterfall(ff, tt, pp_db);
+%     xlabel('Hz');
+%     ylabel('Time (sec)');
+%     zlabel('PSD (dB)');
+%     set(gca,'xscale','log');
+%     
+%     subplot(2,1,2)
+%     imagesc(ff, tt, pp_db);
+%     xlabel('Hz');
+%     ylabel('Time (sec)');
     
     
     next = input('next?');

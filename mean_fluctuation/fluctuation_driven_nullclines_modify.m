@@ -42,8 +42,6 @@ end
 % %% define the parameters
 t_m = 10; %ms
 
-
-
 figure(1);
 hold on;box on;
 
@@ -65,32 +63,37 @@ hold on;box on;
 % title([]);
 % end
 
-plot_nullclines = 1.2;
+plot_nullclines = 10;
 
-mu_ext =  5;
-sigma_ext = 5.5;
+
+figure(1);
+set(gcf,'color','w');
+
+subplot(5,1,4:5);hold on;box on;
 
 ONS = 0;
 for c_mu = 0.1; %5
     
     if plot_nullclines == 1
-    fh1 = @(mu_V, sigma_V) get_eq3_4_table_lookup(mu_V, sigma_V, table,  'v') - (mu_V-mu_ext)./(t_m*c_mu);   
-    h1 = ezplot(fh1,[2 , 25, 2, 20]);
-    set(h1, 'color', 'r','linestyle','-');
-    title([]);
+        for mu_ext = [4.5 5.0 5.5];
+            fh1 = @(mu_V, sigma_V) get_eq3_4_table_lookup(mu_V, sigma_V, table,  'v') - (mu_V-mu_ext)./(t_m*c_mu);
+            h1 = ezplot(fh1,[2 , 25, 2, 20]);
+            set(h1, 'color', 'r','linestyle','-');
+            title([]);
+        end
     end
     
     for  c_sigma = 21 % 20.5
         
-        for sigma_ext = [5.3 5.5];
+        for sigma_ext = [5.0 5.45 5.9];
             if plot_nullclines == 1
-            if ONS == 0 % only plot once
-                fh2 = @(mu_V, sigma_V) (sigma_V.^2-sigma_ext^2)/(t_m/2*c_sigma^2) - get_eq3_4_table_lookup(mu_V, sigma_V, table,  'v*CV^2');
-                h2 = ezplot(fh2,[2 , 25, 2, 20]); % ezplot here may take several minutes
-                set(h2, 'color', 'k','linestyle','--');
-                title([]);
+                if ONS == 0 % only plot once
+                    fh2 = @(mu_V, sigma_V) (sigma_V.^2-sigma_ext^2)/(t_m/2*c_sigma^2) - get_eq3_4_table_lookup(mu_V, sigma_V, table,  'v*CV^2');
+                    h2 = ezplot(fh2,[2 , 25, 2, 20]); % ezplot here may take several minutes
+                    set(h2, 'color', 'k','linestyle','--');
+                    title([]);
+                end
             end
-            end 
         end
         
         if ~isreal(4*c_mu^2 - 8*(c_mu^2-c_sigma^2))
@@ -129,7 +132,7 @@ j = [j_E j_E;    % [EE  IE
 % the above c and j values give c_miu = 5 and c_sigma = 20.2
 % time
 dt = 0.1; % ms
-step_tot = 30000;
+step_tot = 300000;
 T = (1:step_tot)*dt/1000;% sec
 % bookkeeping
 miu_V = zeros(N_pop, step_tot);
@@ -145,13 +148,35 @@ sigma2_V(:,1) = ones(N_pop,1)*5.496^2;
 mu_ext  = ones(1,step_tot)*5; %mV
 sigma_ext = ones(1,step_tot)*5;  %mV
 
-
 % mu_ext  = 3+4*rand(1,step_tot); %mV
-sigma_ext = 5.3 + 0.2*rand(1,step_tot);  %mV
+% sigma_ext = 5.3 + 0.2*rand(1,step_tot);  %mV
 
 
-sigma_ext(5000:6000) = 5.5; %mV, elevated from 5 to 7
-sigma_ext(20000:21000) = 5.2; %mV, elevated from 5 to 7
+sigma_ext(5000:10000) = 5.5; %mV, elevated from 5 to 7
+sigma_ext(20000:25000) = 4.5; %mV, elevated from 5 to 7
+mu_ext(5000:10000) = 5.5; %mV, elevated from 5 to 7
+mu_ext(20000:25000) = 4.5; %mV, elevated from 5 to 7
+
+
+%%%%%%%% try two correlated noises for mu_ext and sigma_ext
+N = length(sigma_ext);
+
+tau_1 = 100; % what's it in the full system?
+r1 = exp_corr_gaussian_noise(N,tau_1);
+
+tau_2 = 100; %
+r_mid = exp_corr_gaussian_noise(N,tau_2);
+
+alpha = 0.4; % zero time-lag correlation of the two signals
+% what's it in the full system?
+r2 = alpha*r1 + sqrt(1-alpha^2)*r_mid; 
+r2 = (r2 - mean(r2))/std(r2);
+corrcoef(r1, r2)
+
+
+mu_ext = 4.5 + r1; %
+sigma_ext = 5.0 + r2; %
+%%%%%%%% try two correlated noises for mu_ext and sigma_ext
 
 
 tic;  % 4e4 steps take about 1 min to finish
@@ -186,9 +211,6 @@ for t = 2:step_tot
 end
 toc;
 
-
-figure(2);
-set(gcf,'color','w');
 %
 subplot(5,1,1);hold on;box on;
 for i = 1:N_pop
@@ -209,7 +231,9 @@ plot([1 1],[0 90],'--');
 ylabel('Firing Rate (Hz)');
 xlabel('Time (s)');
 
-
+% phase flow
+subplot(5,1,4:5);
+plot(miu_V, sigma2_V.^0.5,'b')
 
 
 
