@@ -1,4 +1,4 @@
-function simulate_single_neuron( R, pop, sample_ind, seg_input )
+function plot_neuron_sample( R, pop, sample_ind, seg_input )
 % this function completely emulates the single neuron behavior in the C++
 % simulator
 

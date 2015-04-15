@@ -2,7 +2,7 @@ function [V, loop_num] = CollectVectorYG(var, data, filenames)
 % example:
 % var = 'cluster'
 % data = 'cluster.high_du{3}'
-
+% or, data = 'mean(cluster.high_du)' (very powerful!!)
 
 % Prepare files
 if nargin == 2
@@ -27,7 +27,8 @@ for i = 1:num_files
 
     fprintf('done.\n');
     
-        eval(sprintf('data_tmp = %s;', data));
+        expr = sprintf('data_tmp = %s;', data);
+        eval(expr);
         if isempty(data_tmp)
             warning('empty data')
         end
