@@ -16,7 +16,7 @@ for pop = 1:2
     for i = 1:n
        
         E = R.neuron_sample.I_AMPA{pop}(i,:) + R.neuron_sample.I_ext{pop}(i,:); % I_ext is always excitatory
-        I = R.neuron_sample.I_GABA{pop}(i,:); % negative values
+        I = R.neuron_sample.I_GABA{pop}(i,:);
         V = R.neuron_sample.V{pop}(i,:);
 
         E = E(1:10:end); % down-sampling

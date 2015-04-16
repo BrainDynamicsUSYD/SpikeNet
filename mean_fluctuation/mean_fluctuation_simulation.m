@@ -40,15 +40,14 @@ for loop = 1:50;
     
     
     % %% define the parameters
-    t_m = 10; %ms
+    t_m = 10; %ms    <--- scale it carefully to 15ms !?
     poss = 1;
     for c_mu = 0.1; %5
         for  c_sigma = 21 % 20.5
             if ~isreal(4*c_mu^2 - 8*(c_mu^2-c_sigma^2))
-                disp('Following combination is not possible!');
+                disp('The following combination is not possible!');
                 c_mu, c_sigma
                 poss = 0;
-                
             end
         end
     end
@@ -102,13 +101,13 @@ for loop = 1:50;
         % external inputs
         %%%%%%%% try two correlated noises for mu_ext and sigma_ext
 
-        tau_1 = 100; % what's it in the full system?
+        tau_1 = 2e+04; % what's it in the full system? 3.8971e+04, 4 sec
         r1 = exp_corr_gaussian_noise(step_tot,tau_1);
         
-        tau_2 = 100; %
+        tau_2 = 5e+03; % 4.8828e+03, 500 ms
         r_mid = exp_corr_gaussian_noise(step_tot,tau_2);
         
-        alpha = 0.4; % zero time-lag correlation of the two signals
+        alpha = 0.0; % zero time-lag correlation of the two signals
         % what's it in the full system?
         r2 = alpha*r1 + sqrt(1-alpha^2)*r_mid;
         r2 = (r2 - mean(r2))/std(r2);
