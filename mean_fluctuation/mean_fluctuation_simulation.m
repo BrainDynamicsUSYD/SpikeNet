@@ -114,7 +114,7 @@ for loop = 1:50;
         % corrcoef(r1, r2)
         
         
-        mu_ext = 4.5 + r1; %
+        mu_ext = 4.2 + r1; %
         sigma_ext = 5.0 + r2; %
         %%%%%%%% try two correlated noises for mu_ext and sigma_ext
         
