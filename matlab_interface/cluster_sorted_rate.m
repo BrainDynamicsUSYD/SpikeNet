@@ -28,7 +28,7 @@ function R = cluster_sorted_rate( R )
     symb_acc = [];
     lag_ms = lag*dt_sample;
     for i = 1:Mnum
-        [cc_tmp] = es_autocorrcoef(cluster_sequence(i,t_sample),lag); % this may take some time
+        [cc_tmp] = es_acf(cluster_sequence(i,t_sample),lag); % this may take some time
         symb_acc = [symb_acc; cc_tmp];
     end
     
