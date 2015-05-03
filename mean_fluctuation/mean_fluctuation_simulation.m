@@ -11,7 +11,7 @@ end
 
 loop_num = 0;
 
-for loop = 1:50;
+for loop = 1:200;
     
     loop_num = loop_num + 1;
     
@@ -101,10 +101,14 @@ for loop = 1:50;
         % external inputs
         %%%%%%%% try two correlated noises for mu_ext and sigma_ext
 
-        tau_1 = 2e+04; % what's it in the full system? 3.8971e+04, 4 sec
+        load('tot_mean_std_distribution.mat')
+        % tau_1 = 2e+04; % what's it in the full system? 3.8971e+04, 4 sec
+        rand_ind =randperm(length(exp_mean),1);
+	tau_1 = exp_mean(rand_ind)/dt;
         r1 = exp_corr_gaussian_noise(step_tot,tau_1);
         
-        tau_2 = 5e+03; % 4.8828e+03, 500 ms
+        % tau_2 = 5e+03; % 4.8828e+03, 500 ms
+        tau_2 = exp_std(rand_ind)/dt;
         r_mid = exp_corr_gaussian_noise(step_tot,tau_2);
         
         alpha = 0.0; % zero time-lag correlation of the two signals
