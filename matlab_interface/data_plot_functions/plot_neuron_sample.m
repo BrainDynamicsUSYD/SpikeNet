@@ -264,33 +264,33 @@ for seg = seg_input
 %     ylabel('Time (sec)');
 
 
-
-lagNum = 10*10^4;
-x = I_I_mean + I_E_mean;
-y = I_tot_std;
-
-[acfx,lags] = autocorr(x, lagNum);
-fx = fit(lags', abs(acfx'), 'exp1'); % be very careful about the curve fitting result!
-figure(4);hold on;
-plot(lags, acfx);
-plot(lags, fx.a*exp(fx.b*lags),'r');
-tau_x = -1/fx.b % the value changes a lot over time!!!!
-
-
-[acfy,lags] = autocorr(y, lagNum);
-fy = fit(lags', abs(acfy'), 'exp1');
-figure(5);hold on;
-plot(lags, acfy);
-plot(lags, fy.a*exp(fy.b*lags),'r');
-tau_y = -1/fy.b
-
-
-[xcf,lags] = crosscorr(x,y, lagNum);
-figure(6);hold on;
-plot(lags, xcf);
-fxy = fit(lags((end-1)/2 : end)', -abs(xcf((end-1)/2 : end )'), 'exp1'); % be very careful here!! here I used a dodgy hack
-plot(lags((end-1)/2 : end), fxy.a*exp(fxy.b*lags((end-1)/2 : end)),'r');
-
+% 
+% lagNum = 10*10^4;
+% x = I_I_mean + I_E_mean;
+% y = I_tot_std;
+% 
+% [acfx,lags] = autocorr(x, lagNum);
+% fx = fit(lags', abs(acfx'), 'exp1'); % be very careful about the curve fitting result!
+% figure(4);hold on;
+% plot(lags, acfx);
+% plot(lags, fx.a*exp(fx.b*lags),'r');
+% tau_x = -1/fx.b % the value changes a lot over time!!!!
+% 
+% 
+% [acfy,lags] = autocorr(y, lagNum);
+% fy = fit(lags', abs(acfy'), 'exp1');
+% figure(5);hold on;
+% plot(lags, acfy);
+% plot(lags, fy.a*exp(fy.b*lags),'r');
+% tau_y = -1/fy.b
+% 
+% 
+% [xcf,lags] = crosscorr(x,y, lagNum);
+% figure(6);hold on;
+% plot(lags, xcf);
+% fxy = fit(lags((end-1)/2 : end)', -abs(xcf((end-1)/2 : end )'), 'exp1'); % be very careful here!! here I used a dodgy hack
+% plot(lags((end-1)/2 : end), fxy.a*exp(fxy.b*lags((end-1)/2 : end)),'r');
+% 
 
     
 next = input('next?');
