@@ -38,13 +38,12 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector< vector<double> > rate_ext_t; // vector<duoble> rate_ext(t)
 	vector< vector<double> > ext_current_settings; // (int pop_ind, double mean, double std)
 	vector<double> init_condition_settings; // (double p_fire)
-	vector<int> neuron_sampling_pop_ind; //
-	vector< vector<int> > neuron_sampling_ind; //
-	vector< vector<bool> > neuron_sampling_type; //
-	vector<double> neuron_sampling_dt; // ms
-	vector<int> pop_sampling_pop_ind;
-	vector< vector<bool> > pop_sampling_t_ind; // the length of time vector
-	vector< vector<bool> > pop_sampling_type; //
+	
+	vector<int> neuron_sample_pop_ind; //
+	vector< vector<int> > neuron_sample_neurons; //
+	vector< vector<bool> > neuron_sample_type; //
+	vector< vector<bool> > neuron_sample_time_points; // the length of time vector
+	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
 
@@ -172,35 +171,18 @@ bool SimulatorInterface::import(string in_filename_input){
 				cout << "\t Reading neuron data sampling settings..." << endl;
 				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
 				// int pop_ind;
-				neuron_sampling_pop_ind.push_back(read_next_entry<int>(line_ss));
-				// double sample_dt; ms
-				neuron_sampling_dt.push_back(read_next_entry<double>(line_ss));
+				neuron_sample_pop_ind.push_back(read_next_entry<int>(line_ss));
 				// sample_type
-				neuron_sampling_type.resize(neuron_sampling_type.size()+1);
-				read_next_line_as_vector(neuron_sampling_type.back());
-				// sample_ind
-				neuron_sampling_ind.resize(neuron_sampling_ind.size()+1);
-				read_next_line_as_vector(neuron_sampling_ind.back());
-				continue; // move to next line
-			}
-			
-
-			// read population sampling setting
-			found = line_str.find("SAMP002");
-			if (found != string::npos){
-				cout << "\t Reading population data sampling setting..." << endl;
-				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
-				// int pop_ind;
-				pop_sampling_pop_ind.push_back(read_next_entry<int>(line_ss));
-				// sample_type
-				pop_sampling_type.resize(pop_sampling_type.size()+1);
-				read_next_line_as_vector(pop_sampling_type.back());
+				neuron_sample_type.resize(neuron_sample_type.size()+1);
+				read_next_line_as_vector(neuron_sample_type.back());
+				// sample_neurons
+				neuron_sample_neurons.resize(neuron_sample_neurons.size()+1);
+				read_next_line_as_vector(neuron_sample_neurons.back());
 				// sample_t_ind
-				pop_sampling_t_ind.resize(pop_sampling_t_ind.size()+1);
-				read_next_line_as_vector(pop_sampling_t_ind.back());
+				neuron_sample_time_points.resize(neuron_sample_time_points.size()+1);
+				read_next_line_as_vector(neuron_sample_time_points.back());
 				continue; // move to next line
 			}
-
 
 
 			// read non-default synapse definition file name
@@ -348,26 +330,16 @@ bool SimulatorInterface::import(string in_filename_input){
 	}
 	
 	// neuron data sampling settings
-	if (neuron_sampling_pop_ind.size() != 0){
+	if (neuron_sample_pop_ind.size() != 0){
 		cout << "\t Neuron data sampling settings...";
-		for (unsigned int ind = 0; ind < neuron_sampling_pop_ind.size(); ++ind){
-			int pop_ind = neuron_sampling_pop_ind[ind];
-			network.NeuronPopArray[pop_ind].add_neuron_sampling(neuron_sampling_ind[ind], neuron_sampling_type[ind], neuron_sampling_dt[ind]);
+		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
+			int pop_ind = neuron_sample_pop_ind[ind];
+			network.NeuronPopArray[pop_ind].add_sampling(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind]);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}	
 	
-	// population data (membrane potential) sampling
-	if (pop_sampling_pop_ind.size() != 0){
-		cout << "\t Population data sampling settings...";
-		for (unsigned int ind = 0; ind < pop_sampling_pop_ind.size(); ++ind){
-			int pop_ind = pop_sampling_pop_ind[ind];
-			network.NeuronPopArray[pop_ind].add_pop_sampling(pop_sampling_t_ind[ind], pop_sampling_type[ind]);
-			cout << pop_ind+1 << "...";
-		}
-		cout << "done." << endl;
-	}
 
 	// initialise runaway-killer
 	if (runaway_killer_setting.size() != 0){

@@ -128,47 +128,17 @@ for id_out = 1:length(files)
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 pop_ind = scan_temp{1}(1)+1; % be careful here!
-                sample_dt = scan_temp{1}(2); % be careful here!
-                fgetl(FID); % skip line
+                fgetl(FID); % skip line: data type
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
-                OutData{id_out}.neuron_sample.sample_dt(pop_ind, 1) = sample_dt;
-                
-                
-                
-                
-                
-                
-                
-            elseif strfind(tline,'POPD003')
-                tline = fgetl(FID);
-                scan_temp = textscan(tline,'%f %f','Delimiter',',');
-                pop_ind = scan_temp{1}+1; % be careful here!
-                sample_size = scan_temp{2};
-                tline = fgetl(FID);
-                scan_temp = textscan(tline,'%s','Delimiter',',');
-                data_name = scan_temp{1};
-                for n = 1:length(data_name)
-                    OutData{id_out}.pop_sample.(data_name{n}){pop_ind,1} = cell(sample_size,1);
-                    for sample_ind = 1:sample_size
-                        tline = fgetl(FID); % read next line
-                        scan_temp = textscan(tline, '%f', 'Delimiter', ',');
-                        OutData{id_out}.pop_sample.(data_name{n}){pop_ind}{sample_ind}= transpose(scan_temp{1});
-                    end
-                end
-                for n = 1:length(data_name)
-                    OutData{id_out}.pop_sample.(data_name{n}){pop_ind} = transpose(cell2mat(OutData{id_out}.pop_sample.(data_name{n}){pop_ind}));
-                end
-            elseif strfind(tline,'SAMP002')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                pop_ind = scan_temp{1}+1; % be careful here!
-                fgetl(FID); % skip line
-                tline = fgetl(FID);
-                scan_temp = textscan(tline,'%f','Delimiter',',');
-                OutData{id_out}.pop_sample.t_ind{pop_ind,1} = find(scan_temp{1}); % extract t_ind for pop_sample
-                                
+                OutData{id_out}.neuron_sample.t_ind{pop_ind,1} = find(scan_temp{1}); % extract t_ind for pop_sample
+                
+                
+                
+               
                 
                 
                 

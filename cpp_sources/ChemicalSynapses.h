@@ -62,6 +62,9 @@ protected:
 	
 	
 
+	
+	
+
 
 	// Build-in paramters for time-evolution of post-synaptic conductance change
 	// 1-variable "s(t)" kinetic synapses model

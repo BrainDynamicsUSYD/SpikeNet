@@ -227,72 +227,55 @@ void Neurons::update_V(int step_current){
 
 
 
-void Neurons::add_neuron_sampling(vector<int> neuron_sample_ind_input, vector<bool> neuron_sample_type_input, double neuron_sample_dt){
-	neuron_sample_ind = neuron_sample_ind_input;
-	neuron_sample_type = neuron_sample_type_input;
-	neuron_sample_step = int(round(neuron_sample_dt / dt));
-	// initialise neuron_sample
-	int sample_size = neuron_sample_ind.size();
-	int data_type_tot = neuron_sample_type.size(); // 7 different data types
-	neuron_sample.resize(data_type_tot); 
-	for (int c = 0; c < data_type_tot; ++c){
-		if (neuron_sample_type[c]){
-			neuron_sample[c].resize(sample_size);
-			for (int i = 0; i < sample_size; ++i){ neuron_sample[c][i].reserve(step_tot); } // reserve and push_back so that it won't be affected by adapting step_tot
+
+void Neurons::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input){
+	sample_neurons = sample_neurons_input;
+	sample_type = sample_type_input;
+	sample_time_points = sample_time_points_input;
+	
+	
+	// initialise
+	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
+	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
+		if (sample_time_points[i]){
+			sample_time_points_tot += 1;
 		}
 	}
-}
-
-void Neurons::add_pop_sampling(vector<bool> pop_sample_ind_input, vector<bool> pop_sample_type_input){
-	pop_sample_ind = pop_sample_ind_input;
-	pop_sample_type = pop_sample_type_input;
-	pop_sample_size = 0; // accumulator
-
-	// initialise pop_sample
-	int max_pop_sample_size = 0;// count non zero elements
-	for (unsigned int i = 0; i < pop_sample_ind.size(); ++i){
-		if (pop_sample_ind[i]){
-			max_pop_sample_size += 1;
-		}
-	}
-	int data_type_tot = pop_sample_type.size(); // 7 different data types
-	pop_sample.resize(data_type_tot); 
-	for (int c = 0; c < data_type_tot; ++c){
-		if (pop_sample_type[c]){
-			pop_sample[c].reserve(max_pop_sample_size*N); // reserve and push_back so that it won't be affected by adapting step_tot
-		}
-	}
-}
-
-
-void Neurons::sample_data(int step_current){
-	if (!neuron_sample_ind.empty()){
-		if (step_current % neuron_sample_step == 0){ // push_back allows arbitrary sampling frequency
-			for (unsigned int i = 0; i < neuron_sample_ind.size(); ++i){
-				int ind_temp = neuron_sample_ind[i];
-				if (neuron_sample_type[0]){neuron_sample[0][i].push_back( V[ind_temp] );}
-				if (neuron_sample_type[1]){neuron_sample[1][i].push_back( I_leak[ind_temp] );}
-				if (neuron_sample_type[2]){neuron_sample[2][i].push_back( I_AMPA[ind_temp] );}
-				if (neuron_sample_type[3]){neuron_sample[3][i].push_back( I_GABA[ind_temp] );}
-				if (neuron_sample_type[4]){neuron_sample[4][i].push_back( I_NMDA[ind_temp] );}
-				if (neuron_sample_type[5]){neuron_sample[5][i].push_back( I_GJ[ind_temp] );}
-				if (neuron_sample_type[6]){neuron_sample[6][i].push_back( I_ext[ind_temp] );}
+	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
+	int sample_type_tot = sample_type.size(); // 7 different data types
+	
+	
+	sample.resize(sample_type_tot); 
+	for (int c = 0; c < sample_type_tot; ++c){
+		if (sample_type[c]){
+			sample[c].resize(sample_neurons_tot);
+			for (unsigned int i = 0; i < sample_neurons_tot; ++i){
+				sample[c][i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
 			}
 		}
 	}
+		
+}
+
+
+
+void Neurons::sample_data(int step_current){
 	
-	if (!pop_sample_ind.empty()){
-		if (pop_sample_ind[step_current]){
-			pop_sample_size += 1;
-			if (pop_sample_type[0]){pop_sample[0].push_back(V);}
-			if (pop_sample_type[1]){pop_sample[1].push_back(I_leak);}
-			if (pop_sample_type[2]){pop_sample[2].push_back(I_AMPA);}
-			if (pop_sample_type[3]){pop_sample[3].push_back(I_GABA);}
-			if (pop_sample_type[4]){pop_sample[4].push_back(I_NMDA);}
-			if (pop_sample_type[5]){pop_sample[5].push_back(I_GJ);}
-			if (pop_sample_type[6]){pop_sample[6].push_back(I_ext);}
+	if (!sample_neurons.empty()){
+		if (sample_time_points[step_current]){ // push_back is amazing
+			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample_neurons[i];
+				if (sample_type[0]){sample[0][i].push_back( V[ind_temp] );}
+				if (sample_type[1]){sample[1][i].push_back( I_leak[ind_temp] );}
+				if (sample_type[2]){sample[2][i].push_back( I_AMPA[ind_temp] );}
+				if (sample_type[3]){sample[3][i].push_back( I_GABA[ind_temp] );}
+				if (sample_type[4]){sample[4][i].push_back( I_NMDA[ind_temp] );}
+				if (sample_type[5]){sample[5][i].push_back( I_GJ[ind_temp] );}
+				if (sample_type[6]){sample[6][i].push_back( I_ext[ind_temp] );}
+			}
 		}
 	}
+
 }
 
 
@@ -358,35 +341,12 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 	output_file << pop_ind << delim << var_number << delim << endl;
 	output_file << para_str;
 
-	// POPD003 # sampled populational data
-	if (!pop_sample_ind.empty()){
-		output_file << indicator << " POPD003" << endl;
-		output_file << pop_ind << delim << pop_sample_size << delim  <<  endl;
-
-		// data_type: [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
-		if (pop_sample_type[0] == true){output_file << "V" << delim;}
-		if (pop_sample_type[1] == true){output_file << "I_leak" << delim;}
-		if (pop_sample_type[2] == true){output_file << "I_AMPA" << delim;}
-		if (pop_sample_type[3] == true){output_file << "I_GABA" << delim;}
-		if (pop_sample_type[4] == true){output_file << "I_NMDA" << delim;}
-		if (pop_sample_type[5] == true){output_file << "I_GJ" << delim;}
-		if (pop_sample_type[6] == true){output_file << "I_ext" << delim;}
-		output_file << endl;
-		// any clever way to do the above? (use map?)
-		for (unsigned int c = 0; c < pop_sample_type.size(); ++c){
-			if (!pop_sample[c].empty()){
-				write2file(output_file, delim, pop_sample[c]); // 2D matrix
-			}
-		}
-	}
-
 
 	// POPD004 # sampled neuron data
-	if (!neuron_sample_ind.empty()){
+	if (!sample_neurons.empty()){
 		output_file << indicator << " POPD004" << endl;
-		output_file << pop_ind << delim << neuron_sample_ind.size() << delim << endl;
+		output_file << pop_ind << delim << sample_neurons.size() << delim << endl;
 
-			
 		/*/ data_type: [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 		if (neuron_sample_type[0] == true){output_file << "V" << delim;}
 		if (neuron_sample_type[1] == true){output_file << "I_leak" << delim;}
@@ -401,25 +361,19 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 
   		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext" };
 		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
-			if (neuron_sample_type[tt] == true){output_file << data_types[tt] << delim;}
+			if (sample_type[tt] == true){output_file << data_types[tt] << delim;}
 		}
 		output_file << endl;
 
 
-		for (unsigned int c = 0; c < neuron_sample_type.size(); ++c){
-			if (!neuron_sample[c].empty()){
-				write2file(output_file, delim, neuron_sample[c]); // 2D matrix
+		for (unsigned int c = 0; c < sample_type.size(); ++c){
+			if (!sample[c].empty()){
+				write2file(output_file, delim, sample[c]); // 2D matrix
 			}
 		}
 	}
 
-
-
 }
-
-
-
-
 
 
 // Use function templates when you want to perform the same action on types that can be different.

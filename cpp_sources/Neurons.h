@@ -48,8 +48,8 @@ private:
 public:
 	void set_gaussian_I_ext(double mean, double std);
 	
-	void add_neuron_sampling(vector<int> neuron_sample_ind, vector<bool> neuron_sample_type, double neuron_sample_dt); // add individual neuron membrane potential and currents data sampling
-	void add_pop_sampling(vector<bool> pop_sample_ind,  vector<bool> pop_sample_type); // add population membrane potential sampling
+	void add_sampling(vector<int> sample_neurons, vector<bool> sample_type, vector<bool> sample_time_points); 
+	
 
 	void sample_data(int step_current);
 
@@ -109,26 +109,24 @@ protected:
 		I_ext_mean,
 		I_ext_std;
 
-	// Data containers
-	vector<int>
-		neuron_sample_ind; // membrane potential sampling index vector
-	vector<bool>
-		neuron_sample_type; // boolean vector indicating which data to be sampled
-				    // must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
-	int
-		neuron_sample_step; // in steps defines sampling frequency
-	vector< vector< vector<double> > >
-		neuron_sample; // membrane currents sampling container, types of currents x VI_sample_ind.size() x step_tot
+		
+		
+		
+	// Data sampling
+	vector<int> 
+		sample_neurons; // neuron indices
+	vector<bool> 
+		sample_type;// boolean vector indicating which data to be sampled
+	// must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
+	vector<bool> 
+		sample_time_points; // logical vector as long as time vector
 
-	vector<bool>
-		pop_sample_ind; // population membrane potential sampling, logical vector as long as time vector
-	int
-		pop_sample_size; // the actual number of steps sampled
-	vector<bool>
-		pop_sample_type; // boolean vector indicating which data to be sampled
-				    // must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 	vector< vector< vector<double> > >
-		pop_sample;
+		sample; // types of data x sampled neurons x time points
+
+
+
+	
 
 	// random number generator
 	int 

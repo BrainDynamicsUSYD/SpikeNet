@@ -36,14 +36,14 @@ writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot), 1, N(1) );
 
 % neuronal data sampling
-sample_step = 1; % ms
-writeNeuronSampling(FID, 1, ones(1,7), 1:2 , sample_step);
-writeNeuronSampling(FID, 2, ones(1,7), 1:6 , sample_step);
+sample_steps = zeros(1,step_tot);
+sample_steps(1:10:step_tot) =  true;
+writeNeuronSampling(FID, 1, ones(1,7), 1:2 , sample_steps);
+writeNeuronSampling(FID, 2, ones(1,7), 1:6 , sample_steps);
 
-% populational data sampling
-
-writePopSampling(FID, 1, ones(1,7), ones(1,step_tot));
-writePopSampling(FID, 2, ones(1,7), ones(1,step_tot));
+% % populational data sampling
+% writePopSampling(FID, 1, ones(1,7), ones(1,step_tot));
+% writePopSampling(FID, 2, ones(1,7), ones(1,step_tot));
 
 % initial firing rate
 writeInitV(FID,[0.2,0.2]);
