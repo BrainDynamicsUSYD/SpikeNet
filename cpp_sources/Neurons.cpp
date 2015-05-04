@@ -226,8 +226,6 @@ void Neurons::update_V(int step_current){
 
 
 
-
-
 void Neurons::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input){
 	sample_neurons = sample_neurons_input;
 	sample_type = sample_type_input;
@@ -254,7 +252,6 @@ void Neurons::add_sampling(vector<int> sample_neurons_input, vector<bool> sample
 			}
 		}
 	}
-		
 }
 
 
@@ -277,7 +274,6 @@ void Neurons::sample_data(int step_current){
 	}
 
 }
-
 
 
 void Neurons::set_gaussian_I_ext(double mean, double std){
@@ -347,18 +343,6 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 		output_file << indicator << " POPD004" << endl;
 		output_file << pop_ind << delim << sample_neurons.size() << delim << endl;
 
-		/*/ data_type: [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
-		if (neuron_sample_type[0] == true){output_file << "V" << delim;}
-		if (neuron_sample_type[1] == true){output_file << "I_leak" << delim;}
-		if (neuron_sample_type[2] == true){output_file << "I_AMPA" << delim;}
-		if (neuron_sample_type[3] == true){output_file << "I_GABA" << delim;}
-		if (neuron_sample_type[4] == true){output_file << "I_NMDA" << delim;}
-		if (neuron_sample_type[5] == true){output_file << "I_GJ" << delim;}
-		if (neuron_sample_type[6] == true){output_file << "I_ext" << delim;}
-		output_file << endl;
-		// any clever way to do the above? (use map?) */
-
-
   		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext" };
 		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
 			if (sample_type[tt] == true){output_file << data_types[tt] << delim;}
@@ -368,7 +352,7 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 
 		for (unsigned int c = 0; c < sample_type.size(); ++c){
 			if (!sample[c].empty()){
-				write2file(output_file, delim, sample[c]); // 2D matrix
+				Neurons::write2file(output_file, delim, sample[c]); // 2D matrix
 			}
 		}
 	}

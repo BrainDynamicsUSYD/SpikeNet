@@ -45,8 +45,18 @@ function Data = DiscardTransientData(Data)
                 end
             end
         end
-                
         
+        % synapse sample
+        if any( strcmp(fieldnames(Data), 'syn_sample') ) && ~isempty(Data.syn_sample)
+            for syn_ind = 1:length(Data.syn_sample)
+                t_dis = find(Data.syn_sample{syn_ind}.t_ind <= step_transient);
+                Data.syn_sample{syn_ind}.t_ind(t_dis) = [];
+                Data.syn_sample{syn_ind}.t_ind = Data.syn_sample{syn_ind}.t_ind - step_transient;
+                Data.syn_sample{syn_ind}.I(:,t_dis) = [];
+                
+            end
+        end
+
         % update step_tot
         Data.step_tot = step_tot_dis;
         if Data.step_killed > 0

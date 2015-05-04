@@ -144,7 +144,7 @@ Input data format is as following.
 	parameter_name1, value1,
 	parameter_name2, value2,
 	...
-
+ 
 > PARA002 # non-default synapse parameter
 	number_of_parameters,
 	parameter_name1, value1,
@@ -160,6 +160,11 @@ Input data format is as following.
 	# and it must correspond to 
 	# [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 
+> SAMP002 # synapse data sampling 
+	pop_ind_pre, pop_ind_post, syn_type,
+	ind1, ind2, ..., indX, (post-synaptic sample neuron indices)
+	1, 1, 0, 0, ..., (1-by-step_tot logical values)
+	
 
 \end{lstlisting}
 
@@ -199,6 +204,11 @@ The output data format is as following.
 	parameter_name2, value2,
 	...
 
+> SYND002 # sampled synapse  data
+	pop_ind_pre, pop_ind_post, syn_type, number_of_sample_neurons,
+	data (sampled_neurons-by-sampled_steps matrix),
+	
+	
 
 \end{lstlisting}
 

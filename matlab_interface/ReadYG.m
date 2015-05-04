@@ -63,11 +63,10 @@ for id_out = 1:length(files)
     OutData{id_out}.num_spikes = cell(0,0);
     OutData{id_out}.num_ref = cell(0,0);
     OutData{id_out}.neuron_sample = [];
-    OutData{id_out}.pop_sample = cell(0,0);
+    OutData{id_out}.syn_sample = cell(0,0);
     OutData{id_out}.ExplVar = [];
     OutData{id_out}.PopPara = cell(0,0);
     OutData{id_out}.SynPara = cell(0,0);
-    
     
     while ~feof(FID)
         tline = fgetl(FID);
@@ -139,6 +138,36 @@ for id_out = 1:length(files)
                 
                 
                
+            elseif strfind(tline,'SYND002')
+                tline = fgetl(FID);
+                scan_temp = textscan(tline, '%d', 'Delimiter', ',');
+                OutData{id_out}.syn_sample{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_sample{end,1}.pop_ind_post = scan_temp{1}(2)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_sample{end,1}.syn_type = scan_temp{1}(3)+1; % Be careful here! C/C++ index convection!
+                sample_size = scan_temp{1}(4);
+                for sample_ind = 1:sample_size
+                        tline = fgetl(FID); % read next line
+                        scan_temp = textscan(tline, '%f', 'Delimiter', ',');
+                        OutData{id_out}.syn_sample{end,1}.I(sample_ind,:) = transpose(scan_temp{1});
+                end
+            elseif strfind(tline,'SAMP002')
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%d','Delimiter',',');
+                pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
+                pop_ind_post = scan_temp{1}(2)+1; % Be careful here! C/C++ index convection!
+                syn_type = scan_temp{1}(3)+1; % Be careful here! C/C++ index convection!
+                for syn_ind = 1:length(OutData{id_out}.syn_sample)
+                    if OutData{id_out}.syn_sample{syn_ind}.pop_ind_pre == pop_ind_pre && ...
+                            OutData{id_out}.syn_sample{syn_ind}.pop_ind_post == pop_ind_post && ...
+                            OutData{id_out}.syn_sample{syn_ind}.syn_type == syn_type
+                        tline = fgetl(FID);
+                        scan_temp = textscan(tline,'%f','Delimiter',',');
+                        OutData{id_out}.syn_sample{syn_ind}.neuron_ind = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
+                        tline = fgetl(FID);
+                        scan_temp = textscan(tline,'%f','Delimiter',',');
+                        OutData{id_out}.syn_sample{syn_ind}.t_ind = find(scan_temp{1}); % extract t_ind for pop_sample
+                    end
+                end
                 
                 
                 
@@ -175,9 +204,8 @@ for id_out = 1:length(files)
                 
                 
                 
-                
-                
-                
+
+
                 
                 
             elseif strfind(tline,'INIT002')

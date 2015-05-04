@@ -15,6 +15,8 @@ class ChemicalSynapses{
 public:
 	ChemicalSynapses(); // default constructor
 	ChemicalSynapses(double dt, int step_tot); // parameterised constructor
+	friend class NeuronNetwork; // Let NeuronNetwork access its private members
+	friend class SimulatorInterface;
 
 	void init(int synapses_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); // initialise chemical synapses by reading already prepared connections
 
@@ -31,6 +33,15 @@ public:
 	void update(int step_current); //  Calculate the current post-synaptic conductance changes caused by pre-synaptic spikes.
 	void send_pop_data(vector<Neurons> &NeuronPopArray);
 
+	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points); 
+	void sample_data(int step_current);
+	
+
+	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
+	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
+	void write2file(ofstream& output_file, char delim, vector<int>& v);
+	
+	
 protected:
 	// constants
 	double
@@ -49,7 +60,7 @@ protected:
 	int
 		max_delay_steps,
 		history_steps; // for pre-synaptic spikes_pop
-
+		
 	// A copy of data from pre-synaptic population
 	vector<double>* // This is problematic!!!
 		V_post; // from post-synaptic population
@@ -61,6 +72,15 @@ protected:
 		I; 
 	
 	
+
+
+	// Data sampling
+	vector<int> 
+		sample_neurons; // post-synaptic neuron indices
+	vector<bool> 
+		sample_time_points; // logical vector as long as time vector
+	vector< vector<double> >
+		sample; //  sampled neurons x time points
 
 	
 	

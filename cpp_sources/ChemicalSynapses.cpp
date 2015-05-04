@@ -211,8 +211,6 @@ void ChemicalSynapses::update(int step_current){
 		// Generate current random number generator, note that rate_ext_t is in Hz
 		gen.seed(my_seed + step_current);// reseed random engine!!!
 
-		
-		// binomial_distribution<int> dist(Num_ext, rate_ext_t[step_current] * (dt / 1000.0)); // this is not exactly right and not fast!!
 		poisson_distribution<int> dist(Num_ext * rate_ext_t[step_current] * (dt / 1000.0));		
 		auto ext_spikes = bind(dist, gen);
 
@@ -254,11 +252,43 @@ void ChemicalSynapses::update(int step_current){
 	// Update gating variable
 	for (int j = 0; j < N_post; ++j){ gs_sum[j] *= exp_step; }
 
-
-
+	// sample data
+	sample_data(step_current);
+	
 }// update
 
 
+void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
+	sample_neurons = sample_neurons_input;
+	sample_time_points = sample_time_points_input;
+	
+	// initialise
+	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
+	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
+		if (sample_time_points[i]){
+			sample_time_points_tot += 1;
+		}
+	}
+	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
+
+	sample.resize(sample_neurons_tot);
+	for (unsigned int i = 0; i < sample_neurons_tot; ++i){
+		sample[i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
+	}
+
+}
+
+
+void ChemicalSynapses::sample_data(int step_current){
+	if (!sample_neurons.empty()){
+		if (sample_time_points[step_current]){ // push_back is amazing
+			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample_neurons[i];
+				sample[i].push_back( I[ind_temp] );
+			}
+		}
+	}
+}
 
 
 
@@ -329,6 +359,16 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 	output_file << indicator << " SYND001" << endl;
 	output_file << var_number << delim << endl;
 	output_file << para_str;
+	
+	
+	// SYND002 # sampled synapse data
+	if (!sample_neurons.empty()){
+		output_file << indicator << " SYND002" << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << sample_neurons.size() << delim << endl;
+		write2file(output_file, delim, sample); // 2D matrix
+	}
+
+	
 }
 
 
@@ -367,3 +407,50 @@ void ChemicalSynapses::send_pop_data(vector<Neurons> &NeuronPopArray){
 		}
 	}
 }
+
+
+// Use function templates when you want to perform the same action on types that can be different.
+// Use function overloading when you want to apply different operations depending on the type.
+// In this case, just save yourself the trouble and use overloading.
+void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector< vector<int> >& v){
+	if (!v.empty()){
+		for (unsigned int i = 0; i < v.size(); ++i){
+			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
+			for (unsigned int j = 0; j < v[i].size(); ++j){
+				output_file << v[i][j] << delim;
+			}
+			output_file << endl;
+		}
+	}
+	else {output_file << " " << endl;}
+}
+
+
+
+void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector< vector<double> >& v){
+	if (!v.empty()){
+		for (unsigned int i = 0; i < v.size(); ++i){
+			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
+			for (unsigned int j = 0; j < v[i].size(); ++j){
+				output_file << v[i][j] << delim;
+			}
+			output_file << endl;
+		}
+	}
+	else {output_file << " " << endl;}
+}
+
+
+void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<int>& v){
+	if (!v.empty()){
+		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
+		for (unsigned int i = 0; i < v.size(); ++i){
+			output_file << v[i] << delim;
+		}
+		output_file << endl;
+	}
+	else {output_file << " " << endl;}
+}
+
+
+

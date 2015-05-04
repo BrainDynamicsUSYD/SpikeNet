@@ -41,9 +41,9 @@ sample_steps(1:10:step_tot) =  true;
 writeNeuronSampling(FID, 1, ones(1,7), 1:2 , sample_steps);
 writeNeuronSampling(FID, 2, ones(1,7), 1:6 , sample_steps);
 
-% % populational data sampling
-% writePopSampling(FID, 1, ones(1,7), ones(1,step_tot));
-% writePopSampling(FID, 2, ones(1,7), ones(1,step_tot));
+% synapse data sampling
+writeSynSampling(FID, 1,  2, 1,  1:2, sample_steps)
+
 
 % initial firing rate
 writeInitV(FID,[0.2,0.2]);
@@ -64,7 +64,7 @@ writeRunawayKiller(FID, run_away_pop, min_ms, runaway_Hz, Hz_ms);
 [I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post','N_pre',N(1),'N_post',N(2),'p',1));
 K = ones(size(I))*k;
 D = ones(size(I))*1;
-writeChemicalConnection(FID_syn, 1,  1,2,   I,J,K,D); % (FID, type, i_pre, j_post, I, J, K, D)
+writeChemicalConnection(FID_syn, 1,  1, 2,   I,J,K,D); % (FID, type, i_pre, j_post, I, J, K, D)
 
 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
 % Record explanatory variables, also called "controlled variables"

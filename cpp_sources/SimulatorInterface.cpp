@@ -44,6 +44,13 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector< vector<bool> > neuron_sample_type; //
 	vector< vector<bool> > neuron_sample_time_points; // the length of time vector
 	
+	vector< vector<int> > syn_sample_pop_ind; //
+	vector< vector<int> > syn_sample_neurons; //
+	vector< vector<bool> > syn_sample_time_points; // the length of time vector
+	
+	
+	
+	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
 
@@ -184,6 +191,22 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 
+			// read synapase data sampling setting
+			found = line_str.find("SAMP002");
+			if (found != string::npos){// if found match
+				cout << "\t Reading synapse data sampling settings..." << endl;
+				// pop indices
+				syn_sample_pop_ind.resize(syn_sample_pop_ind.size()+1);
+				read_next_line_as_vector(syn_sample_pop_ind.back());
+				// sample_neurons
+				syn_sample_neurons.resize(syn_sample_neurons.size()+1);
+				read_next_line_as_vector(syn_sample_neurons.back());
+				// sample_t_ind
+				syn_sample_time_points.resize(syn_sample_time_points.size()+1);
+				read_next_line_as_vector(syn_sample_time_points.back());
+				continue; // move to next line
+			}
+			
 
 			// read non-default synapse definition file name
 			found = line_str.find("SYNF001");
@@ -340,6 +363,33 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "done." << endl;
 	}	
 	
+	
+	
+	// syn data sampling settings
+	if (syn_sample_pop_ind.size() != 0){
+		cout << "\t Synapse data sampling settings...";
+		for (unsigned int ind = 0; ind < syn_sample_pop_ind.size(); ++ind){
+			
+			int pop_ind_pre = syn_sample_pop_ind[ind][0];
+			int pop_ind_post = syn_sample_pop_ind[ind][1];
+			int syn_type = syn_sample_pop_ind[ind][2];
+			
+			int syn_sample_match = false;
+			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
+				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
+					network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post &&
+				network.ChemicalSynapsesArray[s].synapses_type == syn_type){ // find the right synapse object
+					network.ChemicalSynapsesArray[s].add_sampling(syn_sample_neurons[ind], syn_sample_time_points[ind]);
+					cout << ind+1 << "...";
+					syn_sample_match = true;
+				}
+			}
+			if (!syn_sample_match){
+				cout << "(no match found!)...";
+			}
+		}
+		cout << "done." << endl;
+	}	
 
 	// initialise runaway-killer
 	if (runaway_killer_setting.size() != 0){
