@@ -152,7 +152,7 @@ Input data format is as following.
 	...
 
 > SAMP001 # neuronal data sampling 
-	pop_ind,
+	pop_ind, sample_step_ms,
 	data_type (logical vector),
 	ind1, ind2, ..., indX, (sample neuron indices)
 	# Note that data_type specifies sample data types
@@ -194,18 +194,18 @@ The output data format is as following.
 > POPD003 # sampled populational data
 	pop_ind, number_of_time_points,
 	data_name1, ..., data_nameX,
-	data_1 (neurons-by-sample_size matrix),
-	data_2 (neurons-by-sample_size matrix),
+	data_1 (all_neurons-by-sampled_steps matrix),
+	data_2 (all_neurons-by-sampled_steps matrix),
 	...
-	data_X (neurons-by-sample_size matrix),
+	data_X (all_neurons-by-sampled_steps matrix),
 
 > POPD004 # sampled neuronal data
 	pop_ind, number_of_sample_neurons,
 	data_name1, ..., data_nameX,
-	data_1 (sample_size-by-step_tot matrix),
-	data_2 (sample_size-by-step_tot matrix),
+	data_1 (sampled_neurons-by-sampled_steps matrix),
+	data_2 (sampled_neurons-by-sampled_steps matrix),
 	...
-	data_X (sample_size-by-step_tot matrix),
+	data_X (sampled_neurons-by-sampled_steps matrix),
 
 > SYND001 # synaptic connection parameters
 	number_of_parameters,

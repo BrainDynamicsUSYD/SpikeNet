@@ -127,12 +127,13 @@ for id_out = 1:length(files)
             elseif strfind(tline,'SAMP001')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                pop_ind = scan_temp{1}+1; % be careful here!
+                pop_ind = scan_temp{1}(1)+1; % be careful here!
+                sample_dt = scan_temp{1}(2); % be careful here!
                 fgetl(FID); % skip line
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
-
+                OutData{id_out}.neuron_sample.sample_dt(pop_ind, 1) = sample_dt;
                 
                 
                 

@@ -227,9 +227,10 @@ void Neurons::update_V(int step_current){
 
 
 
-void Neurons::add_neuron_sampling(vector<int> neuron_sample_ind_input, vector<bool> neuron_sample_type_input){
+void Neurons::add_neuron_sampling(vector<int> neuron_sample_ind_input, vector<bool> neuron_sample_type_input, double neuron_sample_dt){
 	neuron_sample_ind = neuron_sample_ind_input;
 	neuron_sample_type = neuron_sample_type_input;
+	neuron_sample_step = int(round(neuron_sample_dt / dt));
 	// initialise neuron_sample
 	int sample_size = neuron_sample_ind.size();
 	int data_type_tot = neuron_sample_type.size(); // 7 different data types
@@ -266,18 +267,20 @@ void Neurons::add_pop_sampling(vector<bool> pop_sample_ind_input, vector<bool> p
 
 void Neurons::sample_data(int step_current){
 	if (!neuron_sample_ind.empty()){
-		for (unsigned int i = 0; i < neuron_sample_ind.size(); ++i){
-			int ind_temp = neuron_sample_ind[i];
-			if (neuron_sample_type[0]){neuron_sample[0][i].push_back( V[ind_temp] );}
-			if (neuron_sample_type[1]){neuron_sample[1][i].push_back( I_leak[ind_temp] );}
-			if (neuron_sample_type[2]){neuron_sample[2][i].push_back( I_AMPA[ind_temp] );}
-			if (neuron_sample_type[3]){neuron_sample[3][i].push_back( I_GABA[ind_temp] );}
-			if (neuron_sample_type[4]){neuron_sample[4][i].push_back( I_NMDA[ind_temp] );}
-			if (neuron_sample_type[5]){neuron_sample[5][i].push_back( I_GJ[ind_temp] );}
-			if (neuron_sample_type[6]){neuron_sample[6][i].push_back( I_ext[ind_temp] );}
+		if (step_current % neuron_sample_step == 0){ // push_back allows arbitrary sampling frequency
+			for (unsigned int i = 0; i < neuron_sample_ind.size(); ++i){
+				int ind_temp = neuron_sample_ind[i];
+				if (neuron_sample_type[0]){neuron_sample[0][i].push_back( V[ind_temp] );}
+				if (neuron_sample_type[1]){neuron_sample[1][i].push_back( I_leak[ind_temp] );}
+				if (neuron_sample_type[2]){neuron_sample[2][i].push_back( I_AMPA[ind_temp] );}
+				if (neuron_sample_type[3]){neuron_sample[3][i].push_back( I_GABA[ind_temp] );}
+				if (neuron_sample_type[4]){neuron_sample[4][i].push_back( I_NMDA[ind_temp] );}
+				if (neuron_sample_type[5]){neuron_sample[5][i].push_back( I_GJ[ind_temp] );}
+				if (neuron_sample_type[6]){neuron_sample[6][i].push_back( I_ext[ind_temp] );}
+			}
 		}
 	}
-
+	
 	if (!pop_sample_ind.empty()){
 		if (pop_sample_ind[step_current]){
 			pop_sample_size += 1;

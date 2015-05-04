@@ -33,10 +33,12 @@ function Data = DiscardTransientData(Data)
             fname_cell = fieldnames(Data.neuron_sample);
             for pop_ind = 1:length(Data.neuron_sample.neuron_ind)
                 if ~isempty(Data.neuron_sample.neuron_ind{pop_ind})
+                    sample_dt = Data.neuron_sample.sample_dt(pop_ind);
+                    step_transient_sample = round( discard_transient/sample_dt );
                     for f = 1:length(fname_cell)
                         fn = fname_cell{f};
-                        if ~strcmp(fn,'neuron_ind')  % not "neuron_ind"
-                            Data.neuron_sample.(fn){pop_ind}(:,1:step_transient) = [];
+                        if ~strcmp(fn,'neuron_ind') && ~strcmp(fn,'sample_dt')  % not "neuron_ind"  or sample_dt
+                            Data.neuron_sample.(fn){pop_ind}(:,1:step_transient_sample) = [];
                         end
                     end
                 end

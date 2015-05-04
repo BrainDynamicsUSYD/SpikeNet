@@ -41,6 +41,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector<int> neuron_sampling_pop_ind; //
 	vector< vector<int> > neuron_sampling_ind; //
 	vector< vector<bool> > neuron_sampling_type; //
+	vector<double> neuron_sampling_dt; // ms
 	vector<int> pop_sampling_pop_ind;
 	vector< vector<bool> > pop_sampling_t_ind; // the length of time vector
 	vector< vector<bool> > pop_sampling_type; //
@@ -157,7 +158,7 @@ bool SimulatorInterface::import(string in_filename_input){
 			found = line_str.find("KILL001");
 			if (found != string::npos){
 				cout << "\t Reading runaway killer setting..." << endl;
-				// double min_ms, double Hz, double Hz_ms
+				// double pop_ind, min_ms, double Hz, double Hz_ms
 				runaway_killer_setting.resize(runaway_killer_setting.size()+1);
 				read_next_line_as_vector(runaway_killer_setting.back());
 				continue;
@@ -172,6 +173,8 @@ bool SimulatorInterface::import(string in_filename_input){
 				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
 				// int pop_ind;
 				neuron_sampling_pop_ind.push_back(read_next_entry<int>(line_ss));
+				// double sample_dt; ms
+				neuron_sampling_dt.push_back(read_next_entry<double>(line_ss));
 				// sample_type
 				neuron_sampling_type.resize(neuron_sampling_type.size()+1);
 				read_next_line_as_vector(neuron_sampling_type.back());
@@ -344,12 +347,12 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "done." << endl;
 	}
 	
-	// neuron data sampling settings(int pop_ind, vector<int> sample_ind)
+	// neuron data sampling settings
 	if (neuron_sampling_pop_ind.size() != 0){
 		cout << "\t Neuron data sampling settings...";
 		for (unsigned int ind = 0; ind < neuron_sampling_pop_ind.size(); ++ind){
 			int pop_ind = neuron_sampling_pop_ind[ind];
-			network.NeuronPopArray[pop_ind].add_neuron_sampling(neuron_sampling_ind[ind], neuron_sampling_type[ind]);
+			network.NeuronPopArray[pop_ind].add_neuron_sampling(neuron_sampling_ind[ind], neuron_sampling_type[ind], neuron_sampling_dt[ind]);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;

@@ -1,4 +1,4 @@
-function writeNeuronSampling(FID, pop_ind, data_type, sample_ind)
+function writeNeuronSampling(FID, pop_ind, data_type, sample_ind, sample_step_ms)
 % write data sampling settings for individual neurons
 %        FID: file id for writing data
 %    pop_ind: neuron population index
@@ -9,6 +9,10 @@ function writeNeuronSampling(FID, pop_ind, data_type, sample_ind)
 % Entire time sequences of the data will be recorded for individual neurons.
 
 
+if nargin == 4
+    sample_step_ms = 1;
+end
+
 % for C/C++ index convetion
 pop_ind = pop_ind-1;
 sample_ind = sample_ind-1;
@@ -18,7 +22,7 @@ end
 % write
 % fprintf(FID, '%s\n', '# neuronal membrane potential and currents sampling setting // pop_ind;sample_ind');
 fprintf(FID, '%s\n', '> SAMP001');
-fprintf(FID, '%d,\n', pop_ind);
+fprintf(FID, '%d, %.3f,\n', pop_ind, sample_step_ms);
 fprintf(FID, '%d,', data_type); fprintf(FID,'\n');
 fprintf(FID, '%d,', sample_ind); fprintf(FID,'\n');
 fprintf(FID, '\n');
