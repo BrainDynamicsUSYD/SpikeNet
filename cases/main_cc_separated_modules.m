@@ -7,9 +7,9 @@ function main_cc_separated_modules(varargin)
 % varargin is for PBS arrary job
 if nargin == 0
     clc;clear all;close all;
-    cd /import/yossarian1/yifan/Project1/
+    cd /import/yossarian1/yifan/Project1/source
     addpath(genpath(cd));
-    cd tmp_data
+    cd ../tmp_data
 %     cd ~/tmp_data;
 end % Basic parameters
 
@@ -22,7 +22,7 @@ Num_pop = length(N);
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 20*sec; % use 10 second!
+step_tot = 100*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -39,7 +39,7 @@ lesion_2 = 1;    %+(-0.05:0.05:0.05)
 lesion_3 = 1;    %+(-0.05:0.05:0.05)
 lesion_4 = 0.6;  %+(-0.05:0.05:0.05)
 
-for I_ext_strength = 1.5 * ones(1,20) % 1.3-1.35
+for I_ext_strength = 1.5 * 1 %ones(1,50) % 1.3-1.35
     
     
     loop_num = loop_num + 1;
@@ -79,9 +79,9 @@ for I_ext_strength = 1.5 * ones(1,20) % 1.3-1.35
     
     %%%%%%% data sampling
     sample_pop = 1;
-    sample_neurons = 40:40:400;
+    sample_neurons = 1:2; %40:40:400;
     sample_steps = zeros(1,step_tot);
-    sample_steps(1:10:step_tot) =  true;
+    sample_steps(1:100:end) = 1;
     writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neurons, sample_steps);
     for pop_ind_pre = 1:Num_pop
         pop_ind_post = sample_pop;
@@ -170,6 +170,7 @@ writeExplVar(FID, 'comment1', comment1, 'comment2', comment2);
 % append this file self into .ygin for future reference
 appendThisMatlabFile(FID)
 
+disp('Matlab pre-processing done.')
 end
 
 
