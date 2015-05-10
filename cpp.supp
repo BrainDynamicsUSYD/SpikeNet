@@ -1,0 +1,13 @@
+{
+   <cout problem>
+   Memcheck:Cond
+   fun:_platform_memchr$VARIANT$Haswell
+   fun:__sfvwrite
+   fun:fwrite
+   fun:_ZNSt3__111__stdoutbufIcE8overflowEi
+   fun:_ZNSt3__115basic_streambufIcNS_11char_traitsIcEEE6xsputnEPKcl
+   fun:_ZNSt3__116__pad_and_outputIcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+   fun:_ZNSt3__124__put_character_sequenceIcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+   fun:_ZNSt3__1lsINS_11char_traitsIcEEEERNS_13basic_ostreamIcT_EES6_PKc
+   fun:main
+}
