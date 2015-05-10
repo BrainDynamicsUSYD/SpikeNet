@@ -6,11 +6,11 @@ function main_cc_separated_modules_test(varargin)
 
 % varargin is for PBS arrary job
 if nargin == 0
-%     clc;clear all;close all;
-%     cd /import/yossarian1/yifan/Project1/source
-%     addpath(genpath(cd));
-%     cd ../tmp_data
-     cd ~/tmp_data;
+     clc;clear all;close all;
+     cd /yossarian1/yifan/Project1/source
+     addpath(genpath(cd));
+     cd ../tmp_data
+%     cd ~/tmp_data;
 end % Basic parameters
 
 N_I = 1000;
@@ -22,7 +22,7 @@ Num_pop = length(N);
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 1*sec; % use 10 second!
+step_tot = 100*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;

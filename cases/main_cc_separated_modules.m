@@ -39,7 +39,7 @@ lesion_2 = 1;    %+(-0.05:0.05:0.05)
 lesion_3 = 1;    %+(-0.05:0.05:0.05)
 lesion_4 = 0.6;  %+(-0.05:0.05:0.05)
 
-for I_ext_strength = 1.5 * 1 %ones(1,50) % 1.3-1.35
+for I_ext_strength = 1.5 * ones(1,50) % 1.3-1.35
     
     
     loop_num = loop_num + 1;
@@ -85,8 +85,12 @@ for I_ext_strength = 1.5 * 1 %ones(1,50) % 1.3-1.35
     writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neurons, sample_steps);
     for pop_ind_pre = 1:Num_pop
         pop_ind_post = sample_pop;
-        syn_type = 1;
-        writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
+	if pop_ind_pre == Num_pop
+		syn_type = 2;
+	else
+        	syn_type = 1;
+        end
+ 	writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
     end
     
     
