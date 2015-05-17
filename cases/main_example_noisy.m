@@ -35,7 +35,7 @@ lesion_4 = 0.5;  %+(-0.05:0.05:0.05)
 Num_ext = 400;
 
 % for I_ext_strength = 2:0.5:2.5 %0.5:0.5:2.5; %nA   run-away at 3.0!!!!
-for rate_ext = 4.4*ones(1,100) %l
+for rate_ext = 4.4*ones(1,100) % what's wrong with 4.5?
     
     
     loop_num = loop_num + 1;
