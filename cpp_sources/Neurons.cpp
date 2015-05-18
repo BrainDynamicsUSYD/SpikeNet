@@ -257,7 +257,7 @@ void Neurons::add_sampling(vector<int> sample_neurons_input, vector<bool> sample
 	for (int c = 0; c < sample_type_tot; ++c){
 		if (sample_type[c]){
 			sample[c].resize(sample_neurons_tot);
-			for (unsigned int i = 0; i < sample_neurons_tot; ++i){
+			for (int i = 0; i < sample_neurons_tot; ++i){
 				sample[c][i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
 			}
 		}

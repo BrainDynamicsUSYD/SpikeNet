@@ -277,7 +277,7 @@ void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<boo
 	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
 
 	sample.resize(sample_neurons_tot);
-	for (unsigned int i = 0; i < sample_neurons_tot; ++i){
+	for (int i = 0; i < sample_neurons_tot; ++i){
 		sample[i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
 	}
 
