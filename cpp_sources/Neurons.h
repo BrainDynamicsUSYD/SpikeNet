@@ -35,6 +35,11 @@ public:
 	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
 	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
 	void write2file(ofstream& output_file, char delim, vector<int>& v);
+	void write2file(ofstream& output_file, char delim, vector<double>& v);
+	
+	void start_V_mean_std_record();
+	void record_V_mean_std(); //
+	
 
 	void random_V(double firing_probability); // Generate random initial condition for V
 
@@ -102,6 +107,13 @@ protected:
 		// a compact data structure, requiring vector "num_spikes_pop" to unpack it.
 		num_spikes_pop, // number of spikes at each time step
 		num_ref_pop; // number of refractory neurons at each time step
+
+	bool
+		V_mean_std_record;
+	vector<double>
+		V_mean,
+		V_std;
+		
 
 
 	// parameters for Generate Gaussian random external current

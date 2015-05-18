@@ -64,7 +64,6 @@ for id_out = 1:length(files)
     OutData{id_out}.num_ref = cell(0,0);
     OutData{id_out}.neuron_sample = [];
     OutData{id_out}.syn_sample = cell(0,0);
-    OutData{id_out}.synI = cell(0,0);
     OutData{id_out}.ExplVar = [];
     OutData{id_out}.PopPara = cell(0,0);
     OutData{id_out}.SynPara = cell(0,0);
@@ -106,12 +105,10 @@ for id_out = 1:length(files)
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%d','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
-                tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                V_mean = transpose(scan_temp{1});
-                tline = fgetl(FID);
+                V_mean = tranpose(scan_temp{1});
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                V_std = transpose(scan_temp{1});
+                V_std = tranpose(scan_temp{1});
                 OutData{id_out}.popV.V_mean{pop_ind} = V_mean;
                 OutData{id_out}.popV.V_std{pop_ind} = V_std;
                 
@@ -182,7 +179,10 @@ for id_out = 1:length(files)
                         OutData{id_out}.syn_sample{syn_ind}.t_ind = find(scan_temp{1}); % extract t_ind for pop_sample
                     end
                 end
-
+                
+                
+                
+                
                 
             elseif strfind(tline,'SYND003')
                 tline = fgetl(FID);
@@ -190,12 +190,10 @@ for id_out = 1:length(files)
                 OutData{id_out}.synI{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
                 OutData{id_out}.synI{end,1}.pop_ind_post = scan_temp{1}(2)+1; % Be careful here! C/C++ index convection!
                 OutData{id_out}.synI{end,1}.syn_type = scan_temp{1}(3)+1; % Be careful here! C/C++ index convection!
-                tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                I_mean = transpose(scan_temp{1});
-                tline = fgetl(FID);
+                I_mean = tranpose(scan_temp{1});
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                I_std = transpose(scan_temp{1});
+                I_std = tranpose(scan_temp{1});
                 OutData{id_out}.synI{end}.I_mean = I_mean;
                 OutData{id_out}.synI{end}.I_std = I_std;
                 

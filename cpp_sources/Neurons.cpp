@@ -73,8 +73,17 @@ void Neurons::init(){
 	killer_license = false;
 	runaway_killed = false;
 	step_killed = -1;
+	
+	//
+	V_mean_std_record = false;
+
 }
 
+void Neurons::start_V_mean_std_record(){
+	V_mean_std_record = true;
+	V_mean.reserve(step_tot);
+	V_std.reserve(step_tot);
+}
 
 
 void Neurons::set_para(string para_str, char delim){
@@ -115,7 +124,6 @@ string Neurons::dump_para(char delim){
 
 
 
-
 void Neurons::random_V(double p){
 	// Generate random initial condition for V.
 	// Generate uniform random distribution
@@ -132,7 +140,6 @@ void Neurons::random_V(double p){
 	}
 	else {cout << "initial firing rate cannot be 100%!" << endl;}
 }
-
 
 
 void Neurons::update_spikes(int step_current){
@@ -176,7 +183,7 @@ void Neurons::update_spikes(int step_current){
 	}
 	num_ref_pop.push_back(num_ref_temp);
 
-		
+
 	// runaway check
 	runaway_check(step_current);
 	
@@ -222,6 +229,9 @@ void Neurons::update_V(int step_current){
 		}
 	}
 
+	// record mean and std of membrane potentials
+	record_V_mean_std();
+	
 }
 
 
@@ -337,6 +347,14 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 	output_file << pop_ind << delim << var_number << delim << endl;
 	output_file << para_str;
 
+	// POPD003 # membrane potential mean and std
+	if (V_mean_std_record){
+		output_file << indicator << " POPD003" << endl;
+		output_file << pop_ind << delim << endl;
+		write2file(output_file, delim, V_mean);
+		write2file(output_file, delim, V_std);
+	}
+	
 
 	// POPD004 # sampled neuron data
 	if (!sample_neurons.empty()){
@@ -404,5 +422,41 @@ void Neurons::write2file(ofstream& output_file, char delim, vector<int>& v){
 }
 
 
+
+void Neurons::write2file(ofstream& output_file, char delim, vector<double>& v){
+	if (!v.empty()){
+		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
+		for (unsigned int i = 0; i < v.size(); ++i){
+			output_file << v[i] << delim;
+		}
+		output_file << endl;
+	}
+	else {output_file << " " << endl;}
+}
+
+
+
+
+void Neurons::record_V_mean_std(){
+	if (V_mean_std_record){
+		// get mean
+		double sum_mean = 0.0;
+		for (unsigned int i = 0; i < V.size(); ++i){
+			sum_mean += V[i];
+		}
+		double mean_tmp = sum_mean / double(V.size());
+	
+		// get std
+		double sum_std = 0.0;
+		for (unsigned int i = 0; i < V.size(); ++i){
+			sum_std += (V[i]-mean_tmp)*(V[i]-mean_tmp);
+		}
+		double std_tmp = sqrt( sum_std / double(V.size()));
+	
+		// record   
+		V_mean.push_back(mean_tmp);
+		V_std.push_back(std_tmp);
+	}
+}
 
 

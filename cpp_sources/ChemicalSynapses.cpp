@@ -23,6 +23,8 @@ ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input){
 	tau_decay_GABA = 3.0; // 7.0
 	tau_decay_NMDA = 80.0; // 80.0
 
+	// 
+	I_mean_std_record = false;
 }
 
 
@@ -255,6 +257,9 @@ void ChemicalSynapses::update(int step_current){
 	// sample data
 	sample_data(step_current);
 	
+	//
+	record_I_mean_std();
+	
 }// update
 
 
@@ -347,6 +352,13 @@ string ChemicalSynapses::dump_para(char delim){
 	return dump.str();
 }
 
+void ChemicalSynapses::start_I_mean_std_record(){
+	I_mean_std_record = true;
+	I_mean.reserve(step_tot);
+	I_std.reserve(step_tot);
+}
+
+
 void ChemicalSynapses::output_results(ofstream& output_file, char delim, char indicator){
 	// SYND001 # synapse parameters
 	// count number of variables
@@ -368,6 +380,14 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 		write2file(output_file, delim, sample); // 2D matrix
 	}
 
+	
+	// SYND003 # currents mean and std
+	if (I_mean_std_record){
+		output_file << indicator << " SYND003" << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
+		write2file(output_file, delim, I_mean);
+		write2file(output_file, delim, I_std);
+	}
 	
 }
 
@@ -452,5 +472,37 @@ void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<int>
 	else {output_file << " " << endl;}
 }
 
+void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<double>& v){
+	if (!v.empty()){
+		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
+		for (unsigned int i = 0; i < v.size(); ++i){
+			output_file << v[i] << delim;
+		}
+		output_file << endl;
+	}
+	else {output_file << " " << endl;}
+}
 
 
+
+void ChemicalSynapses::record_I_mean_std(){
+	if (I_mean_std_record){
+		// get mean
+		double sum_mean = 0.0;
+		for (unsigned int i = 0; i < I.size(); ++i){
+			sum_mean += I[i];
+		}
+		double mean_tmp = sum_mean / double(I.size());
+	
+		// get std
+		double sum_std = 0.0;
+		for (unsigned int i = 0; i < I.size(); ++i){
+			sum_std += (I[i]-mean_tmp)*(I[i]-mean_tmp);
+		}
+		double std_tmp = sqrt( sum_std / double(I.size()));
+	
+		// record   
+		I_mean.push_back(mean_tmp);
+		I_std.push_back(std_tmp);
+	}
+}

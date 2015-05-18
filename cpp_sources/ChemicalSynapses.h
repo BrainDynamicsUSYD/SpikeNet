@@ -40,6 +40,10 @@ public:
 	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
 	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
 	void write2file(ofstream& output_file, char delim, vector<int>& v);
+	void write2file(ofstream& output_file, char delim, vector<double>& v);
+	
+	void start_I_mean_std_record();
+	void record_I_mean_std(); //
 	
 	
 protected:
@@ -70,8 +74,12 @@ protected:
 	// currents into post-synaptic population
 	vector<double>
 		I; 
-	
-	
+	//
+	bool
+		I_mean_std_record;
+	vector<double>
+		I_mean,
+		I_std;
 
 
 	// Data sampling

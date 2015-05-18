@@ -46,6 +46,28 @@ function Data = DiscardTransientData(Data)
             end
         end
         
+        %  
+        if any( strcmp(fieldnames(Data), 'popV') ) && ~isempty(Data.popV)
+            t_dis = 1:step_transient;
+            for pop = 1:length(Data.popV.V_mean)
+                if ~isempty(Data.popV.V_mean{pop})
+                    
+                    Data.popV.V_mean{pop}(t_dis) = [];
+                    Data.popV.V_std{pop}(t_dis) = [];
+                end
+            end
+        end
+        
+        if any( strcmp(fieldnames(Data), 'synI') ) && ~isempty(Data.synI)
+            t_dis = 1:step_transient;
+            for syn = 1:length(Data.synI)
+                Data.synI{syn}.I_mean(t_dis) = [];
+                Data.synI{syn}.I_std(t_dis) = [];
+            end
+        end
+        
+                
+        
         % synapse sample
         if any( strcmp(fieldnames(Data), 'syn_sample') ) && ~isempty(Data.syn_sample)
             for syn_ind = 1:length(Data.syn_sample)

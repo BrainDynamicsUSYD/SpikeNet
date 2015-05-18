@@ -44,11 +44,15 @@ writeNeuronSampling(FID, 2, ones(1,7), 1:6 , sample_steps);
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1:2, sample_steps)
 
+% V mean and std record
+writePopPotentialMeanStdRecord(FID, 1);
+
+% I mean and std record
+writeSynCurrentMeanStdRecord(FID, 1,  2, 1);
 
 % initial firing rate
 writeInitV(FID,[0.2,0.2]);
                     
-
 %%%%%%% write runaway killer
 min_ms = 10*1000; % 10 sec
 runaway_Hz = 20; % ??

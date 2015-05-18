@@ -165,6 +165,11 @@ Input data format is as following.
 	ind1, ind2, ..., indX, (post-synaptic sample neuron indices)
 	1, 1, 0, 0, ..., (1-by-step_tot logical values)
 	
+> SAMP003 #  membrane potential mean and std record
+	pop_ind,
+	
+> SAMP004 #  synaptic currents mean and std record
+	pop_ind_pre, pop_ind_post, syn_type,
 
 \end{lstlisting}
 
@@ -190,6 +195,11 @@ The output data format is as following.
 	parameter_name2, value2,
 	...
 
+> POPD003 # membrane potential mean and std
+	pop_ind,
+	mean_t1, mean_t2, ... (1-by-step_tot)
+	std_t1, std_t2, ... (1-by-step_tot)
+	
 > POPD004 # sampled neuron data
 	pop_ind, number_of_sample_neurons,
 	data_name1, ..., data_nameX,
@@ -207,6 +217,11 @@ The output data format is as following.
 > SYND002 # sampled synapse  data
 	pop_ind_pre, pop_ind_post, syn_type, number_of_sample_neurons,
 	data (sampled_neurons-by-sampled_steps matrix),
+
+> SYND003 # currents mean and std
+	pop_ind_pre, pop_ind_post, syn_type,
+	mean_t1, mean_t2, ... (1-by-step_tot)
+	std_t1, std_t2, ... (1-by-step_tot)
 	
 	
 
