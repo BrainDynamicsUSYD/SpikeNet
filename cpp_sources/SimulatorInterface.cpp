@@ -48,8 +48,8 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector< vector<int> > syn_sample_neurons; //
 	vector< vector<bool> > syn_sample_time_points; // the length of time vector
 	
-	vector<int> neuron_V_mean_std_setting;
-	vector< vector<int> > syn_I_mean_std_setting;
+	vector<int> neuron_stats_setting;
+	vector< vector<int> > syn_stats_setting;
 	
 	
 	string syn_filename; // name of file that defines synaptic connection
@@ -208,23 +208,23 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 			
-			// neuron_V_mean_std_record
+			// neuron_stats_record
 			found = line_str.find("SAMP003");
 			if (found != string::npos){// if found match
-				cout << "\t Reading neuron V mean and std record settings..." << endl;
+				cout << "\t Reading neuron stats record settings..." << endl;
 				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
 				// int pop_ind;
-				neuron_V_mean_std_setting.push_back(read_next_entry<int>(line_ss));
+				neuron_stats_setting.push_back(read_next_entry<int>(line_ss));
 				continue; // move to next line
 			}
 			
 			
-			// neuron_V_mean_std_record
+			// neuron_stats_record
 			found = line_str.find("SAMP004");
 			if (found != string::npos){// if found match
-				cout << "\t Reading synaptic currents mean and std record settings..." << endl;
-				syn_I_mean_std_setting.resize(syn_I_mean_std_setting.size()+1);
-				read_next_line_as_vector(syn_I_mean_std_setting.back());
+				cout << "\t Reading synaptic stats record settings..." << endl;
+				syn_stats_setting.resize(syn_stats_setting.size()+1);
+				read_next_line_as_vector(syn_stats_setting.back());
 				continue; // move to next line
 			}
 			
@@ -385,11 +385,11 @@ bool SimulatorInterface::import(string in_filename_input){
 	}	
 	
 	// neuron V mean std record settings
-	if (neuron_V_mean_std_setting.size() != 0){
-		cout << "\t Neuron V mean std record settings...";
-		for (unsigned int ind = 0; ind < neuron_V_mean_std_setting.size(); ++ind){
-			int pop_ind = neuron_V_mean_std_setting[ind];
-			network.NeuronPopArray[pop_ind].start_V_mean_std_record();
+	if (neuron_stats_setting.size() != 0){
+		cout << "\t Neuron stats record settings...";
+		for (unsigned int ind = 0; ind < neuron_stats_setting.size(); ++ind){
+			int pop_ind = neuron_stats_setting[ind];
+			network.NeuronPopArray[pop_ind].start_stats_record();
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -426,20 +426,20 @@ bool SimulatorInterface::import(string in_filename_input){
 
 
 	// syn I mean std record settings
-	if (syn_I_mean_std_setting.size() != 0){
-		cout << "\t Synapse I mean std record settings...";
-		for (unsigned int ind = 0; ind < syn_I_mean_std_setting.size(); ++ind){
+	if (syn_stats_setting.size() != 0){
+		cout << "\t Synapse stats record settings...";
+		for (unsigned int ind = 0; ind < syn_stats_setting.size(); ++ind){
 			
-			int pop_ind_pre = syn_I_mean_std_setting[ind][0];
-			int pop_ind_post = syn_I_mean_std_setting[ind][1];
-			int syn_type = syn_I_mean_std_setting[ind][2];
+			int pop_ind_pre = syn_stats_setting[ind][0];
+			int pop_ind_post = syn_stats_setting[ind][1];
+			int syn_type = syn_stats_setting[ind][2];
 			
 			int syn_I_match = false;
 			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
 				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
 					network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post &&
 				network.ChemicalSynapsesArray[s].synapses_type == syn_type){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].start_I_mean_std_record();
+					network.ChemicalSynapsesArray[s].start_stats_record();
 					cout << ind+1 << "...";
 					syn_I_match = true;
 				}

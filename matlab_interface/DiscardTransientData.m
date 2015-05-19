@@ -47,13 +47,16 @@ function Data = DiscardTransientData(Data)
         end
         
         %  
-        if any( strcmp(fieldnames(Data), 'popV') ) && ~isempty(Data.popV)
+        if any( strcmp(fieldnames(Data), 'pop_stats') ) && ~isempty(Data.pop_stats)
             t_dis = 1:step_transient;
-            for pop = 1:length(Data.popV.V_mean)
-                if ~isempty(Data.popV.V_mean{pop})
+            for pop = 1:length(Data.pop_stats.V_mean)
+                if ~isempty(Data.pop_stats.V_mean{pop})
                     
-                    Data.popV.V_mean{pop}(t_dis) = [];
-                    Data.popV.V_std{pop}(t_dis) = [];
+                    Data.pop_stats.V_mean{pop}(t_dis) = [];
+                    Data.pop_stats.V_std{pop}(t_dis) = [];
+                    
+                    Data.pop_stats.I_input_mean{pop}(t_dis) = [];
+                    Data.pop_stats.I_input_std{pop}(t_dis) = [];
                 end
             end
         end
@@ -70,11 +73,11 @@ function Data = DiscardTransientData(Data)
         
         % synapse sample
         if any( strcmp(fieldnames(Data), 'syn_sample') ) && ~isempty(Data.syn_sample)
-            for syn_ind = 1:length(Data.syn_sample)
-                t_dis = find(Data.syn_sample{syn_ind}.t_ind <= step_transient);
-                Data.syn_sample{syn_ind}.t_ind(t_dis) = [];
-                Data.syn_sample{syn_ind}.t_ind = Data.syn_sample{syn_ind}.t_ind - step_transient;
-                Data.syn_sample{syn_ind}.I(:,t_dis) = [];
+            for syn_statsnd = 1:length(Data.syn_sample)
+                t_dis = find(Data.syn_sample{syn_statsnd}.t_ind <= step_transient);
+                Data.syn_sample{syn_statsnd}.t_ind(t_dis) = [];
+                Data.syn_sample{syn_statsnd}.t_ind = Data.syn_sample{syn_statsnd}.t_ind - step_transient;
+                Data.syn_sample{syn_statsnd}.I(:,t_dis) = [];
                 
             end
         end

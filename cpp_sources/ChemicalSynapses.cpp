@@ -24,7 +24,7 @@ ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input){
 	tau_decay_NMDA = 80.0; // 80.0
 
 	// 
-	I_mean_std_record = false;
+	stats_record = false;
 }
 
 
@@ -258,7 +258,7 @@ void ChemicalSynapses::update(int step_current){
 	sample_data(step_current);
 	
 	//
-	record_I_mean_std();
+	record_stats();
 	
 }// update
 
@@ -352,8 +352,8 @@ string ChemicalSynapses::dump_para(char delim){
 	return dump.str();
 }
 
-void ChemicalSynapses::start_I_mean_std_record(){
-	I_mean_std_record = true;
+void ChemicalSynapses::start_stats_record(){
+	stats_record = true;
 	I_mean.reserve(step_tot);
 	I_std.reserve(step_tot);
 }
@@ -382,7 +382,7 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 
 	
 	// SYND003 # currents mean and std
-	if (I_mean_std_record){
+	if (stats_record){
 		output_file << indicator << " SYND003" << endl;
 		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
 		write2file(output_file, delim, I_mean);
@@ -485,8 +485,8 @@ void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<doub
 
 
 
-void ChemicalSynapses::record_I_mean_std(){
-	if (I_mean_std_record){
+void ChemicalSynapses::record_stats(){
+	if (stats_record){
 		// get mean
 		double sum_mean = 0.0;
 		for (unsigned int i = 0; i < I.size(); ++i){

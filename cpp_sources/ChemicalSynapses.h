@@ -42,8 +42,8 @@ public:
 	void write2file(ofstream& output_file, char delim, vector<int>& v);
 	void write2file(ofstream& output_file, char delim, vector<double>& v);
 	
-	void start_I_mean_std_record();
-	void record_I_mean_std(); //
+	void start_stats_record();
+	void record_stats(); //
 	
 	
 protected:
@@ -76,7 +76,7 @@ protected:
 		I; 
 	//
 	bool
-		I_mean_std_record;
+		stats_record;
 	vector<double>
 		I_mean,
 		I_std;

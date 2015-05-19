@@ -37,8 +37,8 @@ public:
 	void write2file(ofstream& output_file, char delim, vector<int>& v);
 	void write2file(ofstream& output_file, char delim, vector<double>& v);
 	
-	void start_V_mean_std_record();
-	void record_V_mean_std(); //
+	void start_stats_record();
+	void record_stats(); //
 	
 
 	void random_V(double firing_probability); // Generate random initial condition for V
@@ -90,6 +90,7 @@ protected:
 	vector<double>
 		V,   // Membrane potential
 		I_leak, // leaky current
+		I_input, // every input currents (I_leak not included)
 		I_AMPA, // current due to AMPA chemical synapses
 		I_GABA, // current due to AMPA chemical synapses
 		I_NMDA, // current due to AMPA chemical synapses
@@ -109,10 +110,12 @@ protected:
 		num_ref_pop; // number of refractory neurons at each time step
 
 	bool
-		V_mean_std_record;
+		stats_record;
 	vector<double>
 		V_mean,
-		V_std;
+		V_std,
+		I_input_mean,
+		I_input_std;
 		
 
 

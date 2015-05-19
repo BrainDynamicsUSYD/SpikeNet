@@ -50,6 +50,7 @@ void Neurons::init(){
 
 	// Initialise arrarys storing instantaneous neuron states
 	V.assign(N, V_lk); // All zeros	
+	I_input.assign(N, 0.0);
 	I_leak.assign(N, 0.0);
 	I_AMPA.assign(N, 0.0);
 	I_GABA.assign(N, 0.0);
@@ -75,14 +76,17 @@ void Neurons::init(){
 	step_killed = -1;
 	
 	//
-	V_mean_std_record = false;
+	stats_record = false;
 
 }
 
-void Neurons::start_V_mean_std_record(){
-	V_mean_std_record = true;
+void Neurons::start_stats_record(){
+	stats_record = true;
 	V_mean.reserve(step_tot);
 	V_std.reserve(step_tot);
+	
+	I_input_mean.reserve(step_tot);
+	I_input_std.reserve(step_tot);
 }
 
 
@@ -219,18 +223,19 @@ void Neurons::update_V(int step_current){
 	// update menbrane potentials
 	double Vdot;
 	for (int i = 0; i < N; ++i){
+		I_input[i] = I_AMPA[i] + I_GABA[i] + I_NMDA[i] + I_GJ[i] + I_ext[i];
 		if (ref_step_left[i] == 0){ // Only update the non-refractory neurons
 			// leaky current
 			I_leak[i] = -g_lk * (V[i] - V_lk); 
 			// using simple Euler method
-			Vdot = (I_leak[i] + I_AMPA[i] + I_GABA[i] + I_NMDA[i] + I_GJ[i] + I_ext[i])/Cm;
+			Vdot = (I_leak[i] + I_input[i])/Cm;
 			V[i] += Vdot * dt;
 			// Note that delta-function coupling is very different from the above conductance-based model!
 		}
 	}
 
 	// record mean and std of membrane potentials
-	record_V_mean_std();
+	record_stats();
 	
 }
 
@@ -348,11 +353,13 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 	output_file << para_str;
 
 	// POPD003 # membrane potential mean and std
-	if (V_mean_std_record){
+	if (stats_record){
 		output_file << indicator << " POPD003" << endl;
 		output_file << pop_ind << delim << endl;
 		write2file(output_file, delim, V_mean);
 		write2file(output_file, delim, V_std);
+		write2file(output_file, delim, I_input_mean);
+		write2file(output_file, delim, I_input_std);
 	}
 	
 
@@ -437,25 +444,35 @@ void Neurons::write2file(ofstream& output_file, char delim, vector<double>& v){
 
 
 
-void Neurons::record_V_mean_std(){
-	if (V_mean_std_record){
+void Neurons::record_stats(){
+	if (stats_record){
 		// get mean
-		double sum_mean = 0.0;
+		double sum_mean_V = 0.0;
+		double sum_mean_I = 0.0;
 		for (unsigned int i = 0; i < V.size(); ++i){
-			sum_mean += V[i];
+			sum_mean_V += V[i];
+			sum_mean_I += I_input[i];
 		}
-		double mean_tmp = sum_mean / double(V.size());
+		double mean_tmp_V = sum_mean_V / double(V.size());
+		double mean_tmp_I = sum_mean_I / double(V.size());
 	
 		// get std
-		double sum_std = 0.0;
+		double sum_std_V = 0.0;
+		double sum_std_I = 0.0;
 		for (unsigned int i = 0; i < V.size(); ++i){
-			sum_std += (V[i]-mean_tmp)*(V[i]-mean_tmp);
+			sum_std_V += (V[i]-mean_tmp_V)*(V[i]-mean_tmp_V);
+			sum_std_I += (I_input[i]-mean_tmp_I)*(I_input[i]-mean_tmp_I);
 		}
-		double std_tmp = sqrt( sum_std / double(V.size()));
+		double std_tmp_V = sqrt( sum_std_V / double(V.size()));
+		double std_tmp_I = sqrt( sum_std_I / double(V.size()));
 	
 		// record   
-		V_mean.push_back(mean_tmp);
-		V_std.push_back(std_tmp);
+		V_mean.push_back(mean_tmp_V);
+		V_std.push_back(std_tmp_V);
+		I_input_mean.push_back(mean_tmp_I);
+		I_input_std.push_back(std_tmp_I);
+		
+		
 	}
 }
 

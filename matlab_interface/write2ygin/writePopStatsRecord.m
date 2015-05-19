@@ -1,4 +1,4 @@
-function writePopPotentialMeanStdRecord(FID, pop_ind)
+function writePopStatsRecord(FID, pop_ind)
 
 % for C/C++ index convetion
 pop_ind = pop_ind-1;

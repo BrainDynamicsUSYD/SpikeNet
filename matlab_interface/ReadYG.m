@@ -64,7 +64,7 @@ for id_out = 1:length(files)
     OutData{id_out}.num_ref = cell(0,0);
     OutData{id_out}.neuron_sample = [];
     OutData{id_out}.syn_sample = cell(0,0);
-    OutData{id_out}.synI = cell(0,0);
+    OutData{id_out}.syn_stats = cell(0,0);
     OutData{id_out}.ExplVar = [];
     OutData{id_out}.PopPara = cell(0,0);
     OutData{id_out}.SynPara = cell(0,0);
@@ -112,9 +112,16 @@ for id_out = 1:length(files)
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 V_std = transpose(scan_temp{1});
-                OutData{id_out}.popV.V_mean{pop_ind} = V_mean;
-                OutData{id_out}.popV.V_std{pop_ind} = V_std;
-                
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%f','Delimiter',',');
+                I_input_mean = transpose(scan_temp{1});
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%f','Delimiter',',');
+                I_input_std = transpose(scan_temp{1});
+                OutData{id_out}.pop_stats.V_mean{pop_ind} = V_mean;
+                OutData{id_out}.pop_stats.V_std{pop_ind} = V_std;
+                OutData{id_out}.pop_stats.I_input_mean{pop_ind} = I_input_mean;
+                OutData{id_out}.pop_stats.I_input_std{pop_ind} = I_input_std;
                 
                 
                        
@@ -187,17 +194,17 @@ for id_out = 1:length(files)
             elseif strfind(tline,'SYND003')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline, '%d', 'Delimiter', ',');
-                OutData{id_out}.synI{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
-                OutData{id_out}.synI{end,1}.pop_ind_post = scan_temp{1}(2)+1; % Be careful here! C/C++ index convection!
-                OutData{id_out}.synI{end,1}.syn_type = scan_temp{1}(3)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_stats{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_stats{end,1}.pop_ind_post = scan_temp{1}(2)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_stats{end,1}.syn_type = scan_temp{1}(3)+1; % Be careful here! C/C++ index convection!
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 I_mean = transpose(scan_temp{1});
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 I_std = transpose(scan_temp{1});
-                OutData{id_out}.synI{end}.I_mean = I_mean;
-                OutData{id_out}.synI{end}.I_std = I_std;
+                OutData{id_out}.syn_stats{end}.I_mean = I_mean;
+                OutData{id_out}.syn_stats{end}.I_std = I_std;
                 
                 
             elseif strfind(tline,'POPD002')

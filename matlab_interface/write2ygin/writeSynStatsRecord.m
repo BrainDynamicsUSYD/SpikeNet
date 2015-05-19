@@ -1,4 +1,4 @@
-function writeSynCurrentMeanStdRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
+function writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
 
 
 
