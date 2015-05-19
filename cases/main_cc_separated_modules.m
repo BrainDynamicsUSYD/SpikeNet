@@ -22,7 +22,7 @@ Num_pop = length(N);
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 400*sec; % use 10 second!
+step_tot = 100*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -79,18 +79,20 @@ for I_ext_strength = 1.5 * ones(1,50) % 1.3-1.35
     
     %%%%%%% data sampling
     sample_pop = 1;
-    sample_neurons = 1:2; %40:40:400;
-    sample_steps = zeros(1,step_tot);
-    sample_steps(1:100:end) = 1;
-    writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neurons, sample_steps);
+%     sample_neurons = 1:2; %40:40:400;
+%     sample_steps = zeros(1,step_tot);
+%     sample_steps(1:100:end) = 1;
+    %writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neurons, sample_steps);
+    writePopStatsRecord(FID, sample_pop);
     for pop_ind_pre = 1:Num_pop
         pop_ind_post = sample_pop;
-	if pop_ind_pre == Num_pop
-		syn_type = 2;
-	else
-        	syn_type = 1;
+        if pop_ind_pre == Num_pop
+            syn_type = 2;
+        else
+            syn_type = 1;
         end
- 	writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
+        %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
+        writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
     end
     
     
