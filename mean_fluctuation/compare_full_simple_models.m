@@ -1,20 +1,21 @@
 
 clc;clear all;close all;
-R = load('001-201505181500-15181_1431927741273_RYG.mat');
+% R = load('001-201505181500-15181_1431927741273_RYG.mat');
 
 
 % %%%%%%%%%%%%% compare V_mean time serious
 
-V_mean = R.popV.V_mean{1};
-V_std = R.popV.V_std{1};
+V_mean = R.pop_stats.V_mean{1};
+V_std = R.pop_stats.V_std{1};
+I_mean = R.pop_stats.I_input_mean{1}; % constant current
+I_std = R.pop_stats.I_input_std{1};
 
-I_mean = ones(size(V_mean))*1.5; % constant current
-I_std2 = zeros(size(V_mean));
+
+I_std_comp = zeros(size(I_std));
 for i = 1:9
-    I_mean = I_mean + R.synI{i}.I_mean;
-    I_std2 = I_std2 + (R.synI{i}.I_std).^2; % this part is probably wrong!!!s
+    I_std_comp = I_std_comp + (R.syn_stats{i}.I_std).^2; % this part is probably wrong!!!s
 end
-
+I_std_comp = I_std_comp.^0.5;
 
 % % subsampling
 % DT = 2;
@@ -26,7 +27,7 @@ end
 
 xData = I_mean;
 yData = V_mean;
-zData = I_std2.^0.5;
+zData = I_std;
 
 i_begin = 4.8*10^4;
 i_step = 2;
@@ -47,7 +48,7 @@ ylim(minmax(yData(seg)));
 zlim(minmax(zData(seg)));
 
 hold on;
-;
+
 i_pre = i_begin;
 for i = seg
     
