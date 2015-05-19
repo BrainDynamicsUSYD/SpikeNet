@@ -61,11 +61,11 @@ function Data = DiscardTransientData(Data)
             end
         end
         
-        if any( strcmp(fieldnames(Data), 'synI') ) && ~isempty(Data.synI)
+        if any( strcmp(fieldnames(Data), 'syn_stats') ) && ~isempty(Data.syn_stats)
             t_dis = 1:step_transient;
-            for syn = 1:length(Data.synI)
-                Data.synI{syn}.I_mean(t_dis) = [];
-                Data.synI{syn}.I_std(t_dis) = [];
+            for syn = 1:length(Data.syn_stats)
+                Data.syn_stats{syn}.I_mean(t_dis) = [];
+                Data.syn_stats{syn}.I_std(t_dis) = [];
             end
         end
         

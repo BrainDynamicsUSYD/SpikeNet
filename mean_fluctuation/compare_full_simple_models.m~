@@ -17,7 +17,7 @@ I_std = R.pop_stats.I_input_std{1};
 %     I_std_comp = I_std_comp + (R.syn_stats{i}.I_std(5001:end)).^2;
 % end
 % I_std_comp = I_std_comp.^0.5;
-% % the above is not always a good assumption
+% % the above is
 
 
 % % subsampling
