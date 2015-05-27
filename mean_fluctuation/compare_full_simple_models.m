@@ -1,7 +1,7 @@
 
 clc;clear all;close all;
 
-R=  load('012-201505191310-17121_1432011996519_RYG.mat');
+R=  load('~/Desktop/012-201505191310-17121_1432011996519_RYG.mat');
 % %%%%%%%%%%%%% compare V_mean time serious
 
 V_mean = R.pop_stats.V_mean{1};
@@ -17,9 +17,9 @@ gaussFilter = exp(-x .^ 2 / (2 * sigma ^ 2));
 gaussFilter = gaussFilter / sum (gaussFilter); %
 num_spikes_sm = transpose(filter(gaussFilter,1, num_spikes'));
 
-xData = I_mean;
-yData = V_mean;
-zData = I_std;
+xData = V_mean;
+yData = V_std;
+zData = num_spikes;
 cData = num_spikes_sm;
 
 

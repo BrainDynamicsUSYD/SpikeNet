@@ -1,5 +1,5 @@
 
-function  [ R ] = simulate_mean_fluc(N_pop, step_tot, dt, c, j, mu_ext )
+function  [ R ] = simulate_mean_fluc(N_pop, step_tot, dt, c, j, mu_ext, sigma_ext )
 
 h = waitbar(0,'Please wait...');
 
@@ -32,8 +32,9 @@ sigma2_V(:,1) = rand(N_pop,1)*5.496^2;
 
 % external inputs (identical to all populations)
 % mu_ext = 0.5*ones(1, step_tot);
-sigma_ext = zeros(1, step_tot);
-
+if nargin == 6
+    sigma_ext = zeros(1, step_tot);
+end
 
 % 4e4 steps take about 1 min to finish
 for t = 2:step_tot
