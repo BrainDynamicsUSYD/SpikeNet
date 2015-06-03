@@ -6,16 +6,32 @@ function solve_conductance()
 
 clc;clear;close all;
 
-% my_fun =  @(v) phi(v) - v;
+ 
 % v_guess = 2*ones(9,1)/1000; % KHz = 1/ms
 % v_guess = 10*rand(9,1)/1000; % KHz = 1/ms
 % v_guess = [20; ones(7,1); 20] /1000; % KHz = 1/ms
-% v_fixed = fsolve( my_fun, v_guess)
+v_guess = [rand(7,1); 20; 20] /1000; % KHz = 1/ms
+
+% v_guess = zeros(9,1);
+v_guess = [2; 20; zeros(6,1); 20] /1000; % KHz = 1/ms
+v_guess = [rand(8,1)*10; 10] /1000; % KHz = 1/ms
+v_guess = [rand(7,1)*2; 4; 10] /1000; % KHz = 1/ms
+
+% v_guess = [20; 5; 2; 2; 0.5*ones(4,1); 20] /1000; % KHz = 1/ms
+
+my_fun =  @(v) phi(v) - v;
+v_fixed = fsolve( my_fun, v_guess)
+
+A = jacobi(my_fun,v_fixed, 1e-5);
+E = eig(A)
+A = jacobi(my_fun,v_fixed, 1e-6);
+E = eig(A)
+
+v_fixed_new = phi(v_fixed)*1000 %Hz
 
 
-v_guess = [1; ones(7,1); 2] /1000; % KHz = 1/ms
-v_guess = zeros(9,1);
-v_new = phi(v_guess)
+
+
 
 end
 
@@ -44,6 +60,10 @@ Iapp = 1.5; % nA
 
 % get sbar 
 sbar = tau_syn .* v;  % this linear approximation could be problematic; consider use emperical results
+if sum(sbar > 0.5) > 0
+    warning('Linear sbar approximation could be inaccurate due to large firing rate')
+end
+
 
 % get gL_eff
 gL_eff = gL + mtimes(C.*g, sbar);
@@ -63,20 +83,31 @@ sigma_C_eff = (  mtimes(C.*(g.^2),  sbar.*tau_syn.*((Vbar - Vrev).^2))  ).^0.5; 
 sigma_V_eff = sigma_C_eff./((tau_m_eff.^0.5).*gL_eff); % I added this equation because I believe there is a mistake in (15.62)
 
 % get V_th_eff & V_r_eff
-alpha = 1.03;
-k = (tau_syn_avg ./ tau_m_eff).^0.5; % this is my own approximation, which can be problematic; 
+% ref : Firing Frequency of Leaky Integrate-and-fire Neurons with Synaptic Current Dynamics
 % This first order correction is in good agreement with the results from
 % numerical simulations for tau_syn < 0.1*tau_m
+alpha = 1.03;
+k = (tau_syn_avg ./ tau_m_eff).^0.5; % this is my own approximation, which can be problematic; 
 Vth_eff = Vth + sigma_V_eff .* alpha .* k;
 Vr_eff = Vr + sigma_V_eff .* alpha .* k;
+% Second order correction (should be good for 0<k<1)
+% if sum(k > 1) > 0
+%     warning('tau_syn / tau_m is larger than 1.')
+% end
+beta0 = -0.35;
+beta1 = 0.27;
+beta = beta0 + beta1*(Vth - Vss)./sigma_V_eff;
+Vth_eff = Vth + sigma_V_eff .* (alpha.*k  + beta.*k.^2);
+Vr_eff = Vr + sigma_V_eff .* (alpha.*k  + beta.*k.^2);
+
 
 % get upper & lower limits of the integral
 upper = (Vth_eff - Vss)./sigma_V_eff;
 lower = (Vr_eff - Vss)./sigma_V_eff;
-if sum( upper <= lower ) > 0
-    upper, lower
-    pause;
-end
+% if sum( upper <= lower ) > 0
+%     upper, lower
+%     pause;
+% end
 
 % calculate firing rate 
 v_new = zeros(size(v));
@@ -84,7 +115,6 @@ fx = @(x) exp(x.^2).*(1+erf(x));
 for i = 1:length(v);
     v_new(i) = 1/(tau_ref + tau_m_eff(i)*sqrt(pi)*integral(fx, lower(i), upper(i))); % can matlab integral() be counted on?!
 end
-
 
 
 end
@@ -121,8 +151,8 @@ Kmat = [2.4*EE_factor  1.4;
         4.5  5.7*II_factor]*kk*10^-3; % miuSiemens
 J = zeros(9,9);
 J(1:8,1:8) = Kmat(1,1);
-J(9,1:8) = Kmat(2,1);
-J(1:8,9) = Kmat(1,2);
+J(9,1:8) = Kmat(1,2);  % be very careful here!
+J(1:8,9) = Kmat(2,1); % be very careful here!
 J(9,9) = Kmat(2,2);
     
 end
