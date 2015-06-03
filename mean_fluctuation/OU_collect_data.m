@@ -21,7 +21,7 @@ data.sigma_c = [];
 
 
 
-loop_num = 1;
+loop_num = 0;
 
 for gL = 0.08:0.01:0.11;
     for Vss = 10:1:14;
@@ -96,7 +96,7 @@ for gL = 0.08:0.01:0.11;
                 % % Harmonic oscillator in heat bath: Exact simulation of time-lapse-recorded data
                 % % and exact analytical benchmark statistics
                 
-                ntrails = 2000;
+                ntrails = 10000;
                 dt = 0.1;
                 fpt = zeros(1, ntrails); % first passage time
                 

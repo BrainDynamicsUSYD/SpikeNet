@@ -10,7 +10,7 @@ tau_syn = 4; % this could be problematic
 
 
 % parameters (4 is too many?)
-tau_m = 3;
+tau_m = 10;
 Vss = 12;
 gL = 0.1;
 sigma_c = 1.4;
@@ -69,21 +69,47 @@ damping_ratio = 0.5*(sqrt(tau_syn/tau_m) + sqrt(tau_m/tau_syn)); % always >= 1
 % the harmonic oscillator is always overdamped, 
 % except when tau_m = tau_syn, which gives a critically damped case.
 
+
+
 w =  sqrt( w0^2 - 1/(4*tau^2) ); % cyclic freq of the damped oscillator
-J = [1/(2*w*tau)  1/w;
-    -w0^2/w  -1/(2*w*tau)]; % eq (10)
-e_Mdt = exp(-dt/(2*tau))*( cos(w*dt)*eye(2) + sin(w*dt)*J ); % eq (9)
 D = sigma_c^2/(2*gL^2*(tau_syn+tau_m)^2); % simple algebra by me
 
-sigma_xx_2 = D/(4*w^2*w0^2*tau^3)*...
-    (4*w^2*tau^2 + exp(-dt/tau) * (cos(2*w*dt) - 2*w*tau*sin(2*w*dt) - 4*w0^2*tau^2)); % eq (15)
+% % note that when tau_syn and tau_m becomes similar, w blows up everything
+% % in the following expressions
+% J = [1/(2*w*tau)  1/w;
+%     -w0^2/w  -1/(2*w*tau)]; % eq (10)
+% e_Mdt = exp(-dt/(2*tau))*( cos(w*dt)*eye(2) + sin(w*dt)*J ); % eq (9)
+% sigma_xx_2 = D/(4*w^2*w0^2*tau^3)*...
+%     (4*w^2*tau^2 + exp(-dt/tau) * (cos(2*w*dt) - 2*w*tau*sin(2*w*dt) - 4*w0^2*tau^2)); % eq (15)
+% sigma_xx = sqrt(sigma_xx_2);
+% sigma_vv_2 = D/(4*w^2*tau^3)*...
+%     (4*w^2*tau^2 + exp(-dt/tau) * (cos(2*w*dt) + 2*w*tau*sin(2*w*dt) - 4*w0^2*tau^2)); % eq (16)
+% sigma_vv = sqrt(sigma_vv_2);
+% sigma_xv = sqrt(  D/(w^2*tau^2)*exp(-dt/tau)*sin(w*dt)^2 ); % eq (17)
+
+
+% To avoid blowing up near tau_syn = tau_m (damping ratio = 1), use the 
+% following expressions which make use of sinc() function in matlab 
+% for more info, type help sinc
+J = [dt/(2*tau)  dt;
+    -w0^2*dt  -dt/(2*tau)];
+e_Mdt = exp(-dt/(2*tau))*( cos(w*dt)*eye(2) + sinc(w*dt/pi)*J );
+sigma_xx_2 = D/(w0^2*tau) - D*exp(-dt/tau)/(w0^2*tau^3)*...
+    (0.5*dt^2*(sinc(w*dt/pi))^2 + tau*dt*sinc(2*w*dt/pi) + tau^2);
 sigma_xx = sqrt(sigma_xx_2);
-
-sigma_vv_2 = D/(4*w^2*tau^3)*...
-    (4*w^2*tau^2 + exp(-dt/tau) * (cos(2*w*dt) + 2*w*tau*sin(2*w*dt) - 4*w0^2*tau^2)); % eq (16)
+sigma_vv_2 = D/tau - D*exp(-dt/tau)/(tau^3)*...
+    (0.5*dt^2*(sinc(w*dt/pi))^2 - tau*dt*sinc(2*w*dt/pi) + tau^2);
 sigma_vv = sqrt(sigma_vv_2);
+sigma_xv = sqrt(  dt^2*D*exp(-dt/tau)/(tau^2)*(sinc(w*dt/pi))^2 ); 
 
-sigma_xv = sqrt(  D/(w^2*tau^2)*exp(-dt/tau)*sin(w*dt)^2 ); % eq (17)
+
+
+
+
+
+
+
+
 
 h = waitbar(0,'Please wait...');
 for i = 1:ntrails
