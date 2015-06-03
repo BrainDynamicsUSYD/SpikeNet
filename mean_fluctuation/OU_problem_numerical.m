@@ -62,6 +62,13 @@ gamma = 1+tau_m/tau_syn; % friction coefficient
 k = 1/tau_syn; % Hooke's constant
 w0 = sqrt(k/m);
 tau = m/gamma;
+
+% damping_ratio = gamma/(2*sqrt(m*k))
+damping_ratio = 0.5*(sqrt(tau_syn/tau_m) + sqrt(tau_m/tau_syn)); % always >= 1
+% note that according to the above expression
+% the harmonic oscillator is always overdamped, 
+% except when tau_m = tau_syn, which gives a critically damped case.
+
 w =  sqrt( w0^2 - 1/(4*tau^2) ); % cyclic freq of the damped oscillator
 J = [1/(2*w*tau)  1/w;
     -w0^2/w  -1/(2*w*tau)]; % eq (10)
