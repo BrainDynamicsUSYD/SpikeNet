@@ -1,4 +1,4 @@
-function R = get_cluster_rate(R)
+function R = get_cluster_rate(R, CC_kernel_width)
 
     Mnum = R.ExplVar.Mnum;
     N = R.N;
@@ -7,7 +7,9 @@ function R = get_cluster_rate(R)
     spike_hist = R.reduced.spike_hist;
 
     % kernel for rate estimation
-    CC_kernel_width = 50; % ms, kernel length
+    if nargin == 1
+        CC_kernel_width = 50; % ms, kernel length
+    end
     choice = 'gaussian';
     kernel = spike_train_kernel_YG(CC_kernel_width, dt, choice);
     
