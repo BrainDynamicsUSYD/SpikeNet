@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <random> //<boost/random.hpp>
 #include <cmath>
-#include <algorithm>
+#include <algorithm> // for transform
 #include <stdio.h> // for printf
 #include <time.h>       /* time */
 
@@ -11,7 +11,7 @@
 
 
 #include "Neurons.h"
-#include <functional> // for bind() 
+#include <functional> // for bind(), plus
 // no need to include what have been included in the header file
 
 Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_input){
@@ -87,6 +87,9 @@ void Neurons::start_stats_record(){
 	
 	I_input_mean.reserve(step_tot);
 	I_input_std.reserve(step_tot);
+	
+	I_input_acc.assign(N, 0.0);
+	I_input_time_avg.assign(N, 0.0);
 }
 
 
@@ -235,7 +238,7 @@ void Neurons::update_V(int step_current){
 	}
 
 	// record mean and std of membrane potentials
-	record_stats();
+	record_stats(step_current);
 	
 }
 
@@ -362,6 +365,13 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 		write2file(output_file, delim, I_input_std);
 	}
 	
+	// POPD005 # time average of input currents for each neuron
+	if (stats_record){
+		output_file << indicator << " POPD005" << endl;
+		output_file << pop_ind << delim << endl;
+		write2file(output_file, delim, I_input_time_avg);
+	}
+	
 
 	// POPD004 # sampled neuron data
 	if (!sample_neurons.empty()){
@@ -444,7 +454,7 @@ void Neurons::write2file(ofstream& output_file, char delim, vector<double>& v){
 
 
 
-void Neurons::record_stats(){
+void Neurons::record_stats(int step_current){
 	if (stats_record){
 		// get mean
 		double sum_mean_V = 0.0;
@@ -471,8 +481,17 @@ void Neurons::record_stats(){
 		V_std.push_back(std_tmp_V);
 		I_input_mean.push_back(mean_tmp_I);
 		I_input_std.push_back(std_tmp_I);
+		// accumulate
+		//for (unsigned int i = 0; i < N; ++i){ // this manual loop is slow, use transform()
+		//	I_input_acc[i] += I_input[i];
+		//}
+		transform( I_input_acc.begin(), I_input_acc.end(), I_input.begin(), I_input_acc.begin(), plus<double>() );
 		
-		
+		if (step_current == step_tot - 1){ // at the end of the last time step
+			for (unsigned int i = 0; i < N; ++i){
+				I_input_time_avg[i] = I_input_acc[i] / step_tot; // time average for each neuron
+			}
+		}
 	}
 }
 

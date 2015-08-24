@@ -38,7 +38,7 @@ public:
 	void write2file(ofstream& output_file, char delim, vector<double>& v);
 	
 	void start_stats_record();
-	void record_stats(); //
+	void record_stats(int step_current); //
 	
 
 	void random_V(double firing_probability); // Generate random initial condition for V
@@ -112,10 +112,12 @@ protected:
 	bool
 		stats_record;
 	vector<double>
-		V_mean,
+		V_mean, // averaged over neurons at one time step
 		V_std,
 		I_input_mean,
-		I_input_std;
+		I_input_std,
+		I_input_acc, // accumulator for net input currents into each neuron
+		I_input_time_avg; // averaged over time for each neuron
 		
 
 

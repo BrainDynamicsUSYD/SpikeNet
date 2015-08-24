@@ -39,12 +39,12 @@ end
 
 % level label
 if level_label == 1 % left
-    for i = 1:level
+    for i = 2:level
         l_label = sprintf('l=%d',i-1);
         text( -1.5, i*height, l_label,'VerticalAlignment','middle','fontsize',text_fontsize );
     end
 elseif level_label == -1 % right
-    for i = 1:level
+    for i = 2:level
         l_label = sprintf('l=%d',i-1);
         text( 2^(level-1)+1.5, i*height, l_label,'VerticalAlignment','middle','fontsize',text_fontsize );
     end
