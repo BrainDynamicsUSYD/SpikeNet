@@ -57,7 +57,7 @@ if nnz(num_spikes) > 0
             sample_color = (sample_color-min(sample_color))/(diff(minmax(sample_color)));
         end
         sample_color(sample_color == 0) = eps; % otherwise ceil() will give 0
-        jetmap = colormap('jet(1000)');
+        jetmap = colormap('parula(1000)');
         
         for i = 1:length(ind_sample)
             color_tmp = jetmap( ceil(sample_color(i)*1000),:);
@@ -66,7 +66,7 @@ if nnz(num_spikes) > 0
             ydata = [Y(:)'-1;Y(:)']+i-1;
             line(xdata, ydata, 'Color', color_tmp,'linewidth',0.1);
         end
-        colormap('jet');
+        colormap('parula');
     end
     
     

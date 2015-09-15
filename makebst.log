@@ -1,0 +1,57 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=latex 2015.3.31)  1 SEP 2015 17:56
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**makebst
+(/usr/local/texlive/2014/texmf-dist/tex/latex/custom-bib/makebst.tex
+LaTeX2e <2014/05/01>
+Babel <3.9k> and hyphenation patterns for 78 languages loaded.
+\outfile=\write3
+\ttyin=\read1
+\infile=\read2
+\ttyout=\write4
+\hours=\count79
+\minutes=\count80
+***********************************
+* This is Make Bibliography Style *
+***********************************
+It makes up a docstrip batch job to produce
+a customized .bst file for running with BibTeX
+Do you want a description of the usage? (NO)
+
+\yn=y
+In the interactive dialogue that follows,
+you will be presented with a series of menus.
+In each case, one answer is the default, marked as (*),
+and a mere carriage-return is sufficient to select it.
+(If there is no * choice, then the default is the last choice.)
+For the other choices, a letter is indicated
+in brackets for selecting that option. If you select
+a letter not in the list, default is taken.
+
+The final output is a file containing a batch job
+which may be (La)TeXed to produce the desired BibTeX
+bibliography style file. The batch job may be edited
+to make minor changes, rather than running this program
+once again.
+
+Enter the name of the MASTER file (default=merlin.mbs)
+
+\mfile=
+! Emergency stop.
+<read 1> 
+         
+l.231 ...me of the MASTER file}(merlin.mbs)i\mfile
+                                                  
+End of file on the terminal!
+
+ 
+Here is how much of TeX's memory you used:
+ 64 strings out of 493118
+ 669 string characters out of 6135459
+ 52906 words of memory out of 5000000
+ 3626 multiletter control sequences out of 15000+600000
+ 3640 words of font info for 14 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 6i,0n,8p,83b,8s stack positions out of 5000i,500n,10000p,200000b,80000s
+No pages of output.
