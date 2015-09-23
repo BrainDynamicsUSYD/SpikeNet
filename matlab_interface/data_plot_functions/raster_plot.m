@@ -40,7 +40,7 @@ T = seg_ind*dt;
 % Plot raster plot
 if nnz(num_spikes) > 0
     % down-sampling
-    if N(pop_ind) >= sample_size
+    if N(pop_ind) > sample_size
         ind_sample = ceil(linspace(1,N(pop_ind),sample_size));
     else
         ind_sample = 1:1:N(pop_ind);

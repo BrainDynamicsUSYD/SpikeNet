@@ -1,3 +1,4 @@
+
 function [ Kernel ] = spike_train_kernel_YG( width, dt, choice )
 %UNTITLED2 Summary of this function goes here
 %   width and dt in msec
