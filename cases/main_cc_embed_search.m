@@ -4,33 +4,25 @@ function main_cc_embed_search(varargin)
 % Hunt it down!!!
 
 
-% % varargin is for PBS arrary job
-% if nargin == 0
-%     clc;clear;close all;
-%     cd /headnode2/yifan/Project2/source2
-%     addpath(genpath(cd));
-%     cd ../tmp_data
-% %     cd ~/tmp_data;
-% end % Basic parameters
-
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 1*sec; % use 10 second!
+step_tot = 2*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
 
 
 discard_transient = 500; % ms
-EE_factor = 0.6;
+for EE_factor = 0.4:0.1:0.6; % 0.6?
 II_factor = 0.8;
-rr = 0.7; % this is different from 0.6!!
+% rr = 0.7; % this is different from 0.6!!
 kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
-
-for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
-    for I_ext_strength = [1.3 1.4 1.5]
-        for  tau_c = 0.5:0.1:1;
+for rr = [0.6 0.7]
+for degree_CV = [0.25 0.5 0.75 1.0] % 0.5?
+for  P0_init = 0.2 %[0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
+    for I_ext_strength = 1.5 % [1.3 1.4 1.5]
+        for  tau_c = 0.1:0.1:0.8 %0.5:0.1:1;
             
             loop_num = loop_num + 1;
             
@@ -47,7 +39,6 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
             
             hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000
             
-            degree_CV = 0.5; % CV = std/mean
             [ll_matrix, N_e, ~] = spatial_embed_network(hw, P0_init, degree_CV, tau_c);
             [I_e,J_e,~] = find(ll_matrix);
             
@@ -155,7 +146,8 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
                 'I_ext_strength', I_ext_strength,...
                 'P0_init', P0_init, ...
                 'degree_CV', degree_CV,...
-                'in_deg_scale_exp', in_deg_scale_exp);
+                'in_deg_scale_exp', in_deg_scale_exp, ...
+		'tau_c', tau_c);
             
             
             % Adding comments in raster plot
@@ -171,7 +163,9 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
         end
     end
 end
-
+end
+end
+end
 end
 
 
