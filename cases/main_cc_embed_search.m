@@ -14,15 +14,15 @@ loop_num = 0;
 
 
 discard_transient = 500; % ms
-for EE_factor = 0.4:0.1:0.6; % 0.6?
-II_factor = 0.8;
+for EE_factor = 0.6 %0.4:0.1:0.6; % 0.6?
+for II_factor = 0.8:0.2:1.2;
 % rr = 0.7; % this is different from 0.6!!
 kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
-for rr = [0.6 0.7]
-for degree_CV = [0.25 0.5 0.75 1.0] % 0.5?
-for  P0_init = 0.2 %[0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
-    for I_ext_strength = 1.5 % [1.3 1.4 1.5]
-        for  tau_c = 0.1:0.1:0.8 %0.5:0.1:1;
+for rr = 0.6 %[0.6 0.7]
+for degree_CV = [1 ] %[0.25 0.5 0.75 1.0] % 0.5?
+for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
+    for I_ext_strength =  [1.3 1.4 1.5]
+        for  tau_c = 0.8:0.2:1.6 %0.1:0.1:0.8 %0.5:0.1:1;
             
             loop_num = loop_num + 1;
             
@@ -162,6 +162,7 @@ for  P0_init = 0.2 %[0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
             disp('Matlab pre-processing done.')
         end
     end
+end
 end
 end
 end
