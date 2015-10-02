@@ -155,17 +155,20 @@ for id_out = 1:length(files)
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 OutData{id_out}.neuron_sample.t_ind{pop_ind,1} = find(scan_temp{1}); % extract t_ind for pop_sample
-
-            elseif strfind(tline,'POPD005')
+                
+                
+               elseif strfind(tline,'POPD005')
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%d','Delimiter',',');
                 pop_ind = scan_temp{1}+1; % be careful here!
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 I_input_time_avg = transpose(scan_temp{1});
+                
                 OutData{id_out}.pop_stats.I_input_time_avg{pop_ind} = I_input_time_avg;
                 
-   
+                
+                
                
             elseif strfind(tline,'SYND002')
                 tline = fgetl(FID);
