@@ -52,8 +52,9 @@ if cutoff == 1
                 end
             end
             seq(1:h) = [];
+            h_fin = h_fin + h;
         end
-        h_fin = h_fin + h;
+
     end
     if ~isempty(seq)
         tail = seq(end);
