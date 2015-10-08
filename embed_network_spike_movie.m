@@ -1,4 +1,4 @@
-% vivvsual the spiking pattern of the spatially embedded network
+% vivvvsual the spiking pattern of the spatially embedded network
 
 N = R.N(1);
 hw = (sqrt(N)-1)/2;
@@ -16,11 +16,13 @@ box on;
 hold on;
 h1 = plot(0, 0, 'rx');
 
-for t = 1:step_tot
+for t = 1:(step_tot/2)
     spikes_t = find(spike_hist(:,t));
     delete(h1);
     h1 = plot(Lattice(spikes_t,1), Lattice(spikes_t,2), 'rx');
     pause(0.05);
     
     xlabel([num2str(t*dt/1000),' sec']);
+    
+    M(t) = getframe(gcf);
 end
