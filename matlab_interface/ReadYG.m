@@ -149,7 +149,7 @@ for id_out = 1:length(files)
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 pop_ind = scan_temp{1}(1)+1; % be careful here!
                 fgetl(FID); % skip line: data type
-                tline = fgetl(FID);
+                tline = fgetl(FID);`
                 scan_temp = textscan(tline,'%f','Delimiter',',');
                 OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
                 tline = fgetl(FID);

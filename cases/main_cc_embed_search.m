@@ -13,9 +13,9 @@ step_tot = 2*sec; % use 10 second!
 loop_num = 0;
 
 
-discard_transient = 500; % ms
+discard_transient = 100; % ms
 for EE_factor = 0.6 %0.4:0.1:0.6; % 0.6?
-for II_factor = 0.8:0.2:1.2;
+for II_factor = 0.8
 % rr = 0.7; % this is different from 0.6!!
 kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
 for rr = 0.6 %[0.6 0.7]
@@ -48,6 +48,13 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
             in_deg_ratio = in_deg_ratio(J_e);
             in_deg_scale_exp = -0.5;
             in_deg_scaling = in_deg_ratio(:).^in_deg_scale_exp; % use -0.5 maybe?
+            
+            % save in_degree and sample neuron data based on in_degree
+            save([sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
+                '_in_degree.mat'], 'in_degree');
+            [~,ind_sorted] = sort(in_degree);
+            sample_neuron = ind_sorted(1:500:end);
+            
             
             N_i = 1000;
             N = [N_e, N_i];
@@ -91,6 +98,7 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
                 %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                 writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
             end
+            writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neuron, ones(1, step_tot) )
             
             
             %%%%%%% random initial condition settings (int pop_ind, double p_fire)
@@ -147,7 +155,7 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
                 'P0_init', P0_init, ...
                 'degree_CV', degree_CV,...
                 'in_deg_scale_exp', in_deg_scale_exp, ...
-		'tau_c', tau_c);
+                'tau_c', tau_c);
             
             
             % Adding comments in raster plot
