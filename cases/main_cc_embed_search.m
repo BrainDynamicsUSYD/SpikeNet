@@ -51,7 +51,7 @@ for  P0_init = [0.2 0.225 0.25] % 0.25 gives P0_actual = 0.2
             
             % save in_degree and sample neuron data based on in_degree
             save([sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
-                '_in_degree.mat'], 'in_degree');
+                '_in_degree.mat_pre'], 'in_degree');
             [~,ind_sorted] = sort(in_degree);
             sample_neuron = ind_sorted(1:500:end);
             
