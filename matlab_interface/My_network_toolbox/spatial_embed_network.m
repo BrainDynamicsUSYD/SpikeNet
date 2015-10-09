@@ -41,6 +41,7 @@ degree = pmf_yg('logn', [deg_mean deg_std], deg_range, deg_size);
 ll = lattice_nD_find_dist(Lattice, hw, 1);
 ll(1) = []; % no self-connection
 ll_range = unique(round(ll));
+ll_range = ll_range(ll_range <= hw); % to avoid spurious cluster from forming at the four corners
 ll_occ = histc(round(ll), ll_range); % occurence
 tau_0 = (deg_mean/pi)^0.5; % #nodes = area covered
 tau = tau_0*tau_c;
