@@ -57,7 +57,7 @@ for i = 1:N
     ll_prob_i = ll_pmf_occ*degree(i); % some values could be > 1
     for j = 1:length(post_prob)
         if j ~= i &&  post_dist_round(j) <= hw
-            post_prob(j) = ll_prob_i(post_dist_round(j) ); % a matlab idiosyncrasy, post_dist are integers
+            post_prob = ll_prob_i(post_dist_round ); % a matlab idiosyncrasy, post_dist are integers
         end
     end
     
