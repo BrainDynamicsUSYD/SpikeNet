@@ -6,7 +6,7 @@
 % al, 2008, Europhysics Letters
 
 
-function [ll_matrix, N, Lattice] = spatial_embed_network(hw, P0_init, degree_CV, tau_c)
+function [ll_matrix, N, Lattice] = spatial_embed_network(hw, P0_init, degree_CV, tau_d)
 % P0: average connection probability 
 % The final P0 will be different from P0_init
 % degree_CV = degree_dist_std/degree_dist_mean
@@ -36,30 +36,11 @@ degree = pmf_yg('logn', [deg_mean deg_std], deg_range, deg_size);
 % mean(degree)
 % std(degree)
 
-
-% % link length distribution: exponential
-ll = lattice_nD_find_dist(Lattice, hw, 1);
-ll(1) = []; % no self-connection
-ll_range = unique(round(ll));
-ll_range = ll_range(ll_range <= hw); % to avoid spurious cluster from forming at the four corners
-ll_occ = histc(round(ll), ll_range); % occurence
-tau_0 = (deg_mean/pi)^0.5; % #nodes = area covered
-tau = tau_0*tau_c;
-[~, ll_pmf] = pmf_yg('exp', tau, ll_range, 1);
-ll_pmf_occ = ll_pmf./ll_occ;
-
-
 for i = 1:N
     post_dist = lattice_nD_find_dist(Lattice, hw, i);
-    % find the connection probability for each post nodes
-    post_dist_round = round(post_dist);
-    post_prob = zeros(size(post_dist));
-    ll_prob_i = ll_pmf_occ*degree(i); % some values could be > 1
-    for j = 1:length(post_prob)
-        if j ~= i &&  post_dist_round(j) <= hw
-            post_prob = ll_prob_i(post_dist_round ); % a matlab idiosyncrasy, post_dist are integers
-        end
-    end
+    post_prob_0 = exp(-post_dist/tau_d); % exponential distribution
+    post_prob = post_prob_0/sum(post_prob_0)*degree(i);
+    post_prob(i) = 0; % no self-connection
     
     % establish connections
     chosen_j = find( rand(N, 1) < post_prob );
