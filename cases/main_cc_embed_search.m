@@ -16,13 +16,13 @@ loop_num = 0;
 discard_transient = 100; % ms
 for EE_factor = 0.6; % 0.6?
     for II_factor = 0.8
-        for EI_factor = [1.0 1.2]
+        for EI_factor = [1.0 1.1 1.2]
             % rr = 0.7; % this is different from 0.6!!
             kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
             for rr = 0.6 %[0.6 0.7]
-                for degree_CV = [0.5 0.75] % 0.5?
+                for degree_CV = [0.5 0.75 1] % 0.5?
                     for  P0_init = [0.2] % 0.25 gives P0_actual = 0.2
-                        for I_ext_strength =  [1.1 1.2 1.3 1.4]
+                        for I_ext_strength =  [ 1.2 1.3 1.4]
                             for  tau_c = [12 15 18]
                                 
                                 loop_num = loop_num + 1;
