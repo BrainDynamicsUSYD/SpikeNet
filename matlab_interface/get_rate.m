@@ -12,7 +12,7 @@ spike_hist = R.spike_hist;
 % kernel for instantaneous rate estimation
 CC_kernel_width = 50; % ms, kernel length
 choice = 'gaussian';
-kernel = spike_train_kernel_YG(CC_kernel_width, R.reduced.dt, choice);
+kernel = spike_train_kernel_YG(CC_kernel_width, dt, choice);
     
 rate = cell(Num_pop,1); % Initialise individual neuron average firing rate
 Hz_t = cell(Num_pop,1); % population instantaneous rate estimation
