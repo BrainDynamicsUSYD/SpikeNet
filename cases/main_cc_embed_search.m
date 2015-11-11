@@ -12,6 +12,7 @@ step_tot = 10*sec; % use 10 second!
 % Loop number for PBS array job
 loop_num = 0;
 
+in_deg_scale_exp = -0.5;
 
 discard_transient = 100; % ms
 for EE_factor = 0.6; % 0.6?
@@ -47,7 +48,7 @@ for EE_factor = 0.6; % 0.6?
                                 in_degree = full(sum(A, 1));
                                 in_deg_ratio = in_degree/mean(in_degree);
                                 in_deg_ratio = in_deg_ratio(J_e);
-                                in_deg_scale_exp = -0.5;
+                                
                                 in_deg_scaling = in_deg_ratio(:).^in_deg_scale_exp; % use -0.5 maybe?
                                 
                                 % save in_degree and sample neuron data based on in_degree
