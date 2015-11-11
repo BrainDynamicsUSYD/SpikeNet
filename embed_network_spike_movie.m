@@ -16,8 +16,10 @@ box on;
 hold on;
 h1 = plot(0, 0, 'rx');
 
-for t = 1:(step_tot/2)
-    spikes_t = find(spike_hist(:,t));
+t_bin = 10;
+for t = 1:t_bin:(step_tot/2)
+    spikes_t = find(spike_hist(:,t:(t+t_bin)));
+    
     delete(h1);
     h1 = plot(Lattice(spikes_t,1), Lattice(spikes_t,2), 'rx');
     pause(0.001);
