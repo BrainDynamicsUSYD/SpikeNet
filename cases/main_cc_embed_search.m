@@ -11,20 +11,19 @@ step_tot = 10*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
+tau_ref = 5;
+delay = 2;
 
 in_deg_scale_exp = -0.5;
 
 discard_transient = 100; % ms
 for EE_factor = 0.6; % 0.6?
-    for II_factor = 0.8
-        for EI_factor = [1.0 1.1 1.2]
-            % rr = 0.7; % this is different from 0.6!!
-            kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
-            for rr = 0.6 %[0.6 0.7]
-                for degree_CV = [0.5 0.75 1] % 0.5?
-                    for  P0_init = [0.2] % 0.25 gives P0_actual = 0.2
-                        for I_ext_strength =  [ 1.2 1.3 1.4]
-                            for  tau_c = [8 10 12]
+    for II_factor = 0.6
+        for EI_factor = 0.8
+                for degree_CV = [0.5] % 0.5?
+                    for  P0_init = [0.1] % 0.25 gives P0_actual = 0.2
+                        for I_ext_strength =  [0.8 0.9 1.0]
+                            for  tau_c = [60 30 15]
                                 
                                 loop_num = loop_num + 1;
                                 
@@ -73,7 +72,7 @@ for EE_factor = 0.6; % 0.6?
                                 
                                 % write pop para
                                 for pop_ind = 1:Num_pop
-                                    writePopPara(FID, pop_ind,  'tau_ref', 2);
+                                    writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
                                     writeExtCurrentSettings(FID, pop_ind, I_ext_strength, 0);
                                 end
                                 
@@ -110,11 +109,11 @@ for EE_factor = 0.6; % 0.6?
                                 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
                                 % type(1:AMAP, 2:GABAa, 3:NMDA)
                                 
-                                P_mat = [0.2 0.5;
-                                    0.5 0.5];
+                                P_mat = [0.1 0.3;
+                                    0.3 0.3];
                                 
                                 K_mat = [2.4*EE_factor  1.4;
-                                    4.5*EI_factor  5.7*II_factor]*kk*10^-3; % miuSiemens
+                                    4.5*EI_factor  5.7*II_factor]*10^-3; % miuSiemens
                                 
                                 Type_mat = ones(Num_pop);
                                 Type_mat(end, :) = 2;
@@ -137,7 +136,7 @@ for EE_factor = 0.6; % 0.6?
                                         else
                                             K = ones(size(I))*K_mat(i_pre,j_post);
                                         end
-                                        D = rand(size(I))*1;
+                                        D = rand(size(I))*delay;
                                         writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
                                         clear I J K D;
                                     end
@@ -149,8 +148,7 @@ for EE_factor = 0.6; % 0.6?
                                 
                                 writeExplVar(FID, 'discard_transient', discard_transient, ...
                                     'loop_num', loop_num, ...
-                                    'k', kk,...
-                                    'r', rr, ...
+                                    'delay', delay, ...
                                     'EE_factor', EE_factor, ...
                                     'II_factor', II_factor, ...
                                     'I_ext_strength', I_ext_strength,...
@@ -177,7 +175,6 @@ for EE_factor = 0.6; % 0.6?
                 end
             end
         end
-    end
 end
 end
 
