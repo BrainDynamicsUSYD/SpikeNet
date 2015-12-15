@@ -82,14 +82,21 @@ void Neurons::init(){
 
 void Neurons::start_stats_record(){
 	stats_record = true;
+	
 	V_mean.reserve(step_tot);
 	V_std.reserve(step_tot);
 	
 	I_input_mean.reserve(step_tot);
 	I_input_std.reserve(step_tot);
 	
-	I_input_acc.assign(N, 0.0);
-	I_input_time_avg.assign(N, 0.0);
+	I_AMPA_acc.assign(N, 0.0);
+	I_AMPA_time_avg.assign(N, 0.0);
+	I_NMDA_acc.assign(N, 0.0);
+	I_NMDA_time_avg.assign(N, 0.0);
+	I_GABA_acc.assign(N, 0.0);
+	I_GABA_time_avg.assign(N, 0.0);
+	
+	EI_ratio.assign(N, 0.0);
 }
 
 
@@ -205,10 +212,10 @@ void Neurons::update_V(int step_current){
 		if (I_ext_std != 0.0){
 			// Gaussian random generator
 			gen.seed(my_seed+step_current);// reseed random engine!
-			normal_distribution<double> nrm_dist(I_ext_mean, I_ext_std);
+			normal_distribution<double> nrm_dist(0, I_ext_std);
 			auto gaus = bind(nrm_dist,gen);
 			// Generate Gaussian white noise. White means not temporally correlated	
-			for (int i = 0; i < N; ++i) { I_ext[i] = gaus() * sqrt(dt); } // be careful about the sqrt(dt) term (Wiener Process)
+			for (int i = 0; i < N; ++i) { I_ext[i] = I_ext_mean + gaus() * sqrt(dt); } // be careful about the sqrt(dt) term (Wiener Process)
 		}
 		else { for (int i = 0; i < N; ++i) { I_ext[i] = I_ext_mean;} }
  	}
@@ -365,11 +372,11 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 		write2file(output_file, delim, I_input_std);
 	}
 	
-	// POPD005 # time average of input currents for each neuron
+	// POPD005 # E-I ratio for each neuron
 	if (stats_record){
 		output_file << indicator << " POPD005" << endl;
 		output_file << pop_ind << delim << endl;
-		write2file(output_file, delim, I_input_time_avg);
+		write2file(output_file, delim, EI_ratio);
 	}
 	
 
@@ -486,12 +493,20 @@ void Neurons::record_stats(int step_current){
 		//for (unsigned int i = 0; i < N; ++i){ // this manual loop is slow, use transform()
 		//	I_input_acc[i] += I_input[i];
 		//}
-		transform( I_input_acc.begin(), I_input_acc.end(), I_input.begin(), I_input_acc.begin(), plus<double>() );
-		
+		transform( I_AMPA_acc.begin(), I_AMPA_acc.end(), I_AMPA.begin(), I_AMPA_acc.begin(), plus<double>() );
+		transform( I_NMDA_acc.begin(), I_NMDA_acc.end(), I_NMDA.begin(), I_NMDA_acc.begin(), plus<double>() );
+		transform( I_GABA_acc.begin(), I_GABA_acc.end(), I_GABA.begin(), I_GABA_acc.begin(), plus<double>() );
+		// get time average for each neuron
 		if (step_current == step_tot - 1){ // at the end of the last time step
 			for (unsigned int i = 0; i < N; ++i){
-				I_input_time_avg[i] = I_input_acc[i] / step_tot; // time average for each neuron
+				I_AMPA_time_avg[i] = I_AMPA_acc[i] / step_tot;
+				I_NMDA_time_avg[i] = I_NMDA_acc[i] / step_tot;
+				I_GABA_time_avg[i] = I_GABA_acc[i] / step_tot;
+				// be careful here, for EI_ratio, I_ext is assumed to be always excitatory and I_GJ is not considered
+				// also, the only source of I_ext is generated internally
+				EI_ratio[i] = (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean) / I_GABA_time_avg[i];
 			}
+			
 		}
 	}
 }

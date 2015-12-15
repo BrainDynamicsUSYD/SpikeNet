@@ -113,12 +113,17 @@ protected:
 		stats_record;
 	vector<double>
 		V_mean, // averaged over neurons at one time step
-		V_std,
-		I_input_mean,
-		I_input_std,
-		I_input_acc, // accumulator for net input currents into each neuron
-		I_input_time_avg; // averaged over time for each neuron
-		
+		V_std, // over neurons at one time step
+		I_input_mean, // averaged over neurons at one time step
+		I_input_std, // over neurons at one time step
+		I_AMPA_acc, // accumulator for AMPA input currents into each neuron
+		I_AMPA_time_avg, // averaged over time for each neuron
+		I_NMDA_acc,
+		I_NMDA_time_avg,
+		I_GABA_acc,
+		I_GABA_time_avg,
+		EI_ratio;
+
 
 
 	// parameters for Generate Gaussian random external current
