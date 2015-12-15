@@ -208,7 +208,7 @@ void Neurons::update_V(int step_current){
 			normal_distribution<double> nrm_dist(I_ext_mean, I_ext_std);
 			auto gaus = bind(nrm_dist,gen);
 			// Generate Gaussian white noise. White means not temporally correlated	
-			for (int i = 0; i < N; ++i) { I_ext[i] = gaus(); }				
+			for (int i = 0; i < N; ++i) { I_ext[i] = gaus() * sqrt(dt); } // be careful about the sqrt(dt) term (Wiener Process)
 		}
 		else { for (int i = 0; i < N; ++i) { I_ext[i] = I_ext_mean;} }
  	}
@@ -481,6 +481,7 @@ void Neurons::record_stats(int step_current){
 		V_std.push_back(std_tmp_V);
 		I_input_mean.push_back(mean_tmp_I);
 		I_input_std.push_back(std_tmp_I);
+		
 		// accumulate
 		//for (unsigned int i = 0; i < N; ++i){ // this manual loop is slow, use transform()
 		//	I_input_acc[i] += I_input[i];
