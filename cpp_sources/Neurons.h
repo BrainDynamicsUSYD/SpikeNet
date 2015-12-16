@@ -61,6 +61,7 @@ public:
 	void init_runaway_killer(double min_ms, double Hz, double Hz_ms); // kill the simulation when runaway activity of the network is detected: 
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 	void runaway_check(int step_current);
+	void add_perturbation(int step_perturb);
 
 protected:
 	// Space and time
@@ -147,7 +148,10 @@ protected:
 		sample; // types of data x sampled neurons x time points
 
 
-
+	// perturbation
+	int
+		step_perturb, //the step where the perturbation takes place (removal of one spike)
+		spike_removed; // the spike that is removed;
 	
 
 	// random number generator

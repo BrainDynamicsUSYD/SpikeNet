@@ -77,6 +77,10 @@ void Neurons::init(){
 	
 	//
 	stats_record = false;
+	
+	// perturbation
+	step_perturb = -1;
+	spike_removed = -1;
 
 }
 
@@ -176,6 +180,20 @@ void Neurons::update_spikes(int step_current){
 			spike_counter += 1;
 		}
 	}
+	
+	
+	// perturbation: remove the last spike
+	if (step_current == step_perturb){
+		if (spikes_current.size() > 0){
+			spike_removed = spikes_current.back(); // record the spike that is removed
+			spikes_current.pop_back(); // remove the last element as the perturbation
+			spike_counter -= 1;
+			// output
+			cout << endl << "Perturbation: the spike of neuron #" << spike_removed << " removed at time step " << step_perturb << endl;
+		}
+		else { step_perturb += 1; } // if there is no spike to be removed at this step, try the next step
+	}
+
 	// record number of spikes
 	num_spikes_pop.push_back(spike_counter); 
 
@@ -307,6 +325,9 @@ void Neurons::set_gaussian_I_ext(double mean, double std){
 }
 
 
+void Neurons::add_perturbation(int step_perturb_input){
+	step_perturb = step_perturb_input;
+}
 
 void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
 
