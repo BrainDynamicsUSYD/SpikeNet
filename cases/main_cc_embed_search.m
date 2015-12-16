@@ -101,6 +101,11 @@ for EE_factor = 0.6; % 0.6?
                             end
                             writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neuron, ones(1, step_tot) )
                             
+                            % testing
+                            writePerturbation(FID, 1, 500);
+                            writePerturbation(FID, 2, 500);
+                            writePopStatsRecord(FID, 2);
+                            % testing
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                             p_fire = 0.00*ones(size(N)); % between [0,1], 0.05
