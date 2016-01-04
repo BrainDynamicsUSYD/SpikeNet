@@ -2,7 +2,7 @@ function main_test_single_EPSP(varargin)
 
 % clc;clear;close all;
 % addpath(genpath(cd));
-cd ~/tmp_data
+%cd ~/tmp_data
     
 loop_num = 1;
 
@@ -39,8 +39,8 @@ sample_steps(1:end) =  true;
 writeNeuronSampling(FID, 2, ones(1,7), 1, sample_steps);
 writeNeuronSampling(FID, 1, ones(1,7), 1, sample_steps);
 
-% initial firing rate
-writeInitV(FID,[0.2,0.2]);
+% % initial firing rate
+% writeInitV(FID,[0.2,0.2]);
 
        
 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
