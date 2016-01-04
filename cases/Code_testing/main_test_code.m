@@ -2,7 +2,7 @@ function main_test_code(varargin)
 
 % clc;clear;close all;
 % addpath(genpath(cd));
-cd ~/tmp_data
+% cd ~/tmp_data
     
 loop_num = 1;
 

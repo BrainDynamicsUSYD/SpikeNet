@@ -128,6 +128,7 @@ void ChemicalSynapses::init(){
 		B_dV = 0.1; // 0.1
 		int i_B = 0;
 		double V_temp, B_temp;
+		B.resize(0); // for re-initialization!!!
 		while (true){
 			V_temp = B_V_min + i_B*B_dV;
 			if (V_temp > B_V_max){ break; }
@@ -142,6 +143,7 @@ void ChemicalSynapses::init(){
 	K_trans =  1.0 / steps_trans; // be careful! 1 / transmitter steps gives zero (int)!!
 
 	// Initialise exp_step
+	exp_step_table.resize(0); // for re-initialization!!!
 	exp_step = exp(-dt / tau_decay); // single step
 	for (int t = 0; t < step_tot; ++t){ // multi-step look-up table
 		if (t == 0){ exp_step_table.push_back(1); }
@@ -150,9 +152,11 @@ void ChemicalSynapses::init(){
 		}
 	}
 
-
 	// Initialise pre-synaptic population spike recording
-	history_steps = steps_trans + max_delay_steps;// history steps
+	// fatal error in the following line!!!
+	// history_steps = steps_trans + max_delay_steps;// history steps
+	history_steps = steps_trans + max_delay_steps + 1;// history steps
+	
 
 	if (pop_ind_pre >= 0){
 		// spike_pop[time][ind_pre]
@@ -178,7 +182,9 @@ void ChemicalSynapses::update(int step_current){
 	// Update gs_sum
 	if (pop_ind_pre >= 0){
 		int t_ring, i_pre, j_post, left_dt_eff; // temporay viarables
+		
 		int t_start = (int)fmax(step_current - steps_trans - max_delay_steps, 0); // very beginning of the relevant spike history
+		
 		double ds_this_syn; // change in gating variable for one synapse
 		for (int t = t_start; t <= step_current; ++t){ // loop through relevant spike history
 			t_ring = int(t % history_steps);// index of the history time
@@ -187,11 +193,26 @@ void ChemicalSynapses::update(int step_current){
 				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){// loop through all the post-synapses
 					j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
 					// left effective time of transmitter
+					// A fatal error in the following line!!!
+					// left_dt_eff = t + D[i_pre][syn_ind] + steps_trans - step_current; 
+					// consequence: 
+					// e.g: left_dt_eff = 0, 10, 9, 8, ..., 1, No_spike (suppose max_delay_steps + steps_trans = 10)
+					// the correct one should be:
+					// 	    left_dt_eff = No_spike, 10, 9, 8, ..., 1, 0
+					// s_TALS is wrongly updated at the beginning of a spike so that exp_step_table[...] is always 1.0
+					// therefore, s_full will eventually saturate at 0.76472 (for AMPA at test case) after several spikes
+					// BE CAREFUL HERE: the saturate value (0.76472) depends on tau_decay!!! Get the correct value for each case!!!
+					// fix:
+					// (history_steps = steps_trans + max_delay_steps + 1) instead of (history_steps = steps_trans + max_delay_steps)
 					left_dt_eff = t + D[i_pre][syn_ind] + steps_trans - step_current; 
+					
 					if (left_dt_eff <= steps_trans && left_dt_eff > 0){ // if transmitter still effective
 						// restore s-value of interest to the current value at the start of spike
 						if (left_dt_eff == steps_trans && s_TALS[i_pre][syn_ind] >= 0){ // at the start of spike and if there exits last spike 
-							s_full[i_pre][syn_ind] *= exp_step_table[step_current - s_TALS[i_pre][syn_ind]];
+							s_full[i_pre][syn_ind] *= exp_step_table[step_current - s_TALS[i_pre][syn_ind]]; // a small error here (fix: +1)
+							cout << "step = " << step_current << ", " << "s_full updated here = " << s_full[i_pre][syn_ind] << endl;
+							cout << "exp_step = " << exp_step << ", " << pow(exp_step, step_current - s_TALS[i_pre][syn_ind]) << "," 
+								<< exp_step_table[step_current - s_TALS[i_pre][syn_ind]] << endl;
 						}
 						// update gs_sum (g*s, 0<s<1, g=K>0)
 						ds_this_syn = K_trans * (1.0 - s_full[i_pre][syn_ind]); // increase in the form of impulse, (1-s) term for saturation
@@ -202,12 +223,13 @@ void ChemicalSynapses::update(int step_current){
 					}// if transmitter still effective
 					else if (left_dt_eff == 0){ // register s_TALS at the end of spike
 						s_TALS[i_pre][syn_ind] = step_current; 
+						cout << "s_TALS updated here" <<  endl;
 					}
 				} // loop through all post-synapses
 			} // loop through every firing neuron at that history time
 		} // loop through relevant spike history
 	} // if pop_ind_pre >=0
-
+	
 	else if (pop_ind_pre == -1){ // if external noisy population
 		// Contribution of external spikes, assuming square pulse transmitter release
 		// Generate current random number generator, note that rate_ext_t is in Hz
@@ -230,6 +252,7 @@ void ChemicalSynapses::update(int step_current){
 		}
 	}
 
+	
 
 	// Calculate chemical currents
 	// need V from post population!!

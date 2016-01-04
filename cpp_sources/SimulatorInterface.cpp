@@ -54,6 +54,8 @@ bool SimulatorInterface::import(string in_filename_input){
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
+	
+	vector< vector<int> > step_perturb_setting; // [pop_ind step_perturb]
 
 	// read data
 	string line_str, entry_str; // temporary container for the entire while loop
@@ -124,7 +126,15 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 
-
+			// read perturbation setting
+			found = line_str.find("INIT007");
+			if (found != string::npos){// if found match
+				cout << "\t Reading perturbation settings..." << endl;
+				// [pop_ind, step_perturb]
+				step_perturb_setting.resize(step_perturb_setting.size()+1);
+				read_next_line_as_vector(step_perturb_setting.back());
+				continue; // move to next line
+			}
 
 			// read neuron population parameter setting
 			found = line_str.find("PARA001");
@@ -368,6 +378,18 @@ bool SimulatorInterface::import(string in_filename_input){
 		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings.size(); ++pop_ind){
 			double p_fire = init_condition_settings[pop_ind];
 			network.NeuronPopArray[pop_ind].random_V(p_fire);
+			cout << pop_ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+	
+	// perturbation setting
+	if (step_perturb_setting.size() != 0){
+		cout << "\t Perturbation settings...";
+		for (unsigned int i = 0; i < step_perturb_setting.size(); ++i){
+			int pop_ind = step_perturb_setting[i][0];
+			int step_perturb = step_perturb_setting[i][1];
+			network.NeuronPopArray[pop_ind].add_perturbation(step_perturb);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
