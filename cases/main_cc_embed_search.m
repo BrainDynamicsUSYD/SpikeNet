@@ -7,7 +7,7 @@ function main_cc_embed_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 10*sec; % use 10 second!
+step_tot = 100*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -22,8 +22,9 @@ for EE_factor = 0.6; % 0.6?
         for EI_factor = 0.8
             for degree_CV = [0.5] % 0.5?
                 for  P0_init = [0.1] % 0.25 gives P0_actual = 0.2
-                    for I_ext_strength =  [1.1 1.2 1.3 1.4 1.5]
-                        for  tau_c = [60 30 15]
+                    for I_ext_strength = [1.2 *ones(1,20)  1.1*ones(1,20)] 
+			for I_ext_std_ratio = 0.1
+                        for  tau_c = [ 12 13 14 ]
                             
                             loop_num = loop_num + 1;
                             
@@ -73,7 +74,7 @@ for EE_factor = 0.6; % 0.6?
                             % write pop para
                             for pop_ind = 1:Num_pop
                                 writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
-                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength, 0);
+                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength, I_ext_std_ratio*I_ext_strength);
                             end
                             
                             % write synapse para
@@ -156,6 +157,7 @@ for EE_factor = 0.6; % 0.6?
                                 'degree_CV', degree_CV,...
                                 'in_deg_scale_exp', in_deg_scale_exp, ...
                                 'tau_c', tau_c, ...
+				'I_ext_std_ratio', I_ext_std_ratio, ...
                                 'EI_factor', EI_factor);
                             
                             
@@ -177,7 +179,7 @@ for EE_factor = 0.6; % 0.6?
     end
 end
 end
-
+end
 
 
 % This function must be here!

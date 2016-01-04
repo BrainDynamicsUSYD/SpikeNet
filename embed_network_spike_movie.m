@@ -16,13 +16,13 @@ box on;
 hold on;
 h1 = plot(0, 0, 'rx');
 
-t_bin = 20;
-for t = 1:t_bin:(step_tot/2)
+t_bin = 100;
+for t = 1:t_bin:(step_tot)
     [spikes_t, ~, ~] = find(spike_hist(:,t:(t+t_bin)));
     
     delete(h1);
     h1 = plot(Lattice(spikes_t,1), Lattice(spikes_t,2), 'rx');
-    pause(0.02);
+    pause(0.01);
     
     xlabel([num2str(t*dt/1000),' sec']);
     
