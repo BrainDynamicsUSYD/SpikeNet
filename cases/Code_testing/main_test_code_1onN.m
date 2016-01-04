@@ -1,4 +1,4 @@
-function main_test_code_1on1(varargin)
+function main_test_code_1onN(varargin)
 
 % clc;clear;close all;
 % addpath(genpath(cd));
@@ -16,8 +16,8 @@ k = 1*2.4e-3; % miuSiemens
 
 % Basic parameters
 dt = 0.1;
-step_tot = 1000;
-N = [1; 1];
+step_tot = 500;
+N = [20; 100];
 writeBasicPara(FID, dt, step_tot, N)
 Num_pop = length(N);
 discard_transient = 0; % ms
@@ -29,7 +29,7 @@ writePopPara(FID, 2,  'tau_ref', 3.2);
 writeSynPara(FID, 'tau_decay_AMPA', 3.3);
 
 % external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 1; %1.4; % nA
+I_ext_strength = 10; %1.4; % nA
 writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
@@ -60,14 +60,14 @@ Hz_ms = 1000; % ms
 run_away_pop = 1;
 writeRunawayKiller(FID, run_away_pop, min_ms, runaway_Hz, Hz_ms);
 %%%%%%%%%%%%%%%%%%%%%%%
-                
+
                 
 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
 % type(1:AMAP, 2:GABAa, 3:NMDA)
 
-[I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post','N_pre',N(1),'N_post',N(2),'p',1));
-K = ones(size(I))*k;
-D = ones(size(I))*1;
+[I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post','N_pre',N(1),'N_post',N(2),'p',0.8));
+K = rand(size(I))*k*2;
+D = rand(size(I))*2;
 writeChemicalConnection(FID_syn, 1,  1, 2,   I,J,K,D); % (FID, type, i_pre, j_post, I, J, K, D)
 
 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
@@ -99,4 +99,5 @@ fprintf(FID, '%s\n', breaker);
 fprintf(FID, '%s\n', breaker);
 fprintf(FID, '%s\n', breaker);
 end
+
 

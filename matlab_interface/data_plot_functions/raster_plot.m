@@ -5,6 +5,9 @@ function raster_plot(R, pop_ind, seg, sample_color, varargin)
 if nargin < 3
     seg = 1;
 end
+if nargin < 4
+    sample_color = [];
+end
 
 sample_size = 500; % sample neurons for raster plot
 seg_size = 4*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
