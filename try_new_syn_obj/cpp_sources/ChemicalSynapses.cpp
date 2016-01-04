@@ -77,6 +77,7 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 	synapses_type = synapses_type_input;
 	pop_ind_pre = -1; // -1 for external noisy population
 	pop_ind_post = j_post;
+	N_pre = 1; // just for initialization
 	N_post = N_post_input;
 	max_delay_steps = 0; // no delay;
 	ia = ia_input; // start of neuron index range in post population
@@ -197,15 +198,18 @@ void ChemicalSynapses::update(int step_current){
 		poisson_distribution<int> dist(Num_ext * rate_ext_t[step_current] * (dt / 1000.0));		
 		auto ext_spikes = bind(dist, gen);
 
+		
 		// Post-synaptic dynamics
 		int t_ring;
 		for (unsigned int t_trans = 0; t_trans < steps_trans; ++t_trans){
 			t_ring = int( (step_current + t_trans) % buffer_steps );
 			for (int j = ia; j <= ib; ++j){
-				// cout << "Good here." << endl; cout.flush();
-				d_gs_sum_buffer[t_ring][j] = K_trans[0] * K_ext * ext_spikes(); // something wrong here!!!
+				d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
+				cout << ext_spikes() << ",";
 			}
 		}
+		cout << endl;
+		
 	}
 
 	// update post-synaptic dynamics
@@ -213,7 +217,8 @@ void ChemicalSynapses::update(int step_current){
 	for (unsigned j_post = 0; j_post < N_post; ++j_post){
 		gs_sum[j_post] += d_gs_sum_buffer[t_ring][j_post];
 	}
-	// immediately reset the current buffer to zeros
+	cout << "gs_sum[0]: " << gs_sum[0] << endl;
+	// immediately reset the current buffer to zeros!!
 	fill(d_gs_sum_buffer[t_ring].begin(), d_gs_sum_buffer[t_ring].end(), 0.0);
 	
 
@@ -254,13 +259,7 @@ void ChemicalSynapses::update(int step_current){
 		for (int i = 0; i < N_pre; ++i){ s[i] *= exp_step; };
 	} 
 	
-	// debug
-	if (pop_ind_post == 1){
-		cout << step_current << ",";
-		cout << s[0] << ",";
-		cout << gs_sum[0] << endl;
-	}
-	
+
 	// decay post-synaptic dynamics
 	for (int j = 0; j < N_post; ++j){ gs_sum[j] *= exp_step; };
 

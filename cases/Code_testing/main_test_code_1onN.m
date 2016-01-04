@@ -11,13 +11,13 @@ loop_num = 1;
 [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
 
 
-k = 1*2.4e-3; % miuSiemens
+k = 1e-3; % miuSiemens
 
 
 % Basic parameters
 dt = 0.1;
-step_tot = 500;
-N = [20; 100];
+step_tot = 5000;
+N = [1; 1];
 writeBasicPara(FID, dt, step_tot, N)
 Num_pop = length(N);
 discard_transient = 0; % ms
@@ -28,12 +28,12 @@ writePopPara(FID, 2,  'tau_ref', 3.2);
 % write synapse para
 writeSynPara(FID, 'tau_decay_AMPA', 3.3);
 
-% external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 10; %1.4; % nA
-writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
+% % external current settings (int pop_ind, double mean, double std)
+% I_ext_strength = 10; %1.4; % nA
+% writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
-% writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot), 1, N(1) );
+writeExtSpikeSettings(FID, 1, 1, k,  20, 100*ones(1,step_tot), 1, N(1) );
 
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
@@ -65,7 +65,7 @@ writeRunawayKiller(FID, run_away_pop, min_ms, runaway_Hz, Hz_ms);
 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
 % type(1:AMAP, 2:GABAa, 3:NMDA)
 
-[I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post','N_pre',N(1),'N_post',N(2),'p',0.8));
+[I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post','N_pre',N(1),'N_post',N(2),'p',1));
 K = rand(size(I))*k*2;
 D = rand(size(I))*2;
 writeChemicalConnection(FID_syn, 1,  1, 2,   I,J,K,D); % (FID, type, i_pre, j_post, I, J, K, D)

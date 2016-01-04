@@ -152,13 +152,14 @@ void ChemicalSynapses::init(){
 		}
 	}
 
-	// Initialise pre-synaptic population spike recording
-	// fatal error in the following line!!!
-	// history_steps = steps_trans + max_delay_steps;// history steps
-	history_steps = steps_trans + max_delay_steps + 1;// history steps
+
 	
 
 	if (pop_ind_pre >= 0){
+		// Initialise pre-synaptic population spike recording
+		// fatal error in the following line!!!
+		// history_steps = steps_trans + max_delay_steps;// history steps
+		history_steps = steps_trans + max_delay_steps + 1;// history steps
 		// spike_pop[time][ind_pre]
 		spikes_pop.resize(history_steps); 
 		for (int t = 0; t < history_steps; ++t){ 
@@ -167,11 +168,15 @@ void ChemicalSynapses::init(){
 		}
 	}
 	else if (pop_ind_pre == -1){
+		// a fatal error in the following line!!!!
+		// previously history_steps for pop_ind_pre == -1 was the same as pop_ind_pre >= 0
+		// this essentially scales up the external firing rate by a factor of (steps_trans + max_delay_steps)/steps_trans !!!
+		history_steps = steps_trans; 
 		// gs_buffer[time][ind_post]
 		gs_buffer.resize(history_steps); 
 		for (int t = 0; t < history_steps; ++t){ 
-			gs_buffer[t].reserve(N_post); 
-			// reserve() sets the capacity, note that clear() only affects the size, not the capacity
+			gs_buffer[t].assign(N_post, 0.0); // a major bug here: using reserve here will cause serious problem!
+			// when the un-defined elements are accessed, results are random!!!!
 		}
 	}
 }
@@ -210,9 +215,6 @@ void ChemicalSynapses::update(int step_current){
 						// restore s-value of interest to the current value at the start of spike
 						if (left_dt_eff == steps_trans && s_TALS[i_pre][syn_ind] >= 0){ // at the start of spike and if there exits last spike 
 							s_full[i_pre][syn_ind] *= exp_step_table[step_current - s_TALS[i_pre][syn_ind]]; // a small error here (fix: +1)
-							cout << "step = " << step_current << ", " << "s_full updated here = " << s_full[i_pre][syn_ind] << endl;
-							cout << "exp_step = " << exp_step << ", " << pow(exp_step, step_current - s_TALS[i_pre][syn_ind]) << "," 
-								<< exp_step_table[step_current - s_TALS[i_pre][syn_ind]] << endl;
 						}
 						// update gs_sum (g*s, 0<s<1, g=K>0)
 						ds_this_syn = K_trans * (1.0 - s_full[i_pre][syn_ind]); // increase in the form of impulse, (1-s) term for saturation
@@ -223,7 +225,6 @@ void ChemicalSynapses::update(int step_current){
 					}// if transmitter still effective
 					else if (left_dt_eff == 0){ // register s_TALS at the end of spike
 						s_TALS[i_pre][syn_ind] = step_current; 
-						cout << "s_TALS updated here" <<  endl;
 					}
 				} // loop through all post-synapses
 			} // loop through every firing neuron at that history time
@@ -242,14 +243,18 @@ void ChemicalSynapses::update(int step_current){
 		int t_ring = int(step_current % history_steps);// index of the history time
 		for (int j = ia; j <= ib; ++j){
 			gs_buffer[t_ring][j] = K_trans * K_ext * ext_spikes();
+			cout << ext_spikes() << ",";
 		}
-
-		// Sum over all relevant spike history
+		cout << endl;
+		
+		// Sum over all relevant spike history (be careful here: history steps should be the same as steps_trans!!!)
 		for (int t = 0; t < history_steps; ++t){
 			for (int j = ia; j <= ib; ++j){
 				gs_sum[j] += gs_buffer[t][j];
 			}
 		}
+		
+		cout << "gs_sum[0]: " << gs_sum[0] << endl;
 	}
 
 	
