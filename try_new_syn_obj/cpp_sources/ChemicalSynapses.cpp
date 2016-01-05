@@ -205,11 +205,8 @@ void ChemicalSynapses::update(int step_current){
 			t_ring = int( (step_current + t_trans) % buffer_steps );
 			for (int j = ia; j <= ib; ++j){
 				d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
-				cout << ext_spikes() << ",";
 			}
 		}
-		cout << endl;
-		
 	}
 
 	// update post-synaptic dynamics
@@ -217,7 +214,6 @@ void ChemicalSynapses::update(int step_current){
 	for (unsigned j_post = 0; j_post < N_post; ++j_post){
 		gs_sum[j_post] += d_gs_sum_buffer[t_ring][j_post];
 	}
-	cout << "gs_sum[0]: " << gs_sum[0] << endl;
 	// immediately reset the current buffer to zeros!!
 	fill(d_gs_sum_buffer[t_ring].begin(), d_gs_sum_buffer[t_ring].end(), 0.0);
 	

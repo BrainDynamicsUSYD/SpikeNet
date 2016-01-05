@@ -243,9 +243,7 @@ void ChemicalSynapses::update(int step_current){
 		int t_ring = int(step_current % history_steps);// index of the history time
 		for (int j = ia; j <= ib; ++j){
 			gs_buffer[t_ring][j] = K_trans * K_ext * ext_spikes();
-			cout << ext_spikes() << ",";
 		}
-		cout << endl;
 		
 		// Sum over all relevant spike history (be careful here: history steps should be the same as steps_trans!!!)
 		for (int t = 0; t < history_steps; ++t){
@@ -254,7 +252,6 @@ void ChemicalSynapses::update(int step_current){
 			}
 		}
 		
-		cout << "gs_sum[0]: " << gs_sum[0] << endl;
 	}
 
 	
