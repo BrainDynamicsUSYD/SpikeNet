@@ -1,4 +1,4 @@
-function main_test_code_1on1(varargin)
+function main_test_code_1on1_STD(varargin)
 
 % clc;clear;close all;
 % addpath(genpath(cd));
@@ -28,11 +28,12 @@ writePopPara(FID, 2,  'tau_ref', 3.2);
 writeSynPara(FID, 'tau_decay_AMPA', 3.3);
 
 % external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 1; %1.4; % nA
+I_ext_strength = 10; %1.4; % nA
 writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
-% writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot), 1, N(1) );
+rate = 200*ones
+writeExtSpikeSettings(FID, 1, 1, k,  1, 10*ones(1,step_tot), 1, N(1) );
 
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);

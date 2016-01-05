@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2015.3.31)  16 DEC 2015 11:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2015.3.31)  5 JAN 2016 14:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -151,18 +151,19 @@ LaTeX Font Info:    ... okay on input line 14.
 \c@lstlisting=\count108
  [1
 
-{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
-Overfull \hbox (40.55884pt too wide) in paragraph at lines 168--169
+{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
+
+Overfull \hbox (40.55884pt too wide) in paragraph at lines 171--172
 [][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[3]
-Overfull \hbox (0.86896pt too wide) in paragraph at lines 205--206
+
+Overfull \hbox (0.86896pt too wide) in paragraph at lines 208--209
 [][][][][][][][][][][][][][][][] 
  []
 
 [4]
-Overfull \hbox (51.8988pt too wide) in paragraph at lines 227--228
+Overfull \hbox (51.8988pt too wide) in paragraph at lines 230--231
 [][][][][][][][][][][][][][] 
  []
 
@@ -170,7 +171,7 @@ Overfull \hbox (51.8988pt too wide) in paragraph at lines 227--228
 Here is how much of TeX's memory you used:
  2279 strings out of 493117
  30143 string characters out of 6135433
- 118010 words of memory out of 5000000
+ 116010 words of memory out of 5000000
  5764 multiletter control sequences out of 15000+600000
  10058 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -189,7 +190,7 @@ ts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2014/texmf-dist/fonts/
 type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2014/texmf-dist/fonts/t
 ype1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2014/texmf-dist/fonts/ty
 pe1/public/amsfonts/cm/cmtt9.pfb>
-Output written on P1_documentation.pdf (5 pages, 156448 bytes).
+Output written on P1_documentation.pdf (5 pages, 156734 bytes).
 PDF statistics:
  72 PDF objects out of 1000 (max. 8388607)
  51 compressed objects within 1 object stream

@@ -1,4 +1,4 @@
-function main_test_code_1on1(varargin)
+function main_test_code_1on1_STD(varargin)
 
 % clc;clear;close all;
 % addpath(genpath(cd));
@@ -15,7 +15,7 @@ k = 1*2.4e-3; % miuSiemens
 
 % Basic parameters
 dt = 0.1;
-step_tot = 1000;
+step_tot = 10000;
 N = [1; 1];
 writeBasicPara(FID, dt, step_tot, N)
 Num_pop = length(N);
@@ -27,12 +27,15 @@ writePopPara(FID, 2,  'tau_ref', 3.2);
 % write synapse para
 writeSynPara(FID, 'tau_decay_AMPA', 3.3);
 
-% external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 1; %1.4; % nA
-writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
+% % external current settings (int pop_ind, double mean, double std)
+% I_ext_strength = 10; %1.4; % nA
+% writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
-% writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot), 1, N(1) );
+rate = zeros(1, step_tot);
+rate(1:(round(step_tot/3))) = 2000;
+rate((round(step_tot/3*2)):step_tot) = 2000;
+writeExtSpikeSettings(FID, 1, 1, k,  1, rate, 1, N(1) );
 
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
@@ -68,6 +71,8 @@ writeRunawayKiller(FID, run_away_pop, min_ms, runaway_Hz, Hz_ms);
 K = ones(size(I))*k;
 D = ones(size(I))*1;
 writeChemicalConnection(FID_syn, 1,  1, 2,   I,J,K,D); % (FID, type, i_pre, j_post, I, J, K, D)
+
+%writeSTD(FID, 1, 2);
 
 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
 % Record explanatory variables, also called "controlled variables"

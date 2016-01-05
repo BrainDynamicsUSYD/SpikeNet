@@ -62,8 +62,8 @@ void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int 
 		else{ continue; }
 	}
 
-	//
-	STD = false;
+	// default settting
+	STD = false; 
 	
 	// parameter-dependent initialisation
 	init();
@@ -96,7 +96,7 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 	//cout << "My_seed is: " << my_seed << endl;
 
 	//
-	STD = false;
+	STD = false; 
 	
 	// parameter-dependent initialisation
 	init();
@@ -141,7 +141,7 @@ void ChemicalSynapses::init(){
 
 
 	// Initialize pre- and post-synaptic dynamic variables
-	buffer_steps = max_delay_steps + steps_trans + 1;
+	buffer_steps = max_delay_steps + steps_trans + 1; // the +1 is vital
 	s.assign(N_pre, 0);
 	gs_sum.assign(N_post, 0);
 	d_gs_sum_buffer.resize(buffer_steps);
@@ -244,10 +244,10 @@ void ChemicalSynapses::update(int step_current){
 		// update short-term depression
 		if (STD == true){
 			for (unsigned int i = 0; i < spikes_pre->size(); ++i){
-				f_ves[spikes_pre->at(i)] *= 1.0 - p_ves;
+				f_ves[spikes_pre->at(i)] *= 1.0 - p_ves; // decrease
 			}
 			for (int i = 0; i < N_pre; ++i){
-				f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]);
+				f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]); // decay to 1.0
 			}
 		}
 	
@@ -290,6 +290,9 @@ void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<boo
 }
 
 void ChemicalSynapses::add_short_term_depression(){
+	if (synapses_type != 0){
+		cout << "Warning: initializing STD on non-AMPA synapses!" << endl;
+	}
 	STD = true;
 	// short term depression
 	p_ves =  0.3; // see X. Wang, 1999, The Journal of Neuroscience
