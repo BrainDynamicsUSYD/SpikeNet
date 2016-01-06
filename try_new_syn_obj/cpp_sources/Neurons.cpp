@@ -519,7 +519,7 @@ void Neurons::record_stats(int step_current){
 		transform( I_GABA_acc.begin(), I_GABA_acc.end(), I_GABA.begin(), I_GABA_acc.begin(), plus<double>() );
 		// get time average for each neuron
 		if (step_current == step_tot - 1){ // at the end of the last time step
-			for (unsigned int i = 0; i < N; ++i){
+			for (int i = 0; i < N; ++i){
 				I_AMPA_time_avg[i] = I_AMPA_acc[i] / step_tot;
 				I_NMDA_time_avg[i] = I_NMDA_acc[i] / step_tot;
 				I_GABA_time_avg[i] = I_GABA_acc[i] / step_tot;
