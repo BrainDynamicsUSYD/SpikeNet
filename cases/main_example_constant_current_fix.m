@@ -14,7 +14,7 @@ end % Basic parameters
 N = [4000; 1000]; %!!!
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 39*sec; % use 10 second!
+step_tot = 19*sec; % use 10 second!
 
 % Loop number for PBS array job
 Num_pop = length(N);
@@ -26,13 +26,15 @@ rr = 0.7; % this is different from 0.6!!
 Mnum = 8; %!!!
 kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
 
+for E_fix = 0.2537
+I_fix = 0.3779;
 
 for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
     for lesion_2 = 1    %+(-0.05:0.05:0.05)
         for lesion_3 = 1    %+(-0.05:0.05:0.05)
             for lesion_4 = 0.6  %+(-0.05:0.05:0.05)
 
-                for I_ext_strength = 1.5*ones(1,200)
+                for I_ext_strength = 1.5*ones(1,10)
                     
                     
                     loop_num = loop_num + 1;
@@ -75,8 +77,8 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                     
                     
                     
-                    Kmat = [2.4*EE_factor  1.4;
-                        4.5  5.7*II_factor]*kk*10^-3; % miuSiemens
+                    Kmat = [2.4*EE_factor*E_fix  1.4*E_fix;
+                        4.5*I_fix  5.7*II_factor*I_fix]*kk*10^-3; % miuSiemens
                     
                     Pmat = [0.2 0.5;
                         0.5 0.5];
@@ -177,6 +179,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
             
         end
     end
+end
 end
 
 
