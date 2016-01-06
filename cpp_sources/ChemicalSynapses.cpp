@@ -230,11 +230,7 @@ void ChemicalSynapses::update(int step_current){
 			} // loop through every firing neuron at that history time
 		} // loop through relevant spike history
 	} // if pop_ind_pre >=0
-	
-	
-	// debug
-	cout << pop_ind_pre << pop_ind_post << ", " << s_full[0][0] << endl;
-	
+
 	else if (pop_ind_pre == -1){ // if external noisy population
 		// Contribution of external spikes, assuming square pulse transmitter release
 		// Generate current random number generator, note that rate_ext_t is in Hz
@@ -258,6 +254,9 @@ void ChemicalSynapses::update(int step_current){
 		
 	}
 
+	
+	// debug
+	cout << pop_ind_pre << pop_ind_post << ", " << s_full[0][0] << endl;
 	
 
 	// Calculate chemical currents
