@@ -211,7 +211,7 @@ void ChemicalSynapses::update(int step_current){
 
 	// update post-synaptic dynamics
 	int t_ring = int( step_current % buffer_steps );
-	for (j_post = 0; j_post < N_post; ++j_post){
+	for (int j_post = 0; j_post < N_post; ++j_post){
 		gs_sum[j_post] += d_gs_sum_buffer[t_ring][j_post];
 	}
 	// immediately reset the current buffer to zeros!!

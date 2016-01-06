@@ -1,4 +1,4 @@
-EXEC_DIR = ..
+EXEC_DIR = ../..
 EXEC = $(EXEC_DIR)/simulator_new
 SRC_DIR = cpp_sources
 SRC_FILES = $(SRC_DIR)/*.cpp
