@@ -158,8 +158,8 @@ void ChemicalSynapses::init(){
 	if (pop_ind_pre >= 0){
 		// Initialise pre-synaptic population spike recording
 		// fatal error in the following line!!!
-		// history_steps = steps_trans + max_delay_steps;// history steps
-		history_steps = steps_trans + max_delay_steps + 1;// history steps
+		history_steps = steps_trans + max_delay_steps;// history steps
+		// history_steps = steps_trans + max_delay_steps + 1;// history steps
 		// spike_pop[time][ind_pre]
 		spikes_pop.resize(history_steps); 
 		for (int t = 0; t < history_steps; ++t){ 
@@ -230,6 +230,10 @@ void ChemicalSynapses::update(int step_current){
 			} // loop through every firing neuron at that history time
 		} // loop through relevant spike history
 	} // if pop_ind_pre >=0
+	
+	
+	// debug
+	cout << pop_ind_pre << pop_ind_post << ", " << s_full[0][0] << endl;
 	
 	else if (pop_ind_pre == -1){ // if external noisy population
 		// Contribution of external spikes, assuming square pulse transmitter release
