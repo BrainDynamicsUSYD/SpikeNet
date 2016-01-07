@@ -14,7 +14,7 @@ end % Basic parameters
 N = [4000; 1000]; %!!!
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 10*sec; % use 10 second!
+step_tot = 19*sec; % use 10 second!
 
 % Loop number for PBS array job
 Num_pop = length(N);
@@ -32,7 +32,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
         for lesion_3 = 1    %+(-0.05:0.05:0.05)
             for lesion_4 = 0.6  %+(-0.05:0.05:0.05)
 
-                for I_ext_strength = 1.5*ones(1,1)
+                for I_ext_strength = 1.5*ones(1,100)
                     
                     
                     loop_num = loop_num + 1;

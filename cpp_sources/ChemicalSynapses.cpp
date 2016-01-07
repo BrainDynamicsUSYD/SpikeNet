@@ -191,10 +191,19 @@ void ChemicalSynapses::update(int step_current){
 		int t_start = (int)fmax(step_current - steps_trans - max_delay_steps, 0); // very beginning of the relevant spike history
 		
 		double ds_this_syn; // change in gating variable for one synapse
+
+				// debug
+				//	cout << step_current << "," << N_pre << "," << N_post << endl;
+
 		for (int t = t_start; t <= step_current; ++t){ // loop through relevant spike history
 			t_ring = int(t % history_steps);// index of the history time
+
+
 			for (unsigned int f = 0; f < spikes_pop[t_ring].size(); ++f){ // loop through every firing neuron at that history time
 				i_pre = spikes_pop[t_ring][f];// index of the pre-synaptic firing neuron
+
+
+
 				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){// loop through all the post-synapses
 					j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
 					// left effective time of transmitter
@@ -227,8 +236,17 @@ void ChemicalSynapses::update(int step_current){
 						s_TALS[i_pre][syn_ind] = step_current; 
 					}
 				} // loop through all post-synapses
+						//debug
+						//cout << ds_this_syn << ",";
+
 			} // loop through every firing neuron at that history time
+
+
 		} // loop through relevant spike history
+
+		//debug
+		//cout << endl << endl;
+		tmp_data.push_back(s_full[0][0]);
 	} // if pop_ind_pre >=0
 
 	else if (pop_ind_pre == -1){ // if external noisy population
@@ -255,6 +273,7 @@ void ChemicalSynapses::update(int step_current){
 	}
 
 	
+	/*
 	// debug
 	if (step_current % 10000 == 0){
 		cout << endl;
@@ -265,7 +284,7 @@ void ChemicalSynapses::update(int step_current){
 		}
 		cout << endl;
 	}
-	
+	*/
 	
 
 	// Calculate chemical currents
@@ -425,9 +444,14 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 		write2file(output_file, delim, I_mean);
 		write2file(output_file, delim, I_std);
 	}
-	
-}
 
+	// tmp data
+	if (tmp_data.size() != 0){
+		output_file << indication << " SYND004" << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
+		write2file(output_file, delim, data_tmp);	
+	}
+}
 
 
 void ChemicalSynapses::recv_pop_data(vector<Neurons> &NeuronPopArray, int step_current){
