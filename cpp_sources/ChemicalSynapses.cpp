@@ -447,9 +447,9 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 
 	// tmp data
 	if (tmp_data.size() != 0){
-		output_file << indication << " SYND004" << endl;
+		output_file << indicator << " SYND004" << endl;
 		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
-		write2file(output_file, delim, data_tmp);	
+		write2file(output_file, delim, tmp_data);	
 	}
 }
 

@@ -214,6 +214,17 @@ for id_out = 1:length(files)
                 OutData{id_out}.syn_stats{end}.I_mean = I_mean;
                 OutData{id_out}.syn_stats{end}.I_std = I_std;
                 
+            elseif strfind(tline,'SYND004')
+                tline = fgetl(FID);
+                scan_temp = textscan(tline, '%d', 'Delimiter', ',');
+                OutData{id_out}.syn_stats{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_stats{end,1}.pop_ind_post = scan_temp{1}(2)+1; % Be careful here! C/C++ index convection!
+                OutData{id_out}.syn_stats{end,1}.syn_type = scan_temp{1}(3)+1; % Be careful here! C/C++ index convection!
+                tline = fgetl(FID);
+                scan_temp = textscan(tline,'%f','Delimiter',',');
+                tmp_data = transpose(scan_temp{1});
+                OutData{id_out}.syn_stats{end}.tmp_data = tmp_data;
+
                 
             elseif strfind(tline,'POPD002')
                 tline = fgetl(FID);
