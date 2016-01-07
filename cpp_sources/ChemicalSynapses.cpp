@@ -246,7 +246,16 @@ void ChemicalSynapses::update(int step_current){
 
 		//debug
 		//cout << endl << endl;
-		tmp_data.push_back(s_full[0][0]);
+		if (step_current == 0){
+			tmp_data.resize(10);
+		}
+		for (int i = 0; i < 10; ++i){
+			tmp_data[i].push_back(s_full[i][0]);
+		}
+		
+		
+		
+		
 	} // if pop_ind_pre >=0
 
 	else if (pop_ind_pre == -1){ // if external noisy population
@@ -448,7 +457,7 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 	// tmp data
 	if (tmp_data.size() != 0){
 		output_file << indicator << " SYND004" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << tmp_data.size() << delim << endl;
 		write2file(output_file, delim, tmp_data);	
 	}
 }

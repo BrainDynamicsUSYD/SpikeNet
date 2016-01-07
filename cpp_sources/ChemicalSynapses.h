@@ -13,7 +13,7 @@ using namespace std;
 // Excitatory and inhibitory chemical synapses with transmission delay
 class ChemicalSynapses{
 public:
-	vector<double> tmp_data; // temporary data container for debug
+	vector< vector<double> > tmp_data; // temporary data container for debug
 
 	ChemicalSynapses(); // default constructor
 	ChemicalSynapses(double dt, int step_tot); // parameterised constructor
