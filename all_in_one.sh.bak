@@ -11,9 +11,9 @@
 
 set -x
 cd "$PBS_O_WORKDIR"
-DATA_DIR="cc_phase_all_visiting"
-MATLAB_MAIN_FUNC="main_cc_phase_all_visiting"
-
+DATA_DIR="tmp_data_2"
+MATLAB_MAIN_FUNC="main_example_constant_current_fix"
+CPP_MAIN_FUNC="simulator_new"
 
 # copy this script to data directory
 me=`basename $0`;
@@ -53,7 +53,7 @@ else
 	echo  ${ID} has not been processed yet;
 	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
 	matlab  -r "addpath(genpath(cd)), cd('${DATA_DIR}'), ${MATLAB_MAIN_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
-	simulator ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
+	${CPP_MAIN_FUNC} ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
 	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
 	# double quote here allows the real value of ${var} to be shown, otherwise echo will process it

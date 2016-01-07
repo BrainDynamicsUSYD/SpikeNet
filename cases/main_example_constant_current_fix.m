@@ -26,15 +26,15 @@ rr = 0.7; % this is different from 0.6!!
 Mnum = 8; %!!!
 kk = 1; %2:5; % use 2 to roughly compensate synaptic saturation
 
-for E_fix = 0.2537
-I_fix = 0.3779;
+for E_fix = [0.2:0.01:0.29]  %0.3:0.005:0.33 % [0.305 0.310 0.315 0.32 0.325]  %0.2537
+for I_fix = 0.8:0.05:1.2 %; %0.3779;
 
 for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
     for lesion_2 = 1    %+(-0.05:0.05:0.05)
         for lesion_3 = 1    %+(-0.05:0.05:0.05)
             for lesion_4 = 0.6  %+(-0.05:0.05:0.05)
 
-                for I_ext_strength = 1.5*ones(1,10)
+                for I_ext_strength = 1.5*ones(1,5)
                     
                     
                     loop_num = loop_num + 1;
@@ -181,7 +181,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
     end
 end
 end
-
+end
 
 end
 
