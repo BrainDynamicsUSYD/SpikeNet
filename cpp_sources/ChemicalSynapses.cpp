@@ -256,7 +256,16 @@ void ChemicalSynapses::update(int step_current){
 
 	
 	// debug
-	cout << pop_ind_pre << pop_ind_post << ", " << s_full[0][0] << endl;
+	if (step_current % 10000 == 0){
+		cout << endl;
+		cout << step_current << "," << N_pre << "," << N_post << endl;
+		
+		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
+			cout << s_full[i_pre][0] << ",";
+		}
+		cout << endl;
+	}
+	
 	
 
 	// Calculate chemical currents
