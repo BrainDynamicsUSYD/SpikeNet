@@ -14,7 +14,7 @@ end % Basic parameters
 N = [4000; 1000]; %!!!
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 19*sec; % use 10 second!
+step_tot = 39*sec; % use 10 second!
 
 % Loop number for PBS array job
 Num_pop = length(N);

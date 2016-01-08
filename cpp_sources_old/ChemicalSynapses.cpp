@@ -142,7 +142,11 @@ void ChemicalSynapses::init(){
 	// transmitter_strength
 	K_trans =  1.0 / steps_trans; // be careful! 1 / transmitter steps gives zero (int)!!
 
+	//
+	cout << endl << "To fully re-create the previous results, remove the line exp_step_table.resize(0) and use history_steps = steps_trans + max_delay_steps!" << endl;
+	cout << "However, after testing, the effects of the above two bugs should be minimal." << endl;
 	// Initialise exp_step
+	//
 	exp_step_table.resize(0); // for re-initialization!!!
 	exp_step = exp(-dt / tau_decay); // single step
 	for (int t = 0; t < step_tot; ++t){ // multi-step look-up table
