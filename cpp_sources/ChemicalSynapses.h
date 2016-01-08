@@ -13,8 +13,6 @@ using namespace std;
 // Excitatory and inhibitory chemical synapses with transmission delay
 class ChemicalSynapses{
 public:
-	vector< vector<double> > tmp_data; // temporary data container for debug
-
 	ChemicalSynapses(); // default constructor
 	ChemicalSynapses(double dt, int step_tot); // parameterised constructor
 	friend class NeuronNetwork; // Let NeuronNetwork access its private members
@@ -31,13 +29,14 @@ public:
 	string dump_para(char delim); // dump all the parameter values used
 	void output_results(ofstream& output_file, char delim, char indicator);
 
-	void recv_pop_data(vector<Neurons> &NeuronPopArray, int step_current);
-	void update(int step_current); //  Calculate the current post-synaptic conductance changes caused by pre-synaptic spikes.
+	void recv_pop_data(vector<Neurons> &NeuronPopArray);
+	void update(int step_current);
 	void send_pop_data(vector<Neurons> &NeuronPopArray);
 
+	void add_short_term_depression();
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points); 
 	void sample_data(int step_current);
-	
+
 
 	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
 	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
@@ -64,14 +63,14 @@ protected:
 		V_ex, // Excitatory reversal
 		V_in; // Inhibitory reversal
 	int
-		max_delay_steps,
-		history_steps; // for pre-synaptic spikes_pop
+		max_delay_steps;
 		
 	// A copy of data from pre-synaptic population
 	vector<double>* // This is problematic!!!
 		V_post; // from post-synaptic population
-	vector< vector<int> >
-		spikes_pop; // pre-population spike history, spikes_pop[time index][neuron index], ring buffer
+	vector<int>*
+		spikes_pre; // current spikes from pre-synaptic population
+
 
 	// currents into post-synaptic population
 	vector<double>
@@ -111,14 +110,10 @@ protected:
 		tau_decay; // msec, decay time
 	int
 		steps_trans; // tranmitter duration in simulation steps
-	double
+	vector<double>
 		K_trans; // 1.0/transmitter_steps!
 	double
 		exp_step; // exp(-dt/tau)
-	vector<double>
-		exp_step_table; // exp(-dt*steps/tau), 
-
-
 
 	// voltage-dependent part B(V) (look-up table):
 	double
@@ -135,15 +130,23 @@ protected:
 
 
 	// connection matrices and bookkeeping for 1-variable kinetic synapse model
+	double // short-term depression constants
+		p_ves, // ves for vesicle
+		tau_ves,
+		exp_ves;
+	bool
+		STD; //  
 	vector<double>
-		gs_sum; // g*s, 0<s<1, g=K>0
-	vector< vector<int> >
-		s_TALS; //  time-step right after last spike (TALS) for each synapse (i.e., each gating variable)
+		s, // pre-synaptic dynamics
+		gs_sum, // post-synaptic dynamics
+		f_ves; // short-term depression: the fraction of available vesicles
+	vector<int>
+		trans_left; // 
 	vector< vector<double> >
-		s_full; 
-		// s-value for each synapse (full matrix):
-		// 	1) the value at TALS if after a spike, or 
-		// 	2) the value at current time if during a spike, range [0,1]
+		d_gs_sum_buffer; // d_gs_sum_buffer[time index][post-synaptic neuron index], ring buffer
+	int
+		buffer_steps;
+	
 	vector< vector<int> >
 		C, // connection index
 		   // each entry in the C matrix is the index of a POST-SYNAPTIC neuron (pre to post)
@@ -163,8 +166,6 @@ protected:
 		
 	vector<double> 
 		rate_ext_t; // identical rate of firing for external pre-synaptic neurons (chemical synapses)
-	vector< vector<double> > 
-		gs_buffer; // in order to model transmitter, [t_ring][j_post]
 
 	// Random number generator
 	int 

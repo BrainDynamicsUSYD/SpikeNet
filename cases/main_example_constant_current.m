@@ -92,7 +92,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                     
                     
                     %%%%%%% random initial condition settings (int pop_ind, double p_fire)
-                    p_fire = 0.00*ones(size(N)); % between [0,1], 0.05
+                    p_fire = -2*ones(size(N)); % between [0,1], 0.05
                     writeInitV(FID, p_fire);
                     
                     %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%

@@ -50,7 +50,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	
 	vector<int> neuron_stats_setting;
 	vector< vector<int> > syn_stats_setting;
-	vector< vector<int> > STD_setting;
+	
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
@@ -136,15 +136,6 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 
-			found = line_str.find("INIT008");
-			if (found != string::npos){// if found match
-				cout << "\t Reading short term depression settings..." << endl;
-				// [pop_ind_pre, pop_ind_post]
-				STD_setting.resize(STD_setting.size()+1);
-				read_next_line_as_vector(STD_setting.back());
-				continue; // move to next line
-			}
-			
 			// read neuron population parameter setting
 			found = line_str.find("PARA001");
 			if (found != string::npos){// if found match
@@ -400,30 +391,6 @@ bool SimulatorInterface::import(string in_filename_input){
 			int step_perturb = step_perturb_setting[i][1];
 			network.NeuronPopArray[pop_ind].add_perturbation(step_perturb);
 			cout << pop_ind+1 << "...";
-		}
-		cout << "done." << endl;
-	}
-	
-	
-	
-	if (STD_setting.size() != 0){
-		cout << "\t Short-term depression settings...";
-		for (unsigned int i = 0; i < STD_setting.size(); ++i){
-			int pop_ind_pre = STD_setting[i][0];
-			int pop_ind_post = STD_setting[i][1];
-			
-			int syn_match = false;
-			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-				network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].add_short_term_depression();
-					cout << i+1 << "...";
-					syn_match = true;
-				}
-			}
-			if (!syn_match){
-				cout << "(no match found!)...";
-			}
 		}
 		cout << "done." << endl;
 	}

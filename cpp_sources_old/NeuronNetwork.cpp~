@@ -47,7 +47,7 @@ void NeuronNetwork::update(int step_current){
 		/*------------------------------------------------------------------------------------------------------*/
 		// Chemical Coupling
 		for (unsigned int syn_ind = 0; syn_ind < ChemicalSynapsesArray.size(); ++syn_ind){
-				ChemicalSynapsesArray[syn_ind].recv_pop_data(NeuronPopArray);
+				ChemicalSynapsesArray[syn_ind].recv_pop_data(NeuronPopArray, step_current);
 				// recv_data should be more optimized if using MPI!
 				ChemicalSynapsesArray[syn_ind].update(step_current);
 				ChemicalSynapsesArray[syn_ind].send_pop_data(NeuronPopArray);
