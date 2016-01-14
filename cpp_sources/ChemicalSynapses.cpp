@@ -295,8 +295,8 @@ void ChemicalSynapses::add_short_term_depression(){
 	}
 	STD = true;
 	// short term depression
-	p_ves =  0.3; // see X. Wang, 1999, The Journal of Neuroscience
-	tau_ves =  500; // ms
+	p_ves =  0.4; // see X. Wang, 1999, The Journal of Neuroscience
+	tau_ves =  700; // ms
 	f_ves.assign(N_pre, 1.0);
 	exp_ves = exp(-dt / tau_ves);
 }
