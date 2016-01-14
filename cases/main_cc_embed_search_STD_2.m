@@ -24,7 +24,6 @@ for EE_factor = 0.6; % 0.6?
                 for  P0_init = [0.1] % 0.25 gives P0_actual = 0.2
                     for I_ext_strength =  [1.1 1.2 1.3 1.4 1.5]
                         for  tau_c = [14 12 10 8 6]
-			    for STD_on = [0 1]                            
                             loop_num = loop_num + 1;
                             
                             % For PBS array job
@@ -141,9 +140,7 @@ for EE_factor = 0.6; % 0.6?
                                     clear I J K D;
                                 end
                             end
-                            if STD_on == 1 
-                            	writeSTD(FID, 1, 1); 
-                            end
+                            	writeSTD(FID, 1, 1, 10*sec); 
 			% Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                             % Record explanatory variables, also called "controlled variables"
                             
@@ -152,7 +149,6 @@ for EE_factor = 0.6; % 0.6?
                                 'delay', delay, ...
                                 'EE_factor', EE_factor, ...
                                 'II_factor', II_factor, ...
-				'STD_on', STD_on, ...
                                 'I_ext_strength', I_ext_strength,...
                                 'P0_init', P0_init, ...
                                 'degree_CV', degree_CV,...
@@ -177,7 +173,6 @@ for EE_factor = 0.6; % 0.6?
             end
         end
     end
-end
 end
 end
 

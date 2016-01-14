@@ -133,6 +133,12 @@ Input data format is as following.
 	K (row vector),
 	D (row vector),
 
+> INIT007 # set perturbation (remove one spike)
+	pop_ind, step_perturb,
+
+> INIT008 # add short-term depression
+	pop_ind_pre, pop_ind_post,
+	
 > SYNF001 # non-default synapse definition file name
 	path/to/file_name (no comma!)
 
@@ -144,28 +150,32 @@ Input data format is as following.
 	parameter_name1, value1,
 	parameter_name2, value2,
 	...
-
+ 
 > PARA002 # non-default synapse parameter
 	number_of_parameters,
 	parameter_name1, value1,
 	parameter_name2, value2,
 	...
 
-> SAMP001 # neuronal data sampling 
+> SAMP001 # neuron data sampling 
 	pop_ind,
 	data_type (logical vector),
 	ind1, ind2, ..., indX, (sample neuron indices)
-	# Note that data_type specifies sample data types
-	# and it must correspond to 
-	# [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
-
-> SAMP002 # populational data sampling
-	pop_ind,
-	data_type (logical vector),
 	1, 1, 0, 0, ..., (1-by-step_tot logical values)
 	# Note that data_type specifies sample data types
 	# and it must correspond to 
 	# [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
+
+> SAMP002 # synapse data sampling 
+	pop_ind_pre, pop_ind_post, syn_type,
+	ind1, ind2, ..., indX, (post-synaptic sample neuron indices)
+	1, 1, 0, 0, ..., (1-by-step_tot logical values)
+	
+> SAMP003 #  neuron population statistical data record
+	pop_ind,
+	
+> SAMP004 #  synaptic currents  statistical data record
+	pop_ind_pre, pop_ind_post, syn_type,
 
 \end{lstlisting}
 
@@ -191,21 +201,24 @@ The output data format is as following.
 	parameter_name2, value2,
 	...
 
-> POPD003 # sampled populational data
-	pop_ind, number_of_time_points,
-	data_name1, ..., data_nameX,
-	data_1 (neurons-by-sample_size matrix),
-	data_2 (neurons-by-sample_size matrix),
-	...
-	data_X (neurons-by-sample_size matrix),
-
-> POPD004 # sampled neuronal data
+> POPD003 # neuron population statistical data
+	pop_ind,
+	V_mean_t1, V_mean_t2, ... (1-by-step_tot)
+	V_std_t1, V_std_t2, ... (1-by-step_tot)
+	I_input_mean_t1, I_input_mean_t2, ... (1-by-step_tot)
+	I_input_std_t1, I_input_std_t2, ... (1-by-step_tot)
+	
+> POPD004 # sampled neuron data
 	pop_ind, number_of_sample_neurons,
 	data_name1, ..., data_nameX,
-	data_1 (sample_size-by-step_tot matrix),
-	data_2 (sample_size-by-step_tot matrix),
+	data_1 (sampled_neurons-by-sampled_steps matrix),
+	data_2 (sampled_neurons-by-sampled_steps matrix),
 	...
-	data_X (sample_size-by-step_tot matrix),
+	data_X (sampled_neurons-by-sampled_steps matrix),
+
+> POPD005 # E-I ratio for each neuron
+	pop_ind,
+	EI_ratio_1, EI_ratio_2, ... (1-by-N),
 
 > SYND001 # synaptic connection parameters
 	number_of_parameters,
@@ -213,6 +226,16 @@ The output data format is as following.
 	parameter_name2, value2,
 	...
 
+> SYND002 # sampled synapse  data
+	pop_ind_pre, pop_ind_post, syn_type, number_of_sample_neurons,
+	data (sampled_neurons-by-sampled_steps matrix),
+
+> SYND003 # synapse statistical data
+	pop_ind_pre, pop_ind_post, syn_type,
+	I_mean_t1, I_mean_t2, ... (1-by-step_tot)
+	I_std_t1, I_std_t2, ... (1-by-step_tot)
+	
+	
 
 \end{lstlisting}
 

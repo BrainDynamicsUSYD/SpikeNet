@@ -64,8 +64,7 @@ void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int 
 
 	// default settting
 	STD = false; 
-	STD_on_step = -1;
-
+	
 	// parameter-dependent initialisation
 	init();
 
@@ -168,10 +167,6 @@ void ChemicalSynapses::update(int step_current){
 
 	
 	if (pop_ind_pre >= 0){
-		//
-		if (STD_on_step == step_current){
-			STD = true;
-		}
 		// update pre-synaptic dynamics
 		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ // add spikes (transmitter release)
 			trans_left[spikes_pre->at(i)] += steps_trans;
@@ -257,7 +252,7 @@ void ChemicalSynapses::update(int step_current){
 
 			//debug
 			//cout << endl << endl;
-			if (step_current == step_tot - 1){
+			if (step_current == step_tot){
 				tmp_data.resize(1);
 				tmp_data[0] = f_ves;
 			}
@@ -302,14 +297,11 @@ void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<boo
 
 }
 
-void ChemicalSynapses::add_short_term_depression(int STD_on_step_input){
+void ChemicalSynapses::add_short_term_depression(){
 	if (synapses_type != 0){
 		cout << "Warning: initializing STD on non-AMPA synapses!" << endl;
 	}
-	STD_on_step = STD_on_step_input;
-	if (STD_on_step == 0){
-		STD = true;
-	}
+	STD = true;
 	// short term depression
 	p_ves =  0.4; // see X. Wang, 1999, The Journal of Neuroscience
 	tau_ves =  700; // ms
