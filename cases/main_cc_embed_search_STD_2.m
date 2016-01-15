@@ -16,6 +16,9 @@ delay = 2;
 
 in_deg_scale_exp = -0.5;
 
+for phi_E = 0.5:0.1:1.0
+ phi_I = phi_E
+
 discard_transient = 100; % ms
 for EE_factor = 0.6; % 0.6?
     for II_factor = 0.6
@@ -147,6 +150,7 @@ for EE_factor = 0.6; % 0.6?
                             writeExplVar(FID, 'discard_transient', discard_transient, ...
                                 'loop_num', loop_num, ...
                                 'delay', delay, ...
+				'phi_I', phi_I, ...
                                 'EE_factor', EE_factor, ...
                                 'II_factor', II_factor, ...
                                 'I_ext_strength', I_ext_strength,...
@@ -175,7 +179,8 @@ for EE_factor = 0.6; % 0.6?
     end
 end
 end
-
+end
+end
 
 % This function must be here!
 function appendThisMatlabFile(FID)
