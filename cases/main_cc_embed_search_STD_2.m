@@ -1,4 +1,4 @@
-function main_cc_embed_search(varargin)
+function main_cc_embed_search_STD_2(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -17,7 +17,7 @@ delay = 2;
 in_deg_scale_exp = -0.5;
 
 for phi_E = 0.5:0.1:1.0
- phi_I = phi_E
+ phi_I = phi_E;
 
 discard_transient = 100; % ms
 for EE_factor = 0.6; % 0.6?
@@ -177,7 +177,6 @@ for EE_factor = 0.6; % 0.6?
             end
         end
     end
-end
 end
 end
 end
