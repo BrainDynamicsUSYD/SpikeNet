@@ -32,7 +32,7 @@ echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 echo "All_in_one: Current PBS_ARRAYID is ${PBS_ARRAYID}"
 printf "\n"
 
-ID=`printf "%03d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
+ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 
 
 cd ${DATA_DIR};

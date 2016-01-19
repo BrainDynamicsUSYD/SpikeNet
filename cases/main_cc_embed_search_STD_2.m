@@ -20,13 +20,13 @@ for phi_E = 0.5:0.1:1.0
  phi_I = phi_E;
 
 discard_transient = 100; % ms
-for EE_factor = 0.6; % 0.6?
-    for II_factor = 0.6
-        for EI_factor = 0.8
+for EE_factor = [0.4 0.5 0.6]; % 0.6?
+    for II_factor = [0.5 0.6]
+        for EI_factor = [0.8 0.9 1.0]
             for degree_CV = [0.5] % 0.5?
                 for  P0_init = [0.1] % 0.25 gives P0_actual = 0.2
-                    for I_ext_strength =  [1.1 1.2 1.3 1.4 1.5]
-                        for  tau_c = [14 12 10 8 6]
+                    for I_ext_strength =  [1.1 1.1 1.2 1.2 1.3 1.3 ]
+                        for  tau_c = [14 12 10 ]
                             loop_num = loop_num + 1;
                             
                             % For PBS array job
@@ -53,7 +53,7 @@ for EE_factor = 0.6; % 0.6?
                             in_deg_scaling = in_deg_ratio(:).^in_deg_scale_exp; % use -0.5 maybe?
                             
                             % save in_degree and sample neuron data based on in_degree
-                            save([sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
+                            save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
                                 '_in_degree.mat_pre'], 'in_degree');
                             [~,ind_sorted] = sort(in_degree);
                             sample_neuron = ind_sorted(1:500:end);

@@ -4,7 +4,7 @@ function [FID, FID_syn] = new_ygin_files_and_randseed(loop_num)
     % using loop_num in filename to ensure unique naming!
     % Otherwise overwriting may occur when using PBS.
     date_now = datestr(now,'yyyymmddHHMM-SSFFF');
-    name = [ sprintf('%03g-', loop_num), date_now ];
+    name = [ sprintf('%04g-', loop_num), date_now ];
     FID = fopen([name,'.ygin'], 'w'); % creat file
     FID_syn = fopen([name,'.ygin_syn'], 'w'); % creat file
     fprintf('Data file name is: \n%s\n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
