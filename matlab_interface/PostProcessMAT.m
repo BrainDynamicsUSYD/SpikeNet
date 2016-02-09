@@ -47,11 +47,15 @@ for i = 1:num_files
     %     save(files{i},'Analysis', '-append');
     
     
-    R_temp = avalanche_detect(R_temp);
-    avalanche = R_temp.avalanche;
-    save(files{i},'avalanche', '-append');
+%     R_temp = avalanche_detect(R_temp);
+%     avalanche = R_temp.avalanche;
+%     save(files{i},'avalanche', '-append');
     
     
+    R_temp = get_grid_firing_centre(R_temp);
+    grid = R_temp.grid;
+    save(files{i},'grid', '-append');
+
     % R_temp = rmfield(R_temp,{'C_rate','C_label','up_down_analysis'});
     
     
