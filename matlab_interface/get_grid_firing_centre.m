@@ -19,6 +19,7 @@ ind_b_vec = ind_ab(2,:);
 
 %%%% get window-ed mean and std for x/y position of firing neurons
 hw = (R.N(1)^0.5 - 1)/2;
+fw = 2*hw+1;
 
 if mod(hw, 1) ~= 0
     warning('Not a square grid')
@@ -38,7 +39,7 @@ else
     
     for i = 1:length(x_shift)
         
-        % shift grid centre
+        % shift grid centre (to take care of the periodic boundary condition)
         x_pos =  mod(x_pos_o - x_shift(i)+hw, 2*hw+1) - hw;
         y_pos =  mod(y_pos_o - y_shift(i)+hw, 2*hw+1) - hw;
         
@@ -76,14 +77,34 @@ else
     y_mean_chosen = [];
     for i = 1:length(xy_mean_ind_chosen)
         if xy_mean_ind_chosen(i)
-            x_mean_chosen = [x_mean_chosen x_mean_all(dist_std_min_ind(i), i)];%#ok<AGROW>
-            y_mean_chosen = [y_mean_chosen y_mean_all(dist_std_min_ind(i), i)];%#ok<AGROW>
+            x_mean_tmp = x_mean_all(dist_std_min_ind(i), i);
+            y_mean_tmp = y_mean_all(dist_std_min_ind(i), i);
+            
+            % shift the position back to normal
+            x_mean_tmp = (mod(x_mean_tmp+hw, fw) - hw); 
+            x_mean_tmp =  x_mean_tmp - 2*hw*(x_mean_tmp > 31);% a hack????
+            y_mean_tmp = (mod(y_mean_tmp+hw, fw) - hw);
+            y_mean_tmp =  y_mean_tmp - 2*hw*(y_mean_tmp > 31);
+            
+            x_mean_chosen = [x_mean_chosen x_mean_tmp];%#ok<AGROW>
+            y_mean_chosen = [y_mean_chosen y_mean_tmp];%#ok<AGROW>
         end
     end
+
     t_mid_chosen = t_mid(xy_mean_ind_chosen);
     dist_std_chosen = dist_std_min(xy_mean_ind_chosen);
     
-    jump_dist = sqrt(diff(x_mean_chosen).^2 + diff(y_mean_chosen).^2);
+    % jump_size (take care of the periodic boundary condition)
+    x_diff_full = repmat(x_mean_chosen(2:end), 9, 1);
+    y_diff_full = repmat(y_mean_chosen(2:end), 9, 1);
+    x_mean_shift2 = [-fw 0  fw -fw 0 fw -fw  0   fw];
+    y_mean_shift2 = [ fw fw fw   0 0  0 -fw -fw -fw];
+    for s = 1:9
+        x_diff_full(s,:) =  x_diff_full(s,:) - x_mean_shift2(s) - x_mean_chosen(1:end-1);
+        y_diff_full(s,:) =  y_diff_full(s,:) - y_mean_shift2(s) - y_mean_chosen(1:end-1) ;
+    end
+    jump_dist = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
+    % jump_duration
     jump_duration = diff(t_mid_chosen);
     
     % output results
@@ -100,22 +121,73 @@ else
 end
 
 
-
-% figure(1);
-% ang=0:0.01:2*pi; 
+% % % Code for visualization
+% figure('Name','Vis','color','w','NumberTitle','off');
+% 
+% axis equal;
+% box on;
+% set(gca,'xtick',[],'ytick',[]);
+% 
 % xlim([-hw hw]);
 % ylim([-hw hw]);
 % hold on;
-% j = 1;
-% for t = 1:length(t_mid);
-%     if sum(t_mid_chosen == t_mid(t)) == 1
-%         plot( x_mean_chosen(j), y_mean_chosen(j), 'rx', ...
-%             x_mean_chosen(j)+ dist_std_chosen(j)*cos(ang),y_mean_chosen(j)+ dist_std_chosen(j)*sin(ang));
-%         j = j + 1;
 % 
+% j = 1;
+% 
+% ang=0:0.01:2*pi;
+% x_shift_vs = [0 fw fw -fw -fw fw -fw 0 0 ];
+% y_shift_vs = [0 fw -fw fw -fw 0  0   fw -fw];
+% 
+% for t = 1:length(t_mid);
+%     h2 = plot(100,0);
+%     h3 = plot(100,0);
+%     
+%     ind_range_tmp = ind_a_vec(t):ind_b_vec(t);
+%     h1 = plot(x_pos_o(ind_range_tmp), y_pos_o(ind_range_tmp), 'bo');
+%     if sum(t_mid_chosen == t_mid(t)) == 1
+%         
+%         x_tmp = x_mean_chosen(j);
+%         y_tmp = y_mean_chosen(j);
+%         r_cos = x_tmp+dist_std_chosen(j)*cos(ang);
+%         r_sin = y_tmp+dist_std_chosen(j)*sin(ang);
+%         
+%         
+%         
+%         h3 = plot(r_cos - x_shift_vs(1),r_sin - y_shift_vs(1),'r', ...
+%             r_cos - x_shift_vs(2),r_sin - y_shift_vs(2),'r',...
+%             r_cos - x_shift_vs(3),r_sin - y_shift_vs(3),'r',...
+%             r_cos - x_shift_vs(4),r_sin - y_shift_vs(4),'r',...
+%             r_cos - x_shift_vs(5),r_sin - y_shift_vs(5),'r', ...
+%             r_cos - x_shift_vs(6),r_sin - y_shift_vs(6),'r', ...
+%             r_cos - x_shift_vs(7),r_sin - y_shift_vs(7),'r', ...
+%             r_cos - x_shift_vs(8),r_sin - y_shift_vs(8),'r', ...
+%             r_cos - x_shift_vs(9),r_sin - y_shift_vs(9),'r');
+%         
+%         if j == 1
+%             h2 = plot( x_tmp, y_tmp, 'r>', 'MarkerSize', 8);
+%         else
+%             %h2 = plot( [x_mean_chosen(j-1) x_tmp], [y_mean_chosen(j-1) y_tmp], 'r>-', 'MarkerSize',8);
+%             h2 = plot( x_tmp, y_tmp, 'rx', 'MarkerSize', 16);
+%             xs = sprintf('jump_size = %4.2f', jump_length(j-1));
+%             xlabel(xs);
+%             %             if jump_length(j-1) > 0
+%             %                 clc
+%             %                 xy1 = [x_mean_chosen(j-1) y_mean_chosen(j-1)]
+%             %                 xy2 = [x_tmp, y_tmp]
+%             %                 pause
+%             %             end
+%         end
+%         
+%         
+%         j = j + 1;
 %     end
 %     pause(0.02);
-% end
+%     delete(h1);
+%     delete(h2);
+%     delete(h3);
+%     ts = sprintf('time = %8.1f ms', t*0.1);
+%     title(ts);
+
 
 end
 
