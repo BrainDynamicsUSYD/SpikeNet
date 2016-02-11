@@ -116,8 +116,7 @@ else
     R.grid.t_mid_full = t_mid;
     R.grid.t_mid = t_mid_chosen;
     R.grid.radius = dist_std_chosen;
-    R.grid.radius_thre = dist_std_thre;
-    R.grid_radiu_full = dist_std_min;
+    R.grid.radius_thre = R.grid.(dist_std_min < dist_std_thre
     R.grid.centre = [x_mean_chosen; y_mean_chosen];
     R.grid.jump_dist = jump_dist;
     R.grid.jump_du = jump_duration;
