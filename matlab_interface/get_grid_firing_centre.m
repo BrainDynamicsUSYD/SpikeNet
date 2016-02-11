@@ -39,9 +39,10 @@ else
     
     for i = 1:length(x_shift)
         
-        % shift grid centre (to take care of the periodic boundary condition)
-        x_pos =  mod(x_pos_o - x_shift(i)+hw, 2*hw+1) - hw;
-        y_pos =  mod(y_pos_o - y_shift(i)+hw, 2*hw+1) - hw;
+        % shift grid centre
+        x_pos =  mod(x_pos_o - x_shift(i)+hw, fw) - hw;
+        y_pos =  mod(y_pos_o - y_shift(i)+hw, fw) - hw;
+        % minmax( [x_pos', y_pos'])
         
         x_mean = [];
         y_mean = [];
@@ -77,10 +78,10 @@ else
     y_mean_chosen = [];
     for i = 1:length(xy_mean_ind_chosen)
         if xy_mean_ind_chosen(i)
-            x_mean_tmp = x_mean_all(dist_std_min_ind(i), i);
-            y_mean_tmp = y_mean_all(dist_std_min_ind(i), i);
             
             % shift the position back to normal
+            x_mean_tmp = x_mean_all(dist_std_min_ind(i), i) + x_shift(dist_std_min_ind(i));
+            y_mean_tmp = y_mean_all(dist_std_min_ind(i), i) + y_shift(dist_std_min_ind(i));
             x_mean_tmp = (mod(x_mean_tmp+hw, fw) - hw); 
             x_mean_tmp =  x_mean_tmp - 2*hw*(x_mean_tmp > 31);% a hack????
             y_mean_tmp = (mod(y_mean_tmp+hw, fw) - hw);
@@ -118,6 +119,8 @@ else
     R.grid.win_len = win_len;
     R.grid.win_gap = win_gap; % window gap
     R.grid.win_min_rate_Hz = win_min_rate_Hz;
+    R.grid.ind_ab = ind_ab;
+    R.grid.num_spikes_win = num_spikes_win;
 end
 
 
