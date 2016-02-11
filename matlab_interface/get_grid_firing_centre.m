@@ -21,6 +21,9 @@ ind_b_vec = ind_ab(2,:);
 hw = (R.N(1)^0.5 - 1)/2;
 fw = 2*hw+1;
 
+% threshold
+dist_std_thre = 31/2;
+
 if mod(hw, 1) ~= 0
     warning('Not a square grid')
 else
@@ -71,8 +74,9 @@ else
     [dist_std_min, dist_std_min_ind] = min(dist_std_all);
     dist_std_min_mean = mean(dist_std_min(~isnan(dist_std_min)));
     dist_std_min_std = std(dist_std_min(~isnan(dist_std_min)));
-    
-    xy_mean_ind_chosen = (dist_std_min < dist_std_min_mean - dist_std_min_std) & (num_spikes_win >= spikes_win_min );
+    % dist_std_thre = dist_std_min_mean - dist_std_min_std; % this can be
+    % problematic!!
+    xy_mean_ind_chosen = (dist_std_min < dist_std_thre) & (num_spikes_win >= spikes_win_min );
     
     x_mean_chosen = [];
     y_mean_chosen = [];
