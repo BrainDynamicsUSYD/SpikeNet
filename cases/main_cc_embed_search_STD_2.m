@@ -54,7 +54,7 @@ for EE_factor = [0.5 ]; % 0.6?
                             
                             % save in_degree and sample neuron data based on in_degree
                             save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
-                                '_in_degree.mat_pre'], 'in_degree');
+                                '_in_degree.mat'], 'in_degree');
                             [~,ind_sorted] = sort(in_degree);
                             sample_neuron = ind_sorted(1:500:end);
                             

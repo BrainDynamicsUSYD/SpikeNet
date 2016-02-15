@@ -2,7 +2,7 @@
 #PBS -N all_in_one
 ##PBS -q yossarian
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=1:59:59
+#PBS -l walltime=11:59:59
 #PBS -l mem=1500MB
 #PBS -V
 #PBS -e PBSout/one_err_av
@@ -11,9 +11,9 @@
 
 set -x
 cd "$PBS_O_WORKDIR"
-DATA_DIR="tmp_data_2"
-MATLAB_MAIN_FUNC="main_example_constant_current_fix"
-CPP_MAIN_FUNC="simulator_new"
+DATA_DIR="STD_on_off_200sec"
+MATLAB_MAIN_FUNC="main_cc_embed_search_STD_2"
+CPP_MAIN_FUNC="simulator"
 
 # copy this script to data directory
 me=`basename $0`;
@@ -36,13 +36,13 @@ ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 
 
 cd ${DATA_DIR};
-matdone=`ls *mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
+matdone=`ls *RYG.mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
 ygoutdone=`ls *ygout | sed -n '/^'${ID}'-.*ygout$/p'| wc -l`;
 cd ${PBS_O_WORKDIR};
 
 
 if [ "${matdone}" == "1" ]; then
-	echo ${ID} has been processed till mat;
+	echo ${ID} has been processed till RYG.mat;
 
 elif [ "${ygoutdone}" == "1" ]; then
 	echo ${ID} has been processed till ygout;
