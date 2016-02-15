@@ -13,7 +13,7 @@ Num_pop = R.Num_pop;
 num_spikes = R.num_spikes;
 
 % Define kernel
-kernel_type = 'square';
+kernel_type = 'square_Hz';
 CC_kernel = spike_train_kernel_YG(CC_kernel_width, dt, kernel_type);
 
 % corrcoef within each population
