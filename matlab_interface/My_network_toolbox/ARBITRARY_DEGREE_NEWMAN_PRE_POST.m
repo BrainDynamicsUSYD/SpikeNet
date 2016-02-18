@@ -6,8 +6,6 @@ addpath(genpath('/import/yossarian1/yifan/Project1/My_network_toolbox'));
 
 
 
-%������������������������������������������%
-
 % Generate random directed graphs with given joint in-and-out
 % degree distribution p(j,k)
 % If p(j,k) is unknown, assume p(j) and p(k) is uncorrelated, i.e.,
@@ -171,7 +169,7 @@ density_generated = mean_degree_generated /(N_post-1)
 end
 
 
-%% Helper function
+% Helper function
 function [ stub ] = degree2stub( degree )
 % This function turn the in/out-degree vector into a stub vector
 % The stub vector will be randomly permuted.
