@@ -13,7 +13,6 @@ function [ X ] = my_logn_rand( Mu, Sigma, CorrMat_log, N, mu_sigma_mode )
 %
 %   Author: Stephen Lienhard
 
-
 switch lower(mu_sigma_mode)
     case 'mu_sigma_log'
         Mu_norm = log((Mu.^2)./sqrt(Sigma.^2+Mu.^2));
@@ -34,19 +33,9 @@ covv = log( CorrMat_log .* sqrt(exp(sigma_down.^2)-1) .* ...
 % The Simulation
 X = exp( mvnrnd( Mu_norm(:) , covv , N ));
 
-% error check
-min_error = 0.05; % percent
-if length(Mu) == 2
-    X_c = corrcoef(X);
-    error = abs( (X_c(1,2)-CorrMat_log(1,2) ) / CorrMat_log(1,2) );
-    if error > min_error
-        clear X;
-        % disp('regenerating...')
-        [ X ] = my_logn_rand( Mu, Sigma, CorrMat_log, N, mu_sigma_mode );
-    end
-else
-    disp('length(Mu) ~= 2, error check skipped.')
-end
+
+X_c = corrcoef(X);
+if X_c(1,2
 
 
 end
