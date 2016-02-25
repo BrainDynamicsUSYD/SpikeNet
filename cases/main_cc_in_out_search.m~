@@ -29,8 +29,8 @@ for EE_CV = 0.5
                         for EI_factor = [ 0.8 ]
                             for degree_CV = [0.5 ] % 0.5?
                                 for  P0_init = [ 0.1 ] % 0.25 gives P0_actual = 0.2
-                                    for I_ext_strength = [ 0.7:0.025:1.0 ]% 0.9*ones(1,10)]
-                                        for  tau_c = [10 ]
+                                    for I_ext_strength = [ 0.8*ones(1,40) ]% 0.9*ones(1,10)]
+                                        for  tau_c = [10  ]
                                             loop_num = loop_num + 1;
                                             
                                             % For PBS array job
@@ -112,7 +112,7 @@ for EE_CV = 0.5
                                             % type(1:AMAP, 2:GABAa, 3:NMDA)
                                             
                                             P_mat = [P0_init 0.3;
-                                                    0.3 0.3];
+                                                0.3 0.3];
                                             
                                             K_mat = [2.4*EE_factor  1.4;
                                                 4.5*EI_factor  5.7*II_factor]*10^-3; % miuSiemens

@@ -1,3 +1,4 @@
+
 function writeInitV(FID, p_fire)
 % write initial condition for membrane potential distribution
 %    FID: file id for writing data
