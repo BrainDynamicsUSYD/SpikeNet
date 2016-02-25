@@ -53,7 +53,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                     % Creat ygin file
                     % using loop_num in filename to ensure unique naming!
                     % Otherwise overwriting may occur when using PBS.
-                    name = [ sprintf('%03g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF')];
+                    name = [ sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF')];
                     
                     fprintf('Data file name is: /n%s/n', strcat(name,'.ygin') ); % write the file name to stdout and use "grep ygin" to extract it
                     FID = fopen([name,'.ygin'], 'w'); % creat file
@@ -92,7 +92,7 @@ for lesion_1 = 1.1      %+(-0.05:0.05:0.05) %1.1:0.1:1.4 % range [0-1]
                     
                     
                     %%%%%%% random initial condition settings (int pop_ind, double p_fire)
-                    p_fire = -2*ones(size(N)); % between [0,1], 0.05
+                    p_fire = -1*ones(size(N)); % between [0,1], 0.05
                     writeInitV(FID, p_fire);
                     
                     %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
