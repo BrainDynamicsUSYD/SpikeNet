@@ -145,31 +145,30 @@ clc;
 
 % output and check results
 ll_matrix = sparse(J,I,K);
-% A = ll_matrix > 0;
+A = ll_matrix > 0;
 
-% in = full(sum(A,2));
-% out = full(sum(A,1));
-% c_out = corrcoef(out, degree_out);
-% c_out = c_out(1,2);
-% c_in = corrcoef(in, degree_in);
-% c_in = c_in(1,2);
-% 
-% out_in = corrcoef(in,out);
-% out_in = out_in(1,2);
+in = full(sum(A,2));
+out = full(sum(A,1));
+c_out = corrcoef(out, degree_out);
+c_out = c_out(1,2);
+c_in = corrcoef(in, degree_in);
+c_in = c_in(1,2);
 
-% in_out_corr_comp = [in_out_corrcoef in_out_corr out_in];
-% mean_comp = [deg_mean mean(in) mean(out)];
-% std_comp = [deg_std std(in) std(out)];
+out_in = corrcoef(in,out);
+out_in = out_in(1,2);
 
-% % Check the distance-dependent rule (exponential)
-% dist_avail = lattice_nD_find_dist(Lattice, hw, 1);
-% edges = linspace(0,max(dist_avail),50);
-% N_avail = histc(dist_avail,edges );
-% N_K = histc(K,edges );
-% N_exp_check = N_K./N_avail;
-% plot(edges, N_exp_check,'o');
+in_out_corr_comp = [in_out_corrcoef in_out_corr out_in];
+mean_comp = [deg_mean mean(in) mean(out)];
+std_comp = [deg_std std(in) std(out)];
 
-end
+% Check the distance-dependent rule (exponential)
+edges = linspace(0,max(dist_avail),50);
+dist_avail = lattice_nD_find_dist(Lattice, hw, 1);
+N_avail = histc(dist_avail,edges );
+N_K = histc(K,edges );
+N_exp_check = N_K./N_avail;
+plot(edges, N_exp_check,'o');
+
 
 
 
