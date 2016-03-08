@@ -36,7 +36,10 @@ bool SimulatorInterface::import(string in_filename_input){
 	string syn_para; // parameters of synapses
 	vector< vector<double> > ext_spike_settings; // (int pop_ind, int type_ext, double K_ext, int Num_ext, double rate_ext, int ia, int ib)
 	vector< vector<double> > rate_ext_t; // vector<duoble> rate_ext(t)
-	vector< vector<double> > ext_current_settings; // (int pop_ind, double mean, double std)
+	
+	vector<int> ext_current_settings_pop_ind; // (int pop_ind)
+	vector< vector<double> > ext_current_settings; // (vector<double> mean, vector<double> std)
+	
 	vector<double> init_condition_settings; // (double p_fire)
 	
 	vector<int> neuron_sample_pop_ind; //
@@ -105,9 +108,12 @@ bool SimulatorInterface::import(string in_filename_input){
 			found = line_str.find("INIT004");
 			if (found != string::npos){// if found match
 				cout << "\t Reading external current settings..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
+				ext_current_settings_pop_ind.push_back(read_next_entry<int>(line_ss));
 				ext_current_settings.resize(ext_current_settings.size()+1);
-				// [pop_ind, mean, std];
-				read_next_line_as_vector(ext_current_settings.back()); // vec[vec.size()-1] ?
+				read_next_line_as_vector(ext_current_settings.back()); // vector<double> mean
+				ext_current_settings.resize(ext_current_settings.size()+1);
+				read_next_line_as_vector(ext_current_settings.back()); // vector<double> std
 				continue; // move to next line
 			}
 
@@ -368,13 +374,13 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "done." << endl;
 	}
 
-	// external current setting (int pop_ind, double mean, double std)
-	if (ext_current_settings.size() != 0){
+	// external current setting
+	if (ext_current_settings_pop_ind.size() != 0){
 		cout << "\t External current settings...";
-		for (unsigned int ind = 0; ind < ext_current_settings.size(); ++ind){
-			int pop_ind = int(ext_current_settings[ind][0]);
-			double mean = ext_current_settings[ind][1];
-			double std = ext_current_settings[ind][2];
+		for (unsigned int ind = 0; ind < ext_current_settings_pop_ind.size(); ++ind){
+			int pop_ind = ext_current_settings_pop_ind[ind];
+			vector<double> mean = ext_current_settings[ ind*2 ];
+			vector<double> std = ext_current_settings[ ind*2+1 ];
 			network.NeuronPopArray[pop_ind].set_gaussian_I_ext(mean, std);
 			cout << ind+1 << "...";
 		}

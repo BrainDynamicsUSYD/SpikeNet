@@ -120,7 +120,9 @@ Input data format is as following.
 	p_fire_pop1 (range (0,1]), ..., p_fire_popN, 
 
 > INIT004 # external Gaussian currents
-	pop_ind, mean (nA), std (nA), 
+	pop_ind, 
+	mean_1 (nA), mean_2, ...,  mean_N, (for each neuron)
+	std_1 (nA), std_2, ...,  std_N, 
 
 > INIT005 # external Poissonian spikes
 	pop_ind, type_ext, K_ext ($\mu$S), Num_ext, ia, ib,

@@ -226,16 +226,15 @@ void Neurons::update_V(int step_current){
 	// This function updates menbrane potentials for non-refractory neurons
 
 	// Gaussian white external currents
-	if (I_ext_mean != 0.0){
-		if (I_ext_std != 0.0){
-			// Gaussian random generator
-			gen.seed(my_seed+step_current);// reseed random engine!
-			normal_distribution<double> nrm_dist(0, I_ext_std);
-			auto gaus = bind(nrm_dist,gen);
-			// Generate Gaussian white noise. White means not temporally correlated	
-			for (int i = 0; i < N; ++i) { I_ext[i] = I_ext_mean + gaus() * sqrt(dt); } // be careful about the sqrt(dt) term (Wiener Process)
+	if (I_ext_mean.size() != 0){
+		double sqrt_dt = sqrt(dt);
+		// Gaussian random generator
+		gen.seed(my_seed+step_current);// reseed random engine!
+		normal_distribution<double> nrm_dist(0.0, 1.0);
+		auto gaus = bind(nrm_dist,gen);
+		for (int i = 0; i < N; ++i){ 
+			I_ext[i] = I_ext_mean[i] + gaus() * I_ext_std[i] * sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
 		}
-		else { for (int i = 0; i < N; ++i) { I_ext[i] = I_ext_mean;} }
  	}
 
 
@@ -319,7 +318,7 @@ void Neurons::sample_data(int step_current){
 }
 
 
-void Neurons::set_gaussian_I_ext(double mean, double std){
+void Neurons::set_gaussian_I_ext(vector<double> mean, vector<double> std){
 	I_ext_mean = mean;
 	I_ext_std = std;
 }

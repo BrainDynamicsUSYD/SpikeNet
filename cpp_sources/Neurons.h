@@ -51,7 +51,7 @@ private:
 	void update_V(int step_current); // Update potential
 
 public:
-	void set_gaussian_I_ext(double mean, double std);
+	void set_gaussian_I_ext(vector<double> mean, vector<double> std);
 	
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_type, vector<bool> sample_time_points); 
 	
@@ -128,7 +128,7 @@ protected:
 
 
 	// parameters for Generate Gaussian random external current
-	double 
+	vector<double> // a vector for each neuron
 		I_ext_mean,
 		I_ext_std;
 
