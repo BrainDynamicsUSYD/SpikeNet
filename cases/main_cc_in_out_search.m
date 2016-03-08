@@ -7,7 +7,7 @@ function main_cc_in_out_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 40*sec; % use 10 second!
+step_tot = 0.5*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -15,22 +15,22 @@ tau_ref = 4;
 delay = 2;
 
 
-in_out_corrcoef = 0.3;
+in_out_corrcoef = 0.1;
 discard_transient = 0; % ms
 
-for EE_CV = 0.5
-    for EI_CV = 0.5
+for I_ext_CV = 0.2
+for EE_CV = 0.2
+    for EI_CV = 0.2
         for phi_E = 0.4
             phi_I = phi_E;
-            for STD_on = [0]
-                
-                for EE_factor = [0.5 ]; % 0.6?
+            for STD_on = [0]                
+                for EE_factor = [0.6 ]; % 0.6?
                     for II_factor = [0.7 ]
-                        for EI_factor = [ 0.8 ]
+                        for EI_factor = [ 2:0.1:2.2 ]
                             for degree_CV = [0.5 ] % 0.5?
-                                for  P0_init = [ 0.1 ] % 0.25 gives P0_actual = 0.2
-                                    for I_ext_strength = [ 0.7:0.025:1.0 ]% 0.9*ones(1,10)]
-                                        for  tau_c = [10 ]
+                                for  P0_init = [ 0.1 ] 
+                                    for I_ext_strength = [ 0.9 ]% 0.9*ones(1,10)]
+                                        for  tau_c = [10 12 14]
                                             loop_num = loop_num + 1;
                                             
                                             % For PBS array job
@@ -75,7 +75,7 @@ for EE_CV = 0.5
                                             % write pop para
                                             for pop_ind = 1:Num_pop
                                                 writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
-                                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength, 0);
+                                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength, I_ext_strength*I_ext_CV);
                                             end
                                             
                                             % write synapse para
@@ -115,7 +115,7 @@ for EE_CV = 0.5
                                                     0.3 0.3];
                                             
                                             K_mat = [2.4*EE_factor  1.4;
-                                                4.5*EI_factor  5.7*II_factor]*10^-3; % miuSiemens
+                                                4.5  5.7*II_factor]*10^-3; % miuSiemens
                                             
                                             Type_mat = ones(Num_pop);
                                             Type_mat(end, :) = 2;
@@ -134,7 +134,7 @@ for EE_CV = 0.5
                                                     end
                                                     
                                                     if i_pre == 1 && j_post == 1 % E to E
-                                                        Mu_log = K_mat(1,1);
+                                                        Mu_log = K_mat(1,1); %/(mean(in_degree));
                                                         Sigma_log = Mu_log*EE_CV;
                                                         Mu_norm = log((Mu_log.^2)./sqrt(Sigma_log.^2+Mu_log.^2));
                                                         Sigma_norm = sqrt(log(Sigma_log.^2./(Mu_log.^2)+1));
@@ -144,7 +144,7 @@ for EE_CV = 0.5
                                                     elseif i_pre == 2 && j_post == 1 % I to E
                                                         K_ei = [];
                                                         for E_i = 1:N(1)
-                                                            Mu_log = EE_input(E_i);
+                                                            Mu_log = EE_input(E_i)*EI_factor/(P_mat(2,1)*N(2));
                                                             Sigma_log = Mu_log*EI_CV; % EI_CV?
                                                             Mu_norm = log((Mu_log.^2)./sqrt(Sigma_log.^2+Mu_log.^2));
                                                             Sigma_norm = sqrt(log(Sigma_log.^2./(Mu_log.^2)+1));
@@ -183,7 +183,8 @@ for EE_CV = 0.5
                                                 'EI_CV',EI_CV,...
                                                 'in_out_corrcoef', in_out_corrcoef, ...
                                                 'tau_c', tau_c, ...
-                                                'STD_on', STD_on);
+                                                'STD_on', STD_on, ...
+                                                'I_ext_CV', I_ext_CV);
                                             
                                             
                                             % Adding comments in raster plot
@@ -192,7 +193,11 @@ for EE_CV = 0.5
                                             writeExplVar(FID, 'comment1', comment1, 'comment2', comment2);
                                             
                                             
-                                            % append this file self into .ygin for future reference
+					    % save in_degree and sample neuron data based on in_degree
+					    save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
+					        '_in_degree.mat'], 'in_degree', 'out_degree', 'EE_input','EI_input');
+
+				            % append this file self into .ygin for future reference
                                             appendThisMatlabFile(FID)
                                             
                                             disp('Matlab pre-processing done.')
@@ -207,11 +212,8 @@ for EE_CV = 0.5
         end
     end
 end
+end
 
-
-% save in_degree and sample neuron data based on in_degree
-save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
-    '_in_degree.mat'], 'in_degree', 'out_degree', 'EE_input','EI_input');
 
 end
 
