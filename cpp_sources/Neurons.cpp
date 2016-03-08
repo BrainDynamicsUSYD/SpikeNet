@@ -42,11 +42,6 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 
 
 void Neurons::init(){
-	
-	// I_ext
-	I_ext_mean = 0.0;
-	I_ext_std = 0.0;
-
 
 	// Initialise arrarys storing instantaneous neuron states
 	V.assign(N, V_lk); // All zeros	
@@ -227,18 +222,22 @@ void Neurons::update_V(int step_current){
 
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0){
-		double sqrt_dt = sqrt(dt);
-		// Gaussian random generator
-		gen.seed(my_seed+step_current);// reseed random engine!
-		normal_distribution<double> nrm_dist(0.0, 1.0);
-		auto gaus = bind(nrm_dist,gen);
-		for (int i = 0; i < N; ++i){ 
-			I_ext[i] = I_ext_mean[i] + gaus() * I_ext_std[i] * sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
+		if (I_ext_std.size() != 0){
+			double sqrt_dt = sqrt(dt);
+			// Gaussian random generator
+			gen.seed(my_seed+step_current);// reseed random engine!
+			normal_distribution<double> nrm_dist(0.0, 1.0);
+			auto gaus = bind(nrm_dist,gen);
+			
+			I_ext = I_ext_mean;
+			for (int i = 0; i < N; ++i){ 
+				I_ext[i] += gaus() * I_ext_std[i] * sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
+			}
 		}
- 	}
+		else{ I_ext = I_ext_mean; }
+	}
 
-
-	// Collect Currents from all pre-synapses!!!!!!!!!!!!!!!
+	// Collect Currents from all pre-synapses (for MPI job)!!!!!!!!!!!!!!!
 
 
 
@@ -321,6 +320,11 @@ void Neurons::sample_data(int step_current){
 void Neurons::set_gaussian_I_ext(vector<double> mean, vector<double> std){
 	I_ext_mean = mean;
 	I_ext_std = std;
+	
+	double max_std = *max_element(I_ext_std.begin(), I_ext_std.end());
+	if (max_std == 0.0){
+		I_ext_std.resize(0);
+	}
 }
 
 
