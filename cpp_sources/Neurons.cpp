@@ -528,7 +528,7 @@ void Neurons::record_stats(int step_current){
 				I_GABA_time_avg[i] = I_GABA_acc[i] / step_tot;
 				// be careful here, for EI_ratio, I_ext is assumed to be always excitatory and I_GJ is not considered
 				// also, the only source of I_ext is generated internally
-				EI_ratio[i] = (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean) / I_GABA_time_avg[i];
+				EI_ratio[i] = (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean[i]) / I_GABA_time_avg[i];
 			}
 			
 		}
