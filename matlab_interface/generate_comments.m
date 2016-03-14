@@ -7,13 +7,17 @@ cmt_llength = 100;
 % dump field
 ExplVar = R.ExplVar;
 step_killed = R.step_killed;
-Hz_overall = R.Analysis.Hz_overall;
+Hz = [];
+for pop = 1:length(R.N)
+    Hz = [Hz mean(R.Analysis.rate{pop}) ];
+end
+
 % Comments
 comments = ' ';
 if step_killed >= 0
 comments = sprintf('Runaway killed at step %g, ', step_killed);
 end
-comments = [comments sprintf('Mean firing rate %.4g Hz, ', Hz_overall)];
+comments = [comments 'Mean firing rate (Hz) ', sprintf('%.4g, ', Hz)];
 % Expl variables
 fname_cell = fieldnames(ExplVar);
 for f = 1:length(fname_cell)

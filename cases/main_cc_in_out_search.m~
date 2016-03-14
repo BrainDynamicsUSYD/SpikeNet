@@ -26,7 +26,9 @@ for I_ext_CV = 0
                 for STD_on = [0]
                     for EE_factor = [0.6 ]; % 0.6?
                         for II_factor = [ 0.6 0.8]
-                            for EI_factor = [ 1.0 ]
+                            for EI_factor = [ 1.0 
+                                    
+                                ]
                                 for degree_CV = [0.5 ] % 0.5?
                                     for  P0_init = [ 0.1 ]
                                         for I_ext_strength_E = [ 0.2:0.1:0.4 ]% 0.9*ones(1,10)]
