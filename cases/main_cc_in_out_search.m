@@ -140,13 +140,27 @@ for I_ext_CV = 0
                                                             end
                                                             
                                                             if i_pre == 1 && j_post == 1 % E to E
-                                                                Mu_log = K_mat(1,1); %/(mean(in_degree));
-                                                                Sigma_log = Mu_log*EE_CV;
-                                                                Mu_norm = log((Mu_log.^2)./sqrt(Sigma_log.^2+Mu_log.^2));
-                                                                Sigma_norm = sqrt(log(Sigma_log.^2./(Mu_log.^2)+1));
-                                                                K_ee = exp(randn(size(I))*Sigma_norm + Mu_norm);
-                                                                K = K_ee;
+                                                                K_tot =  K_mat(1,1)*length(I_e);
+                                                                scale = sqrt(in_degree);
+                                                                K = scale*K_tot/sum(scale);
+                                                                K_mu = K./in_degree;
+                                                                K_ee = zeros(size(J_e));
+                                                                for j = 1:length(in_degree)
+                                                                    Mu_log = K_mu(j); %/(mean(in_degree));
+                                                                    Sigma_log = Mu_log*EE_CV;
+                                                                    Mu_norm = log((Mu_log.^2)./sqrt(Sigma_log.^2+Mu_log.^2));
+                                                                    Sigma_norm = sqrt(log(Sigma_log.^2./(Mu_log.^2)+1));
+                                                                    err = 1;
+                                                                    while err > 1e-2
+                                                                        K_tmp = exp(randn(size(1,in_degree(j)))*Sigma_norm + Mu_norm);
+                                                                        err = abs(K_tmp - Mu_log)/Mu_log;
+                                                                    end
+                                                                    K_ee(J_e == j) = K_tmp;
+                                                                    
+                                                                end
                                                                 EE_input = full(sum(sparse(I_e,J_e,K_ee),1));
+                                                                K = K_ee;
+                                                                
                                                             elseif i_pre == 2 && j_post == 1 % I to E
                                                                 K_ei = [];
                                                                 for E_i = 1:N(1)
