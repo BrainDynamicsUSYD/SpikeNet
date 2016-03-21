@@ -14,7 +14,7 @@ function [ K ] = get_K_given_certain_conditions( I, J, K_mu_log, K_sigma_log, K_
 %
 % %%%% example code for using this function:
 %
-% hw = 11;
+% hw = 31;
 % P0_init = 0.1;
 % degree_CV = 0.5;
 % tau_c = 10;
@@ -42,6 +42,8 @@ function [ K ] = get_K_given_certain_conditions( I, J, K_mu_log, K_sigma_log, K_
 % toc
 %
 %%%% example code for using this function ends here
+% 
+% For the above code, it takes 4-5 mins to run.
 
 
 in_degree = full(sum(sparse(I,J, ones(size(I))), 1));
