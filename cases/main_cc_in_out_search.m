@@ -50,8 +50,7 @@ for I_ext_CV = 0
                                                     K_mat = [2.4*EE_factor  1.4;
                                                         4.5  5.7*II_factor]*10^-3; % miuSiemens
                                                     
-                                                    Type_mat = ones(Num_pop);
-                                                    Type_mat(end, :) = 2;
+                                                    
                                                     
                                                     % sptially embedded network
                                                     hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000
@@ -79,7 +78,8 @@ for I_ext_CV = 0
                                                     N_i = 1000;
                                                     N = [N_e, N_i];
                                                     Num_pop = length(N);
-                                                    
+                                                    Type_mat = ones(Num_pop);
+                                                    Type_mat(end, :) = 2;
                                                     
                                                     
                                                     % seed the matlab rand function! The seed is global.
