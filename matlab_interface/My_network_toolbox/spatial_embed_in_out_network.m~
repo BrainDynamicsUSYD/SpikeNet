@@ -1,4 +1,5 @@
-function [I, J, K, N] = spatial_embed_in_out_network(hw, P0_init, degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log)
+function [I, J, K, N, iter_hist] = spatial_embed_in_out_network(hw, P0_init, ...
+    degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log, cn_scale_wire)
 % [I, J, K, N] = spatial_embed_in_out_network(hw, P0_init, degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log)
 % 
 % P0: average connection probability
@@ -11,7 +12,7 @@ function [I, J, K, N] = spatial_embed_in_out_network(hw, P0_init, degree_CV, tau
 % rule
 %
 
-% hw = 21; % 31
+% hw = 21; % hw = 31; % (31*2+1)^2 = 3969 ~ 4000
 % P0_init = 0.1;
 % degree_CV = 0.1;
 % tau_d = 10; %
@@ -19,32 +20,21 @@ function [I, J, K, N] = spatial_embed_in_out_network(hw, P0_init, degree_CV, tau
 
 
 D = 2; % Pulin: 2D is enough
-% hw = 31; % (31*2+1)^2 = 3969 ~ 4000
-
 [Lattice, N] = lattice_nD(D, hw);
-% fprintf('The number of node is %d. \n' , N);
-
-% link-length matrix (sparse)
-I = []; % pre node index
-J = []; % post node index
-K = []; % link length
+fprintf('The number of node is %d. \n' , N);
 
 % % degree distribution
 % log-normal
 deg_mean = N*P0_init;
 deg_std = degree_CV*deg_mean;
-[ degree_in, degree_out ] = logn_in_out_degree( N, [deg_mean deg_mean], [deg_std,  deg_std], in_out_corrcoef  );
-
+[ degree_in_0, degree_out_0 ] = logn_in_out_degree( N, [deg_mean deg_mean], [deg_std,  deg_std], in_out_corrcoef  );
 
 %
-% The following solution ensures that degree_in and degree_out are strictly
-% used.
-
 for iter = 1:5 % 5 is arbitrary, try something else?
     I = []; % pre node index
     J = []; % post node index
     K = [];
-    degree_in_left = degree_in;
+    degree_in_left = degree_in_0;
     for i = randperm(N)
         % distance factor
         post_dist = lattice_nD_find_dist(Lattice, hw, i);
@@ -67,8 +57,9 @@ for iter = 1:5 % 5 is arbitrary, try something else?
         
         % establish connections
         [~, ind] = sort( rand(N,1)./joint_factor, 'ascend' );
-        chosen_j = ind(1: degree_out(i) );
-        sometimes what's lef
+        chosen_j = ind(1: degree_out_0(i) );
+%         Issue: sometimes what's left will be [NaN NaN 1 1 2 1 NaN] and 5
+%         connections are needed. Try to fix this?
 %         if sum(isnan(degree_in_left(chosen_j))) ~= 0
 %             warning('sth wrong here')
 %         end
@@ -82,27 +73,35 @@ for iter = 1:5 % 5 is arbitrary, try something else?
         J = [J; chosen_j]; %#ok<AGROW>
         K_tmp = post_dist(chosen_j);
         K = [K; K_tmp(:)]; %#ok<AGROW>
-
     end
 
     
     %%%%% find number of common pre-synaptic neighbours
-    A = sparse(I,J, ones(size(I)));
+    A = sparse(I,J, ones(size(I))); % I:pre, J:post
     cn = A'* A; % A * A' gives common post-synaptic neighbours, note that cn is symmetric
     cn(logical(eye(size(cn)))) = 0; % no self-connection allowed
-    
+    % pre-calculate the global common neighbour scaling for the next
+    % iteration
     cn_dist = full(triu(cn,1));
     cn_dist = cn_dist(:)';
     edges =  0:max(cn_dist);
     Y = histc(cn_dist, edges);
+    cn_minmax = minmax(cn_dist);
+    clear cn_dist;
+    % store iteration history
+    if iter == 1
+        iter_hist.edges = {edges};
+        iter_hist.Y = {Y};
+        iter_hist.cn_minmax = {cn_minmax};
+    else
+        iter_hist.edges{end+1} = edges;
+        iter_hist.Y{end+1} = Y;
+        iter_hist.cn_minmax{end+1} = cn_minmax;
+    end
 %     plot(edges,Y)
 %     mean(cn_dist)
 %     std(cn_dist)
-    % pre-calculate the global common neighbour scaling
-    cn_minmax = minmax(cn_dist);
-    clear cn_dist;
 
-    
 end
 
 %%%% Generate K
@@ -111,10 +110,11 @@ end
 K_tot = K_mu_log*length(I);
 in_degree = full(sum(A, 1));
 scale = sqrt(in_degree);
-K_neuron_sum = scale*K_tot/sum(scale);
+K_neuron_sum_scale = scale*K_tot/sum(scale);
+iter_hist.K_neuron_sum_scale = K_neuron_sum_scale;
 
 plot_results = 0;
-[ K ] = get_K_given_certain_conditions( I, J, K_mu_log, K_sigma_log, K_neuron_sum, plot_results);
+[ K ] = get_K_given_certain_conditions( I, J, K_mu_log, K_sigma_log, K_neuron_sum_scale, plot_results);
 
 K_minmax = minmax(K);
 % now shuffle the K according to common neighbour rule
@@ -124,13 +124,12 @@ for i = 1:N
     K_tmp = K(I == i);
     K_tmp = K_tmp(:)';
     K_tmp_shuffle = zeros(size(K_tmp));
-    
     % bilinear factor
     ck_factor = 1 + (c_tmp - cn_minmax(1))./diff(cn_minmax) .* ...
         (K_tmp - K_minmax(1))./diff(K_minmax) * (cn_scale_weight - 1);
     [~, ck_factor_sort_ind] = sort( rand(size(c_tmp))./ck_factor, 'ascend' );
+    % shuffle
     K_tmp_shuffle(ck_factor_sort_ind) = sort( K_tmp, 'descend' );
-    
     K(I == i) =  K_tmp_shuffle;
 end
 

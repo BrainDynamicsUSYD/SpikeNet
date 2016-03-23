@@ -1,5 +1,7 @@
-function [I, J, K, N] = spatial_embed_in_out_network(hw, P0_init, degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log)
-% [I, J, K, N] = spatial_embed_in_out_network(hw, P0_init, degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log)
+function [I, J, K, N, iter_hist] = spatial_embed_in_out_network(hw, P0_init, ...
+    degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log, cn_scale_wire, cn_scale_weight)
+% [I, J, K, N, iter_hist] = spatial_embed_in_out_network(hw, P0_init, ...
+%    degree_CV, tau_d, in_out_corrcoef, K_mu_log, K_sigma_log, cn_scale_wire, cn_scale_weight)
 % 
 % P0: average connection probability
 % The final P0 will be different from P0_init
@@ -109,10 +111,11 @@ end
 K_tot = K_mu_log*length(I);
 in_degree = full(sum(A, 1));
 scale = sqrt(in_degree);
-K_neuron_sum = scale*K_tot/sum(scale);
+K_neuron_sum_scale = scale*K_tot/sum(scale);
+iter_hist.K_neuron_sum_scale = K_neuron_sum_scale;
 
 plot_results = 0;
-[ K ] = get_K_given_certain_conditions( I, J, K_mu_log, K_sigma_log, K_neuron_sum, plot_results);
+[ K ] = get_K_given_certain_conditions( I, J, K_mu_log, K_sigma_log, K_neuron_sum_scale, plot_results);
 
 K_minmax = minmax(K);
 % now shuffle the K according to common neighbour rule
@@ -130,6 +133,8 @@ for i = 1:N
     K_tmp_shuffle(ck_factor_sort_ind) = sort( K_tmp, 'descend' );
     K(I == i) =  K_tmp_shuffle;
 end
+
+
 
 
 % % output and check results

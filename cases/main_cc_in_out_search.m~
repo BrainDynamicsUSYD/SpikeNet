@@ -17,8 +17,6 @@ delay = 2;
 
 in_out_corrcoef = 0.1;
 discard_transient = 0; % ms
-cn_scale_wire = 4;
-cn_scale_weight = 4;
 
 for I_ext_CV = 0
     for EE_CV = 0.2
@@ -31,8 +29,8 @@ for I_ext_CV = 0
                             for EI_factor = [ 1.0 ]
                                 for degree_CV = [0.5 ] % 0.5?
                                     for  P0_init = [ 0.1 ]
-                                        for I_ext_strength_E = [ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
-                                            for I_ext_strength_I = [0.1]% 0.9*ones(1,10)]
+                                        for I_ext_strength_E = [ 0.2:0.1:0.4 ]% 0.9*ones(1,10)]
+                                            for I_ext_strength_I = [0.1:0.1:0.2]% 0.9*ones(1,10)]
                                                 for  tau_c = [10 15]
                                                     loop_num = loop_num + 1;
                                                     
@@ -55,16 +53,11 @@ for I_ext_CV = 0
                                                     
                                                     % sptially embedded network
                                                     hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000
-                                                    K_mu_log = K_mat(1,1);
-                                                    K_sigma_log = EE_CV*K_mu_log;
-                                                    [I_e, J_e, K_ee, N_e, iter_hist] = spatial_embed_in_out_network(...
-                                                        hw, P0_init, degree_CV, tau_c, in_out_corrcoef, ...
-                                                        K_mu_log, K_sigma_log, cn_scale_wire, cn_scale_weight);
+                                                    K_mu_log = 
+                                                    [I_e, J_e, K_ee, N_e] = spatial_embed_in_out_network(...
+                                                        hw, P0_init, degree_CV, tau_c, in_out_corrcoef, K_mu_log, K_sigma_log);
                                                     
                                                     
-                                                    [ EPSP ] = g_2_EPSP( K_ee );
-                                                    [EPSP_Y, EPSP_X] = hist(EPSP, 50);
-                                                    clear EPSP;
                                                     
                                                     A = sparse(I_e,J_e, ones(size(I_e)));
                                                     in_degree = full(sum(A, 1));
@@ -196,9 +189,7 @@ for I_ext_CV = 0
                                                         'in_out_corrcoef', in_out_corrcoef, ...
                                                         'tau_c', tau_c, ...
                                                         'STD_on', STD_on, ...
-                                                        'I_ext_CV', I_ext_CV, ...
-                                                        'cn_scale_wire', cn_scale_wire, ...
-                                                        'cn_scale_weight', cn_scale_weight);
+                                                        'I_ext_CV', I_ext_CV);
                                                     
                                                     
                                                     % Adding comments in raster plot
@@ -209,8 +200,7 @@ for I_ext_CV = 0
                                                     
                                                     % save in_degree and sample neuron data based on in_degree
                                                     save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
-                                                        '_in_degree.mat'], 'in_degree', 'out_degree', 'EE_input','EI_input', ...
-                                                        'EPSP_Y', 'EPSP_X', 'iter_hist');
+                                                        '_in_degree.mat'], 'in_degree', 'out_degree', 'EE_input','EI_input');
                                                     
                                                     % append this file self into .ygin for future reference
                                                     appendThisMatlabFile(FID)
