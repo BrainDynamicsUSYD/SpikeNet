@@ -1,5 +1,5 @@
-function [ EPSP ] = g_2_EPSP( g ,varargin)
-%UNTITLED4 Summary of this function goes here
+function [ fit_g_2_EPSP, fit_EPSP_2_g ] = g_EPSP_conversion( varargin )
+%[ fit_g_2_EPSP, fit_EPSP_2_g ] = g_EPSP_conversion( g ,varargin)
 %   This function finds the EPSP amplitude given the coupling strength
 %   (conductance)
 
@@ -17,11 +17,16 @@ tau_d = 5; %ms
 
 V_th = -50; % threshold;
 
+g_min = 0.001;
+g_max = 0.010;
 % read parameters
 for i = 1:(length(varargin)/2)
     eval([varargin{i*2-1}, '=', num2str(varargin{i*2}), ';' ]);
 end
 
+
+g = linspace(g_min, g_max, 10);
+g = g(:);
 
 EPSP = zeros(size(g));
 for i = 1:length(g)
@@ -45,12 +50,22 @@ for i = 1:length(g)
         peaked = V_new < V_old;
         V_old = V_new;
         s = s*exp(-dt/tau_d);
+        if V_old >= V_th
+            V_old = NaN;
+            break;
+        end
     end
     
     EPSP(i) = V_old - V_lk;
     
 end
 
+if sum(isnan(EPSP)) > 0
+    warning('Some given g''s are unrealistically large!')
+end
+
+fit_g_2_EPSP = fit(g,EPSP,'poly1');
+fit_EPSP_2_g = fit(EPSP,g,'poly1');
 
 end
 
