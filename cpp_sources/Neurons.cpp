@@ -223,7 +223,7 @@ void Neurons::update_V(int step_current){
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0){
 		if (I_ext_std.size() != 0){
-			double sqrt_dt = sqrt(dt);
+			double one_on_sqrt_dt = 1.0/sqrt(dt); // Here sqrt_dt is on the denominator because I_ext will be multiplied by dt later. 
 			// Gaussian random generator
 			gen.seed(my_seed+step_current);// reseed random engine!
 			normal_distribution<double> nrm_dist(0.0, 1.0);
@@ -231,7 +231,7 @@ void Neurons::update_V(int step_current){
 			
 			I_ext = I_ext_mean;
 			for (int i = 0; i < N; ++i){ 
-				I_ext[i] += gaus() * I_ext_std[i] * sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
+				I_ext[i] += gaus() * I_ext_std[i] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
 			}
 		}
 		else{ I_ext = I_ext_mean; }
