@@ -1,4 +1,5 @@
-function main_cc_in_out_search(varargin)
+
+function main_heterogenesou_search(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -7,7 +8,7 @@ function main_cc_in_out_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 0.5*sec; % use 10 second!
+step_tot = 0.3*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -23,6 +24,11 @@ STD_on = 0;
 P0_init = 0.1;
 degree_CV = 0.2 ; % 0.2 works
 iter_num = 1;
+
+%  K_ee_mean is about 0.5, need 1000 in-coming connections.
+%  this is not good.
+%  what can I do??? 
+%  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
 
 for g_EI_over_EE = 1:0.25:4
     for g_IE = 6 % ???
@@ -50,10 +56,10 @@ for g_EI_over_EE = 1:0.25:4
                                         0.3  0.3];
                             
                             % sptially embedded network
-                            hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000
+                            hw = 49; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=49 gives 9801
                             N_e = (hw*2+1)^2;
                             
-                            N_i = 1000;
+                            N_i = 2500;
                             N = [N_e, N_i];
                             Num_pop = length(N);
                             Type_mat = ones(Num_pop);
@@ -82,7 +88,8 @@ for g_EI_over_EE = 1:0.25:4
                             if ~isnan( K_ee)
                                 [  K_ee ] = shuffle_K_common_neighbour(  K_ee, I_ee, J_ee, cn_scale_weight );
                             end
-                           
+                            K_ee_mean = mean(K_ee);
+                            
                             
                             [~,ind_sorted] = sort(in_degree);
                             sample_neuron = ind_sorted(1:500:end);
@@ -200,7 +207,7 @@ for g_EI_over_EE = 1:0.25:4
                             
                             % save in_degree and sample neuron data based on in_degree
                             save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
-                                '_in_degree.mat'], 'in_degree', 'out_degree', 'dist_IJ', 'iter_hist');
+                                '_in_degree.mat'], 'in_degree', 'out_degree', 'dist_IJ', 'iter_hist','K_ee_mean');
                             
                             % append this file self into .ygin for future reference
                             appendThisMatlabFile(FID)
