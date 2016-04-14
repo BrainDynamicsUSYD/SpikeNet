@@ -23,7 +23,9 @@ discard_transient = 0; % ms
 STD_on = 0;
 P0_init = 0.1;
 degree_CV = 0.2 ; % 0.2 works
-iter_num = 1;
+iter_num = 5;
+mu_p = -0.2;  
+s_p = 0.5;
 
 %  K_ee_mean is about 0.5, need 1000 in-coming connections.
 %  this is not good.
@@ -34,7 +36,7 @@ for g_EI_over_EE = 1:0.25:4
     for g_IE = 6 % ???
         for g_II = 1.5
             for I_ext_CV = 0
-                for I_ext_strength_E = 0.1 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
+                for I_ext_strength_E = 0 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
                     for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
                         for  tau_c = [10 15]
                             loop_num = loop_num + 1;
@@ -77,7 +79,7 @@ for g_EI_over_EE = 1:0.25:4
                             
                             % Generate K according to
                             
-                            g_pool_generator_hld = @(N)g_pool_generator(N);
+                            g_pool_generator_hld = @(N)g_pool_generator(N, mu_p, s_p);
                             K_scale = sqrt(in_degree);
                             K_cell = inverse_pool( in_degree, K_scale, g_pool_generator_hld);
                              K_ee = NaN;
@@ -198,7 +200,9 @@ for g_EI_over_EE = 1:0.25:4
                                 'STD_on', STD_on, ...
                                 'I_ext_CV', I_ext_CV, ...
                                 'cn_scale_wire', cn_scale_wire, ...
-                                'cn_scale_weight', cn_scale_weight);
+                                'cn_scale_weight', cn_scale_weight, ...
+                                'mu_p', mu_p,...
+                                's_p', s_p);
                             
                             
                             % Adding comments in raster plot

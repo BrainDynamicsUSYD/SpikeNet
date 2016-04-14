@@ -1,4 +1,4 @@
-function [ g, g_info ] = g_pool_generator( N )
+function [ g, g_info ] = g_pool_generator( N, mu_p, s_p )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 % % pulished pdf curve
@@ -35,12 +35,15 @@ EPSP_max = 20; % mV
 % pulished pdf curve for log-normally distributed EPSP
 % mu_p = -0.702; % published data
 % s_p = 0.9355; % published data
-mu_p = -0.70; % published data
-s_p = 1; % published data
 
+% mu_p = -0.2; % 
+% s_p = 0.5; %
 
 EPSP_mu_norm = mu_p-s_p^2; % log-bin correction to parameter mu!!
 EPSP_sigma_norm = s_p;
+
+[EPSP_mu, EPSP_sigma] = lognstat(EPSP_mu_norm, EPSP_sigma_norm) %#ok<NOPRT>
+
 EPSP_pool_generator = @(N)lognrnd(EPSP_mu_norm,EPSP_sigma_norm,[1,N]); 
 
 
