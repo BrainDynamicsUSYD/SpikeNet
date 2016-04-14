@@ -1,5 +1,5 @@
 
-function main_heterogenesou_search(varargin)
+function main_heterogeneous_search(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -34,7 +34,7 @@ for g_EI_over_EE = 1:0.25:4
     for g_IE = 6 % ???
         for g_II = 1.5
             for I_ext_CV = 0
-                for I_ext_strength_E = 0 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
+                for I_ext_strength_E = 0.1 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
                     for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
                         for  tau_c = [10 15]
                             loop_num = loop_num + 1;
@@ -56,10 +56,10 @@ for g_EI_over_EE = 1:0.25:4
                                         0.3  0.3];
                             
                             % sptially embedded network
-                            hw = 49; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=49 gives 9801
+                            hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=49 gives 9801
                             N_e = (hw*2+1)^2;
                             
-                            N_i = 2500;
+                            N_i = 1000;
                             N = [N_e, N_i];
                             Num_pop = length(N);
                             Type_mat = ones(Num_pop);
@@ -104,9 +104,10 @@ for g_EI_over_EE = 1:0.25:4
                             end
                             
                             % write external currents
-                            I_ext = I_ext_strength_E*sqrt(in_degree/mean(in_degree));
-                            writeExtCurrentSettings(FID, 1, I_ext, I_ext*I_ext_CV);
-                            writeExtCurrentSettings(FID, 2, I_ext_strength_I, I_ext_strength_I*I_ext_CV);
+                            I_ext_E = I_ext_strength_E*sqrt(in_degree/mean(in_degree));
+                            I_ext_I = I_ext_strength_I*ones(1,N_i);
+                            writeExtCurrentSettings(FID, 1, I_ext_E, I_ext_E*I_ext_CV);
+                            writeExtCurrentSettings(FID, 2, I_ext_I, I_ext_I*I_ext_CV);
                             
                             % write synapse para
                             writeSynPara(FID, 'tau_decay_GABA', 3);
