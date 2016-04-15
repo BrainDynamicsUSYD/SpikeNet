@@ -32,7 +32,7 @@ s_p = 0.5;
 %  what can I do??? 
 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
 
-for g_EI_over_EE = 1:0.25:4
+for g_EI_over_EE = 0:0.25:1
     for g_IE = 6 % ???
         for g_II = 1.5
             for I_ext_CV = 0
@@ -139,7 +139,7 @@ for g_EI_over_EE = 1:0.25:4
                             writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1], [1 100], ones(1, step_tot) )
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)
-                            p_fire = 0.05*ones(size(N)); % between [0,1], 0.05
+                            p_fire = [0.1 -1]; % between [0,1], 0.05
                             writeInitV(FID, p_fire);
                             
                             %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
