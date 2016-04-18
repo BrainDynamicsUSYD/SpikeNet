@@ -22,7 +22,7 @@ cn_scale_weight = 4;
 discard_transient = 0; % ms
 STD_on = 0;
 P0_init = 0.1;
-degree_CV = 0.2 ; % 0.2 works
+degree_CV = 0.1 ; % 0.2 works
 iter_num = 5;
 mu_p = -0.2;  
 s_p = 0.5;
@@ -34,7 +34,7 @@ s_p = 0.5;
 
 for g_EI_over_EE = 0.25:0.05:0.5
     for g_IE = 4:1:7 % 6
-        for g_II = 1:0.5:2 % 1.5
+        for g_II = 1.5:0.5:2.5 % 1.5
             for I_ext_CV = 0
                 for I_ext_strength_E = 0 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
                     for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
@@ -139,7 +139,7 @@ for g_EI_over_EE = 0.25:0.05:0.5
                             writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1], [1 100], ones(1, step_tot) )
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)
-                            p_fire = [0.1 -1]; % between [0,1], 0.05
+                            p_fire = [0.1 0.05]; % between [0,1], 0.05
                             writeInitV(FID, p_fire);
                             
                             %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
