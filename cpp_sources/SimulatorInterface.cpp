@@ -448,6 +448,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	
 	if (inh_STDP_setting.size() != 0){
 		cout << "\t Inhibitory STDP settings...";
+		
 		for (unsigned int i = 0; i < inh_STDP_setting.size(); ++i){
 			int pop_ind_pre = inh_STDP_setting[i][0];
 			int pop_ind_post = inh_STDP_setting[i][1];

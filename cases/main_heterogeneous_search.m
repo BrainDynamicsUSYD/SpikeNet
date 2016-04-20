@@ -121,9 +121,7 @@ for g_EI_over_EE = 0.25
                             runaway_Hz = 200; % ??
                             Hz_ms = 500; % ms
                             writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
-                            %%%%%%%%%%%%%%%%%%%%%%%
-                            
-                            
+                            %%%%%%%%%%%%%%%%%%%%%%%  
                             
                             %%%%%%% data sampling
                             sample_pop = 1;

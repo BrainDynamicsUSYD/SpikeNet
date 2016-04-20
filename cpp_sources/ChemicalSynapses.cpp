@@ -65,6 +65,7 @@ void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int 
 	// default settting
 	STD = false; 
 	STD_on_step = -1;
+	inh_STDP_on_step = -1;
 	inh_STDP = false;
 	
 	// parameter-dependent initialisation
@@ -230,6 +231,7 @@ void ChemicalSynapses::update(int step_current){
 				s[i_pre] += K_trans[i_pre] * (1.0 - s[i_pre]);
 			}
 		}
+		
 	} // if pop_ind_pre >=0
 
 	else if (pop_ind_pre == -1){ // if external noisy population
@@ -293,12 +295,8 @@ void ChemicalSynapses::update(int step_current){
 		}
 		// update inhibitory STDP 
 		if (inh_STDP == true){
-			for (int i = 0; i < N_pre; ++i){
-				x_trace_pre[i] *= exp_step_STDP;
-			}
-			for (int j = 0; j < N_post; ++j){
-				x_trace_post[j] *= exp_step_STDP;
-			}
+			for (int i = 0; i < N_pre; ++i){ x_trace_pre[i] *= exp_step_STDP; }
+			for (int j = 0; j < N_post; ++j){ x_trace_post[j] *= exp_step_STDP; }
 		}
 		// decay pre-synaptic dynamics
 		for (int i = 0; i < N_pre; ++i){ s[i] *= exp_step; };
@@ -364,14 +362,16 @@ void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
 	
 	x_trace_pre.assign(N_pre, 0.0);
 	x_trace_post.assign(N_post, 0.0);
-
+	
 	tau_STDP = 20; // ms
 	exp_step_STDP = exp(-dt / tau_STDP);
 	eta_STDP = 0.01; // learning rate, 0.0001 is the published value but requires 60min of simulation
 	rho_0_STDP = 0.003; //kHz
 	alpha_STDP = 2.0 * rho_0_STDP * tau_STDP; // depression factor
-	
+
 	// j_2_i and j_2_syn_ind
+	j_2_i.resize(N_post);
+	j_2_syn_ind.resize(N_post);
 	int j_post;
 	for (int i_pre = 0; i_pre < N_pre; ++i_pre){ 
 		for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){

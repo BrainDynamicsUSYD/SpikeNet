@@ -1,7 +1,7 @@
 function [ K ] = shuffle_K_common_neighbour( K, I, J, cn_scale_weight )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-show_wait_bar = 1;
+show_wait_bar = 0;
 
 %%%%% find number of common pre-synaptic neighbours
 A = sparse(I,J, ones(size(I))); % I:pre, J:post

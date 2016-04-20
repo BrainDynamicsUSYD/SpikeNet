@@ -7,7 +7,7 @@ hw = (sqrt(length(degree_in_0)) - 1)/2;
 D = 2; % Pulin: 2D is enough
 [Lattice, N] = lattice_nD(D, hw);
 
-show_wait_bar = 1;
+show_wait_bar = 0;
 
 if nargin == 4
     iter_num = 5;% 5 is arbitrary, try something else?

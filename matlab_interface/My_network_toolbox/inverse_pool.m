@@ -13,7 +13,7 @@ function [ K ] = inverse_pool(  K_num, K_scale, pool_generator)
 
 
 % parameters
-show_wait_bar = 1;
+show_wait_bar = 0;
 max_K_pool_num = 10; % ?
 err_max = 0.1; % unit: percentage
 max_sb_round = 4; % ?
