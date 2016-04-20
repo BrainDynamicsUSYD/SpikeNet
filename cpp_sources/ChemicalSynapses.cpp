@@ -65,7 +65,8 @@ void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int 
 	// default settting
 	STD = false; 
 	STD_on_step = -1;
-
+	inh_STDP = false;
+	
 	// parameter-dependent initialisation
 	init();
 
@@ -98,6 +99,7 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 
 	//
 	STD = false; 
+	inh_STDP = false;
 	
 	// parameter-dependent initialisation
 	init();
@@ -169,17 +171,51 @@ void ChemicalSynapses::update(int step_current){
 	
 	if (pop_ind_pre >= 0){
 		//
-		if (STD_on_step == step_current){
-			STD = true;
-		}
+		if (STD_on_step == step_current){STD = true;}
+		if (inh_STDP_on_step == step_current){inh_STDP = true;}
+		
 		// update pre-synaptic dynamics
 		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ // add spikes (transmitter release)
 			trans_left[spikes_pre->at(i)] += steps_trans;
-			// short-term depression
-			if (STD == true){
+		}
+		
+		// short-term depression
+		if (STD == true){
+			for (unsigned int i = 0; i < spikes_pre->size(); ++i){ 
 				K_trans[spikes_pre->at(i)] = 1.0 / steps_trans * f_ves[i];
 			}
 		}
+		
+		// inhibitory STDP
+		if (inh_STDP == true){
+			// update x_trace
+			for (unsigned int i = 0; i < spikes_pre->size(); ++i){
+				x_trace_pre[spikes_pre->at(i)] += 1.0;
+			}
+			for (unsigned int j = 0; j < spikes_post->size(); ++j){
+				x_trace_post[spikes_post->at(j)] += 1.0;
+			}
+			// update K
+			int i_pre, j_post;
+			for (unsigned int ind_spike = 0; ind_spike < spikes_pre->size(); ++ind_spike){
+				i_pre = spikes_pre->at(ind_spike);
+				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
+					j_post = C[i_pre][syn_ind];
+					K[i_pre][syn_ind] += eta_STDP * ( x_trace_post[j_post] - alpha_STDP );
+				}
+			}
+			int syn_ind;
+			for (unsigned int ind_spike = 0; ind_spike < spikes_post->size(); ++ind_spike){
+				j_post = spikes_post->at(ind_spike);
+				for (unsigned int ind = 0; ind < j_2_i[j_post].size(); ++ind){
+					// j_2_i and j_2_syn_ind together serve as the "inverse function" of j_post = C[i_pre][syn_ind]
+					i_pre = j_2_i[j_post][ind];
+					syn_ind = j_2_syn_ind[j_post][ind];
+					K[i_pre][syn_ind] += eta_STDP * x_trace_pre[i_pre];
+				}
+			}
+		}
+		
 		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
 			if (trans_left[i_pre] > 0){
 				// conduction delay: put into d_gs_sum_buffer
@@ -254,16 +290,16 @@ void ChemicalSynapses::update(int step_current){
 			for (int i = 0; i < N_pre; ++i){
 				f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]); // decay to 1.0
 			}
-
-			//debug
-			//cout << endl << endl;
-			if (step_current == step_tot - 1){
-				tmp_data.resize(1);
-				tmp_data[0] = f_ves;
-			}
-
 		}
-	
+		// update inhibitory STDP 
+		if (inh_STDP == true){
+			for (int i = 0; i < N_pre; ++i){
+				x_trace_pre[i] *= exp_step_STDP;
+			}
+			for (int j = 0; j < N_post; ++j){
+				x_trace_post[j] *= exp_step_STDP;
+			}
+		}
 		// decay pre-synaptic dynamics
 		for (int i = 0; i < N_pre; ++i){ s[i] *= exp_step; };
 	} 
@@ -316,6 +352,36 @@ void ChemicalSynapses::add_short_term_depression(int STD_on_step_input){
 	f_ves.assign(N_pre, 1.0);
 	exp_ves = exp(-dt / tau_ves);
 }
+
+void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
+	if (synapses_type != 1){
+		cout << "Warning: initializing inhibitory STDP on non-GABA synapses!" << endl;
+	}
+	inh_STDP_on_step = inh_STDP_on_step_input;
+	if (inh_STDP_on_step == 0){
+		inh_STDP = true;
+	}
+	
+	x_trace_pre.assign(N_pre, 0.0);
+	x_trace_post.assign(N_post, 0.0);
+
+	tau_STDP = 20; // ms
+	exp_step_STDP = exp(-dt / tau_STDP);
+	eta_STDP = 0.01; // learning rate, 0.0001 is the published value but requires 60min of simulation
+	rho_0_STDP = 0.003; //kHz
+	alpha_STDP = 2.0 * rho_0_STDP * tau_STDP; // depression factor
+	
+	// j_2_i and j_2_syn_ind
+	int j_post;
+	for (int i_pre = 0; i_pre < N_pre; ++i_pre){ 
+		for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
+			j_post = C[i_pre][syn_ind];
+			j_2_i[j_post].push_back( i_pre );
+			j_2_syn_ind[j_post].push_back( int(syn_ind) );
+		}
+	}
+}	
+
 
 void ChemicalSynapses::sample_data(int step_current){
 	if (!sample_neurons.empty()){
@@ -435,7 +501,10 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 void ChemicalSynapses::recv_pop_data(vector<Neurons> &NeuronPopArray){
 	// get current spikes from pre-pop
 	if (pop_ind_pre >= 0){
-		spikes_pre = &(NeuronPopArray[pop_ind_pre].spikes_current); // This is problematic!!!
+		spikes_pre = &(NeuronPopArray[pop_ind_pre].spikes_current); // This might be problematic!!!
+		if (inh_STDP == true){
+			spikes_post = &(NeuronPopArray[pop_ind_post].spikes_current);
+		}
 	}
 	// get current V from post-pop
 	V_post = &(NeuronPopArray[pop_ind_post].V); // This is problematic!!!

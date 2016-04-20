@@ -34,6 +34,7 @@ public:
 	void send_pop_data(vector<Neurons> &NeuronPopArray);
 
 	void add_short_term_depression(int STD_on_step);
+	void add_inh_STDP(int inh_STDP_on_step);
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points); 
 	void sample_data(int step_current);
 
@@ -66,10 +67,11 @@ protected:
 		max_delay_steps;
 		
 	// A copy of data from pre-synaptic population
-	vector<double>* // This is problematic!!!
-		V_post; // from post-synaptic population
-	vector<int>*
-		spikes_pre; // current spikes from pre-synaptic population
+	vector<double> // This is problematic!!!
+		*V_post; // from post-synaptic population
+	vector<int>
+		*spikes_pre,
+		*spikes_post; // current spikes from pre-synaptic population
 
 
 	// currents into post-synaptic population
@@ -126,7 +128,24 @@ protected:
 		B; // B = 1 / (1 + miuMg_NMDA*exp(-gamma_NMDA*V))
 
 
-
+	// Inhibitory-to-excitatory coupling STDP plasticity as in
+	// ref: Inhibitory plasticity balances excitation and inhibition in sensory pathways and memory networks
+	bool
+		inh_STDP;
+	vector<double>
+		x_trace_pre,
+		x_trace_post;
+	double 
+		tau_STDP,
+		exp_step_STDP, // exp(-dt/tau_STPD)
+		eta_STDP, // learning rate
+		rho_0_STDP,
+		alpha_STDP; // depression factor
+	int
+		inh_STDP_on_step;
+	vector< vector<int> >
+		j_2_i, // j_2_i[j_post] gives all the i_pre's (indices of pre-synaptic neurons)
+		j_2_syn_ind; // j_2_syn_ind[j_post] gives all the syn_ind's so that K[i_pre][syn_ind] is a synapse onto j_post
 
 
 	// connection matrices and bookkeeping for 1-variable kinetic synapse model
