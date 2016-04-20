@@ -114,7 +114,7 @@ for g_EI_over_EE = 0.25
                             % write synapse para
                             writeSynPara(FID, 'tau_decay_GABA', 3);
                             
-                            writeInhSTDP(FID, 2, 1, 0);
+                            writeInhSTDP(FID, 
                             
                             %%%%%%% write runaway killer
                             min_ms = 1000; % 5 sec
