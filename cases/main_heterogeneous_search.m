@@ -8,7 +8,7 @@ function main_heterogeneous_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 0.3*sec; % use 10 second!
+step_tot = 39*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -32,11 +32,11 @@ s_p = 0.5;
 %  what can I do??? 
 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
 
-for g_EI_over_EE = 0.25
+for g_EI_over_EE = 0.25:0.25:1
     for g_IE = 6
         for g_II = 1.5
             for I_ext_CV = 0
-                for I_ext_strength_E = 0 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
+                for I_ext_strength_E = 0:0.05:0.2 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
                     for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
                         for  tau_c = [15]
                             loop_num = loop_num + 1;
