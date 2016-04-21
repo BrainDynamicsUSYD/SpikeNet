@@ -55,6 +55,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector< vector<int> > syn_stats_setting;
 	vector< vector<int> > STD_setting;
 	vector< vector<int> > inh_STDP_setting;
+	vector<int> spike_freq_adpt_setting; //
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
@@ -161,6 +162,14 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 			
+			found = line_str.find("INIT010");
+			if (found != string::npos){// if found match
+				cout << "\t Reading spike-frequency adaptation settings..." << endl;
+				// [pop_ind]
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
+				spike_freq_adpt_setting.push_back(read_next_entry<int>(line_ss));			
+				continue; // move to next line
+			}
 			
 			// read neuron population parameter setting
 			found = line_str.find("PARA001");
@@ -466,6 +475,16 @@ bool SimulatorInterface::import(string in_filename_input){
 			if (!syn_match){
 				cout << "(no match found!)...";
 			}
+		}
+		cout << "done." << endl;
+	}
+	
+	if (spike_freq_adpt_setting.size() != 0){
+		cout << "\t Spike-frequency adaptation settings...";
+		for (unsigned int i = 0; i < spike_freq_adpt_setting.size(); ++i){
+			int pop_ind = spike_freq_adpt_setting[i];
+			network.NeuronPopArray[pop_ind].add_spike_freq_adpt();
+			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}

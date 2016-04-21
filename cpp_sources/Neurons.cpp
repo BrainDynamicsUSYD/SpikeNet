@@ -52,6 +52,7 @@ void Neurons::init(){
 	I_NMDA.assign(N, 0.0);
 	I_GJ.assign(N, 0.0);
 	I_ext.assign(N, 0.0);
+	I_K.assign(N, 0.0);
 	ref_step_left.assign(N, 0);
 	ref_steps = (int)round(tau_ref / dt);
 
@@ -72,10 +73,12 @@ void Neurons::init(){
 	
 	//
 	stats_record = false;
+	spike_freq_adpt = false;
 	
 	// perturbation
 	step_perturb = -1;
 	spike_removed = -1;
+
 
 }
 
@@ -236,6 +239,16 @@ void Neurons::update_V(int step_current){
 		}
 		else{ I_ext = I_ext_mean; }
 	}
+	// potassium conductance for spike-frequency adaptation
+	if (spike_freq_adpt == true){
+		for (unsigned int ind = 0; ind < spikes_current.size(); ++ind){
+			g_K[ spikes_current[ind] ] += dg_K;
+		}
+		for (int i = 0; i < N; ++i){
+			g_K[i] *= exp_K_step;
+			I_K[i] = -g_K[i] * (V[i] - V_K);
+		}
+	}
 
 	// Collect Currents from all pre-synapses (for MPI job)!!!!!!!!!!!!!!!
 
@@ -246,10 +259,11 @@ void Neurons::update_V(int step_current){
 	// we want to sample the V[] before it's updated!
 
 
+
 	// update menbrane potentials
 	double Vdot;
 	for (int i = 0; i < N; ++i){
-		I_input[i] = I_AMPA[i] + I_GABA[i] + I_NMDA[i] + I_GJ[i] + I_ext[i];
+		I_input[i] = I_AMPA[i] + I_GABA[i] + I_NMDA[i] + I_GJ[i] + I_ext[i] + I_K[i];
 		if (ref_step_left[i] == 0){ // Only update the non-refractory neurons
 			// leaky current
 			I_leak[i] = -g_lk * (V[i] - V_lk); 
@@ -332,6 +346,16 @@ void Neurons::add_perturbation(int step_perturb_input){
 	step_perturb = step_perturb_input;
 }
 
+void Neurons::add_spike_freq_adpt(){
+	spike_freq_adpt = true;
+	V_K = -85.0; // mV
+	dg_K = 0.01; // (uS=miuSiemens)
+	tau_K = 80; // ms
+	exp_K_step = exp( -dt / tau_K );
+	g_K.assign(N, 0.0);
+}
+
+
 void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
 
 	min_pop_size = 100;
@@ -342,8 +366,6 @@ void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
 		Hz_steps = int(round(Hz_ms / dt));
 	}
 }
-
-
 
 void Neurons::runaway_check(int step_current){
 	if (killer_license == true && runaway_killed == false && step_current > min_steps && step_current > Hz_steps){

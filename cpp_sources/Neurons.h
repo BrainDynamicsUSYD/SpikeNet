@@ -62,6 +62,7 @@ public:
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 	void runaway_check(int step_current);
 	void add_perturbation(int step_perturb);
+	void add_spike_freq_adpt();
 
 protected:
 	// Space and time
@@ -125,15 +126,22 @@ protected:
 		I_GABA_time_avg,
 		EI_ratio;
 
-
-
 	// parameters for Generate Gaussian random external current
 	vector<double> // a vector for each neuron
 		I_ext_mean,
 		I_ext_std;
-
-		
-		
+	
+	// spike-frequency adaptation
+	bool
+		spike_freq_adpt;
+	vector<double>
+		g_K, // potassium conductance that produces spike-frequency adaptation
+	    I_K;
+	double
+		V_K, // reversal potential for the potassium conductance 
+		dg_K,
+		tau_K,
+		exp_K_step;
 		
 	// Data sampling
 	vector<int> 
