@@ -502,9 +502,7 @@ void ChemicalSynapses::recv_pop_data(vector<Neurons> &NeuronPopArray){
 	// get current spikes from pre-pop
 	if (pop_ind_pre >= 0){
 		spikes_pre = &(NeuronPopArray[pop_ind_pre].spikes_current); // This might be problematic!!!
-		if (inh_STDP == true){
-			spikes_post = &(NeuronPopArray[pop_ind_post].spikes_current);
-		}
+		spikes_post = &(NeuronPopArray[pop_ind_post].spikes_current);
 	}
 	// get current V from post-pop
 	V_post = &(NeuronPopArray[pop_ind_post].V); // This is problematic!!!
