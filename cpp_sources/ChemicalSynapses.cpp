@@ -215,6 +215,13 @@ void ChemicalSynapses::update(int step_current){
 					K[i_pre][syn_ind] += eta_STDP * x_trace_pre[i_pre];
 				}
 			}
+			
+			// for testing
+			if (step_current == 0){
+				tmp_data.resize(2);
+			}
+			tmp_data[0].push_back(K[0][0]);
+			tmp_data[1].push_back(K[100][0]);
 		}
 		
 		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
