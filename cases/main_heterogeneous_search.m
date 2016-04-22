@@ -8,7 +8,7 @@ function main_heterogeneous_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 0.3*sec; % use 10 second!
+step_tot = 10*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -27,14 +27,14 @@ iter_num = 5;
 mu_p = -0.2;  
 s_p = 0.5;
 
-inh_STDP = 0;
+inh_STDP = 1;
 
 %  K_ee_mean is about 0.5, need 1000 in-coming connections.
 %  this is not good.
 %  what can I do??? 
 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
 
-for g_EI_over_EE = 0.1:0.1:1
+for g_EI_over_EE = 0.1:0.1:0.2
     for g_IE = 4
         for g_II = 1.5
             for I_ext_CV = 0
@@ -118,7 +118,7 @@ for g_EI_over_EE = 0.1:0.1:1
                             
                             % inhibitory STDP
                             if inh_STDP == 1
-                            writeInhSTDP(FID, 2, 1, 0);
+                            writeInhSTDP(FID, 2, 1, 0.2*sec);
                             end
                             
                             %%%%%%% write runaway killer
