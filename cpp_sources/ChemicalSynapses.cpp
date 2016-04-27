@@ -215,9 +215,8 @@ void ChemicalSynapses::update(int step_current){
 					K[i_pre][syn_ind] += eta_STDP * x_trace_pre[i_pre];
 				}
 			}
-			
 			// for testing
-			if (step_current == 0){
+			if (tmp_data.size() == 0){
 				tmp_data.resize(2);
 			}
 			tmp_data[0].push_back(K[0][0]);
@@ -372,8 +371,8 @@ void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
 	
 	tau_STDP = 20; // ms
 	exp_step_STDP = exp(-dt / tau_STDP);
-	eta_STDP = 0.001; // learning rate, 0.0001 is the published value but requires 60min of simulation
-	rho_0_STDP = 0.003; //kHz
+	eta_STDP = 0.0001; // learning rate, 0.0001 is the published value but requires 60min of simulation
+	rho_0_STDP = 0.010; //kHz
 	alpha_STDP = 2.0 * rho_0_STDP * tau_STDP; // depression factor
 
 	// j_2_i and j_2_syn_ind

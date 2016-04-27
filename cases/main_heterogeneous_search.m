@@ -8,7 +8,7 @@ function main_heterogeneous_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 0.3*sec; % use 10 second!
+step_tot = 0.5*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -16,29 +16,32 @@ tau_ref = 4;
 delay = 2;
 
 % parameter
-in_out_corrcoef = 0.2;
+in_out_r = 0.2;
 cn_scale_wire = 4;
 cn_scale_weight = 4;
 discard_transient = 0; % ms
 STD_on = 0;
 P0_init = 0.1;
-degree_CV = 0.1 ; % 0.2 works
-iter_num = 5;
+degree_CV = 0.2; % 0.2 works
+iter_num = 1;
 mu_p = -0.2;  
 s_p = 0.5;
 
 inh_STDP = 0;
+
 
 %  K_ee_mean is about 0.5, need 1000 in-coming connections.
 %  this is not good.
 %  what can I do??? 
 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
 
-for g_EI_over_EE = 0.1:0.1:1
-    for g_IE = 4
+
+for deg_hybrid = [0 0.3 0.6]
+for g_EI_over_EE = 0.1
+    for g_IE = 3
         for g_II = 1.5
             for I_ext_CV = 0
-                for I_ext_strength_E = 0 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
+                for I_ext_strength_E = 0.1 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
                     for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
                         for  tau_c = [10 15]
                             loop_num = loop_num + 1;
@@ -73,9 +76,11 @@ for g_EI_over_EE = 0.1:0.1:1
                             % generate in- and out-degree accroding to (1) distance-dependent rule
                             % (2) degree distributios and (3) common neighbour rule
                             deg_mean = N_e*P0_init;
-                            deg_std = degree_CV*deg_mean;
-                            [ degree_in_0, degree_out_0 ] = logn_in_out_degree( N_e, [deg_mean deg_mean], [deg_std,  deg_std], in_out_corrcoef  );% log-normal
-                            [ I_ee, J_ee, dist_IJ, iter_hist ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_c, cn_scale_wire, iter_num );
+                            deg_std_logn = degree_CV*deg_mean;
+                            
+                            [ deg_in_0, deg_out_0 ] = hybrid_degree( N_e, deg_mean, deg_std_logn, in_out_r, deg_hybrid );
+
+                            [ I_ee, J_ee, dist_IJ, iter_hist ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c, cn_scale_wire, iter_num );
                             in_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 1)); % row vector
                             out_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 2));
                             
@@ -118,7 +123,7 @@ for g_EI_over_EE = 0.1:0.1:1
                             
                             % inhibitory STDP
                             if inh_STDP == 1
-                            writeInhSTDP(FID, 2, 1, 0);
+                                writeInhSTDP(FID, 2, 1, 0.1*sec);
                             end
                             
                             %%%%%%% write runaway killer
@@ -202,7 +207,7 @@ for g_EI_over_EE = 0.1:0.1:1
                                 'I_ext_strength_I', I_ext_strength_I,...
                                 'P0_init', P0_init, ...
                                 'degree_CV', degree_CV,...
-                                'in_out_corrcoef', in_out_corrcoef, ...
+                                'in_out_corrcoef', in_out_r, ...
                                 'tau_c', tau_c, ...
                                 'STD_on', STD_on, ...
                                 'I_ext_CV', I_ext_CV, ...
@@ -210,7 +215,8 @@ for g_EI_over_EE = 0.1:0.1:1
                                 'cn_scale_weight', cn_scale_weight, ...
                                 'mu_p', mu_p,...
                                 's_p', s_p, ...
-                                'inh_STDP', inh_STDP);
+                                'inh_STDP', inh_STDP, ...
+                                'deg_hybrid', deg_hybrid);
                             
                             
                             % Adding comments in raster plot
@@ -232,7 +238,7 @@ for g_EI_over_EE = 0.1:0.1:1
             end
         end
     end
-    
+end
     
 end
 end

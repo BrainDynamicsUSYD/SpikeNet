@@ -35,7 +35,7 @@ covv = log( CorrMat_log .* sqrt(exp(sigma_down.^2)-1) .* ...
 X = exp( mvnrnd( Mu_norm(:) , covv , N ));
 
 % error check
-min_error = 0.05; % percent
+min_error = 0.1; % percent
 if length(Mu) == 2
     X_c = corrcoef(X);
     error = abs( (X_c(1,2)-CorrMat_log(1,2) ) / CorrMat_log(1,2) );
