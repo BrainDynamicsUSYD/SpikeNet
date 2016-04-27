@@ -8,7 +8,9 @@ function main_heterogeneous_search(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
+
 step_tot = 0.5*sec; % use 10 second!
+
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -27,7 +29,7 @@ iter_num = 1;
 mu_p = -0.2;  
 s_p = 0.5;
 
-inh_STDP = 0;
+inh_STDP = 1;
 
 
 %  K_ee_mean is about 0.5, need 1000 in-coming connections.
@@ -37,8 +39,10 @@ inh_STDP = 0;
 
 
 for deg_hybrid = [0 0.3 0.6]
-for g_EI_over_EE = 0.1
-    for g_IE = 3
+
+for g_EI_over_EE = 0.1:0.1:0.2
+    for g_IE = 4
+
         for g_II = 1.5
             for I_ext_CV = 0
                 for I_ext_strength_E = 0.1 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
