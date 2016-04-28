@@ -23,7 +23,6 @@ switch lower(mu_sigma_mode)
         Sigma_norm = Sigma;
 end
 % The inverse transformation of the above one is lognstat
-% [Mu_log, Sigma_log] = [Mu_norm, Sigma_norm]
 
 % Calculate the covariance structure
 sigma_down = repmat( Sigma_norm(:)' , numel(Sigma_norm(:)), 1                    );
@@ -31,18 +30,23 @@ sigma_acrs = repmat( Sigma_norm(:)  , 1                   , numel(Sigma_norm(:))
 covv = log( CorrMat_log .* sqrt(exp(sigma_down.^2)-1) .* ...
                        sqrt(exp(sigma_acrs.^2)-1) + 1 );
 
-% The Simulation
-X = exp( mvnrnd( Mu_norm(:) , covv , N ));
-
 % error check
 min_error = 0.1; % percent
+error = 1;
+max_loop = 100;
+loop = 0;
 if length(Mu) == 2
-    X_c = corrcoef(X);
-    error = abs( (X_c(1,2)-CorrMat_log(1,2) ) / CorrMat_log(1,2) );
-    if error > min_error
-        clear X;
-        % disp('regenerating...')
-        [ X ] = my_logn_rand( Mu, Sigma, CorrMat_log, N, mu_sigma_mode );
+    while error > min_error
+        loop = loop + 1;
+        if loop > max_loop
+            X = [];
+            break;
+        end
+        % The Simulation
+        X = exp( mvnrnd( Mu_norm(:) , covv , N ));
+        % error
+        X_c = corrcoef(X);
+        error = abs( (X_c(1,2)-CorrMat_log(1,2) ) / CorrMat_log(1,2) );
     end
 else
     disp('length(Mu) ~= 2, error check skipped.')

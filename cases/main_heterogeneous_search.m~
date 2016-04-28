@@ -28,13 +28,19 @@ degree_CV = 0.2; % 0.2 works
 iter_num = 1;
 
 
-[ fit_g_2_EPSP_2, ~ ] = g_EPSP_conversion( );
-g_mu = 1;
+
+EPSP_mu_norm = mu_p-s_p^2; % log-bin correction to parameter mu!!
+EPSP_sigma_norm = s_p;
+
+[EPSP_mu, EPSP_sigma] = lognstat(EPSP_mu_norm, EPSP_sigma_norm) %#ok<NOPRT>
 
 
-EPSP_mu = fit_g_2_EPSP_2(g_mu);
-EPSP_sigma = 1;
+mu_p = -0.2;  
+s_p = 0.5;
 
+mu_p = log((EPSP_mu^2)/sqrt(EPSP_sigma+EPSP_mu^2));
+s_p = sqrt(log(EPSP_sigma/(EPSP_mu^2)+1));
+mu_p = mu_p + s_p^2l
 
 
 inh_STDP = 1;
@@ -96,9 +102,7 @@ for g_EI_over_EE = 0.1:0.1:0.2
                             out_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 2));
                             
                             % Generate K according to
-                            mu_p = log((EPSP_mu^2)/sqrt(EPSP_sigma^2+EPSP_mu^2));
-                            s_p = sqrt(log(EPSP_sigma^2/(EPSP_mu^2)+1));
-                            mu_p = mu_p + s_p^2;
+                            
                             g_pool_generator_hld = @(N)g_pool_generator(N, mu_p, s_p);
                             K_scale = sqrt(in_degree);
                             K_cell = inverse_pool( in_degree, K_scale, g_pool_generator_hld);
