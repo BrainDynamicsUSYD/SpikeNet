@@ -13,7 +13,7 @@ step_tot = 0.5*sec; % use 10 second!
 
 
 % Loop number for PBS array job
-loop_num = 0;
+loop_num = 36;
 tau_ref = 4;
 delay = 2;
 
@@ -56,7 +56,7 @@ for g_EI = [30 35 40]
         for g_II = [30 40]
             for I_ext_CV = 0
                 for I_ext_strength_E = 0.1 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
-                    for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
+                    for I_ext_strength_I = 0.1 %[0.1]% 0.9*ones(1,10)]
                         for  tau_c = [10 15]
                             loop_num = loop_num + 1;
                             
