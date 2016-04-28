@@ -29,7 +29,10 @@ iter_num = 1;
 
 
 [ fit_g_2_EPSP_2, ~ ] = g_EPSP_conversion( );
-g_mu = 1;
+
+
+
+for g_mu = [2 2.4 4];
 
 
 EPSP_mu = fit_g_2_EPSP_2(g_mu);
@@ -48,9 +51,9 @@ inh_STDP = 1;
 
 for deg_hybrid = 0
 
-for g_EI_over_EE = 0.1:0.1:0.2
-    for g_IE = 4
-        for g_II = 1.5
+for g_EI = [30 35 40]
+    for g_IE = 4.8
+        for g_II = [30 40]
             for I_ext_CV = 0
                 for I_ext_strength_E = 0.1 %[ 0.05:0.05:0.2 ]% 0.9*ones(1,10)]
                     for I_ext_strength_I = 0 %[0.1]% 0.9*ones(1,10)]
@@ -252,7 +255,8 @@ for g_EI_over_EE = 0.1:0.1:0.2
         end
     end
 end
-    
+end
+
 end
 end
 
