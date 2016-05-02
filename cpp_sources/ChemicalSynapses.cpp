@@ -216,11 +216,11 @@ void ChemicalSynapses::update(int step_current){
 				}
 			}
 			// for testing
-			if (tmp_data.size() == 0){
-				tmp_data.resize(2);
-			}
-			tmp_data[0].push_back(K[0][0]);
-			tmp_data[1].push_back(K[100][0]);
+			//if (tmp_data.size() == 0){
+			//	tmp_data.resize(2);
+			//}
+			//tmp_data[0].push_back(K[0][0]);
+			//tmp_data[1].push_back(K[100][0]);
 		}
 		
 		for (int i_pre = 0; i_pre < N_pre; ++i_pre){

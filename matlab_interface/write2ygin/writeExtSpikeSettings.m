@@ -12,6 +12,12 @@ function writeExtSpikeSettings(FID, pop_ind, type_ext, K_ext,  Num_ext, rate_ext
 
 pop_ind = pop_ind - 1;
 type_ext = type_ext - 1;
+
+if nargin == 6
+    ia = 1;
+    ib = length(rate_ext);
+end
+
 ia = ia - 1;
 ib = ib - 1;
 
