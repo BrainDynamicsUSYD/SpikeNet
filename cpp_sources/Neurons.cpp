@@ -53,6 +53,7 @@ void Neurons::init(){
 	I_GJ.assign(N, 0.0);
 	I_ext.assign(N, 0.0);
 	I_K.assign(N, 0.0);
+	I_ext_mean.assign(N, 0.0);
 	ref_step_left.assign(N, 0);
 	ref_steps = (int)round(tau_ref / dt);
 
@@ -552,7 +553,6 @@ void Neurons::record_stats(int step_current){
 				// also, the only source of I_ext is generated internally
 				EI_ratio[i] = (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean[i]) / I_GABA_time_avg[i];
 			}
-			
 		}
 	}
 }

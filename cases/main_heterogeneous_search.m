@@ -9,7 +9,7 @@ function main_heterogeneous_search(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 0.5*sec; % use 10 second!
+step_tot = 0.4*sec; % use 10 second!
 
 
 % Loop number for PBS array job
@@ -129,7 +129,7 @@ for g_mu = [1 2 3 4]*10^-3;
                                     writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
                                 end
                                 
-                                % write external currents
+                                write external currents
                                 writeExtSpikeSettings(FID, 1, 1, g_ext,  N_ext, rate_ext*ones(1,N(1)));
                                 writeExtSpikeSettings(FID, 2, 1, g_ext,  N_ext, rate_ext*ones(1,N(2)));
                                 
@@ -142,9 +142,9 @@ for g_mu = [1 2 3 4]*10^-3;
                                 end
                                 
                                 %%%%%%% write runaway killer
-                                min_ms = 1000; % 5 sec
+                                min_ms = 500; % 5 sec
                                 runaway_Hz = 200; % ??
-                                Hz_ms = 500; % ms
+                                Hz_ms = 200; % ms
                                 writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
                                 %%%%%%%%%%%%%%%%%%%%%%%
                                 
