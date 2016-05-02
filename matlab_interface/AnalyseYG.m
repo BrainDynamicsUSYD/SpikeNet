@@ -21,18 +21,16 @@ for r_num = 1:Result_num
     % Get Firing rate
     Result_cell{r_num} = get_rate(Result_cell{r_num});
     
-%     % Get ISI distribution
-%     Result_cell{r_num} = get_ISI(Result_cell{r_num});
+    % Get ISI distribution
+    Result_cell{r_num} = get_ISI(Result_cell{r_num});
     
     
 %     % Re-arrange the neuron index
 %     % >> according to firing rate
 %     Result_cell{r_num} = rate_sort(Result_cell{r_num}, re_arrange);
     
+
     
-%     % Irregularity measures for the network based on CV_ISI
-%     Result_cell{r_num} = get_CV2_ISI(Result_cell{r_num});
-%     
     % Correlation coefficient (zero time-lag)
     if get_corrcoef == 1
         Result_cell{r_num} = get_CC_pop(Result_cell{r_num});
