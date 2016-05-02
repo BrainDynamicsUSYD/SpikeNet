@@ -129,7 +129,7 @@ for g_mu = [1 2 3 4]*10^-3;
                                     writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
                                 end
                                 
-                                write external currents
+                                % write external currents
                                 writeExtSpikeSettings(FID, 1, 1, g_ext,  N_ext, rate_ext*ones(1,N(1)));
                                 writeExtSpikeSettings(FID, 2, 1, g_ext,  N_ext, rate_ext*ones(1,N(2)));
                                 
