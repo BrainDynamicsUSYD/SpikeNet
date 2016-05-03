@@ -34,7 +34,7 @@ g_ext = 2*10^-3;
 
 
 
-for g_mu = [1 2 3 4]*10^-3;
+for g_mu = [1 2]*10^-3;
     
     
     EPSP_mu = fit_g_2_EPSP_2(g_mu);
@@ -53,9 +53,9 @@ for g_mu = [1 2 3 4]*10^-3;
     
     for deg_hybrid = 0
         
-        for g_EI = [5 7.5 10 ]*10^-3
-            for g_IE = 5*10^-3
-                for g_II = [5 7.5 10 ]*10^-3
+        for g_EI = [5 ]*10^-3
+            for g_IE = [5 7.5 10]*10^-3
+                for g_II = [10 12 14]*10^-3
                     for I_ext_CV = 0
                         for rate_ext = [1 2 3 4];
                             for  tau_c = [10 15]
