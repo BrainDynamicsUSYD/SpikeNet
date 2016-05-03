@@ -163,8 +163,8 @@ for id_out = 1:length(files)
                 pop_ind = scan_temp{1}+1; % be careful here!
                 tline = fgetl(FID);
                 scan_temp = textscan(tline,'%f','Delimiter',',');
-                EI_ratio = transpose(scan_temp{1});
-                OutData{id_out}.neuron_stats.EI_ratio{pop_ind} = EI_ratio;
+                IE_ratio = transpose(scan_temp{1});
+                OutData{id_out}.neuron_stats.IE_ratio{pop_ind} = IE_ratio;
                 
    
                
