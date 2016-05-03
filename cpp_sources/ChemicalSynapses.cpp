@@ -519,8 +519,13 @@ void ChemicalSynapses::recv_pop_data(vector<Neurons> &NeuronPopArray){
 void ChemicalSynapses::send_pop_data(vector<Neurons> &NeuronPopArray){
 	
 	// send currents to post-pop
-	//AMPA
-	if (synapses_type == 0){
+	if (pop_ind_pre == -1){ // if noisy external currents, always send to I_ext regardless of the synapse type
+		for (int j = 0; j < N_post; ++j){
+			NeuronPopArray[pop_ind_post].I_ext[j] += I[j];
+		}
+	}
+	// AMPA
+	else if (synapses_type == 0){
 		for (int j = 0; j < N_post; ++j){
 			NeuronPopArray[pop_ind_post].I_AMPA[j] += I[j];
 		}

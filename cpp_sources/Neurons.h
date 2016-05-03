@@ -124,7 +124,7 @@ protected:
 		I_NMDA_time_avg,
 		I_GABA_acc,
 		I_GABA_time_avg,
-		EI_ratio;
+		IE_ratio;
 
 	// parameters for Generate Gaussian random external current
 	vector<double> // a vector for each neuron

@@ -99,7 +99,7 @@ void Neurons::start_stats_record(){
 	I_GABA_acc.assign(N, 0.0);
 	I_GABA_time_avg.assign(N, 0.0);
 	
-	EI_ratio.assign(N, 0.0);
+	IE_ratio.assign(N, 0.0);
 }
 
 
@@ -232,13 +232,16 @@ void Neurons::update_V(int step_current){
 			gen.seed(my_seed+step_current);// reseed random engine!
 			normal_distribution<double> nrm_dist(0.0, 1.0);
 			auto gaus = bind(nrm_dist,gen);
-			
-			I_ext = I_ext_mean;
+
 			for (int i = 0; i < N; ++i){ 
-				I_ext[i] += gaus() * I_ext_std[i] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
+				I_ext[i] += I_ext_mean[i] + gaus() * I_ext_std[i] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
 			}
 		}
-		else{ I_ext = I_ext_mean; }
+		else{ 
+			for (int i = 0; i < N; ++i){ 
+				I_ext[i] += I_ext_mean[i]; 
+			} 
+		}
 	}
 	// potassium conductance for spike-frequency adaptation
 	if (spike_freq_adpt == true){
@@ -423,7 +426,7 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 	if (stats_record){
 		output_file << indicator << " POPD005" << endl;
 		output_file << pop_ind << delim << endl;
-		write2file(output_file, delim, EI_ratio);
+		write2file(output_file, delim, IE_ratio);
 	}
 	
 
@@ -549,9 +552,9 @@ void Neurons::record_stats(int step_current){
 				I_AMPA_time_avg[i] = I_AMPA_acc[i] / step_tot;
 				I_NMDA_time_avg[i] = I_NMDA_acc[i] / step_tot;
 				I_GABA_time_avg[i] = I_GABA_acc[i] / step_tot;
-				// be careful here, for EI_ratio, I_ext is assumed to be always excitatory and I_GJ is not considered
+				// be careful here, for IE_ratio, I_ext is assumed to be always excitatory and I_GJ is not considered
 				// also, the only source of I_ext is generated internally
-				EI_ratio[i] = (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean[i]) / I_GABA_time_avg[i];
+				IE_ratio[i] = I_GABA_time_avg[i] / (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean[i]);
 			}
 		}
 	}
