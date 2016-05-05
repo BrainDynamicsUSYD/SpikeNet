@@ -57,7 +57,9 @@ degree_out = ceil(deg(:,2));
  logn_ind = randperm(N, round(N*hybrid));
  
  deg = deg_pois;
- deg(logn_ind, :) = deg_logn(logn_ind, :);
+ if hybrid > 0
+    deg(logn_ind, :) = deg_logn(logn_ind, :);
+ end
  
  
  end

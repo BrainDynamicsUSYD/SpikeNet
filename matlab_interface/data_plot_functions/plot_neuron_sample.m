@@ -28,13 +28,14 @@ V_th = R.PopPara{pop}.V_th;
 
 % find threshold current for neuron to fire
 I_th = g_leak*(V_th - V_lk) % important!!!!!!!!!!!!!
+I_ext_mean = mean(I_ext)
 I_E_mean = mean(I_AMPA + I_ext)
 I_I_std = std(I_AMPA + I_ext)
 I_I_mean = mean(I_GABA)
 I_E_std = std(I_GABA)
 I_tot_mean = mean(I_AMPA + I_ext + I_GABA)
 I_tot_std = std(I_AMPA + I_ext + I_GABA)
-EI_ratio = mean(I_AMPA + I_ext)/mean(I_GABA)
+IE_ratio = mean(I_GABA)/mean(I_AMPA + I_ext)
 
 
 % simulate the stuff again in matlab (xx_new)

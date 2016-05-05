@@ -30,7 +30,11 @@ while  err > err_max
     
     r_a = corrcoef(pois(:,1), pois(:,2));
     r_a = r_a(1,2);
-    err = abs(r_a-r)/r;
+    if r > 0.1
+        err = abs(r_a-r)/r;
+    else
+        err = abs(r_a-r);
+    end
     
 end
 

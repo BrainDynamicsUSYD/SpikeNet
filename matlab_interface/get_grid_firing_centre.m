@@ -1,4 +1,4 @@
-function [ R ] = get_grid_firing_centre( R )
+function [ Result_cell ] = get_grid_firing_centre( Result_cell )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -10,158 +10,162 @@ win_gap = 100; % window gap
 win_min_rate_Hz = 0.5;
 
 
-spikes_win_min = win_min_rate_Hz*(R.dt*0.001)*win_len*R.N(1);
-
-[ t_mid, ind_ab,  num_spikes_win ] = window_spike_hist_compressed( R, win_len, win_gap );
-ind_a_vec = ind_ab(1,:);
-ind_b_vec = ind_ab(2,:);
-
-
-%%%% get window-ed mean and std for x/y position of firing neurons
-hw = (R.N(1)^0.5 - 1)/2;
-fw = 2*hw+1;
-
-% threshold
-dist_std_thre = 31/2;
-
-if mod(hw, 1) ~= 0
-    warning('Not a square grid')
-else
+Result_num = length(Result_cell);
+for r_num = 1:Result_num
     
-    [Lattice, ~] = lattice_nD(2, hw);
+    spikes_win_min = win_min_rate_Hz*(Result_cell{r_num}.dt*0.001)*win_len*Result_cell{r_num}.N(1);
     
-    x_pos_o = Lattice(R.spike_hist_compressed{1}, 1);
-    y_pos_o = Lattice(R.spike_hist_compressed{1}, 2);
+    [ t_mid, ind_ab,  num_spikes_win ] = window_spike_hist_compressed( Result_cell{r_num}, win_len, win_gap );
+    ind_a_vec = ind_ab(1,:);
+    ind_b_vec = ind_ab(2,:);
     
-    x_shift = [0 hw hw  -hw -hw];
-    y_shift = [0 hw -hw  hw -hw];
     
-    x_mean_all = [];
-    y_mean_all = [];
-    dist_std_all = [];
+    %%%% get window-ed mean and std for x/y position of firing neurons
+    hw = (Result_cell{r_num}.N(1)^0.5 - 1)/2;
+    fw = 2*hw+1;
     
-    for i = 1:length(x_shift)
+    % threshold
+    dist_std_thre = 31/2;
+    
+    if mod(hw, 1) ~= 0
+        warning('Not a square grid')
+    else
         
-        % shift grid centre
-        x_pos =  mod(x_pos_o - x_shift(i)+hw, fw) - hw;
-        y_pos =  mod(y_pos_o - y_shift(i)+hw, fw) - hw;
-        % minmax( [x_pos', y_pos'])
+        [Lattice, ~] = lattice_nD(2, hw);
         
-        x_mean = [];
-        y_mean = [];
-        dist_std = [];
+        x_pos_o = Lattice(Result_cell{r_num}.spike_hist_compressed{1}, 1);
+        y_pos_o = Lattice(Result_cell{r_num}.spike_hist_compressed{1}, 2);
         
-        for j = 1:length(ind_a_vec)
-            ind_range_tmp = ind_a_vec(j):ind_b_vec(j);
-            x_pos_tmp = x_pos(ind_range_tmp);
-            y_pos_tmp = y_pos(ind_range_tmp);
+        x_shift = [0 hw hw  -hw -hw];
+        y_shift = [0 hw -hw  hw -hw];
+        
+        x_mean_all = [];
+        y_mean_all = [];
+        dist_std_all = [];
+        
+        for i = 1:length(x_shift)
             
-            x_mean = [x_mean mean(x_pos_tmp ) ]; %#ok<AGROW>
-            y_mean = [y_mean mean(y_pos_tmp) ]; %#ok<AGROW>
-            dist_std = [dist_std (std(x_pos_tmp).^2 + std(y_pos_tmp).^2).^0.5 ]; %#ok<AGROW>
+            % shift grid centre
+            x_pos =  mod(x_pos_o - x_shift(i)+hw, fw) - hw;
+            y_pos =  mod(y_pos_o - y_shift(i)+hw, fw) - hw;
+            % minmax( [x_pos', y_pos'])
             
-            % if there is no spike in the current window, NaN will be
-            % returned
+            x_mean = [];
+            y_mean = [];
+            dist_std = [];
+            
+            for j = 1:length(ind_a_vec)
+                ind_range_tmp = ind_a_vec(j):ind_b_vec(j);
+                x_pos_tmp = x_pos(ind_range_tmp);
+                y_pos_tmp = y_pos(ind_range_tmp);
+                
+                x_mean = [x_mean mean(x_pos_tmp ) ]; %#ok<AGROW>
+                y_mean = [y_mean mean(y_pos_tmp) ]; %#ok<AGROW>
+                dist_std = [dist_std (std(x_pos_tmp).^2 + std(y_pos_tmp).^2).^0.5 ]; %#ok<AGROW>
+                
+                % if there is no spike in the current window, NaN will be
+                % returned
+            end
+            x_mean_all = [x_mean_all; x_mean];%#ok<AGROW>
+            y_mean_all = [y_mean_all; y_mean];%#ok<AGROW>
+            dist_std_all = [dist_std_all;  dist_std];%#ok<AGROW>
+            
         end
-        x_mean_all = [x_mean_all; x_mean];%#ok<AGROW>
-        y_mean_all = [y_mean_all; y_mean];%#ok<AGROW>
-        dist_std_all = [dist_std_all;  dist_std];%#ok<AGROW>
         
-    end
-
-    %%%%%%%%%%%%% now find the right shifting
-    
-    [dist_std_min, dist_std_min_ind] = min(dist_std_all);
-    dist_std_min_mean = mean(dist_std_min(~isnan(dist_std_min)));
-    dist_std_min_std = std(dist_std_min(~isnan(dist_std_min)));
-    % dist_std_thre = dist_std_min_mean - dist_std_min_std; % this can be
-    % problematic!!
-    xy_mean_ind_chosen = (dist_std_min < dist_std_thre) & (num_spikes_win >= spikes_win_min );
-    
-    x_mean_chosen = [];
-    y_mean_chosen = [];
-    for i = 1:length(xy_mean_ind_chosen)
-        if xy_mean_ind_chosen(i)
-            
-            % shift the position back to normal
-            x_mean_tmp = x_mean_all(dist_std_min_ind(i), i) + x_shift(dist_std_min_ind(i));
-            y_mean_tmp = y_mean_all(dist_std_min_ind(i), i) + y_shift(dist_std_min_ind(i));
-            x_mean_tmp = (mod(x_mean_tmp+hw, fw) - hw); 
-            x_mean_tmp =  x_mean_tmp - 2*hw*(x_mean_tmp > 31);% a hack????
-            y_mean_tmp = (mod(y_mean_tmp+hw, fw) - hw);
-            y_mean_tmp =  y_mean_tmp - 2*hw*(y_mean_tmp > 31);
-            
-            x_mean_chosen = [x_mean_chosen x_mean_tmp];%#ok<AGROW>
-            y_mean_chosen = [y_mean_chosen y_mean_tmp];%#ok<AGROW>
+        %%%%%%%%%%%%% now find the right shifting
+        
+        [dist_std_min, dist_std_min_ind] = min(dist_std_all);
+        dist_std_min_mean = mean(dist_std_min(~isnan(dist_std_min)));
+        dist_std_min_std = std(dist_std_min(~isnan(dist_std_min)));
+        % dist_std_thre = dist_std_min_mean - dist_std_min_std; % this can be
+        % problematic!!
+        xy_mean_ind_chosen = (dist_std_min < dist_std_thre) & (num_spikes_win >= spikes_win_min );
+        
+        x_mean_chosen = [];
+        y_mean_chosen = [];
+        for i = 1:length(xy_mean_ind_chosen)
+            if xy_mean_ind_chosen(i)
+                
+                % shift the position back to normal
+                x_mean_tmp = x_mean_all(dist_std_min_ind(i), i) + x_shift(dist_std_min_ind(i));
+                y_mean_tmp = y_mean_all(dist_std_min_ind(i), i) + y_shift(dist_std_min_ind(i));
+                x_mean_tmp = (mod(x_mean_tmp+hw, fw) - hw);
+                x_mean_tmp =  x_mean_tmp - 2*hw*(x_mean_tmp > 31);% a hack????
+                y_mean_tmp = (mod(y_mean_tmp+hw, fw) - hw);
+                y_mean_tmp =  y_mean_tmp - 2*hw*(y_mean_tmp > 31);
+                
+                x_mean_chosen = [x_mean_chosen x_mean_tmp];%#ok<AGROW>
+                y_mean_chosen = [y_mean_chosen y_mean_tmp];%#ok<AGROW>
+            end
         end
+        
+        t_mid_chosen = t_mid(xy_mean_ind_chosen);
+        dist_std_chosen = dist_std_min(xy_mean_ind_chosen);
+        
+        % jump_size (take care of the periodic boundary condition)
+        x_diff_full = repmat(x_mean_chosen(2:end), 9, 1);
+        y_diff_full = repmat(y_mean_chosen(2:end), 9, 1);
+        x_mean_shift2 = [-fw 0  fw -fw 0 fw -fw  0   fw];
+        y_mean_shift2 = [ fw fw fw   0 0  0 -fw -fw -fw];
+        for s = 1:9
+            x_diff_full(s,:) =  x_diff_full(s,:) - x_mean_shift2(s) - x_mean_chosen(1:end-1);
+            y_diff_full(s,:) =  y_diff_full(s,:) - y_mean_shift2(s) - y_mean_chosen(1:end-1) ;
+        end
+        jump_dist = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
+        % jump_duration
+        jump_duration = diff(t_mid_chosen);
+        
+        % output results
+        Result_cell{r_num}.grid.t_mid_full = t_mid;
+        Result_cell{r_num}.grid.t_mid = t_mid_chosen;
+        Result_cell{r_num}.grid.radius = dist_std_chosen;
+        Result_cell{r_num}.grid.radius_thre = dist_std_thre;
+        Result_cell{r_num}.grid_radiu_full = dist_std_min;
+        Result_cell{r_num}.grid.centre = [x_mean_chosen; y_mean_chosen];
+        Result_cell{r_num}.grid.jump_dist = jump_dist;
+        Result_cell{r_num}.grid.jump_du = jump_duration;
+        Result_cell{r_num}.grid.hw = hw;
+        Result_cell{r_num}.grid.win_len = win_len;
+        Result_cell{r_num}.grid.win_gap = win_gap; % window gap
+        Result_cell{r_num}.grid.win_min_rate_Hz = win_min_rate_Hz;
+        Result_cell{r_num}.grid.ind_ab = ind_ab;
+        Result_cell{r_num}.grid.num_spikes_win = num_spikes_win;
     end
-
-    t_mid_chosen = t_mid(xy_mean_ind_chosen);
-    dist_std_chosen = dist_std_min(xy_mean_ind_chosen);
     
-    % jump_size (take care of the periodic boundary condition)
-    x_diff_full = repmat(x_mean_chosen(2:end), 9, 1);
-    y_diff_full = repmat(y_mean_chosen(2:end), 9, 1);
-    x_mean_shift2 = [-fw 0  fw -fw 0 fw -fw  0   fw];
-    y_mean_shift2 = [ fw fw fw   0 0  0 -fw -fw -fw];
-    for s = 1:9
-        x_diff_full(s,:) =  x_diff_full(s,:) - x_mean_shift2(s) - x_mean_chosen(1:end-1);
-        y_diff_full(s,:) =  y_diff_full(s,:) - y_mean_shift2(s) - y_mean_chosen(1:end-1) ;
-    end
-    jump_dist = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
-    % jump_duration
-    jump_duration = diff(t_mid_chosen);
-    
-    % output results
-    R.grid.t_mid_full = t_mid;
-    R.grid.t_mid = t_mid_chosen;
-    R.grid.radius = dist_std_chosen;
-    R.grid.radius_thre = dist_std_thre;
-    R.grid_radiu_full = dist_std_min;
-    R.grid.centre = [x_mean_chosen; y_mean_chosen];
-    R.grid.jump_dist = jump_dist;
-    R.grid.jump_du = jump_duration;
-    R.grid.hw = hw;
-    R.grid.win_len = win_len;
-    R.grid.win_gap = win_gap; % window gap
-    R.grid.win_min_rate_Hz = win_min_rate_Hz;
-    R.grid.ind_ab = ind_ab;
-    R.grid.num_spikes_win = num_spikes_win;
 end
-
 
 % % % Code for visualization
 % figure('Name','Vis','color','w','NumberTitle','off');
-% 
+%
 % axis equal;
 % box on;
 % set(gca,'xtick',[],'ytick',[]);
-% 
+%
 % xlim([-hw hw]);
 % ylim([-hw hw]);
 % hold on;
-% 
+%
 % j = 1;
-% 
+%
 % ang=0:0.01:2*pi;
 % x_shift_vs = [0 fw fw -fw -fw fw -fw 0 0 ];
 % y_shift_vs = [0 fw -fw fw -fw 0  0   fw -fw];
-% 
+%
 % for t = 1:length(t_mid);
 %     h2 = plot(100,0);
 %     h3 = plot(100,0);
-%     
+%
 %     ind_range_tmp = ind_a_vec(t):ind_b_vec(t);
 %     h1 = plot(x_pos_o(ind_range_tmp), y_pos_o(ind_range_tmp), 'bo');
 %     if sum(t_mid_chosen == t_mid(t)) == 1
-%         
+%
 %         x_tmp = x_mean_chosen(j);
 %         y_tmp = y_mean_chosen(j);
 %         r_cos = x_tmp+dist_std_chosen(j)*cos(ang);
 %         r_sin = y_tmp+dist_std_chosen(j)*sin(ang);
-%         
-%         
-%         
+%
+%
+%
 %         h3 = plot(r_cos - x_shift_vs(1),r_sin - y_shift_vs(1),'r', ...
 %             r_cos - x_shift_vs(2),r_sin - y_shift_vs(2),'r',...
 %             r_cos - x_shift_vs(3),r_sin - y_shift_vs(3),'r',...
@@ -171,7 +175,7 @@ end
 %             r_cos - x_shift_vs(7),r_sin - y_shift_vs(7),'r', ...
 %             r_cos - x_shift_vs(8),r_sin - y_shift_vs(8),'r', ...
 %             r_cos - x_shift_vs(9),r_sin - y_shift_vs(9),'r');
-%         
+%
 %         if j == 1
 %             h2 = plot( x_tmp, y_tmp, 'r>', 'MarkerSize', 8);
 %         else
@@ -186,8 +190,8 @@ end
 %             %                 pause
 %             %             end
 %         end
-%         
-%         
+%
+%
 %         j = j + 1;
 %     end
 %     pause(0.02);

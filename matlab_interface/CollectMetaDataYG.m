@@ -1,5 +1,4 @@
-function CollectMetaDataYG( varargin )
-%
+
 %   Detailed explanation goes here
 disp('CollectMetaData...');
 tic;
@@ -14,6 +13,5 @@ disp('CollectMetaData Done.');
 
 save('meta_data_tmp.mat');
 
-end
 
 
