@@ -32,7 +32,10 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 	V_th = -50.0;   // Threshold // -55.0
 	// Leak conductance
 	g_lk = 0.0167;   // (uS=miuSiemens), time constants=Cm/gL=15 ms!
-
+	// spike-frequency adaptation parameter
+	V_K = -85.0; // mV
+	dg_K = 0.01; // (uS=miuSiemens)
+	tau_K = 80; // ms
 	// Initialise defualt parameters
 	init();
 
@@ -126,7 +129,6 @@ void Neurons::set_para(string para_str, char delim){
 	init();
 }
 
-
 string Neurons::dump_para(char delim){
 	stringstream dump;
 	dump << "Cm" << delim << Cm << delim << endl;
@@ -135,16 +137,18 @@ string Neurons::dump_para(char delim){
 	dump << "V_lk" << delim << V_lk << delim << endl;
 	dump << "V_th" << delim << V_th << delim << endl;
 	dump << "g_lk" << delim << g_lk << delim << endl;
+	dump << "V_K" << delim << V_K << delim << endl;
+	dump << "dg_K" << delim << dg_K << delim << endl;
+	dump << "tau_K" << delim << tau_K << delim << endl;
 	dump << "seed" << delim << my_seed << delim << endl;
 	return dump.str();
 }
 
 
-
 void Neurons::random_V(double p){
 	// Generate random initial condition for V.
 	// Generate uniform random distribution
-	if ( p < 1.0){
+	if (p < 1.0){
 		gen.seed(my_seed);// reseed random engine!
 		uniform_real_distribution<double> uniform_dis(0.0, 1.0);
 		auto ZeroOne = bind(uniform_dis,gen);
@@ -299,7 +303,7 @@ void Neurons::add_sampling(vector<int> sample_neurons_input, vector<bool> sample
 		}
 	}
 	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
-	int sample_type_tot = sample_type.size(); // 7 different data types
+	int sample_type_tot = sample_type.size(); // 8 different data types
 	
 	
 	sample.resize(sample_type_tot); 
@@ -328,6 +332,7 @@ void Neurons::sample_data(int step_current){
 				if (sample_type[4]){sample[4][i].push_back( I_NMDA[ind_temp] );}
 				if (sample_type[5]){sample[5][i].push_back( I_GJ[ind_temp] );}
 				if (sample_type[6]){sample[6][i].push_back( I_ext[ind_temp] );}
+				if (sample_type[7]){sample[7][i].push_back( I_K[ind_temp] );}
 			}
 		}
 	}
@@ -352,9 +357,6 @@ void Neurons::add_perturbation(int step_perturb_input){
 
 void Neurons::add_spike_freq_adpt(){
 	spike_freq_adpt = true;
-	V_K = -85.0; // mV
-	dg_K = 0.01; // (uS=miuSiemens)
-	tau_K = 80; // ms
 	exp_K_step = exp( -dt / tau_K );
 	g_K.assign(N, 0.0);
 }
@@ -435,7 +437,7 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 		output_file << indicator << " POPD004" << endl;
 		output_file << pop_ind << delim << sample_neurons.size() << delim << endl;
 
-  		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext" };
+  		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
 		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
 			if (sample_type[tt] == true){output_file << data_types[tt] << delim;}
 		}

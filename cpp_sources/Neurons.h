@@ -148,7 +148,7 @@ protected:
 		sample_neurons; // neuron indices
 	vector<bool> 
 		sample_type;// boolean vector indicating which data to be sampled
-	// must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
+	// must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
 	vector<bool> 
 		sample_time_points; // logical vector as long as time vector
 
