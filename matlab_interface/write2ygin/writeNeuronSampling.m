@@ -2,11 +2,11 @@ function writeNeuronSampling(FID, pop_ind, data_type, sample_ind, time_index)
 % write data sampling settings for individual neurons
 %        FID: file id for writing data
 %    pop_ind: neuron population index
-%  data_type: logical vector for [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
+%  data_type: logical vector for [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
 % sample_ind: vector of neuron indices to be sampled in pop_ind
 % time_index: logical vector to define time points to be sampled
 %
-% For example, if V and I_GABA are needed, use data_type = [1,0,0,1,0,0,0]
+% For example, if V and I_GABA are needed, use data_type = [1,0,0,1,0,0,0,0]
 % 
 % Note that time_index should have the length of total simulation steps.
 % For example, if step_tot = 10 and the last half time points are to be
@@ -24,6 +24,11 @@ sample_ind = sample_ind-1;
 if sum((data_type ~= 0) & (data_type ~= 1)) ~= 0
     error('Data_type must be logical vectors: ');
 end
+
+if length(data_type) ~= 8
+    error('data_type must have a length of 8.')
+end
+
 % write
 % fprintf(FID, '%s\n', '# neuronal membrane potential and currents sampling setting // pop_ind;sample_ind');
 fprintf(FID, '%s\n', '> SAMP001');
