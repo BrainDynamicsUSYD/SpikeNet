@@ -97,10 +97,9 @@ I_I_std = std(I_GABA + I_K);
 IE_ratio = I_I_mean/I_E_mean;
 
 fprintf('I-E ratio = %.3g.\n', IE_ratio);
-fprintf('I_E = %.3g (%.3g) including I_ext = %.3g (%.3g).\n', I_E_mean, I_E_std, I_ext_mean, I_ext_std);
-fprintf('I_I is %.3g (%.3g).\n',  I_I_mean, I_I_std);
-fprintf('I_th = %.3g\n', I_th);
-fprintf('I_tot = %.3g (%.3g).\n',  I_tot_mean, I_tot_std);
+fprintf('I_E = %.3g (%.3g) including I_ext =, I_I is %.3g (%.3g).\n', I_E_mean, I_E_std, I_I_mean, I_I_std);
+fprintf('I_ext (part of I_E) is %.3g (%.3g).\n', I_ext_mean, I_ext_std);
+fprintf('I_th = %.3g, I_tot = %.3g (%.3g).\n', I_th, I_tot_mean, I_tot_std);
 
 % Segmetation
 seg_size = 4*10^5; % 40 sec
