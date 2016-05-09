@@ -14,6 +14,7 @@ V = R.neuron_sample.V{pop}(sample_ind,:);
 I_AMPA = R.neuron_sample.I_AMPA{pop}(sample_ind,:);
 I_GABA = R.neuron_sample.I_GABA{pop}(sample_ind,:);
 I_ext = R.neuron_sample.I_ext{pop}(sample_ind,:);
+% I_K = R.neuron_sample.I_K{pop}(sample_ind,:);
 neuron_ind = R.neuron_sample.neuron_ind{pop}(sample_ind);
 
 spikes = find( R.spike_hist{pop}(neuron_ind,:) );
@@ -182,7 +183,7 @@ for seg = seg_input
     xlim([min(x) max(x)]);
 
     
-    %% individual neuron rate
+    %%% individual neuron rate
      ax(5) = subplot(5,1,5);
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
