@@ -75,7 +75,7 @@ for EE_factor = [0.5 ]; % 0.6?
                             % write pop para
                             for pop_ind = 1:Num_pop
                                 writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
-                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength, 0);
+                                writeExtCurrentSettings(FID, pop_ind, I_ext_strength*ones(1,N(pop_ind)), 0*ones(1,N(pop_ind)));
                             end
                             
                             % write synapse para
@@ -101,7 +101,7 @@ for EE_factor = [0.5 ]; % 0.6?
                                 %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                                 writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
                             end
-                            writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neuron, ones(1, step_tot) )
+                            writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1,0], sample_neuron, ones(1, step_tot) )
                             
                             
                             %%%%%%% random initial condition settings (int pop_ind, double p_fire)

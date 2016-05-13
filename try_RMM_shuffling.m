@@ -1,8 +1,8 @@
 
 
 
-A = transpose(R.spike_hist{1}(1:40,:));
-
+sample_num = 100;
+A = transpose(R.spike_hist{1}(randperm(R.N(1), sample_num),:));
 
 % Now shuffle
 % Implementation of the Raster Marginals Model, as introduced in
@@ -10,9 +10,10 @@ A = transpose(R.spike_hist{1}(1:40,:));
 %  sensory cortex", Journal of Neuroscience.
 
 neuron_num = size(A,2); % keep it ~100
-shuffle_num = 10*nchoosek(neuron_num,2); 
+shuffle_num = 30*nchoosek(neuron_num,2); 
 c = ceil(rand(shuffle_num,2)*neuron_num); % two randomly selected columns
 
+tic;
 for i = 1:shuffle_num
 
   I = A(:,c(i,1)) + A(:,c(i,2)) == 1; % where the 2 columns don't coincide
@@ -34,6 +35,8 @@ for i = 1:shuffle_num
 
 end;
 A = A';
+
+toc;
 
 
 

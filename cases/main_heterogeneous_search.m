@@ -9,7 +9,7 @@ function main_heterogeneous_search(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 4*sec; % use 10 second!
+step_tot = 8*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -22,9 +22,9 @@ P0_init = 0.1;
 
 % parameter
 for SpikeFreqAapt = [0 1]
-    for in_out_r = [0.2];
-        for cn_scale_wire = [2 4];
-            for cn_scale_weight = [2 4];
+    for in_out_r = [0.2 0.4];
+        for cn_scale_wire = [2 ];
+            for cn_scale_weight = [2 ];
                 iter_num = 5;
                 
                 
@@ -37,10 +37,10 @@ for SpikeFreqAapt = [0 1]
                 [ fit_g_2_EPSP_2, ~ ] = g_EPSP_conversion( );
                 
                 
-                for deg_hybrid = [0.2 0.4]
+                for deg_hybrid = [0.4 0.6]
                     degree_CV = 0.2; % 0.2 works
                     
-                    for g_mu = [3 4]*10^-3;
+                    for g_mu = [4]*10^-3;
                         
                         
                         EPSP_mu = fit_g_2_EPSP_2(g_mu);
@@ -48,21 +48,21 @@ for SpikeFreqAapt = [0 1]
                         
                         
                         
-                        inh_STDP = 0;
-                        
-                        
-                        %  K_ee_mean is about 0.5, need 1000 in-coming connections.
-                        %  this is not good.
-                        %  what can I do???
-                        %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
-                        
-                        
-                        for g_EI = [10 14]*10^-3
-                            for g_IE = [5]*10^-3
-                                for g_II = [20 25]*10^-3
-                                    for I_ext_CV = 0
-                                        for rate_ext = [0.5 1];
-                                            for  tau_c = [10 15]
+                        for inh_STDP = [0 1];
+                            
+                            
+                            %  K_ee_mean is about 0.5, need 1000 in-coming connections.
+                            %  this is not good.
+                            %  what can I do???
+                            %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
+                            
+                            
+                            for g_EI = [10 14 18]*10^-3
+                                for g_IE = [5]*10^-3
+                                    for g_II = [25]*10^-3
+                                        
+                                        for rate_ext = [0.6 0.6 0.8 0.8  1 1 1.2 1.2 1.4 1.4];
+                                            for  tau_c = [10]
                                                 loop_num = loop_num + 1;
                                                 
                                                 % For PBS array job
@@ -125,7 +125,7 @@ for SpikeFreqAapt = [0 1]
                                                 
                                                 
                                                 [~,ind_sorted] = sort(in_degree);
-                                                sample_neuron = ind_sorted(1:500:end);
+                                                sample_neuron = ind_sorted(1:250:end);
                                                 
                                                 % write basic parameters
                                                 writeBasicPara(FID, dt, step_tot, N);
@@ -145,7 +145,7 @@ for SpikeFreqAapt = [0 1]
                                                 
                                                 % inhibitory STDP
                                                 if inh_STDP == 1
-                                                    writeInhSTDP(FID, 2, 1, 0.1*sec);
+                                                    writeInhSTDP(FID, 2, 1, 1*sec);
                                                 end
                                                 
                                                 %%%%%%% write runaway killer
@@ -168,9 +168,9 @@ for SpikeFreqAapt = [0 1]
                                                     %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                                                     writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                 end
-                                                writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1], sample_neuron, ones(1, step_tot) )
+                                                writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
                                                 
-                                                writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1], [1 100], ones(1, step_tot) )
+                                                writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
                                                 
                                                 %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                                                 p_fire = [0.1 0.00]; % between [0,1], 0.05
@@ -234,7 +234,6 @@ for SpikeFreqAapt = [0 1]
                                                     'in_out_r', in_out_r, ...
                                                     'tau_c', tau_c, ...
                                                     'STD_on', STD_on, ...
-                                                    'I_ext_CV', I_ext_CV, ...
                                                     'cn_scale_wire', cn_scale_wire, ...
                                                     'cn_scale_weight', cn_scale_weight, ...
                                                     'mu_p', mu_p,...
