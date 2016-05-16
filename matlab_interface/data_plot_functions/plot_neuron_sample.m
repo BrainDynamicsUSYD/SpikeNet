@@ -84,7 +84,7 @@ if nargin == 2
         
         spikes = spikes(:)';
         spikes_new = spikes_new(:)';
-        if nnz(sort(spikes_new) - sort(spikes)) > 0
+        if length(spikes_new) ~= length(spikes) || nnz(sort(spikes_new) - sort(spikes)) > 0
             warning('Simulator does not behave identically as c++ code!');
         end
         
