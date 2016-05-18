@@ -1,4 +1,4 @@
-function [ I, J, dist_IJ, iter_hist ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_d, cn_scale_wire, iter_num )
+function [ I, J, dist_IJ, iter_hist, Lattice ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_d, cn_scale_wire, iter_num )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -29,7 +29,7 @@ for iter = 1:iter_num
             waitbar(wb_p / N)
         end
         % distance factor
-        post_dist = lattice_nD_find_dist(Lattice, hw, i);
+        post_dist = lattice_nD_find_dist(Lattice, hw, Lattice(i,:));
         dist_factor = exp(-post_dist/tau_d); % exponential distribution, will be properly scaled later;
         dist_factor(i) = 0; % no self-connection
         % common neighbour factor

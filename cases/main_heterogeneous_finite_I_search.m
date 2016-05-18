@@ -74,8 +74,8 @@ for SpikeFreqAapt = [0 1]
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
-                                        for rate_ext = [0.05 0.1 0.15 0.2];
-                                            for  tau_c = [10]
+                                        for rate_ext = [ 0.1 0.2 0.3 0.4];
+                                            for  tau_c_E = [10]
                                                 loop_num = loop_num + 1;
                                                 
                                                 % For PBS array job
@@ -91,44 +91,10 @@ for SpikeFreqAapt = [0 1]
                                                 
                                                 K_mat = [NaN  g_IE;
                                                     g_EI  g_II]; % miuSiemens
-
                                                 
- 
                                                 if SpikeFreqAapt == 1
                                                     writeSpikeFreqAdpt(FID, 1);
                                                 end
-                                                
-                                                % generate in- and out-degree accroding to (1) distance-dependent rule
-                                                % (2) degree distributios and (3) common neighbour rule
-                                                deg_mean = N_e*P0_init;
-                                                deg_std_logn = degree_CV*deg_mean;
-                                                
-                                                [ deg_in_0, deg_out_0 ] = hybrid_degree( N_e, deg_mean, deg_std_logn, in_out_r, deg_hybrid );
-                                                
-                                                [ I_ee, J_ee, dist_IJ, iter_hist ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c, cn_scale_wire, iter_num );
-                                                in_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 1)); % row vector
-                                                out_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 2));
-                                                
-                                                % Generate K according to
-                                                mu_p = log((EPSP_mu^2)/sqrt(EPSP_sigma^2+EPSP_mu^2));
-                                                s_p = sqrt(log(EPSP_sigma^2/(EPSP_mu^2)+1));
-                                                mu_p = mu_p + s_p^2;
-                                                g_pool_generator_hld = @(N)g_pool_generator(N, mu_p, s_p);
-                                                K_scale = sqrt(in_degree);
-                                                K_cell = inverse_pool( in_degree, K_scale, g_pool_generator_hld);
-                                                K_ee = NaN;
-                                                if ~isnan(K_cell{1})
-                                                    K_ee = zeros(size(J_ee)); for j = 1:N_e;  K_ee(J_ee==j) = K_cell{j}'; end, clear K_cell; % reformat K
-                                                end
-                                                % shuffle K accordind to common neighbour rule
-                                                if ~isnan( K_ee)
-                                                    [  K_ee ] = shuffle_K_common_neighbour(  K_ee, I_ee, J_ee, cn_scale_weight );
-                                                end
-                                                K_ee_mean = mean(K_ee);
-                                                
-                                                
-                                                [~,ind_sorted] = sort(in_degree);
-                                                sample_neuron = ind_sorted(1:250:end);
                                                 
                                                 % write basic parameters
                                                 writeBasicPara(FID, dt, step_tot, N);
@@ -151,12 +117,88 @@ for SpikeFreqAapt = [0 1]
                                                     writeInhSTDP(FID, 2, 1, 1*sec);
                                                 end
                                                 
-                                                %%%%%%% write runaway killer
+                                                if STD_on == 1
+                                                    % writeSTD(FID, 1, 1, 5*sec);
+                                                    writeSTD(FID, 1, 1, 1);
+                                                end
+                                                
+                                                % write runaway killer
                                                 min_ms = 500; % 5 sec
                                                 runaway_Hz = 100; % ??
                                                 Hz_ms = 200; % ms
                                                 writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
-                                                %%%%%%%%%%%%%%%%%%%%%%%
+                                                
+                                                % random initial condition settings (int pop_ind, double p_fire)
+                                                p_fire = [0.1 0.00]; % between [0,1], 0.05
+                                                writeInitV(FID, p_fire);
+                                                
+                                                
+                                                
+                                                %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
+                                                % type(1:AMAP, 2:GABAa, 3:NMDA)
+                                                
+                                                Lattice_I = quasi_lattice_2D( N(2) , hw);
+                                                %%%%%%%%%%%%%%%%%%%%%%
+                                                % generate in- and out-degree accroding to (1) distance-dependent rule
+                                                % (2) degree distributios and (3) common neighbour rule
+                                                deg_mean = N_e*P0_init;
+                                                deg_std_logn = degree_CV*deg_mean;
+                                                
+                                                [ deg_in_0, deg_out_0 ] = hybrid_degree( N_e, deg_mean, deg_std_logn, in_out_r, deg_hybrid );
+                                                
+                                                [ I_ee, J_ee, dist_IJ, iter_hist, Lattice_E ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c_E, cn_scale_wire, iter_num );
+                                                in_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 1)); % row vector
+                                                out_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 2));
+                                                
+                                                % Generate K according to
+                                                mu_p = log((EPSP_mu^2)/sqrt(EPSP_sigma^2+EPSP_mu^2));
+                                                s_p = sqrt(log(EPSP_sigma^2/(EPSP_mu^2)+1));
+                                                mu_p = mu_p + s_p^2;
+                                                g_pool_generator_hld = @(N)g_pool_generator(N, mu_p, s_p);
+                                                K_scale = sqrt(in_degree);
+                                                K_cell = inverse_pool( in_degree, K_scale, g_pool_generator_hld);
+                                                K_ee = NaN;
+                                                if ~isnan(K_cell{1})
+                                                    K_ee = zeros(size(J_ee)); for j = 1:N_e;  K_ee(J_ee==j) = K_cell{j}'; end, clear K_cell; % reformat K
+                                                end
+                                                % shuffle K accordind to common neighbour rule
+                                                if ~isnan( K_ee)
+                                                    [  K_ee ] = shuffle_K_common_neighbour(  K_ee, I_ee, J_ee, cn_scale_weight );
+                                                end
+                                                K_ee_mean = mean(K_ee);
+                                                EE_input = full(sum(sparse(I_ee,J_ee,K_ee),1));
+                                                
+                                                D = rand(size(I_ee))*delay;
+                                                writeChemicalConnection(FID_syn, Type_mat(1, 1),  1, 1,   I_ee,J_ee,K_ee,D);
+                                                clear I J K D;
+                                                
+                                                [~,ind_sorted] = sort(in_degree);
+                                                sample_neuron = ind_sorted(1:250:end);
+                                                
+                                                %%%%%%%%%%%%%%%%%%%%%%
+                                                [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );
+                                                D = rand(size(I))*delay;
+                                                K = zeros(size(J));
+                                                for i_E = 1:N(1)
+                                                    K(J==i_E) = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
+                                                end
+                                                writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                clear I J K D;
+                                                
+                                                %%%%%%%%%%%%%%%%%%%%%%
+                                                [ I,J ] = Lattice2Lattice( Lattice_E, Lattice_I, hw, tau_E, P_mat(1,2) );
+                                                D = rand(size(I))*delay;
+                                                K = ones(size(I))*K_mat(1,2);
+                                                writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                clear I J K D;
+                                                
+                                                %%%%%%%%%%%%%%%%%%%%%%
+                                                [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_I, hw, tau_c_I, P_mat(2,2) );
+                                                D = rand(size(I))*delay;
+                                                K = ones(size(I))*K_mat(2,2);
+                                                writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                clear I J K D;
+                                                
                                                 
                                                 %%%%%%% data sampling
                                                 sample_pop = 1;
@@ -172,53 +214,9 @@ for SpikeFreqAapt = [0 1]
                                                     writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                 end
                                                 writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
-                                                
                                                 writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
+
                                                 
-                                                %%%%%%% random initial condition settings (int pop_ind, double p_fire)
-                                                p_fire = [0.1 0.00]; % between [0,1], 0.05
-                                                writeInitV(FID, p_fire);
-                                                
-                                                %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
-                                                % type(1:AMAP, 2:GABAa, 3:NMDA)
-                                                
-                                                
-                                                
-                                                for i_pre = 1:Num_pop
-                                                    for j_post = 1:Num_pop
-                                                        if i_pre == 1 && j_post == 1
-                                                            I = I_ee;
-                                                            J = J_ee;
-                                                        elseif i_pre == j_post % no self-connection!!!!!!!!
-                                                            [I, J, ~] = find(MyRandomGraphGenerator('E_R', ...
-                                                                'N', N(i_pre), 'p', P_mat(i_pre, j_post) ));
-                                                        else
-                                                            [I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post', ...
-                                                                'N_pre', N(i_pre),'N_post', N(j_post), 'p', P_mat(i_pre, j_post) ));
-                                                        end
-                                                        
-                                                        if i_pre == 1 && j_post == 1 % E to E
-                                                            EE_input = full(sum(sparse(I_ee,J_ee,K_ee),1));
-                                                            K = K_ee;
-                                                            
-                                                        elseif i_pre == 2 && j_post == 1 % I to E
-                                                            K = zeros(size(J));
-                                                            for i_E = 1:N(1)
-                                                                K(J==i_E) = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
-                                                            end
-                                                            
-                                                        else
-                                                            K = ones(size(I))*K_mat(i_pre,j_post);
-                                                        end
-                                                        D = rand(size(I))*delay;
-                                                        writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
-                                                        clear I J K D;
-                                                    end
-                                                end
-                                                if STD_on == 1
-                                                    % writeSTD(FID, 1, 1, 5*sec);
-                                                    writeSTD(FID, 1, 1, 1);
-                                                end
                                                 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                 % Record explanatory variables, also called "controlled variables"
                                                 
@@ -235,7 +233,7 @@ for SpikeFreqAapt = [0 1]
                                                     'P0_init', P0_init, ...
                                                     'degree_CV', degree_CV,...
                                                     'in_out_r', in_out_r, ...
-                                                    'tau_c', tau_c, ...
+                                                    'tau_c', tau_c_E, ...
                                                     'STD_on', STD_on, ...
                                                     'cn_scale_wire', cn_scale_wire, ...
                                                     'cn_scale_weight', cn_scale_weight, ...

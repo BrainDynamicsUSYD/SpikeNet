@@ -1,4 +1,4 @@
-function [dist] = lattice_nD_find_dist(Lattice, hw, i)
+function [dist] = lattice_nD_find_dist(Lattice, hw, p0)
     % dist(j) is the Euclidean distance between node i and node j in the Lattice
     % Lattice
     %
@@ -6,10 +6,11 @@ function [dist] = lattice_nD_find_dist(Lattice, hw, i)
     %
     % the boundary condition is periodic
     %
+    % p0 is the coordinates (x,y) of any point (not necessarily on the lattice)
     [N, D] = size(Lattice);
     dist = zeros(N,1);
     for d = 1:D
-        Xd = mod(Lattice(:,d)-Lattice(i,d)+hw, 2*hw+1) - hw; % periodic boundary condition
+        Xd = mod(Lattice(:,d)-p0(d)+hw, 2*hw+1) - hw; % periodic boundary condition
         dist = dist + Xd.^2;
     end
     dist = dist.^0.5; % Euclidean distance
