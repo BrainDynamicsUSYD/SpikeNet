@@ -1,5 +1,4 @@
-
-function main_heterogeneous_search(varargin)
+function main_heterogeneous_finite_I_search(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -9,7 +8,7 @@ function main_heterogeneous_search(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 100*sec; % use 10 second!
+step_tot = 2*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -18,7 +17,21 @@ tau_ref = 4;
 delay = 4;
 
 
-P0_init = 0.1;
+P0_init = 0.05;
+
+P_mat = [P0_init 0.1;
+    0.1  0.2];
+
+% sptially embedded network
+hw = 44; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
+N_e = (hw*2+1)^2; %
+
+N_i = 2000;
+N = [N_e, N_i];
+Num_pop = length(N);
+Type_mat = ones(Num_pop);
+Type_mat(end, :) = 2;
+
 
 % parameter
 for SpikeFreqAapt = [0 1]
@@ -61,7 +74,7 @@ for SpikeFreqAapt = [0 1]
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
-                                        for rate_ext = [0.2 0.2 0.4 0.4 0.6 0.6 0.8 0.8 ];
+                                        for rate_ext = [0.05 0.1 0.15 0.2];
                                             for  tau_c = [10]
                                                 loop_num = loop_num + 1;
                                                 
@@ -78,19 +91,9 @@ for SpikeFreqAapt = [0 1]
                                                 
                                                 K_mat = [NaN  g_IE;
                                                     g_EI  g_II]; % miuSiemens
-                                                P_mat = [P0_init 0.2;
-                                                    0.2  0.2];
+
                                                 
-                                                % sptially embedded network
-                                                hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=49 gives 9801
-                                                N_e = (hw*2+1)^2;
-                                                
-                                                N_i = 1000;
-                                                N = [N_e, N_i];
-                                                Num_pop = length(N);
-                                                Type_mat = ones(Num_pop);
-                                                Type_mat(end, :) = 2;
-                                                
+ 
                                                 if SpikeFreqAapt == 1
                                                     writeSpikeFreqAdpt(FID, 1);
                                                 end
