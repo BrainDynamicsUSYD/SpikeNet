@@ -183,21 +183,21 @@ for SpikeFreqAapt = [1]
                                                     for i_E = 1:N(1)
                                                         K(J==i_E) = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
                                                     end
-                                                    writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                    writeChemicalConnection(FID_syn, Type_mat(2, 1),  2, 1,   I,J,K,D);
                                                     clear I J K D;
                                                     
                                                     %%%%%%%%%%%%%%%%%%%%%%
                                                     [ I,J ] = Lattice2Lattice( Lattice_E, Lattice_I, hw, tau_c_E, P_mat(1,2) );
                                                     D = rand(size(I))*delay;
                                                     K = ones(size(I))*K_mat(1,2);
-                                                    writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                    writeChemicalConnection(FID_syn, Type_mat(1, 2),  1, 2,   I,J,K,D);
                                                     clear I J K D;
                                                     
                                                     %%%%%%%%%%%%%%%%%%%%%%
                                                     [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_I, hw, tau_c_I, P_mat(2,2) );
                                                     D = rand(size(I))*delay;
                                                     K = ones(size(I))*K_mat(2,2);
-                                                    writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                    writeChemicalConnection(FID_syn, Type_mat(2, 2),  2, 2,   I,J,K,D);
                                                     clear I J K D;
                                                     
                                                     
