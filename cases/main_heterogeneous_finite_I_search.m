@@ -12,7 +12,7 @@ step_tot = 2*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
-loop_num = 0;
+loop_num = 22;
 tau_ref = 4;
 delay = 4;
 
@@ -20,7 +20,7 @@ delay = 4;
 P0_init = 0.05;
 
 P_mat = [P0_init 0.1;
-    0.1  0.2];
+            0.1  0.2];
 
 % sptially embedded network
 hw = 44; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
@@ -74,7 +74,7 @@ for SpikeFreqAapt = [1]
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
-                                        for rate_ext = [ 0.1 0.2 0.3 0.4];
+                                        for rate_ext = [1.6:0.1:2.5];
                                             for  tau_c_E = [10]
                                                 for tau_c_I = 20
                                                     loop_num = loop_num + 1;

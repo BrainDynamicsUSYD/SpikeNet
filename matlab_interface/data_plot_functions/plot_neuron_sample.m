@@ -52,7 +52,7 @@ if nargin == 2
         I_K = zeros(1,step_tot);
         for t = 1:(step_tot-1)
             % update_spikes
-            if ref_tmp == 0 && V_new(t) >= V_th
+            if ref_tmp == 0 && (V_new(t) >= V_th || (t == 1 && spikes(1) == 1))
                 ref_tmp = tau_steps;
                 spikes_new = [spikes_new t];
                 g_K(t) = g_K(t) + dg_K;
