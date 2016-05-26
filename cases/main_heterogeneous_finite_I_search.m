@@ -8,11 +8,11 @@ function main_heterogeneous_finite_I_search(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 2*sec; % use 10 second!
+step_tot = 200*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
-loop_num = 22;
+loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
@@ -34,7 +34,7 @@ Type_mat(end, :) = 2;
 
 
 % parameter
-for SpikeFreqAapt = [1]
+for SpikeFreqAapt = [0 1]
     for in_out_r = [0.2 ];
         for cn_scale_wire = [2 ];
             for cn_scale_weight = [2 ];
@@ -70,13 +70,13 @@ for SpikeFreqAapt = [1]
                             %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                             
                             
-                            for g_EI = [ 14 18]*10^-3
+                            for g_EI = [ 11 12 ]*10^-3
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
                                         for rate_ext = [1.6:0.1:2.5];
-                                            for  tau_c_E = [10]
-                                                for tau_c_I = 20
+                                            for  tau_c_E = [8 10]
+                                                for tau_c_I = [15 20]
                                                     loop_num = loop_num + 1;
                                                     
                                                     % For PBS array job
@@ -181,8 +181,10 @@ for SpikeFreqAapt = [1]
                                                     D = rand(size(I))*delay;
                                                     K = zeros(size(J));
                                                     for i_E = 1:N(1)
-                                                        K(J==i_E) = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
+                                                        mu_K_tmp = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
+                                                        K(J==i_E) = abs(randn([1 sum(J==i_E)])*(mu_K_tmp/4) + mu_K_tmp); % this is a bit too arbitary!
                                                     end
+                                                    % K = ones(size(I))*K_mat(2,1);
                                                     writeChemicalConnection(FID_syn, Type_mat(2, 1),  2, 1,   I,J,K,D);
                                                     clear I J K D;
                                                     
