@@ -26,14 +26,15 @@ function PostPostProcessYG(stdin)
  save_fig = -1;
  for i = 1:num_files
      fprintf('Loading RYG.mat file %s...\n', files{i});
-     R_temp = load(files{i});
+     R_temp = load(files{i},'reduced','N');
      
      disp('Loading done.');
      %%%%%%% do something here
      % R = ClusterYG({R_temp},save_fig);
-     R_temp = cluster_sorted_rate(R_temp);
+     % R_temp = cluster_sorted_rate(R_temp);
      % R_temp = R{1};
-     save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
+     R_temp = get_stPR(R_temp);
+     save(files{i},'-struct', 'R_temp', '-v7.3','-append'); % -v7.3 for >2GB
      %%%%%%% visualise results
      % RasterYG(R, save_fig);
      % ClusterYG(R,save_fig);

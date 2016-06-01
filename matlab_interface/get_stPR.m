@@ -75,15 +75,15 @@ for i = 1:sample_num
 end
 
 R.stPR.sample_ind = sample_ind;
-R.stPR.stPR_full = stPR; %in Hz
+R.stPR.stPR_full = stPR'; %in Hz
 R.stPR.lags = lags*dt/1000; % sec
 R.stPR.kernel_width = kernel_width; %ms
 R.stPR.kernel_type = kernel_type;
 R.stPR.c = stPR(:,lagNum+1); % size at zero time lag
 
-R.stPR.stPR_full_shuffle =  stPR_shuffle;
+R.stPR.stPR_full_shuffle =  stPR_shuffle';
 R.stPR.c_shuffle =  stPR_shuffle(:,lagNum+1);
-R.stPR.c_norm = R.stPR.c/median(R.stPR.c_shuffle); % normlize by the median value from shuffled data
+R.stPR.c_norm = R.stPR.c/nanmedian(R.stPR.c_shuffle); % normlize by the median value from shuffled data
 
 end
 

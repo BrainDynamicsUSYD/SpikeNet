@@ -8,21 +8,25 @@ spike_hist = R.reduced.spike_hist{1};
 dt = R.reduced.dt;
 step_tot = R.reduced.step_tot;
 
-figure(1);
-set(gcf, 'color','w');
+
+if isempty(findall(0,'Type','Figure'))
+    figure('NumberTitle','Off','Name','Movie');
+    set(gcf, 'color','w');
+end
+
 xlim([-hw hw])
 ylim([-hw hw])
 box on;
 hold on;
 h1 = plot(0, 0, 'rx');
 
-t_bin = 5;
+t_bin = 2;
 for t = 1:t_bin:(step_tot-t_bin)
     [spikes_t, ~, ~] = find(spike_hist(:,t:(t+t_bin)));
     
     delete(h1);
     h1 = plot(Lattice(spikes_t,1), Lattice(spikes_t,2), 'rx');
-    pause(0.01);
+    pause(0.05);
     
     xlabel([num2str(t*dt/1000),' sec']);
     
