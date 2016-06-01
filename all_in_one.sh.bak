@@ -2,7 +2,7 @@
 #PBS -N all_in_one
 ##PBS -q yossarian
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=11:59:59
+#PBS -l walltime=111:59:59
 #PBS -l mem=1500MB
 #PBS -V
 #PBS -e PBSout/one_err_av
@@ -11,16 +11,18 @@
 
 set -x
 cd "$PBS_O_WORKDIR"
-DATA_DIR="STD_on_off_200sec"
-MATLAB_MAIN_FUNC="main_cc_embed_search_STD_2"
+DATA_DIR="tmp_data"
+MATLAB_PRE_PROCESS_FUNC="main_heterogeneous_finite_I_search"
 CPP_MAIN_FUNC="simulator"
+MATLAB_POST_PROCESS_FUNC="PostProcessYG"
+MATLAB_SOURCE_PATH='source2'
 
 # copy this script to data directory
 me=`basename $0`;
 THIS_FILE=$(echo ${me});
 cp ${THIS_FILE} ${DATA_DIR}/${THIS_FILE}.log;
 # copy the matlab main function to data directory
-mfile=`find . -name "${MATLAB_MAIN_FUNC}.m"`;
+mfile=`find . -name "${MATLAB_PRE_PROCESS_FUNC}.m"`;
 MATLAB_FILE=$(echo ${mfile});
 MATLAB_FILENAME=`basename ${mfile}`;
 cp ${MATLAB_FILE} ${DATA_DIR}/${MATLAB_FILENAME}.log;
@@ -48,20 +50,20 @@ elif [ "${ygoutdone}" == "1" ]; then
 	echo ${ID} has been processed till ygout;
 	INPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout); # Simulate and output .ygout file
 	echo "BASH INPUTFILE=${INPUTFILE}" # Note that echo actually does some processing!
-	matlab  -r "addpath(genpath(cd)), PostProcessYG('${INPUTFILE}'), exit"
+	matlab -nodisplay  -r "addpath(genpath(${MATLAB_SOURCE_PATH})), ${MATLAB_POST_PROCESS_FUNC}('${INPUTFILE}'), exit"
 else
 	echo  ${ID} has not been processed yet;
 	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
-	matlab  -r "addpath(genpath(cd)), cd('${DATA_DIR}'), ${MATLAB_MAIN_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
+	matlab -nodisplay  -r "addpath(genpath(${MATLAB_SOURCE_PATH})), cd('${DATA_DIR}'), ${MATLAB_PRE_PROCESS_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
 	${CPP_MAIN_FUNC} ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
 	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
 	# double quote here allows the real value of ${var} to be shown, otherwise echo will process it
-	# data post-process in matlab
+	# data post-process in matlab 
 	# double quote "" prevents shell from expanding meta-characters like "*" and "?"
 	# single quote '' prevents almost anything from happening to the text
 	# back quote `` means command substitution
-	matlab  -r "addpath(genpath(cd)), PostProcessYG('${OUTPUTFILE}'), exit"
+	matlab -nodisplay  -r "addpath(genpath(${MATLAB_SOURCE_PATH})), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 	# the single quote here is for matlab to recognize string
 	# the double quote here is for shell to expand macros.
 fi 

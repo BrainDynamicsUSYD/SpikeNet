@@ -125,7 +125,7 @@ for SpikeFreqAapt = [0 1]
                                                     
                                                     % write runaway killer
                                                     min_ms = 500; % 5 sec
-                                                    runaway_Hz = 100; % ??
+                                                    runaway_Hz = 40; % ??
                                                     Hz_ms = 200; % ms
                                                     writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
                                                     

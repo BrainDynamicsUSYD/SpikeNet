@@ -8,8 +8,12 @@ spike_hist = R.reduced.spike_hist{1};
 dt = R.reduced.dt;
 step_tot = R.reduced.step_tot;
 
-figure(1);
-set(gcf, 'color','w');
+
+if isempty(findall(0,'Type','Figure'))
+    figure('NumberTitle','Off','Name','Movie');
+    set(gcf, 'color','w');
+end
+
 xlim([-hw hw])
 ylim([-hw hw])
 box on;
