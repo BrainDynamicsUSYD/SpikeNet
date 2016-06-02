@@ -3,7 +3,6 @@
 #include <vector>
 #include <random> // <boost/random.hpp>
 #include <string> // "" for string, '' for char
-
 #include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
 #include <fstream> // fstream : Stream class to both read and write from / to files
 class NeuronNetwork; //forward declaration, better than #include "NeuronNetwork.h", if you do not need to access the internal of the class
@@ -16,8 +15,7 @@ using namespace std;
 // Two types of synapses are supported:
 // 1) chemical synapses, both excitatory and inhibitory, conductance-based, with transmission delay, post-synaptic conductance described by alpha-function
 // 2) electrical synapses (the most common type is modelled, i.e., gap junction)
-class Neurons
-{
+class Neurons{
 public:
 	Neurons(); //default constructor
 	Neurons(int pop_ind, int N_input, double dt_input, int step_tot, char delim, char indicator); // parameterised constructor
