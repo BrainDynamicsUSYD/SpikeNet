@@ -8,7 +8,6 @@ int main(int argc, char* argv[]){// arguments should be input file path
 		SimulatorInterface simulator;
 		if (simulator.import(argv[i])){ // return true if import is successful
 			simulator.simulate();
-			simulator.output_results();
 			cout << "Input file No." << i << " out of " << argc-1 << " processed." << endl;
 		}
 	}

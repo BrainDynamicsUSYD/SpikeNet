@@ -14,12 +14,14 @@
 #include <functional> // for bind(), plus
 // no need to include what have been included in the header file
 
-Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_input){
+Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_input, char delim_input, char indicator_input){
 
 	pop_ind = pop_ind_input;
 	N = N_input;
 	dt = dt_input;
 	step_tot = step_tot_input; // this parameter is designed to be self-adapting (step_killed), so should be any other stuff that relies on it!!
+	delim = delim_input;
+	indicator = delim_input;
 	
 	// Using consistant units: msec+mV+nF+miuS+nA
 	// Initialise default parameters
@@ -106,7 +108,7 @@ void Neurons::start_stats_record(){
 }
 
 
-void Neurons::set_para(string para_str, char delim){
+void Neurons::set_para(string para_str){
 	if (!para_str.empty()){
 		istringstream para(para_str);
 		string para_name, para_value_str, line_str; 
@@ -129,7 +131,7 @@ void Neurons::set_para(string para_str, char delim){
 	init();
 }
 
-string Neurons::dump_para(char delim){
+string Neurons::dump_para(){
 	stringstream dump;
 	dump << "Cm" << delim << Cm << delim << endl;
 	dump << "tau_ref" << delim << tau_ref << delim << endl;
@@ -262,8 +264,9 @@ void Neurons::update_V(int step_current){
 
 
 
-	// Data sampling
-	sample_data(step_current); // this must be here
+	// Data sampling, which must be done here!
+	// sample_data(step_current);  // this is deprecated due to poor memory performance
+	output_sampled_data_real_time(step_current);
 	// we want to sample the V[] before it's updated!
 
 
@@ -284,6 +287,25 @@ void Neurons::update_V(int step_current){
 
 	// record mean and std of membrane potentials
 	record_stats(step_current);
+	
+}
+
+
+void Neurons::add_sampling_real_time(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input, string samp_file_name_input){
+	sample_neurons = sample_neurons_input;
+	sample_type = sample_type_input;
+	sample_time_points = sample_time_points_input;
+	
+	samp_file_name = samp_file_name_input.append(to_string(pop_ind)).append(".ygout_samp");
+	samp_file.open(samp_file_name);
+			
+	// initialise
+	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
+	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
+		if (sample_time_points[i]){
+			sample_time_points_tot += 1;
+		}
+	}
 	
 }
 
@@ -392,20 +414,54 @@ void Neurons::runaway_check(int step_current){
 	}
 }
 
+void Neurons::output_sampled_data_real_time(int step_current){
+	
+	if (!sample_neurons.empty() && step_current == 0){
+		int sample_step_number = 0;
+		for (int tt = 0; tt < step_tot; ++tt){
+			if (sample_time_points[tt]){sample_step_number += 1;}
+		}
+		samp_file << indicator << " POPD006" << endl;
+		samp_file << pop_ind << delim << int(sample_neurons.size())*sample_step_number << delim << endl;
+  		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
+		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
+			if (sample_type[tt]){samp_file << data_types[tt] << delim; }
+		}
+		samp_file << endl;
+	}
+	
+	if (!sample_neurons.empty()){
+		if (sample_time_points[step_current]){ // push_back is amazing
+			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample_neurons[i];
+				if (sample_type[0]){samp_file << V[ind_temp] << delim;}
+				if (sample_type[1]){samp_file << I_leak[ind_temp] << delim;}
+				if (sample_type[2]){samp_file << I_AMPA[ind_temp] << delim;}
+				if (sample_type[3]){samp_file << I_GABA[ind_temp] << delim;}
+				if (sample_type[4]){samp_file << I_NMDA[ind_temp] << delim;}
+				if (sample_type[5]){samp_file << I_GJ[ind_temp] << delim;}
+				if (sample_type[6]){samp_file << I_ext[ind_temp] << delim;}
+				if (sample_type[7]){samp_file << I_K[ind_temp] << delim;}
+				samp_file << endl;
+			}
+		}
+	}
+	
+	
+}
 
-
-void Neurons::output_results(ofstream& output_file, char delim, char indicator){
+void Neurons::output_results(ofstream& output_file){
 
 	// POPD001 # spike history of neuron population
 	output_file << indicator << " POPD001" << endl;
 	output_file << pop_ind << delim << endl;
-	write2file(output_file, delim, spike_hist_tot);
-	write2file(output_file, delim, num_spikes_pop);
-	write2file(output_file, delim, num_ref_pop);
+	write2file(output_file, spike_hist_tot);
+	write2file(output_file, num_spikes_pop);
+	write2file(output_file, num_ref_pop);
 
 	// POPD002 # neuron parameters in the population
 	stringstream dump_count;
-	string para_str = dump_para(delim);
+	string para_str = dump_para();
 	dump_count << para_str;
 	string str_temp;
 	int var_number = 0;
@@ -418,20 +474,26 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 	if (stats_record){
 		output_file << indicator << " POPD003" << endl;
 		output_file << pop_ind << delim << endl;
-		write2file(output_file, delim, V_mean);
-		write2file(output_file, delim, V_std);
-		write2file(output_file, delim, I_input_mean);
-		write2file(output_file, delim, I_input_std);
+		write2file(output_file, V_mean);
+		write2file(output_file, V_std);
+		write2file(output_file, I_input_mean);
+		write2file(output_file, I_input_std);
 	}
 	
 	// POPD005 # E-I ratio for each neuron
 	if (stats_record){
 		output_file << indicator << " POPD005" << endl;
 		output_file << pop_ind << delim << endl;
-		write2file(output_file, delim, IE_ratio);
+		write2file(output_file, IE_ratio);
 	}
 	
+	// SAMF001 # sampled data file name
+	if (!samp_file_name.empty()){
+		output_file << indicator << " SAMF001" << endl;
+		output_file << samp_file_name << endl;
+	}
 
+	/* // This following output protocol is deprecated due to poor memeory performance
 	// POPD004 # sampled neuron data
 	if (!sample_neurons.empty()){
 		output_file << indicator << " POPD004" << endl;
@@ -446,10 +508,11 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 
 		for (unsigned int c = 0; c < sample_type.size(); ++c){
 			if (!sample[c].empty()){
-				Neurons::write2file(output_file, delim, sample[c]); // 2D matrix
+				Neurons::write2file(output_file, sample[c]); // 2D matrix
 			}
 		}
 	}
+	*/
 
 }
 
@@ -457,7 +520,7 @@ void Neurons::output_results(ofstream& output_file, char delim, char indicator){
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
 // In this case, just save yourself the trouble and use overloading.
-void Neurons::write2file(ofstream& output_file, char delim, vector< vector<int> >& v){
+void Neurons::write2file(ofstream& output_file,  vector< vector<int> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -472,7 +535,7 @@ void Neurons::write2file(ofstream& output_file, char delim, vector< vector<int> 
 
 
 
-void Neurons::write2file(ofstream& output_file, char delim, vector< vector<double> >& v){
+void Neurons::write2file(ofstream& output_file, vector< vector<double> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -486,7 +549,7 @@ void Neurons::write2file(ofstream& output_file, char delim, vector< vector<doubl
 }
 
 
-void Neurons::write2file(ofstream& output_file, char delim, vector<int>& v){
+void Neurons::write2file(ofstream& output_file, vector<int>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -499,7 +562,7 @@ void Neurons::write2file(ofstream& output_file, char delim, vector<int>& v){
 
 
 
-void Neurons::write2file(ofstream& output_file, char delim, vector<double>& v){
+void Neurons::write2file(ofstream& output_file, vector<double>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){

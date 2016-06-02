@@ -14,7 +14,7 @@ using namespace std;
 class ChemicalSynapses{
 public:
 	ChemicalSynapses(); // default constructor
-	ChemicalSynapses(double dt, int step_tot); // parameterised constructor
+	ChemicalSynapses(double dt, int step_tot, char delim, char indicator); // parameterised constructor
 	friend class NeuronNetwork; // Let NeuronNetwork access its private members
 	friend class SimulatorInterface;
 
@@ -23,11 +23,14 @@ public:
 	void init(int synapses_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, int ia, int ib); // initialise chemical synapses for simulating external Poissonian neuron population
 	// [ia,ib] specifies the neuron index range in post population to receive the external stimulation 
 
+	char delim;
+	char indicator;
+		
 
 	void init();
-	void set_para(string para_str, char delim);
-	string dump_para(char delim); // dump all the parameter values used
-	void output_results(ofstream& output_file, char delim, char indicator);
+	void set_para(string para_str);
+	string dump_para(); // dump all the parameter values used
+	void output_results(ofstream& output_file);
 
 	void recv_pop_data(vector<Neurons> &NeuronPopArray);
 	void update(int step_current);
@@ -39,10 +42,10 @@ public:
 	void sample_data(int step_current);
 
 
-	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
-	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
-	void write2file(ofstream& output_file, char delim, vector<int>& v);
-	void write2file(ofstream& output_file, char delim, vector<double>& v);
+	void write2file(ofstream& output_file, vector< vector<int> >& v);
+	void write2file(ofstream& output_file, vector< vector<double> >& v);
+	void write2file(ofstream& output_file, vector<int>& v);
+	void write2file(ofstream& output_file, vector<double>& v);
 	
 	void start_stats_record();
 	void record_stats(); //

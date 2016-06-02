@@ -10,14 +10,18 @@
 
 using namespace std;
 
-NeuronNetwork::NeuronNetwork(vector<int> N_array_input, double dt_input, int step_tot_input){
+NeuronNetwork::NeuronNetwork(vector<int> N_array_input, double dt_input, int step_tot_input, char delim_input, char indicator_input){
 
 	N_array = N_array_input;
 	dt = dt_input;
-	step_tot = step_tot_input;	Num_pop = N_array.size();
-
+	step_tot = step_tot_input;
+	delim = delim_input;
+	indicator = delim_input;
+	Num_pop = N_array.size();
 	runaway_killed = false;
 	step_killed = -1;
+	
+	
 };
 
 
@@ -80,6 +84,26 @@ void NeuronNetwork::update(int step_current){
 
 }
 
+void NeuronNetwork::output_results(ofstream& output_file){
+
+	// write data
+	cout << "Outputting results into file..." << endl;
+	
+	// KILL002 # step at which runaway activity is killed
+	output_file << indicator << " KILL002" << endl;
+	output_file << step_killed << delim << endl;
+
+	// dump population data
+	for (int i = 0; i < Num_pop; i++){
+		NeuronPopArray[i].output_results(output_file);
+	}
+
+	// dump synapse data
+	for (unsigned int i = 0; i < ChemicalSynapsesArray.size(); i++){
+		ChemicalSynapsesArray[i].output_results(output_file);
+	}
+	
+}
 
 
 

@@ -6,10 +6,12 @@
 
 #include "ChemicalSynapses.h"
 
-ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input){
+ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input, char delim_input, char indicator_input){
 	
 	dt = dt_input;
 	step_tot = step_tot_input;
+	delim = delim_input;
+	indicator = delim_input;
 	
 	// Default parameters
 	V_ex = 0.0;     // Excitatory reversal, 0.0
@@ -402,7 +404,7 @@ void ChemicalSynapses::sample_data(int step_current){
 
 
 
-void ChemicalSynapses::set_para(string para_str, char delim){
+void ChemicalSynapses::set_para(string para_str){
 	if (!para_str.empty()){
 		istringstream para(para_str);
 		string para_name, para_value_str, line_str; 
@@ -428,7 +430,7 @@ void ChemicalSynapses::set_para(string para_str, char delim){
 }
 
 
-string ChemicalSynapses::dump_para(char delim){
+string ChemicalSynapses::dump_para(){
 	stringstream dump;
 
 
@@ -464,11 +466,11 @@ void ChemicalSynapses::start_stats_record(){
 }
 
 
-void ChemicalSynapses::output_results(ofstream& output_file, char delim, char indicator){
+void ChemicalSynapses::output_results(ofstream& output_file){
 	// SYND001 # synapse parameters
 	// count number of variables
 	stringstream dump_count;
-	string para_str = dump_para(delim);
+	string para_str = dump_para();
 	dump_count << para_str;
 	string str_temp;
 	int var_number = 0;
@@ -482,7 +484,7 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 	if (!sample_neurons.empty()){
 		output_file << indicator << " SYND002" << endl;
 		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << sample_neurons.size() << delim << endl;
-		write2file(output_file, delim, sample); // 2D matrix
+		write2file(output_file, sample); // 2D matrix
 	}
 
 	
@@ -490,15 +492,15 @@ void ChemicalSynapses::output_results(ofstream& output_file, char delim, char in
 	if (stats_record){
 		output_file << indicator << " SYND003" << endl;
 		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
-		write2file(output_file, delim, I_mean);
-		write2file(output_file, delim, I_std);
+		write2file(output_file, I_mean);
+		write2file(output_file, I_std);
 	}
 	
 	// tmp data
 	if (tmp_data.size() != 0){
 		output_file << indicator << " SYND004" << endl;
 		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << tmp_data.size() << delim << endl;
-		write2file(output_file, delim, tmp_data);	
+		write2file(output_file, tmp_data);	
 	}
 }
 
@@ -548,7 +550,7 @@ void ChemicalSynapses::send_pop_data(vector<Neurons> &NeuronPopArray){
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
 // In this case, just save yourself the trouble and use overloading.
-void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector< vector<int> >& v){
+void ChemicalSynapses::write2file(ofstream& output_file, vector< vector<int> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -563,7 +565,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector< vec
 
 
 
-void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector< vector<double> >& v){
+void ChemicalSynapses::write2file(ofstream& output_file, vector< vector<double> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -577,7 +579,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector< vec
 }
 
 
-void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<int>& v){
+void ChemicalSynapses::write2file(ofstream& output_file, vector<int>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -588,7 +590,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<int>
 	else {output_file << " " << endl;}
 }
 
-void ChemicalSynapses::write2file(ofstream& output_file, char delim, vector<double>& v){
+void ChemicalSynapses::write2file(ofstream& output_file, vector<double>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){

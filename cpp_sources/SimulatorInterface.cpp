@@ -11,6 +11,7 @@ SimulatorInterface::SimulatorInterface(){
 	delim = ',';
 	indicator = '>';
 	commentor = '#';
+	
 }
 
 bool SimulatorInterface::import(string in_filename_input){
@@ -347,15 +348,16 @@ bool SimulatorInterface::import(string in_filename_input){
 	inputfile.close();
 	inputfile.clear();
 
+	out_filename = gen_out_filename();
 
 
 	// build NeuronNetwork based on data imported
-	network = NeuronNetwork(N_array, dt, step_tot);
+	network = NeuronNetwork(N_array, dt, step_tot, delim, indicator);
 	cout << "\t Network created." << endl;
 	cout << "\t Initialising neuron populations...";
 	for (unsigned int ind = 0; ind < N_array.size(); ++ind){
-		network.NeuronPopArray.push_back(Neurons(ind, N_array[ind], network.dt, network.step_tot));
-		network.NeuronPopArray.back().set_para(pop_para[ind], delim);
+		network.NeuronPopArray.push_back(Neurons(ind, N_array[ind], network.dt, network.step_tot, delim, indicator));
+		network.NeuronPopArray.back().set_para(pop_para[ind]);
 		cout << ind+1 << "...";
 	}
 	cout << "done." << endl;
@@ -367,9 +369,9 @@ bool SimulatorInterface::import(string in_filename_input){
 			int type = IJKD_chem_info[ind][0];
 			int i_pre = IJKD_chem_info[ind][1];
 			int j_post = IJKD_chem_info[ind][2];
-			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot));
+			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
 			network.ChemicalSynapsesArray.back().init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I_temp[ind], J_temp[ind], K_temp[ind], D_temp[ind]);
-			network.ChemicalSynapsesArray.back().set_para(syn_para, delim);
+			network.ChemicalSynapsesArray.back().set_para(syn_para);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -386,9 +388,9 @@ bool SimulatorInterface::import(string in_filename_input){
 			int Num_ext = int(ext_spike_settings[ind][3]);
 			int ia = int(ext_spike_settings[ind][4]);
 			int ib = int(ext_spike_settings[ind][5]);
-			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot));
+			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
 			network.ChemicalSynapsesArray.back().init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ia, ib);
-			network.ChemicalSynapsesArray.back().set_para(syn_para, delim);
+			network.ChemicalSynapsesArray.back().set_para(syn_para);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -494,7 +496,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Neuron data sampling settings...";
 		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
 			int pop_ind = neuron_sample_pop_ind[ind];
-			network.NeuronPopArray[pop_ind].add_sampling(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind]);
+			network.NeuronPopArray[pop_ind].add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -566,10 +568,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		}
 		cout << "done." << endl;
 	}	
-
-
-
-
+	
 	// initialise runaway-killer
 	if (runaway_killer_setting.size() != 0){
 		cout << "\t Runaway killer licensing for pop...";
@@ -588,48 +587,29 @@ bool SimulatorInterface::import(string in_filename_input){
 }
 
 void SimulatorInterface::simulate(){
+
 	// simulate
 	for (int i = 0; i < network.step_tot; ++i){
 		network.update(i);
 	}
 	cout << "Simulation done." << endl;
-}
-
-void SimulatorInterface::output_results(){
-
-
-	// creat output file
-	out_filename = gen_out_filename();
-	output_file.open(out_filename);
 	
-	
-	// write data
-	cout << "Outputting results into file..." << endl;
-	
-	// KILL002 # step at which runaway activity is killed
-	output_file << indicator << " KILL002" << endl;
-	output_file << network.step_killed << delim << endl;
-
-	// dump population data
-	for (int i = 0; i < network.Num_pop; i++){
-		network.NeuronPopArray[i].output_results(output_file, delim, indicator);
-	}
-
-	// dump synapse data
-	for (unsigned int i = 0; i < network.ChemicalSynapsesArray.size(); i++){
-		network.ChemicalSynapsesArray[i].output_results(output_file, delim, indicator);
-	}
-
+	// output results
+	ofstream output_file;
+	output_file.open(out_filename.append(output_suffix));
+	network.output_results(output_file);
 	// attach input file (.ygin) to the output file for data completeness
  	ifstream in_file_attach( in_filename ) ;
-        output_file << in_file_attach.rdbuf() ;
-
+    output_file << in_file_attach.rdbuf() ;
+		
 
 	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
 	// Write data file name to stdout and use "grep ygout" to extract it!
 	cout << "Data file name is: " << endl;
-	cout << "	" << out_filename << endl;
+	cout << "	" << out_filename.append(output_suffix) << endl;
+		
 }
+
 
 
 
@@ -645,7 +625,7 @@ string SimulatorInterface::gen_out_filename(){
 	chrono::milliseconds tse_ms = chrono::duration_cast<chrono::milliseconds>(tse);
 	unsigned long long time_stamp = tse_ms.count(); // ms from epoch, better than "time_t time_stamp = time(0);"
 	// Combine all the parts of the output file path and name
-	convert_temp << in_filename_trim << "_" << time_stamp << output_suffix; // insert the textual representation of 'Number' in the characters in the stream
+	convert_temp << in_filename_trim << "_" << time_stamp; // insert the textual representation of 'Number' in the characters in the stream
 	return convert_temp.str(); // set 'Result' to the contents of the stream
 }
 
@@ -676,17 +656,6 @@ template < typename Type, typename A > void SimulatorInterface::read_next_line_a
 		vec.push_back(entry);
 	}
 
-}
-
-void SimulatorInterface::write2file(vector<int>& v){
-	if (!v.empty()){
-		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
-		for (unsigned int i = 0; i < v.size(); ++i){
-			output_file << v[i] << delim;
-		}
-		output_file << endl;
-	}
-	else {output_file << " " << endl;}
 }
 
 

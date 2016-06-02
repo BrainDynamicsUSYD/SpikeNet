@@ -5,7 +5,7 @@
 #include <string> // "" for string, '' for char
 
 #include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
-
+#include <fstream> // fstream : Stream class to both read and write from / to files
 class NeuronNetwork; //forward declaration, better than #include "NeuronNetwork.h", if you do not need to access the internal of the class
 class ChemicalSynapses;
 // class ElectricalSynapses;
@@ -20,22 +20,25 @@ class Neurons
 {
 public:
 	Neurons(); //default constructor
-	Neurons(int pop_ind, int N_input, double dt_input, int step_tot); // parameterised constructor
+	Neurons(int pop_ind, int N_input, double dt_input, int step_tot, char delim, char indicator); // parameterised constructor
 	friend class NeuronNetwork; // Let NeuronNetwork access its private members
 	friend class ChemicalSynapses; // considers ChemicalSynapses as its friend so that ChemicalSynapses can access its private members.
 	//friend class ElectricalSynapses;
 	friend class SimulatorInterface;
 
 	void init(); // initialise neurons, called by constructor after parameter assignment
-	void set_para(string para, char delim); // set parameters if not using default ones
 
-
-	string dump_para(char delim); // dump all the parameter values used
-	void output_results(ofstream& output_file, char delim, char indicator);
-	void write2file(ofstream& output_file, char delim, vector< vector<int> >& v);
-	void write2file(ofstream& output_file, char delim, vector< vector<double> >& v);
-	void write2file(ofstream& output_file, char delim, vector<int>& v);
-	void write2file(ofstream& output_file, char delim, vector<double>& v);
+	void set_para(string para); // set parameters if not using default ones
+	string dump_para(); // dump all the parameter values used
+	
+	char delim;
+	char indicator;
+	void output_results(ofstream& output_file);
+	void output_sampled_data_real_time(int step_current);
+	void write2file(ofstream& output_file, vector< vector<int> >& v);
+	void write2file(ofstream& output_file, vector< vector<double> >& v);
+	void write2file(ofstream& output_file, vector<int>& v);
+	void write2file(ofstream& output_file, vector<double>& v);
 	
 	void start_stats_record();
 	void record_stats(int step_current); //
@@ -54,8 +57,10 @@ public:
 	void set_gaussian_I_ext(vector<double> mean, vector<double> std);
 	
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_type, vector<bool> sample_time_points); 
-	
-
+	void add_sampling_real_time(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input, string samp_file_name);
+	ofstream samp_file;
+	string samp_file_name;
+		
 	void sample_data(int step_current);
 
 	void init_runaway_killer(double min_ms, double Hz, double Hz_ms); // kill the simulation when runaway activity of the network is detected: 

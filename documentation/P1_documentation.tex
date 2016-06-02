@@ -216,7 +216,7 @@ The output data format is as following.
 	I_input_mean_t1, I_input_mean_t2, ... (1-by-step_tot)
 	I_input_std_t1, I_input_std_t2, ... (1-by-step_tot)
 	
-> POPD004 # sampled neuron data
+> POPD004 # sampled neuron data (deprecated)
 	pop_ind, number_of_sample_neurons,
 	data_name1, ..., data_nameX,
 	data_1 (sampled_neurons-by-sampled_steps matrix),
@@ -232,13 +232,13 @@ The output data format is as following.
 > SAMF001 # sampled data file name
 	path/to/file_name (no comma!)
 
-> POPD006 # sampled neuron data (segmented)
-	pop_ind, number_of_sample_neurons, seg_number
+> POPD006 # sampled neuron data
+	pop_ind, number_of_neurons times number_of_steps
 	data_name1, ..., data_nameX,
-	data_1 (sampled_neurons-by-sampled_steps matrix),
-	data_2 (sampled_neurons-by-sampled_steps matrix),
+	step_1 (sampled_neurons-by-data_types matrix),
+	step_2 (sampled_neurons-by-data_types matrix),
 	...
-	data_X (sampled_neurons-by-sampled_steps matrix),
+	step_X (sampled_neurons-by-data_types matrix),
 	
 > SYND001 # synaptic connection parameters
 	number_of_parameters,
