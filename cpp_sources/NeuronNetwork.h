@@ -22,8 +22,8 @@ public:
 	int step_tot; // total number of simulation steps
 	int Num_pop; // number of populations
 
-	vector<Neurons> NeuronPopArray; // array of neuron populations
-	vector<ChemicalSynapses> ChemicalSynapsesArray; // array of chemical synapses: inter-/intra-population connections
+	vector<Neurons*> NeuronPopArray; // array of neuron populations
+	vector<ChemicalSynapses*> ChemicalSynapsesArray; // array of chemical synapses: inter-/intra-population connections
 	bool runaway_killed;
 	int step_killed; // initialised as -1
 	

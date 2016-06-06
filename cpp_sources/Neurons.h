@@ -56,8 +56,7 @@ public:
 	
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_type, vector<bool> sample_time_points); 
 	void add_sampling_real_time(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input, string samp_file_name);
-	ofstream samp_file;
-	string samp_file_name;
+
 		
 	void sample_data(int step_current);
 
@@ -68,6 +67,9 @@ public:
 	void add_spike_freq_adpt();
 
 protected:
+ofstream samp_file; // someting is wrong here?
+	string samp_file_name;
+	
 	// Space and time
 	int // actually we can use "unsigned int" here
 		pop_ind,

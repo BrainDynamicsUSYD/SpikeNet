@@ -11,7 +11,7 @@ ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input, char del
 	dt = dt_input;
 	step_tot = step_tot_input;
 	delim = delim_input;
-	indicator = delim_input;
+	indicator = indicator_input;
 	
 	// Default parameters
 	V_ex = 0.0;     // Excitatory reversal, 0.0
@@ -506,42 +506,42 @@ void ChemicalSynapses::output_results(ofstream& output_file){
 
 
 
-void ChemicalSynapses::recv_pop_data(vector<Neurons> &NeuronPopArray){
+void ChemicalSynapses::recv_pop_data(vector<Neurons*> &NeuronPopArray){
 	// get current spikes from pre-pop
 	if (pop_ind_pre >= 0){
-		spikes_pre = &(NeuronPopArray[pop_ind_pre].spikes_current); // This might be problematic!!!
-		spikes_post = &(NeuronPopArray[pop_ind_post].spikes_current);
+		spikes_pre = &(NeuronPopArray[pop_ind_pre]->spikes_current); // This might be problematic!!!
+		spikes_post = &(NeuronPopArray[pop_ind_post]->spikes_current);
 	}
 	// get current V from post-pop
-	V_post = &(NeuronPopArray[pop_ind_post].V); // This is problematic!!!
+	V_post = &(NeuronPopArray[pop_ind_post]->V); // This is problematic!!!
 	
 }
 
 
-void ChemicalSynapses::send_pop_data(vector<Neurons> &NeuronPopArray){
+void ChemicalSynapses::send_pop_data(vector<Neurons*> &NeuronPopArray){
 	
 	// send currents to post-pop
 	if (pop_ind_pre == -1){ // if noisy external currents, always send to I_ext regardless of the synapse type
 		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post].I_ext[j] += I[j];
+			NeuronPopArray[pop_ind_post]->I_ext[j] += I[j];
 		}
 	}
 	// AMPA
 	else if (synapses_type == 0){
 		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post].I_AMPA[j] += I[j];
+			NeuronPopArray[pop_ind_post]->I_AMPA[j] += I[j];
 		}
 	}
 	//GABA
 	else if (synapses_type == 1){
 		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post].I_GABA[j] += I[j];
+			NeuronPopArray[pop_ind_post]->I_GABA[j] += I[j];
 		}
 	}
 	//NMDA
 	else if (synapses_type == 2){
 		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post].I_NMDA[j] += I[j];
+			NeuronPopArray[pop_ind_post]->I_NMDA[j] += I[j];
 		}
 	}
 }

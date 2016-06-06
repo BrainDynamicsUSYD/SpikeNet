@@ -21,7 +21,7 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 	dt = dt_input;
 	step_tot = step_tot_input; // this parameter is designed to be self-adapting (step_killed), so should be any other stuff that relies on it!!
 	delim = delim_input;
-	indicator = delim_input;
+	indicator = indicator_input;
 	
 	// Using consistant units: msec+mV+nF+miuS+nA
 	// Initialise default parameters

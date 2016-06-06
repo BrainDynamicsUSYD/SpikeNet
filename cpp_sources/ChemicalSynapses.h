@@ -32,9 +32,9 @@ public:
 	string dump_para(); // dump all the parameter values used
 	void output_results(ofstream& output_file);
 
-	void recv_pop_data(vector<Neurons> &NeuronPopArray);
+	void recv_pop_data(vector<Neurons*> &NeuronPopArray);
 	void update(int step_current);
-	void send_pop_data(vector<Neurons> &NeuronPopArray);
+	void send_pop_data(vector<Neurons*> &NeuronPopArray);
 
 	void add_short_term_depression(int STD_on_step);
 	void add_inh_STDP(int inh_STDP_on_step);

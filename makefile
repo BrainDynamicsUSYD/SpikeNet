@@ -8,7 +8,7 @@ OBJ = main.o Neurons.o NeuronNetwork.o ChemicalSynapses.o SimulatorInterface.o
 ###########################################################################
 CXX = g++ # must use version that MATLAB supp
 
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 -Wall -Wextra
 
 CXXDEBUGFLAGS = -Wall -g #-pg #-pg for gprof
 

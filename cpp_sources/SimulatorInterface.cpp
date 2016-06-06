@@ -1,6 +1,5 @@
 #include "NeuronNetwork.h"
 #include "SimulatorInterface.h"
-
 #include <chrono> // #include <boost/chrono.hpp>
 
 using namespace std;
@@ -356,8 +355,8 @@ bool SimulatorInterface::import(string in_filename_input){
 	cout << "\t Network created." << endl;
 	cout << "\t Initialising neuron populations...";
 	for (unsigned int ind = 0; ind < N_array.size(); ++ind){
-		network.NeuronPopArray.push_back(Neurons(ind, N_array[ind], network.dt, network.step_tot, delim, indicator));
-		network.NeuronPopArray.back().set_para(pop_para[ind]);
+		network.NeuronPopArray.push_back(new Neurons(ind, N_array[ind], network.dt, network.step_tot, delim, indicator));
+		network.NeuronPopArray.back()->set_para(pop_para[ind]);
 		cout << ind+1 << "...";
 	}
 	cout << "done." << endl;
@@ -369,9 +368,9 @@ bool SimulatorInterface::import(string in_filename_input){
 			int type = IJKD_chem_info[ind][0];
 			int i_pre = IJKD_chem_info[ind][1];
 			int j_post = IJKD_chem_info[ind][2];
-			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
-			network.ChemicalSynapsesArray.back().init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I_temp[ind], J_temp[ind], K_temp[ind], D_temp[ind]);
-			network.ChemicalSynapsesArray.back().set_para(syn_para);
+			network.ChemicalSynapsesArray.push_back(new ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
+			network.ChemicalSynapsesArray.back()->init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I_temp[ind], J_temp[ind], K_temp[ind], D_temp[ind]);
+			network.ChemicalSynapsesArray.back()->set_para(syn_para);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -388,9 +387,9 @@ bool SimulatorInterface::import(string in_filename_input){
 			int Num_ext = int(ext_spike_settings[ind][3]);
 			int ia = int(ext_spike_settings[ind][4]);
 			int ib = int(ext_spike_settings[ind][5]);
-			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
-			network.ChemicalSynapsesArray.back().init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ia, ib);
-			network.ChemicalSynapsesArray.back().set_para(syn_para);
+			network.ChemicalSynapsesArray.push_back(new ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
+			network.ChemicalSynapsesArray.back()->init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ia, ib);
+			network.ChemicalSynapsesArray.back()->set_para(syn_para);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -403,7 +402,7 @@ bool SimulatorInterface::import(string in_filename_input){
 			int pop_ind = ext_current_settings_pop_ind[ind];
 			vector<double> mean = ext_current_settings[ ind*2 ];
 			vector<double> std = ext_current_settings[ ind*2+1 ];
-			network.NeuronPopArray[pop_ind].set_gaussian_I_ext(mean, std);
+			network.NeuronPopArray[pop_ind]->set_gaussian_I_ext(mean, std);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -414,7 +413,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Random initial condition settings...";
 		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings.size(); ++pop_ind){
 			double p_fire = init_condition_settings[pop_ind];
-			network.NeuronPopArray[pop_ind].random_V(p_fire);
+			network.NeuronPopArray[pop_ind]->random_V(p_fire);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -426,7 +425,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		for (unsigned int i = 0; i < step_perturb_setting.size(); ++i){
 			int pop_ind = step_perturb_setting[i][0];
 			int step_perturb = step_perturb_setting[i][1];
-			network.NeuronPopArray[pop_ind].add_perturbation(step_perturb);
+			network.NeuronPopArray[pop_ind]->add_perturbation(step_perturb);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -443,9 +442,9 @@ bool SimulatorInterface::import(string in_filename_input){
 
 			int syn_match = false;
 			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-				network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].add_short_term_depression(STD_on_step);
+				if (network.ChemicalSynapsesArray[s]->pop_ind_pre == pop_ind_pre &&
+				network.ChemicalSynapsesArray[s]->pop_ind_post == pop_ind_post){ // find the right synapse object
+					network.ChemicalSynapsesArray[s]->add_short_term_depression(STD_on_step);
 					cout << i+1 << "...";
 					syn_match = true;
 				}
@@ -467,9 +466,9 @@ bool SimulatorInterface::import(string in_filename_input){
 
 			int syn_match = false;
 			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-				network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].add_inh_STDP(inh_STDP_on_step);
+				if (network.ChemicalSynapsesArray[s]->pop_ind_pre == pop_ind_pre &&
+				network.ChemicalSynapsesArray[s]->pop_ind_post == pop_ind_post){ // find the right synapse object
+					network.ChemicalSynapsesArray[s]->add_inh_STDP(inh_STDP_on_step);
 					cout << i+1 << "...";
 					syn_match = true;
 				}
@@ -485,7 +484,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Spike-frequency adaptation settings...";
 		for (unsigned int i = 0; i < spike_freq_adpt_setting.size(); ++i){
 			int pop_ind = spike_freq_adpt_setting[i];
-			network.NeuronPopArray[pop_ind].add_spike_freq_adpt();
+			network.NeuronPopArray[pop_ind]->add_spike_freq_adpt();
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -496,7 +495,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Neuron data sampling settings...";
 		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
 			int pop_ind = neuron_sample_pop_ind[ind];
-			network.NeuronPopArray[pop_ind].add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
+			network.NeuronPopArray[pop_ind]->add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -507,7 +506,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Neuron stats record settings...";
 		for (unsigned int ind = 0; ind < neuron_stats_setting.size(); ++ind){
 			int pop_ind = neuron_stats_setting[ind];
-			network.NeuronPopArray[pop_ind].start_stats_record();
+			network.NeuronPopArray[pop_ind]->start_stats_record();
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -526,10 +525,10 @@ bool SimulatorInterface::import(string in_filename_input){
 			
 			int syn_sample_match = false;
 			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-					network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post &&
-				network.ChemicalSynapsesArray[s].synapses_type == syn_type){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].add_sampling(syn_sample_neurons[ind], syn_sample_time_points[ind]);
+				if (network.ChemicalSynapsesArray[s]->pop_ind_pre == pop_ind_pre &&
+					network.ChemicalSynapsesArray[s]->pop_ind_post == pop_ind_post &&
+				network.ChemicalSynapsesArray[s]->synapses_type == syn_type){ // find the right synapse object
+					network.ChemicalSynapsesArray[s]->add_sampling(syn_sample_neurons[ind], syn_sample_time_points[ind]);
 					cout << ind+1 << "...";
 					syn_sample_match = true;
 				}
@@ -554,10 +553,10 @@ bool SimulatorInterface::import(string in_filename_input){
 			
 			int syn_I_match = false;
 			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-					network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post &&
-				network.ChemicalSynapsesArray[s].synapses_type == syn_type){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].start_stats_record();
+				if (network.ChemicalSynapsesArray[s]->pop_ind_pre == pop_ind_pre &&
+					network.ChemicalSynapsesArray[s]->pop_ind_post == pop_ind_post &&
+				network.ChemicalSynapsesArray[s]->synapses_type == syn_type){ // find the right synapse object
+					network.ChemicalSynapsesArray[s]->start_stats_record();
 					cout << ind+1 << "...";
 					syn_I_match = true;
 				}
@@ -574,7 +573,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Runaway killer licensing for pop...";
 		for (unsigned int ind = 0; ind < runaway_killer_setting.size(); ++ind){
 			int pop_ind = int(runaway_killer_setting[ind][0]);
-			network.NeuronPopArray[pop_ind].init_runaway_killer(runaway_killer_setting[ind][1], runaway_killer_setting[ind][2], runaway_killer_setting[ind][3]);
+			network.NeuronPopArray[pop_ind]->init_runaway_killer(runaway_killer_setting[ind][1], runaway_killer_setting[ind][2], runaway_killer_setting[ind][3]);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -606,7 +605,7 @@ void SimulatorInterface::simulate(){
 	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
 	// Write data file name to stdout and use "grep ygout" to extract it!
 	cout << "Data file name is: " << endl;
-	cout << "	" << out_filename.append(output_suffix) << endl;
+	cout << "	" << out_filename << endl;
 		
 }
 
