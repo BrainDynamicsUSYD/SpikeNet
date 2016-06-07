@@ -422,7 +422,7 @@ void Neurons::output_sampled_data_real_time(int step_current){
 			if (sample_time_points[tt]){sample_step_number += 1;}
 		}
 		samp_file << indicator << " POPD006" << endl;
-		samp_file << pop_ind << delim << int(sample_neurons.size())*sample_step_number << delim << endl;
+		samp_file << pop_ind << delim << sample_neurons.size() << delim << sample_step_number << delim << endl;
   		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
 		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
 			if (sample_type[tt]){samp_file << data_types[tt] << delim; }
