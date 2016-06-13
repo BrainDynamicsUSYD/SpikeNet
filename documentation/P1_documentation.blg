@@ -3,47 +3,46 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: P1_documentation.aux
 The style file: plain.bst
 Database file #1: P1_documentation.bib
-Warning--empty journal in destexhe1998kinetic
-Warning--empty year in destexhe1998kinetic
-You've used 5 entries,
+Warning--empty publisher in destexhe1998kinetic
+You've used 6 entries,
             2118 wiz_defined-function locations,
-            532 strings with 4954 characters,
-and the built_in function-call counts, 1678 in all, are:
-= -- 161
-> -- 84
-< -- 1
-+ -- 34
-- -- 28
-* -- 131
-:= -- 291
-add.period$ -- 14
-call.type$ -- 5
-change.case$ -- 29
+            541 strings with 5129 characters,
+and the built_in function-call counts, 2130 in all, are:
+= -- 212
+> -- 91
+< -- 2
++ -- 37
+- -- 30
+* -- 161
+:= -- 356
+add.period$ -- 19
+call.type$ -- 6
+change.case$ -- 33
 chr.to.int$ -- 0
 cite$ -- 7
-duplicate$ -- 57
-empty$ -- 122
-format.name$ -- 28
-if$ -- 334
+duplicate$ -- 78
+empty$ -- 168
+format.name$ -- 30
+if$ -- 442
 int.to.chr$ -- 0
-int.to.str$ -- 5
-missing$ -- 5
-newline$ -- 27
-num.names$ -- 10
-pop$ -- 28
+int.to.str$ -- 6
+missing$ -- 6
+newline$ -- 33
+num.names$ -- 12
+pop$ -- 30
 preamble$ -- 1
-purify$ -- 24
+purify$ -- 27
 quote$ -- 0
-skip$ -- 37
+skip$ -- 50
 stack$ -- 0
-substring$ -- 109
-swap$ -- 7
-text.length$ -- 1
+substring$ -- 154
+swap$ -- 14
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 20
-warning$ -- 2
-while$ -- 17
-width$ -- 6
-write$ -- 53
-(There were 2 warnings)
+type$ -- 24
+warning$ -- 1
+while$ -- 23
+width$ -- 7
+write$ -- 68
+(There was 1 warning)

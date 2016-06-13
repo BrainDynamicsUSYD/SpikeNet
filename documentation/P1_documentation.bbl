@@ -1,14 +1,15 @@
 \begin{thebibliography}{1}
 
-\bibitem{destexhe1998kinetic}
-Alain Destexhe, Zachary~F Mainen, and Terrence~J Sejnowski.
-\newblock Kinetic models of synaptic transmission.
-
 \bibitem{destexhe1994efficient}
 Alain Destexhe, Zachary~F Mainen, and Terrence~J Sejnowski.
 \newblock An efficient method for computing synaptic conductances based on a
   kinetic model of receptor binding.
 \newblock {\em Neural Computation}, 6(1):14--18, 1994.
+
+\bibitem{destexhe1998kinetic}
+Alain Destexhe, Zachary~F Mainen, and Terrence~J Sejnowski.
+\newblock Kinetic models of synaptic transmission.
+\newblock In {\em Methods in neuronal modeling 2}, pages 1--25. 1998.
 
 \bibitem{hennig2015theoretical}
 Matthias~H Hennig.
@@ -21,6 +22,11 @@ Ashok Litwin-Kumar and Brent Doiron.
 \newblock Slow dynamics and high variability in balanced cortical networks with
   clustered connections.
 \newblock {\em Nature neuroscience}, 15(11):1498--1505, 2012.
+
+\bibitem{treves1993mean}
+Alessandro Treves.
+\newblock Mean-field analysis of neuronal spike dynamics.
+\newblock {\em Network: Computation in Neural Systems}, 4(3):259--284, 1993.
 
 \bibitem{vogels2011inhibitory}
 TP~Vogels, Henning Sprekeler, Friedemann Zenke, Claudia Clopath, and Wulfram

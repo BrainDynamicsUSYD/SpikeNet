@@ -11,7 +11,8 @@
 \usepackage[utf8]{inputenc}
 
 \newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
-  
+ 
+ \renewcommand{\labelitemii}{$\circ$}
 
   
   
@@ -33,7 +34,7 @@ SpikeNet is a software developed for simulating spiking neuronal networks, of wh
 
 \item [Configurability] SpikeNet supports any user-defined structure of synaptic connectivity topologies, coupling strengths and conduction delays. It can be easily extended by developers to support any variations of integrate-and-fire neuron and synapse models. For the models that are currently available, see \nameref{sec:model}.
 
-\item [Performance]  Simulation of spiking neuronal network quickly becomes computationally intensive if the number of neurons $N$ in the network exceeds a few thousand. To achieve superior performance, various measures have been taken at both algorithmic and implementation level. Notably, at the algorithmic level, kinetic models are exclusively chosen for their algorithmic efficiency (e.g., \cite{destexhe1998kinetic, vogels2011inhibitory, hennig2015theoretical}). Furthermore, for such kinetic models, computational cost of the simulation can be dramatically reduced  with the commonly used mathematical abstraction that synapses can be simplified into a few groups, within which their dynamics (or more specifically, the time constants) are identical \cite{destexhe1994efficient}. At the implementation level, C\texttt{++}, a programming language renowned for its high-performance computing, is used.
+\item [Performance]  Simulation of spiking neuronal network quickly becomes computationally intensive if the number of neurons $N$ in the network exceeds a few thousand. To achieve superior performance, various measures have been taken at both algorithmic and implementation level. Notably, at the algorithmic level, kinetic models are exclusively chosen for their algorithmic efficiency (e.g., \cite{destexhe1998kinetic, vogels2011inhibitory, hennig2015theoretical, treves1993mean}). Furthermore, for such kinetic models, computational cost of the simulation can be dramatically reduced  with the commonly used mathematical abstraction that synapses can be simplified into a few groups, within which their dynamics (or more specifically, the time constants) are identical \cite{destexhe1994efficient}. At the implementation level, C\texttt{++}, a programming language renowned for its high-performance computing, is used.
 
 \item [User-friendly interface] In SpikeNet, although, C\texttt{++}  is used for heavy-duty computation, its user-interface is written in a high-level programming language (Matlab) for user-friendliness. This means SpikeNet does not require non-developer users to be familiar with C\texttt{++}. In practise, the typical work-flow of SpikeNet user is as following.
 \begin{enumerate}
@@ -43,7 +44,7 @@ SpikeNet is a software developed for simulating spiking neuronal networks, of wh
 \end{enumerate}
 Please see \nameref{sec:matlab user interface} for more detailed descriptions of the work-flow. Developer users will be interested to know that the data format of the aforementioned input and output files follows pre-defined protocols (see \nameref{sec:Output protocols} and \nameref{sec:Input protocols}). This design essentially makes the SpikeNet C\texttt{++} simulator a stand-alone software. Based on these protocols, the C\texttt{++} simulator can easily interface with any other high-level programming languages if Matlab is not prefered.
 
-\item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created in parallel and the amount of message passing among them at each simulation time step is minimal.  
+\item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created and simulated in parallel and the amount of message passing among them at each simulation time step is minimal.  
 \end{description}
  
 \section{Tech Stack}
@@ -58,7 +59,7 @@ Please see \nameref{sec:matlab user interface} for more detailed descriptions of
 Following are the steps to set up the SpikeNet C\texttt{++} simulator.
 \begin{itemize}
 \item Ask for read permission from one of the contributors with admin rights.
-\item Make a new repository: \mylstinline{mkdir tmp; cd tmp}
+\item Make a new directory: \mylstinline{mkdir tmp; cd tmp}
 \item Clone SpikeNet: \mylstinline{git clone https://github.com/BrainDynamicsUSYD/SpikeNet}
 \item Go into the directory: \mylstinline{cd SpikeNet}
 \item Build the C\texttt{++} simulator:  \mylstinline{make; make clean; cd ..; ls}
@@ -68,25 +69,38 @@ However, it will be much easier to work with the Matlab user interface.
 If you do not have access to Matlab, try to contact the contributors to request interfaces with other high-level programming languages (Python for example).
 Following are the steps to use the Matlab user interface.
 \begin{itemize}
-\item Make a new repository for storing data: \mylstinline{mkdir tmp_data}
+\item Make a new directory for storing data: \mylstinline{mkdir tmp_data}
 \item Start Matlab: \mylstinline{matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd source2; addpath(genapth(cd));}
+\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genapth(cd));}
 \item Generate the example input files: \mylstinline{cd ../tmp_data; SpikeNet_example.m;}
 \item Quit Matlab: \mylstinline{quit}
 \item Run the simulator with the input files: \mylstinline{cd tmp_data; ../simulator *ygin;}
 \item Start Matlab: \mylstinline{cd ..; matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd source2; addpath(genapth(cd));}
+\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genapth(cd));}
 \item Parse the output files, run some basic post-processing and visualization: \mylstinline{cd ../tmp_data; PostProcessYG()}
 \item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
 \end{itemize}
-For those who have access to a high-performance computing cluster with PBS, SpikeNet also supports PBS and has scripts that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow. (????)
+For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
 \begin{itemize}
-\item (????)
+\item Go to the tmp directory
+\item Make a copy of the script: \mylstinline{cp SpikeNet/*sh.bak all_in_one.sh}
+\item Change it to executable: \mylstinline{chmod +x all_in_one.sh}
+\item Edit the following variables in the bash script accordingly: 
+\begin{itemize}
+\item {\footnotesize MATLAB\_PRE\_PROCESS\_FUNC=`your\_function'}
+\item {\footnotesize MATLAB\_POST\_PROCESS\_FUNC=`your\_function'}
+\item {\footnotesize MATLAB\_SOURCE\_PATH=`SpikeNet'}
 \end{itemize}
-\section{Matlab user interface}
-See main\_demo.m
+\item Make a directory for PBS output: \mylstinline{mkdir PBSout}
+\item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
+\end{itemize}
+For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
+\section{Matlab user interface}
 \label{sec:matlab user interface}
+See main\_demo.m.
+
+(More need to be added on the available post-processing Matlab functions. SpikeNet has a variety of statistical analysis and visualization tools for spiking networks.)
 
 \section{Neuron and synapse models}
 \label{sec:model}
@@ -114,7 +128,7 @@ I^{\alpha}_{i,syn}(t) &= \sum_{\beta=1}^{P}I^{\alpha\beta}_{i}(t) \\
 
 
 \noindent
-where $V_{rev}^{\beta}$ is the reversal potential of the corresponding current $I^{\alpha\beta}_{i}$ induced by pre-synaptic population $\beta$ and mathematically models the excitatory/inhibitory nature of it. 
+where $V_{rev}^{\beta}$ is the reversal potential of the corresponding current $I^{\alpha\beta}_{i}$ induced by pre-synaptic population $\beta$. 
 $a_{ij}^{\alpha\beta}$ is a binary variable which determines the existence of synapse from the $j$-th neuron in population $\beta$ to the $i$-th neuron in  population $\alpha$, while $g_{ij}^{\alpha\beta}$ reflects the (maximal) strength of the synaptic conductance. 
 The gating variable $s_{ij}^{\alpha\beta}(t)$ models the instananeous value of synaptic conductance in terms of the fraction of open channels, described by
 
@@ -175,13 +189,12 @@ The default input filename is ``filename.ygin''.
 It is advised that synapse definitions always be given in a separate file.
 The default synapse definition filename is ``filename.ygin\_syn''.
 Non-default synapse definition file path and name can be specified by ``SYNF001'' protocol.
-Following is the complete list of  the input data protocols.
+Following is the complete list of the input data protocols.
+Note that the protocols use three special characters, including ``\textgreater'' for starting a new protocol, ``\#'' for commenting and "," for delimiting.
 
 \lstset{
   basicstyle=\fontsize{9}{11}\selectfont\ttfamily
 }
-
-
 
 \begin{lstlisting}[mathescape]
 
@@ -258,10 +271,10 @@ Following is the complete list of  the input data protocols.
 	ind1, ind2, ..., indX, (post-synaptic sample neuron indices)
 	1, 1, 0, 0, ..., (1-by-step_tot logical values)
 	
-> SAMP003 #  neuron population statistical data record
+> SAMP003 # neuron population statistical data record
 	pop_ind,
 	
-> SAMP004 #  synaptic currents  statistical data record
+> SAMP004 # synaptic currents  statistical data record
 	pop_ind_pre, pop_ind_post, syn_type,
 
 \end{lstlisting}
