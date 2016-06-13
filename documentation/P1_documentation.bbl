@@ -1,15 +1,32 @@
 \begin{thebibliography}{1}
 
+\bibitem{destexhe1998kinetic}
+Alain Destexhe, Zachary~F Mainen, and Terrence~J Sejnowski.
+\newblock Kinetic models of synaptic transmission.
+
 \bibitem{destexhe1994efficient}
 Alain Destexhe, Zachary~F Mainen, and Terrence~J Sejnowski.
 \newblock An efficient method for computing synaptic conductances based on a
   kinetic model of receptor binding.
 \newblock {\em Neural Computation}, 6(1):14--18, 1994.
 
+\bibitem{hennig2015theoretical}
+Matthias~H Hennig.
+\newblock Theoretical models of synaptic short term plasticity.
+\newblock {\em Neural Information Processing with Dynamical Synapses}, page~5,
+  2015.
+
 \bibitem{litwin2012slow}
 Ashok Litwin-Kumar and Brent Doiron.
 \newblock Slow dynamics and high variability in balanced cortical networks with
   clustered connections.
 \newblock {\em Nature neuroscience}, 15(11):1498--1505, 2012.
+
+\bibitem{vogels2011inhibitory}
+TP~Vogels, Henning Sprekeler, Friedemann Zenke, Claudia Clopath, and Wulfram
+  Gerstner.
+\newblock Inhibitory plasticity balances excitation and inhibition in sensory
+  pathways and memory networks.
+\newblock {\em Science}, 334(6062):1569--1573, 2011.
 
 \end{thebibliography}

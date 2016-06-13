@@ -3,10 +3,22 @@
 \usepackage{cite}
 \usepackage{tabulary}
 \usepackage{listings}
+\usepackage{nameref}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}  %use draft
+\usepackage{listings}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[misc]{ifsym}
+\usepackage[utf8]{inputenc}
 
-\title{Project1 Documentation}
+\newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
+  
+
+  
+  
+\title{SpikeNet Documentation}
 \author{Yifan Gu  \\
 	Complex System Group, School of Physics, USYD  \\
+	yigu8115@gmail.com \\
 	}
 
 \date{\today} 
@@ -14,23 +26,85 @@
 \begin{document}
  \maketitle
 
+\section{Overview}
+SpikeNet is a software developed for simulating spiking neuronal networks, of which the design provides the following four features.
 
-\section{Model}
+\begin{description}
+
+\item [Configurability] SpikeNet supports any user-defined structure of synaptic connectivity topologies, coupling strengths and conduction delays. It can be easily extended by developers to support any variations of integrate-and-fire neuron and synapse models. For the models that are currently available, see \nameref{sec:model}.
+
+\item [Performance]  Simulation of spiking neuronal network quickly becomes computationally intensive if the number of neurons $N$ in the network exceeds a few thousand. To achieve superior performance, various measures have been taken at both algorithmic and implementation level. Notably, at the algorithmic level, kinetic models are exclusively chosen for their algorithmic efficiency (e.g., \cite{destexhe1998kinetic, vogels2011inhibitory, hennig2015theoretical}). Furthermore, for such kinetic models, computational cost of the simulation can be dramatically reduced  with the commonly used mathematical abstraction that synapses can be simplified into a few groups, within which their dynamics (or more specifically, the time constants) are identical \cite{destexhe1994efficient}. At the implementation level, C\texttt{++}, a programming language renowned for its high-performance computing, is used.
+
+\item [User-friendly interface] In SpikeNet, although, C\texttt{++}  is used for heavy-duty computation, its user-interface is written in a high-level programming language (Matlab) for user-friendliness. This means SpikeNet does not require non-developer users to be familiar with C\texttt{++}. In practise, the typical work-flow of SpikeNet user is as following.
+\begin{enumerate}
+\item In Matlab, use SpikeNet functions to generate the input files (plain text) that define the simulation case.
+\item Evoke the SpikeNet C\texttt{++} simulator, which reads the input files, runs the simulation and generates the output files.
+\item In Matlab, use SpikeNet functions to parse the output files (plain text) into Matlab data for post-processing.
+\end{enumerate}
+Please see \nameref{sec:matlab user interface} for more detailed descriptions of the work-flow. Developer users will be interested to know that the data format of the aforementioned input and output files follows pre-defined protocols (see \nameref{sec:Output protocols} and \nameref{sec:Input protocols}). This design essentially makes the SpikeNet C\texttt{++} simulator a stand-alone software. Based on these protocols, the C\texttt{++} simulator can easily interface with any other high-level programming languages if Matlab is not prefered.
+
+\item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created in parallel and the amount of message passing among them at each simulation time step is minimal.  
+\end{description}
+ 
+\section{Tech Stack}
+\begin{itemize}
+\item C\texttt{++}11 standard is required (GCC 4.2.1 or later; Intel C++ 12.0 or later).
+\item Matlab is optional but highly recommended.
+\item Portable Batch System (PBS) is optional but highly recommended.
+\item Message Passing Interface (MPI) implementation is optional.
+\end{itemize}
+ 
+\section{Quickstart}
+Following are the steps to set up the SpikeNet C\texttt{++} simulator.
+\begin{itemize}
+\item Ask for read permission from one of the contributors with admin rights.
+\item Make a new repository: \mylstinline{mkdir tmp; cd tmp}
+\item Clone SpikeNet: \mylstinline{git clone https://github.com/BrainDynamicsUSYD/SpikeNet}
+\item Go into the directory: \mylstinline{cd SpikeNet}
+\item Build the C\texttt{++} simulator:  \mylstinline{make; make clean; cd ..; ls}
+\end{itemize}
+Now you should see the ``simulator'' in the current directory, with which you can run simulations by creating input files according to \nameref{sec:Input protocols}.
+However, it will be much easier to work with the Matlab user interface.
+If you do not have access to Matlab, try to contact the contributors to request interfaces with other high-level programming languages (Python for example).
+Following are the steps to use the Matlab user interface.
+\begin{itemize}
+\item Make a new repository for storing data: \mylstinline{mkdir tmp_data}
+\item Start Matlab: \mylstinline{matlab -nodisplay}
+\item Set up the environment for Matlab: \mylstinline{cd source2; addpath(genapth(cd));}
+\item Generate the example input files: \mylstinline{cd ../tmp_data; SpikeNet_example.m;}
+\item Quit Matlab: \mylstinline{quit}
+\item Run the simulator with the input files: \mylstinline{cd tmp_data; ../simulator *ygin;}
+\item Start Matlab: \mylstinline{cd ..; matlab -nodisplay}
+\item Set up the environment for Matlab: \mylstinline{cd source2; addpath(genapth(cd));}
+\item Parse the output files, run some basic post-processing and visualization: \mylstinline{cd ../tmp_data; PostProcessYG()}
+\item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
+\end{itemize}
+For those who have access to a high-performance computing cluster with PBS, SpikeNet also supports PBS and has scripts that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow. (????)
+\begin{itemize}
+\item (????)
+\end{itemize}
+\section{Matlab user interface}
+See main_demo.m
+
+\label{sec:matlab user interface}
+
+\section{Neuron and synapse models}
+\label{sec:model}
+
 
 \numberwithin{equation}{section}
 
-Neurons are modeled as conductance-based leaky integrate-and-fire units. 
-The membrane potential $V^{\alpha}_{i}$ of the $i$-th neuron ($i=1,\cdots,N_{\alpha}$) from population $\alpha=E,I,X$ (excitatory, inhibitory and external population, respectively) evolves according to
+The default neuron model in SpikeNet is leaky integrate-and-fire neuron. 
+The membrane potential $V^{\alpha}_{i}$ of the $i$-th neuron ($i=1,\cdots,N_{\alpha}$) from population $\alpha$ evolves according to
 
 \begin{equation}
-C_{m}\frac{dV^{\alpha}_{i}}{dt} = -g_{L}(V^{\alpha}_{i}-V_{L}) + I^{\alpha}_{i,syn}(t) + I^{\alpha}_{i,app}(t), \text{ if } V^{\alpha}_{i} < V_{th}
+C_{m}\frac{dV^{\alpha}_{i}}{dt} = -g_{L}(V^{\alpha}_{i}-V_{L}) + I^{\alpha}_{i,syn}(t) + I^{\alpha}_{i,app}(t), \text{ if } V^{\alpha}_{i} < V_{th}.
 \end{equation}
-
 When neurons reach the threshold $V_{th}$, a spike is emitted and they are reset to $V_{rt}$ for an absolute refractory period $\tau_{ref}$. 
 The spike times $t^{\alpha}_{i}$ are recorded.
 
+The default synapse model in SpikeNet is conductance-based. 
 The synaptic currents received by a neuron are given by
-
 
 \begin{align}
 I^{\alpha}_{i,syn}(t) &= \sum_{\beta=1}^{P}I^{\alpha\beta}_{i}(t) \\
@@ -65,7 +139,7 @@ h(t) =
 
 The default parameters are summarized in Table \ref{table:model constants}. 
 All numerical values are in consistant units unless mentioned otherwise (ms for time, mV for voltage, nA for current, nF for capacitance and ${\mu}$S for conductance). 
-Numerical integration is performed using Euler method with a time-step of 0.1 ms\cite{litwin2012slow}.
+Default numerical integration is performed using Euler method and the suggested time-step is 0.1 ms\cite{litwin2012slow}.
 
 
 
@@ -93,14 +167,15 @@ Numerical integration is performed using Euler method with a time-step of 0.1 ms
 
 
 
-\section{Input File Format}
+\section{Input protocols}
+\label{sec:Input protocols}
 
-The input files are text files.
-The default input filename is ``input\_filename.ygin''.
+The input files are plain text files.
+The default input filename is ``filename.ygin''.
 It is advised that synapse definitions always be given in a separate file.
-The default synapse definition filename is ``input\_filename.ygin\_syn''.
-Non-default synapse definition file path and name can be specified by ``SYNF001'' command.
-Input data format is as following.
+The default synapse definition filename is ``filename.ygin\_syn''.
+Non-default synapse definition file path and name can be specified by ``SYNF001'' protocol.
+Following is the complete list of  the input data protocols.
 
 \lstset{
   basicstyle=\fontsize{9}{11}\selectfont\ttfamily
@@ -117,7 +192,7 @@ Input data format is as following.
 	dt (ms), step_tot,
 
 > INIT003 # random initial distributions for V
-	p_fire_pop1 (range (0,1]), ..., p_fire_popN, 
+	p_fire_pop1 (range ($-\infty$,1]), ..., p_fire_popN, 
 
 > INIT004 # external Gaussian currents
 	pop_ind, 
@@ -187,11 +262,12 @@ Input data format is as following.
 
 \end{lstlisting}
 
-\section{Output File Format}
-The output files are text files.
-The default output filename is ``input\_filename-time\_stamp.ygout''.
+\section{Output protocols}
+\label{sec:Output protocols}
+The output files are plain text files.
+The default output filename is ``filename-X.ygout'', where X is a time-stamp that uniquely marks the output file so that multiple simulations can be run for the same input files.
 For data completeness, the corresponding input file will be attached to the output file.
-The output data format is as following.
+Following is the complete list of the output data protocols.
 \begin{lstlisting}
 
 > KILL002 # step at which runaway activity is killed
