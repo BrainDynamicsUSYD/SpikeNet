@@ -84,7 +84,7 @@ For those who have access to a high-performance computing cluster with PBS, Spik
 \item (????)
 \end{itemize}
 \section{Matlab user interface}
-See main_demo.m
+See main\_demo.m
 
 \label{sec:matlab user interface}
 
@@ -137,32 +137,32 @@ h(t) =
 \end{equation}
 
 
-The default parameters are summarized in Table \ref{table:model constants}. 
+% The default parameters are summarized in Table \ref{table:model constants}. 
 All numerical values are in consistant units unless mentioned otherwise (ms for time, mV for voltage, nA for current, nF for capacitance and ${\mu}$S for conductance). 
 Default numerical integration is performed using Euler method and the suggested time-step is 0.1 ms\cite{litwin2012slow}.
 
 
 
-\begin{table}
-\begin{center}
-  \begin{tabulary}{3.0\textwidth}{RRR}
-	$\alpha$  & E & I \\
-	\hline
-	$\tau_{r}^{\alpha}$ (ms) & 1 & 1\\
-	$\tau_{d}^{\alpha}$ (ms) & 5 & 3 \\
-	$V_{rev}^{\alpha}$ (mV) & 0 & -80 \\
-	
-	$\tau_{ref}$ (ms) & \multicolumn{2}{c}{2} \\
-	$C_{m}$ (nF) & \multicolumn{2}{c}{0.25} \\
-	$g_{L}$ ($\mu$S) & \multicolumn{2}{c}{0.0167} \\
-	$V_{L}$ (mV) & \multicolumn{2}{c}{-70} \\
-	$V_{rt}$ (mV) & \multicolumn{2}{c}{-60} \\
-	$\theta$ (mV) & \multicolumn{2}{c}{-50} \\
-  \end{tabulary}  
-  \caption{Model constants}
-  \label{table:model constants}
-\end{center}
-\end{table}
+%\begin{table}
+%\begin{center}
+%  \begin{tabulary}{3.0\textwidth}{RRR}
+%	$\alpha$  & E & I \\
+%	\hline
+%	$\tau_{r}^{\alpha}$ (ms) & 1 & 1\\
+%	$\tau_{d}^{\alpha}$ (ms) & 5 & 3 \\
+%	$V_{rev}^{\alpha}$ (mV) & 0 & -80 \\
+%	
+%	$\tau_{ref}$ (ms) & \multicolumn{2}{c}{2} \\
+%	$C_{m}$ (nF) & \multicolumn{2}{c}{0.25} \\
+%	$g_{L}$ ($\mu$S) & \multicolumn{2}{c}{0.0167} \\
+%	$V_{L}$ (mV) & \multicolumn{2}{c}{-70} \\
+%	$V_{rt}$ (mV) & \multicolumn{2}{c}{-60} \\
+%	$\theta$ (mV) & \multicolumn{2}{c}{-50} \\
+%  \end{tabulary}  
+%  \caption{Model constants}
+%  \label{table:model constants}
+%\end{center}
+%\end{table}
 
 
 
@@ -191,7 +191,7 @@ Following is the complete list of  the input data protocols.
 > INIT002 # time step length and total number of steps
 	dt (ms), step_tot,
 
-> INIT003 # random initial distributions for V
+> INIT003 # random initial distributions for V (deprecated)
 	p_fire_pop1 (range ($-\infty$,1]), ..., p_fire_popN, 
 
 > INIT004 # external Gaussian currents
@@ -221,6 +221,10 @@ Following is the complete list of  the input data protocols.
 	
 > INIT010 # add spike-frequency adaptation 
 	pop_ind,
+
+> INIT011 # random initial conditions for V and firing probabilities
+	r_V0_pop1 (range (0,1]), ...,r_V0_popN, 
+	p_fire_pop1 (range (0,1]), ..., p_fire_popN, 
 	
 > SYNF001 # non-default synapse definition file name
 	path/to/file_name (no comma!)

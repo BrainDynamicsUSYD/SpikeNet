@@ -40,7 +40,8 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector<int> ext_current_settings_pop_ind; // (int pop_ind)
 	vector< vector<double> > ext_current_settings; // (vector<double> mean, vector<double> std)
 	
-	vector<double> init_condition_settings; // (double p_fire)
+	vector<double> init_condition_settings_depre; // (double p_fire)
+	vector< vector<double> >  init_condition_settings; // (double r_V0, double p_fire)
 	
 	vector<int> neuron_sample_pop_ind; //
 	vector< vector<int> > neuron_sample_neurons; //
@@ -97,15 +98,14 @@ bool SimulatorInterface::import(string in_filename_input){
 
 
 
-			// Random initial distributions for membrane potentials 
+			// Random initial distributions for membrane potentials (deprecated)
 			found = line_str.find("INIT003");
 			if (found != string::npos){// if found match
 				cout << "\t Reading random initial distributions for membrane potentials..." << endl;
-				read_next_line_as_vector(init_condition_settings); // p_fire
+				read_next_line_as_vector(init_condition_settings_depre); // p_fire
 				continue; // move to next line
 			}
-
-
+			
 			// read external current setting
 			found = line_str.find("INIT004");
 			if (found != string::npos){// if found match
@@ -168,6 +168,16 @@ bool SimulatorInterface::import(string in_filename_input){
 				// [pop_ind]
 				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
 				spike_freq_adpt_setting.push_back(read_next_entry<int>(line_ss));			
+				continue; // move to next line
+			}
+			
+			// Random initial distributions for membrane potentials and initial firing probabilities
+			found = line_str.find("INIT011");
+			if (found != string::npos){// if found match
+				cout << "\t Reading random initial distributions for membrane potentials and initial firing probabilities..." << endl;
+				init_condition_settings.resize(2);
+				read_next_line_as_vector(init_condition_settings[0]); // r_V0
+				read_next_line_as_vector(init_condition_settings[1]); // p_fire
 				continue; // move to next line
 			}
 			
@@ -409,15 +419,28 @@ bool SimulatorInterface::import(string in_filename_input){
 	}
 
 	// random initial condition settings (double p_fire)
-	if (init_condition_settings.size() != 0){
+	if (init_condition_settings_depre.size() != 0){
 		cout << "\t Random initial condition settings...";
-		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings.size(); ++pop_ind){
-			double p_fire = init_condition_settings[pop_ind];
+		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings_depre.size(); ++pop_ind){
+			double p_fire = init_condition_settings_depre[pop_ind];
 			network.NeuronPopArray[pop_ind]->random_V(p_fire);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}
+	
+	// random initial condition settings (double r_V0, double p_fire)
+	if (init_condition_settings.size() != 0){
+		cout << "\t Random initial condition settings...";
+		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings.size(); ++pop_ind){
+			double r_V0 = init_condition_settings[0][pop_ind];
+			double p_fire = init_condition_settings[1][pop_ind];
+			network.NeuronPopArray[pop_ind]->set_init_condition(r_V0, p_fire);
+			cout << pop_ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+	
 	
 	// perturbation setting
 	if (step_perturb_setting.size() != 0){

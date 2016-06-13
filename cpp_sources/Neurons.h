@@ -42,7 +42,8 @@ public:
 	void record_stats(int step_current); //
 	
 
-	void random_V(double firing_probability); // Generate random initial condition for V
+	void random_V(double firing_probability); // Generate random initial condition for V. This function is deprecated!
+	void set_init_condition(double r_V0, double p_fire); // Uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
 
 
 

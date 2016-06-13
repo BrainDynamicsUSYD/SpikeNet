@@ -149,19 +149,34 @@ string Neurons::dump_para(){
 
 void Neurons::random_V(double p){
 	// Generate random initial condition for V.
-	// Generate uniform random distribution
+	// Generate uniform random distribution 
+	cout << "Function Neurons::random_V(double p) is deprecated!" << endl;
 	if (p < 1.0){
 		gen.seed(my_seed);// reseed random engine!
 		uniform_real_distribution<double> uniform_dis(0.0, 1.0);
 		auto ZeroOne = bind(uniform_dis,gen);
 
-		for (int i = 0; i < N; ++i) {
+		for (int i = 0; i < N; ++i){
 			// Generate random number.
 			//ZeroOne = uniform_dis(gen); // range is [0,1]
 			V[i] = V_rt + (V_th - V_rt) / (1.0 - p)*ZeroOne();
 		}
 	}
-	else {cout << "initial firing rate cannot be 100%!" << endl;}
+	else {cout << "Initial firing rate cannot be 100%!" << endl;}
+}
+
+void Neurons::set_init_condition(double r_V0, double p_fire){
+	// Set V to be uniformly distributed between [V_rt, V_rt + (V_th - V_rt)*r_V0]
+	// And then randomly set some of them above firing threshold according to p_fire
+	gen.seed(my_seed);// reseed random engine!
+	uniform_real_distribution<double> uniform_dis(0.0, 1.0);
+	auto ZeroOne = bind(uniform_dis,gen);
+	for (int i = 0; i < N; ++i){
+		if (ZeroOne() < p_fire){
+			V[i] = V_th + 1.0; // above threshold for firing
+		}
+		else{V[i] = V_rt + (V_th - V_rt) *r_V0 * ZeroOne();}
+	}
 }
 
 

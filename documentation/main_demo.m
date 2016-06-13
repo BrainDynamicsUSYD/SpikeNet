@@ -42,9 +42,10 @@ pop = 1;
 writeSpikeFreqAdpt(FID, pop);
 
 
-% Define the initial condition: percentage of neurons firing at t=0
-p_fire = [0.1 0.00]; % for the two populations
-writeInitV(FID, p_fire);
+% Define the initial condition
+p_fire = [0.1 0.1]; % initial firing probabilities for both populations
+r_V0 = [0.5 0.5]; %set initial V distribution to be [V_rt, V_rt + (V_th-V_rt)*r_V0] 
+writeInitCond(FID, r_V0, p_fire)
 
 % Add external Poissonian spike trains into the 1st population
 pop = 1;
