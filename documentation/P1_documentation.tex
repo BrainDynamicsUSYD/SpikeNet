@@ -60,7 +60,7 @@ Following are the steps to set up the SpikeNet C\texttt{++} simulator.
 \begin{itemize}
 \item Ask for read permission from one of the contributors with admin rights.
 \item Make a new directory: \mylstinline{mkdir tmp; cd tmp}
-\item Clone SpikeNet: \mylstinline{git clone https://github.com/BrainDynamicsUSYD/SpikeNet}
+\item Clone SpikeNet: \mylstinline{git clone git@github.com:BrainDynamicsUSYD/SpikeNet.git}
 \item Go into the directory: \mylstinline{cd SpikeNet}
 \item Build the C\texttt{++} simulator:  \mylstinline{make; make clean; cd ..; ls}
 \end{itemize}
@@ -71,12 +71,12 @@ Following are the steps to use the Matlab user interface.
 \begin{itemize}
 \item Make a new directory for storing data: \mylstinline{mkdir tmp_data}
 \item Start Matlab: \mylstinline{matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genapth(cd));}
+\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
 \item Generate the example input files: \mylstinline{cd ../tmp_data; SpikeNet_example.m;}
 \item Quit Matlab: \mylstinline{quit}
 \item Run the simulator with the input files: \mylstinline{cd tmp_data; ../simulator *ygin;}
 \item Start Matlab: \mylstinline{cd ..; matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genapth(cd));}
+\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
 \item Parse the output files, run some basic post-processing and visualization: \mylstinline{cd ../tmp_data; PostProcessYG()}
 \item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
 \end{itemize}
