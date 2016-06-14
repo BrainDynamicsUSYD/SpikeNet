@@ -160,7 +160,7 @@ writeSynStatsRecord(FID, pop_pre, pop_post, syn_type);
 pop = 1;
 sample_neuron = 1:10:N(1); % sample every 10th neuron
 sample_steps = 1:2:step_tot; % sample every 2nd time step
-sample_data_type = [1,1,1,1,0,0,1,0]; % [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
+sample_data_type = logical([1,1,1,1,0,0,1,0]); % [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
 writeNeuronSampling(FID, pop, sample_data_type, sample_neuron, sample_steps )
 
 %%%% Record explanatory variables that are nacessary for post-processing

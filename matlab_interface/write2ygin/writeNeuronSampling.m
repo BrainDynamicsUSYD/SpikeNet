@@ -14,9 +14,9 @@ function writeNeuronSampling(FID, pop_ind, data_type, sample_ind, time_index)
 % 4,000 neurons x 10,000 time points will be 300MB data
 
 
-if sum((time_index ~= 0) & (time_index ~= 1)) ~= 0
-    error('sample_time_index must be logical vectors: ');
-end
+% if sum((time_index ~= 0) & (time_index ~= 1)) ~= 0
+%     error('sample_time_index must be logical vectors: ');
+% end
 
 % for C/C++ index convetion
 pop_ind = pop_ind-1;
