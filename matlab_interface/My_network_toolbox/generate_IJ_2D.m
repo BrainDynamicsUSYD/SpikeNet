@@ -29,7 +29,7 @@ for iter = 1:iter_num
             waitbar(wb_p / N)
         end
         % distance factor
-        post_dist = lattice_nD_find_dist(Lattice, hw, Lattice(i,:));
+        post_dist = lattice_nD_find_dist(Lattice, hw, i);
         dist_factor = exp(-post_dist/tau_d); % exponential distribution, will be properly scaled later;
         dist_factor(i) = 0; % no self-connection
         % common neighbour factor
