@@ -104,7 +104,7 @@ Here are some basic tips on git.
 
 \section{Matlab user interface}
 \label{sec:matlab user interface}
-See main\_demo.m.
+See main\_demo.m for a complete list of available case-building matlab functions and their usages.
 
 (More need to be added on the available post-processing Matlab functions. SpikeNet has a variety of statistical analysis and visualization tools for spiking networks.)
 
@@ -283,6 +283,10 @@ Note that the protocols use three special characters, including ``\textgreater''
 > SAMP004 # synaptic currents  statistical data record
 	pop_ind_pre, pop_ind_post, syn_type,
 
+> SAMP005 # local field potential data record
+	pop_ind,
+	1, 0, 0, 1, ..., (1-by-N logical values)
+	
 \end{lstlisting}
 
 \section{Output protocols}
@@ -338,6 +342,10 @@ Following is the complete list of the output data protocols.
 	step_2 (sampled_neurons-by-data_types matrix),
 	...
 	step_X (sampled_neurons-by-data_types matrix),
+	
+> POPD007 # local field potential data
+	pop_ind, 
+	LFP_1, LFP_2, ..., LFP_step_tot,
 	
 > SYND001 # synaptic connection parameters
 	number_of_parameters,

@@ -1,4 +1,4 @@
-function main_cc_embed_search_STD_2(varargin)
+function main_cc_embed_search_STD_2_LFP(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -7,7 +7,7 @@ function main_cc_embed_search_STD_2(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 200*sec; % use 10 second!
+step_tot = 1*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -16,6 +16,7 @@ delay = 2;
 
 in_deg_scale_exp = -0.5;
 
+for LFP_range = [1 1.5 2]
 for phi_E = 1
  phi_I = phi_E;
 for STD_on = [1 0]
@@ -25,7 +26,7 @@ for EE_factor = [0.5 ]; % 0.6?
         for EI_factor = [ 0.8 ]
             for degree_CV = [0.1 ] % 0.5?
                for  P0_init = [ 0.08 ] % 0.25 gives P0_actual = 0.2
-                    for I_ext_strength = [ 0.8*ones(1,40) ]% 0.9*ones(1,10)]
+                    for I_ext_strength = [ 0.8*ones(1,10) ]% 0.9*ones(1,10)]
                         for  tau_c = [10  ]
                             loop_num = loop_num + 1;
                             
@@ -59,6 +60,8 @@ for EE_factor = [0.5 ]; % 0.6?
                             sample_neuron = ind_sorted(1:500:end);
                             
                             
+ 
+                            
                             N_i = 1000;
                             N = [N_e, N_i];
                             Num_pop = length(N);
@@ -67,6 +70,13 @@ for EE_factor = [0.5 ]; % 0.6?
                             
                             % seed the matlab rand function! The seed is global.
                             [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
+                            
+                            % Add LFP sampling
+                            [Lattice, ~] = lattice_nD(2, hw);
+                            dist_lattice = (Lattice(:,1).^2 + Lattice(:,2).^2).^0.5;
+                            LFP_neurons = (dist_lattice < hw*LFP_range);
+                            writeLFPRecord(FID, 1, LFP_neurons);
+                            
                             
                             % write basic parameters
                             writeBasicPara(FID, dt, step_tot, N);
@@ -164,6 +174,7 @@ for EE_factor = [0.5 ]; % 0.6?
                                 'I_ext_strength', I_ext_strength,...
                                 'P0_init', P0_init, ...
                                 'degree_CV', degree_CV,...
+                                'LFP_range', LFP_range,...
                                 'in_deg_scale_exp', in_deg_scale_exp, ...
                                 'tau_c', tau_c, ...
 				'STD_on', STD_on);
@@ -185,6 +196,7 @@ for EE_factor = [0.5 ]; % 0.6?
             end
         end
     end
+end
 end
 end
 end

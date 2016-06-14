@@ -40,7 +40,8 @@ public:
 	
 	void start_stats_record();
 	void record_stats(int step_current); //
-	
+	void start_LFP_record(vector<bool> LFP_neurons);
+	void record_LFP();
 
 	void random_V(double firing_probability); // Generate random initial condition for V. This function is deprecated!
 	void set_init_condition(double r_V0, double p_fire); // Uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
@@ -132,6 +133,13 @@ ofstream samp_file; // someting is wrong here?
 		I_GABA_time_avg,
 		IE_ratio;
 
+	bool
+		LFP_record;
+	vector<bool> 
+		LFP_neurons;
+	vector<double>
+		LFP;
+	
 	// parameters for Generate Gaussian random external current
 	vector<double> // a vector for each neuron
 		I_ext_mean,

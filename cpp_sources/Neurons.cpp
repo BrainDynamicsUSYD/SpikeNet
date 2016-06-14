@@ -79,6 +79,7 @@ void Neurons::init(){
 	
 	//
 	stats_record = false;
+	LFP_record = false;
 	spike_freq_adpt = false;
 	
 	// perturbation
@@ -106,6 +107,18 @@ void Neurons::start_stats_record(){
 	
 	IE_ratio.assign(N, 0.0);
 }
+
+void Neurons::start_LFP_record(vector<bool> LFP_neurons_input){
+	if (int(LFP_neurons_input.size()) != N){
+		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
+	}
+	else{
+		LFP_record = true;
+		LFP_neurons = LFP_neurons_input;
+		LFP.reserve(step_tot);
+	}	
+}
+
 
 
 void Neurons::set_para(string para_str){
@@ -302,6 +315,7 @@ void Neurons::update_V(int step_current){
 
 	// record mean and std of membrane potentials
 	record_stats(step_current);
+	record_LFP();
 	
 }
 
@@ -495,6 +509,14 @@ void Neurons::output_results(ofstream& output_file){
 		write2file(output_file, I_input_std);
 	}
 	
+	// POPD007 # local field potential
+	if (LFP_record){
+		output_file << indicator << " POPD007" << endl;
+		output_file << pop_ind << delim << endl;
+		write2file(output_file, LFP);
+	}
+	
+	
 	// POPD005 # E-I ratio for each neuron
 	if (stats_record){
 		output_file << indicator << " POPD005" << endl;
@@ -507,6 +529,7 @@ void Neurons::output_results(ofstream& output_file){
 		output_file << indicator << " SAMF001" << endl;
 		output_file << samp_file_name << endl;
 	}
+
 
 	/* // This following output protocol is deprecated due to poor memeory performance
 	// POPD004 # sampled neuron data
@@ -588,7 +611,16 @@ void Neurons::write2file(ofstream& output_file, vector<double>& v){
 	else {output_file << " " << endl;}
 }
 
-
+void Neurons::record_LFP(){
+	if (LFP_record){
+		LFP.push_back(0.0);
+		for (int i = 0; i < N; ++i){
+			if (LFP_neurons[i]){
+				LFP.back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
+			}
+		} 
+	}
+}
 
 
 void Neurons::record_stats(int step_current){
