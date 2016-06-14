@@ -10,7 +10,7 @@ seed = 1;
 % FID is the main input file, FID_syn is the input file with the synaptic
 % connectivity definitions (could be very large).
 [FID, FID_syn] = new_ygin_files_and_randseed(seed);
-
+% If no FID_syn is needed, use FID = new_ygin_files_and_randseed(seed, 0)
 
 %%%% Define some basic parameters
 % Time step (ms)
@@ -131,6 +131,15 @@ K_II = g_II*ones(size(I_II)); % identical coupling strength
 D_II = rand(size(I_II))*5; % uniformly random conduction delay between 0 and 5 ms
 writeChemicalConnection(FID_syn, syn_type,  pop_pre, pop_post, I_II, J_II, K_II, D_II);
 %%%%%%%%%%%%%%%%%%% Chemical Connections Done %%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%% Use an existing synapse connectivity definition file instead of
+% generating a new one:
+% writeSynFilename(FID, 'path/to/existing/XXX.ygin_syn')
+% In this case, you should use "FID = new_ygin_files_and_randseed(seed, 0)"
+% to avoid creating an empty ygin_syn file.
+
+
 
 %%%% Define non-default synapse parameters
 writeSynPara(FID, 'tau_decay_GABA', 3); 
