@@ -15,12 +15,15 @@ end
 if ~isempty(files)
     % Read ygout file(s) specified by "name" and write data to "OutData"
     for id_out = 1:length(files)
-        fprintf('Processing ygout_samp file No.%d out of %d...\n', id_out, length(files));
-        fprintf('\t Current ReadYGSamp file is: %s\n', files{id_out});
-        FID = fopen(files{id_out},'wr');
+        FID = fopen(files{id_out},'r');
         % prepare containers
         neuron_sample = [];
         saved = 0;
+        if FID == -1
+            continue;
+        end
+        fprintf('Processing ygout_samp file No.%d out of %d...\n', id_out, length(files));
+        fprintf('\t Current ReadYGSamp file is: %s\n', files{id_out});
         while ~feof(FID)
             tline = fgetl(FID);
             % search for data-info line
@@ -57,8 +60,9 @@ if ~isempty(files)
             save([path, file_name,'_samp.mat'],'neuron_sample')
             saved = 1;
         end
+        fclose(FID);
         if saved == 1
-            delete(FID);
+            delete(files{id_out});
         end
         %fclose(FID);
         disp('Done');

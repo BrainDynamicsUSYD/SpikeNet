@@ -313,7 +313,7 @@ if ~isempty(files)
                     end
                     tline = fgetl(FID);
                     scan_temp = textscan(tline, '%s', 'Delimiter', ',');
-                    OutData{id_out}.samp_file{length(OutData{id_out}.samp_file)+1} = scan_temp{1};o
+                    OutData{id_out}.samp_file{length(OutData{id_out}.samp_file)+1} = scan_temp{1}{1};
                    
                 elseif strfind(tline, 'explanatory variable')
                     tline = fgetl(FID);
