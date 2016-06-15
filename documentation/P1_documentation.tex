@@ -90,9 +90,8 @@ For those who have access to a high-performance computing cluster with PBS, Spik
 \item Change it to executable: \mylstinline{chmod +x all_in_one.sh}
 \item Edit the following variables in the bash script accordingly: 
 \begin{itemize}
+\item {\footnotesize MATLAB\_SOURCE\_PATH\_2=`your\_path'}
 \item {\footnotesize MATLAB\_PRE\_PROCESS\_FUNC=`your\_function'}
-\item {\footnotesize MATLAB\_POST\_PROCESS\_FUNC=`your\_function'}
-\item {\footnotesize MATLAB\_SOURCE\_PATH=`SpikeNet'}
 \end{itemize}
 \item Make a directory for PBS output: \mylstinline{mkdir PBSout}
 \item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
@@ -102,8 +101,7 @@ For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 Here are some basic tips on git.
 \begin{itemize}
 \item To get the most recent version of SpikeNet: \mylstinline{git pull origin master}
-\item Avoid directly modifying any existing files in SpikeNet unless you are a developer. Create your own files.
-\end{itemize} 
+\item Avoid directly modifying any existing files in SpikeNet unless you are a developer. Create another directory alongside SpikeNet and put all of your files there.\end{itemize} 
 
 \section{Matlab user interface}
 \label{sec:matlab user interface}

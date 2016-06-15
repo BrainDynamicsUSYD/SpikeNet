@@ -38,24 +38,6 @@ printf "\n"
 ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 
 
-cd ${DATA_DIR};
-matdone=`ls *RYG.mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
-ygoutdone=`ls *ygout | sed -n '/^'${ID}'-.*ygout$/p'| wc -l`;
-cd ${PBS_O_WORKDIR};
-
-
-if [ "${matdone}" == "1" ]; then
-	echo ${ID} has been processed till RYG.mat;
-
-elif [ "${ygoutdone}" == "1" ]; then
-	echo ${ID} has been processed till ygout;
-	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout); # Simulate and output .ygout file
-	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
-						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
-						   cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
-else
-	echo  ${ID} has not been processed yet;
 	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
 	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , \
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
@@ -73,7 +55,7 @@ else
 			               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 	# the single quote here is for matlab to recognize string
 	# the double quote here is for shell to expand macros.
-fi 
+
 
 
 # zip files if mat done # It's NOT safe to use zip in PBS array job!!!!1
