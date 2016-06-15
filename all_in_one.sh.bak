@@ -15,7 +15,8 @@ DATA_DIR="tmp_data"
 MATLAB_PRE_PROCESS_FUNC="main_cc_embed_search_STD_2_LFP"
 CPP_MAIN_FUNC="simulator"
 MATLAB_POST_PROCESS_FUNC="PostProcessYG"
-MATLAB_SOURCE_PATH='source2'
+MATLAB_SOURCE_PATH='SpikeNet'
+MATLAB_SOURCE_PATH_2='SpikeNet'
 
 # copy this script to data directory
 me=`basename $0`;
@@ -50,11 +51,15 @@ elif [ "${ygoutdone}" == "1" ]; then
 	echo ${ID} has been processed till ygout;
 	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout); # Simulate and output .ygout file
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
+	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+						   cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 else
 	echo  ${ID} has not been processed yet;
 	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , cd('${DATA_DIR}'), ${MATLAB_PRE_PROCESS_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
+	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , \
+						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+						   cd('${DATA_DIR}'), ${MATLAB_PRE_PROCESS_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
 	${CPP_MAIN_FUNC} ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
 	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
@@ -63,7 +68,9 @@ else
 	# double quote "" prevents shell from expanding meta-characters like "*" and "?"
 	# single quote '' prevents almost anything from happening to the text
 	# back quote `` means command substitution
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
+	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+			               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 	# the single quote here is for matlab to recognize string
 	# the double quote here is for shell to expand macros.
 fi 
