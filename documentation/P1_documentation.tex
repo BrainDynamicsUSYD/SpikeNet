@@ -9,6 +9,8 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage[misc]{ifsym}
 \usepackage[utf8]{inputenc}
+\usepackage[numbered, framed]{mcode}
+\usepackage[textwidth=365pt]{geometry}
 
 \newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
  
@@ -77,7 +79,8 @@ Following are the steps to use the Matlab user interface.
 \item Run the simulator with the input files: \mylstinline{cd tmp_data; ../simulator *ygin;}
 \item Start Matlab: \mylstinline{cd ..; matlab -nodisplay}
 \item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
-\item Parse the output files, run some basic post-processing and visualization: \mylstinline{cd ../tmp_data; PostProcessYG()}
+\item Parse the output files, run some basic post-processing and visualization: 
+\newline \mylstinline{cd ../tmp_data; PostProcessYG()}
 \item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
 \end{itemize}
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
@@ -104,7 +107,9 @@ Here are some basic tips on git.
 
 \section{Matlab user interface}
 \label{sec:matlab user interface}
-See main\_demo.m for a complete list of available case-building matlab functions and their usages.
+See main\_demo.m for a complete list of available case-building matlab functions and their usages. Each such function implements one particular input protocol.
+
+\lstinputlisting{../main_demo.m}
 
 (More need to be added on the available post-processing Matlab functions. SpikeNet has a variety of statistical analysis and visualization tools for spiking networks.)
 
@@ -205,22 +210,22 @@ Note that the protocols use three special characters, including ``\textgreater''
 \begin{lstlisting}[mathescape]
 
 > INIT001 # number of neurons in each population
-	N1, N2, ...,
+	N1, N2, $\dots$,
 
 > INIT002 # time step length and total number of steps
 	dt (ms), step_tot,
 
-> INIT003 # random initial distributions for V (deprecated)
-	p_fire_pop1 (range ($-\infty$,1]), ..., p_fire_popN, 
+> INIT003 # random initial distributions $\text{for}$ V (deprecated)
+	p_fire_pop1 (range ($-\infty$,1]), $\dots$, p_fire_popN, 
 
 > INIT004 # external Gaussian currents
 	pop_ind, 
-	mean_1 (nA), mean_2, ...,  mean_N, (for each neuron)
-	std_1 (nA), std_2, ...,  std_N, 
+	mean_1 (nA), mean_2, $\dots$,  mean_N, ($\text{for}$ each neuron)
+	std_1 (nA), std_2, $\dots$,  std_N, 
 
 > INIT005 # external Poissonian spikes
 	pop_ind, type_ext, K_ext ($\mu$S), Num_ext, ia, ib,
-	rate_1 (Hz), rate_2, ..., rate_step_tot
+	rate_1 (Hz), rate_2, $\dots$, rate_step_tot
 
 > INIT006 # chemical connection definition
 	type, pop_ind_pre, pop_ind_post,
@@ -241,9 +246,9 @@ Note that the protocols use three special characters, including ``\textgreater''
 > INIT010 # add spike-frequency adaptation 
 	pop_ind,
 
-> INIT011 # random initial conditions for V and firing probabilities
-	r_V0_pop1 (range (0,1]), ...,r_V0_popN, 
-	p_fire_pop1 (range (0,1]), ..., p_fire_popN, 
+> INIT011 # random initial conditions $\text{for}$ V and firing prob
+	r_V0_pop1 (range (0,1]), $\dots$,r_V0_popN, 
+	p_fire_pop1 (range (0,1]), $\dots$, p_fire_popN, 
 	
 > SYNF001 # non-default synapse definition file name
 	path/to/file_name (no comma!)
@@ -255,27 +260,27 @@ Note that the protocols use three special characters, including ``\textgreater''
 	pop_ind, number_of_parameters,
 	parameter_name1, value1,
 	parameter_name2, value2,
-	...
+	$\dots$
  
 > PARA002 # non-default synapse parameter
 	number_of_parameters,
 	parameter_name1, value1,
 	parameter_name2, value2,
-	...
+	$\dots$
 
 > SAMP001 # neuron data sampling 
 	pop_ind,
 	data_type (logical vector),
-	ind1, ind2, ..., indX, (sample neuron indices)
-	1, 1, 0, 0, ..., (1-by-step_tot logical values)
+	ind1, ind2, $\dots$, indX, (sample neuron indices)
+	1, 1, 0, 0, $\dots$, (1-by-step_tot logical values)
 	# Note that data_type specifies sample data types
 	# and it must correspond to 
 	# [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext]
 
 > SAMP002 # synapse data sampling 
 	pop_ind_pre, pop_ind_post, syn_type,
-	ind1, ind2, ..., indX, (post-synaptic sample neuron indices)
-	1, 1, 0, 0, ..., (1-by-step_tot logical values)
+	ind1, $\dots$, indX, (post-synaptic sample neuron indices)
+	1, 1, 0, 0, $\dots$, (1-by-step_tot logical values)
 	
 > SAMP003 # neuron population statistical data record
 	pop_ind,
@@ -285,7 +290,7 @@ Note that the protocols use three special characters, including ``\textgreater''
 
 > SAMP005 # local field potential data record
 	pop_ind,
-	1, 0, 0, 1, ..., (1-by-N logical values)
+	1, 0, 0, 1, $\dots$, (1-by-N logical values)
 	
 \end{lstlisting}
 
@@ -295,7 +300,7 @@ The output files are plain text files.
 The default output filename is ``filename-X.ygout'', where X is a time-stamp that uniquely marks the output file so that multiple simulations can be run for the same input files.
 For data completeness, the corresponding input file will be attached to the output file.
 Following is the complete list of the output data protocols.
-\begin{lstlisting}
+\begin{lstlisting}[mathescape]
 
 > KILL002 # step at which runaway activity is killed
 	step_killed,
@@ -310,57 +315,57 @@ Following is the complete list of the output data protocols.
 	pop_ind, number_of_parameters,
 	parameter_name1, value1,
 	parameter_name2, value2,
-	...
+	$\dots$
 
 > POPD003 # neuron population statistical data
 	pop_ind,
-	V_mean_t1, V_mean_t2, ... (1-by-step_tot)
-	V_std_t1, V_std_t2, ... (1-by-step_tot)
-	I_input_mean_t1, I_input_mean_t2, ... (1-by-step_tot)
-	I_input_std_t1, I_input_std_t2, ... (1-by-step_tot)
+	V_mean_t1, V_mean_t2, $\dots$ (1-by-step_tot)
+	V_std_t1, V_std_t2, $\dots$ (1-by-step_tot)
+	I_input_mean_t1, I_input_mean_t2, $\dots$ (1-by-step_tot)
+	I_input_std_t1, I_input_std_t2, $\dots$ (1-by-step_tot)
 	
 > POPD004 # sampled neuron data (deprecated)
 	pop_ind, number_of_sample_neurons,
-	data_name1, ..., data_nameX,
+	data_name1, $\dots$, data_nameX,
 	data_1 (sampled_neurons-by-sampled_steps matrix),
 	data_2 (sampled_neurons-by-sampled_steps matrix),
-	...
+	$\dots$
 	data_X (sampled_neurons-by-sampled_steps matrix),
 
 
-> POPD005 # E-I ratio for each neuron
+> POPD005 # E-I ratio $\text{for}$ each neuron
 	pop_ind,
-	EI_ratio_1, EI_ratio_2, ... (1-by-N),
+	EI_ratio_1, EI_ratio_2, $\dots$ (1-by-N),
 	
 > SAMF001 # sampled data file name
 	path/to/file_name (no comma!)
 
 > POPD006 # sampled neuron data
 	pop_ind, number_of_neurons times number_of_steps
-	data_name1, ..., data_nameX,
+	data_name1, $\dots$, data_nameX,
 	step_1 (sampled_neurons-by-data_types matrix),
 	step_2 (sampled_neurons-by-data_types matrix),
-	...
+	$\dots$
 	step_X (sampled_neurons-by-data_types matrix),
 	
 > POPD007 # local field potential data
 	pop_ind, 
-	LFP_1, LFP_2, ..., LFP_step_tot,
+	LFP_1, LFP_2, $\dots$, LFP_step_tot,
 	
 > SYND001 # synaptic connection parameters
 	number_of_parameters,
 	parameter_name1, value1,
 	parameter_name2, value2,
-	...
+	$\dots$
 
 > SYND002 # sampled synapse  data
-	pop_ind_pre, pop_ind_post, syn_type, number_of_sample_neurons,
+	pop_ind_pre, pop_ind_post, syn_type, no_of_sample_neurons,
 	data (sampled_neurons-by-sampled_steps matrix),
 
 > SYND003 # synapse statistical data
 	pop_ind_pre, pop_ind_post, syn_type,
-	I_mean_t1, I_mean_t2, ... (1-by-step_tot)
-	I_std_t1, I_std_t2, ... (1-by-step_tot)
+	I_mean_t1, I_mean_t2, $\dots$ (1-by-step_tot)
+	I_std_t1, I_std_t2, $\dots$ (1-by-step_tot)
 	
 	
 
