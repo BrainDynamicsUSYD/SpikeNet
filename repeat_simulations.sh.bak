@@ -14,7 +14,6 @@ cd "$PBS_O_WORKDIR"
 DATA_DIR="tmp_data"
 MATLAB_SOURCE_PATH='SpikeNet'
 MATLAB_SOURCE_PATH_2='SpikeNet'
-MATLAB_PRE_PROCESS_FUNC="main_cc_embed_search_STD_2_LFP"
 MATLAB_POST_PROCESS_FUNC="PostProcessYG"
 CPP_MAIN_FUNC="simulator"
 
@@ -37,11 +36,6 @@ printf "\n"
 
 ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 
-
-	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , \
-						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
-						   cd('${DATA_DIR}'), ${MATLAB_PRE_PROCESS_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
 	${CPP_MAIN_FUNC} ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
 	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
