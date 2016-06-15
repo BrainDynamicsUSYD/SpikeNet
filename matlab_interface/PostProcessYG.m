@@ -35,6 +35,12 @@ for id_out = 1:num_files
     % HistogramsYG(R,save_fig);
     SaveRYG(R);
     disp('Done');
+    for ind = 1:length(R)
+        if isfield(R{ind}, 'samp_file')
+            Read_and_save_YGSamp(R{ind}.samp_file);
+        end
+    end
+   
 end
 
 

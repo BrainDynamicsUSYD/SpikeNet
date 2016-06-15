@@ -308,10 +308,12 @@ if ~isempty(files)
                     OutData{id_out}.N = scan_temp{1};
                     OutData{id_out}.Num_pop = length(OutData{id_out}.N);
                 elseif strfind(tline,'SAMF001')
+                    if  ~isfield(OutData{id_out},'samp_file')
+                        OutData{id_out}.samp_file = cell(0,0);
+                    end
                     tline = fgetl(FID);
                     scan_temp = textscan(tline, '%s', 'Delimiter', ',');
-                    samp_file = scan_temp{1};
-                    ReadYGSamp( samp_file )
+                    OutData{id_out}.samp_file{length(OutData{id_out}.samp_file)+1} = scan_temp{1};o
                    
                 elseif strfind(tline, 'explanatory variable')
                     tline = fgetl(FID);
