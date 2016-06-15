@@ -60,9 +60,11 @@ else
 	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , \
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${DATA_DIR}'), ${MATLAB_PRE_PROCESS_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
-	${CPP_MAIN_FUNC} ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
-	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
+	cd ${DATA_DIR};
+	${PBS_O_WORKDIR}/${CPP_MAIN_FUNC} ${ID}-*.ygin; # Simulate and output .ygout file
+	OUTPUTFILE=$(echo ${ID}-*.ygout) # why here bash is different from c-shell?? 
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
+	cd ${PBS_O_WORKDIR};
 	# double quote here allows the real value of ${var} to be shown, otherwise echo will process it
 	# data post-process in matlab 
 	# double quote "" prevents shell from expanding meta-characters like "*" and "?"

@@ -35,20 +35,21 @@ echo "All_in_one: Current PBS_ARRAYID is ${PBS_ARRAYID}"
 printf "\n"
 
 ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
-
-	${CPP_MAIN_FUNC} ${DATA_DIR}/${ID}-*.ygin; # Simulate and output .ygout file
-	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout) # why here bash is different from c-shell?? 
-	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
-	# double quote here allows the real value of ${var} to be shown, otherwise echo will process it
-	# data post-process in matlab 
-	# double quote "" prevents shell from expanding meta-characters like "*" and "?"
-	# single quote '' prevents almost anything from happening to the text
-	# back quote `` means command substitution
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
-						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
-			               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
-	# the single quote here is for matlab to recognize string
-	# the double quote here is for shell to expand macros.
+cd ${DATA_DIR};
+${PBS_O_WORKDIR}/${CPP_MAIN_FUNC} ${ID}-*.ygin; # Simulate and output .ygout file
+OUTPUTFILE=$(echo ${ID}-*.ygout) # why here bash is different from c-shell?? 
+echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
+cd ${PBS_O_WORKDIR}
+# double quote here allows the real value of ${var} to be shown, otherwise echo will process it
+# data post-process in matlab 
+# double quote "" prevents shell from expanding meta-characters like "*" and "?"
+# single quote '' prevents almost anything from happening to the text
+# back quote `` means command substitution
+matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+					   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+		               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
+# the single quote here is for matlab to recognize string
+# the double quote here is for shell to expand macros.
 
 
 
