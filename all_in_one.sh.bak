@@ -50,7 +50,7 @@ elif [ "${ygoutdone}" == "1" ]; then
 	echo ${ID} has been processed till ygout;
 	OUTPUTFILE=$(echo ${DATA_DIR}/${ID}-*.ygout); # Simulate and output .ygout file
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), $cd('${DATA_DIR}'), {MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
+	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 else
 	echo  ${ID} has not been processed yet;
 	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
@@ -63,7 +63,7 @@ else
 	# double quote "" prevents shell from expanding meta-characters like "*" and "?"
 	# single quote '' prevents almost anything from happening to the text
 	# back quote `` means command substitution
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), $cd('${DATA_DIR}'), {MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
+	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 	# the single quote here is for matlab to recognize string
 	# the double quote here is for shell to expand macros.
 fi 
