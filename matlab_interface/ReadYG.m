@@ -62,13 +62,10 @@ if ~isempty(files)
         OutData{id_out}.spike_hist = cell(0,0);
         OutData{id_out}.num_spikes = cell(0,0);
         OutData{id_out}.num_ref = cell(0,0);
-        OutData{id_out}.neuron_sample = [];
-        OutData{id_out}.syn_sample = cell(0,0);
-        OutData{id_out}.syn_stats = cell(0,0);
-        OutData{id_out}.syn_tmp_data = cell(0,0);
         OutData{id_out}.ExplVar = [];
         OutData{id_out}.PopPara = cell(0,0);
         OutData{id_out}.SynPara = cell(0,0);
+
         
         while ~feof(FID)
             tline = fgetl(FID);
@@ -78,7 +75,7 @@ if ~isempty(files)
             elseif strcmp(tline(1), '>')
                 
                 
-                if strfind(tline,'KILL002');
+                if strfind(tline,'KILL002')
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%f','Delimiter',','); % using %d will give step_killed a type int32, which will bring trouble!
                     OutData{id_out}.step_killed = scan_temp{1} + 1; % Be careful here! C/C++ index convection!
@@ -186,9 +183,22 @@ if ~isempty(files)
                     IE_ratio = transpose(scan_temp{1});
                     OutData{id_out}.neuron_stats.IE_ratio{pop_ind} = IE_ratio;
                     
-                    
+                elseif strfind(tline,'POPD007')
+                    tline = fgetl(FID);
+                    scan_temp = textscan(tline,'%d','Delimiter',',');
+                    pop_ind = scan_temp{1}+1; % be careful here!
+                    tline = fgetl(FID);
+                    scan_temp = textscan(tline,'%f','Delimiter',',');
+                    LFP = transpose(scan_temp{1});
+                    if ~isfield(OutData{id_out}, 'LFP')
+                        OutData{id_out}.LFP = cell(0,0);
+                    end
+                    OutData{id_out}.LFP{pop_ind} = LFP;
                     
                 elseif strfind(tline,'SYND002')
+                    if ~isfield(OutData{id_out}, 'syn_sample')
+                        OutData{id_out}.syn_sample = cell(0,0);
+                    end
                     tline = fgetl(FID);
                     scan_temp = textscan(tline, '%d', 'Delimiter', ',');
                     OutData{id_out}.syn_sample{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
@@ -221,6 +231,9 @@ if ~isempty(files)
                     
                     
                 elseif strfind(tline,'SYND003')
+                    if ~isfield(OutData{id_out}, 'syn_stats')
+                        OutData{id_out}.syn_stats = cell(0,0);
+                    end      
                     tline = fgetl(FID);
                     scan_temp = textscan(tline, '%d', 'Delimiter', ',');
                     OutData{id_out}.syn_stats{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
@@ -236,6 +249,9 @@ if ~isempty(files)
                     OutData{id_out}.syn_stats{end}.I_std = I_std;
                     
                 elseif strfind(tline,'SYND004')
+                    if ~isfield(OutData{id_out}, 'syn_tmp_data')
+                        OutData{id_out}.syn_tmp_data = cell(0,0);
+                    end   
                     tline = fgetl(FID);
                     scan_temp = textscan(tline, '%d', 'Delimiter', ',');
                     OutData{id_out}.syn_tmp_data{end+1,1}.pop_ind_pre = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
