@@ -332,7 +332,9 @@ if ~isempty(files)
                         
                     end
                     
-                    
+                elseif strfind(tline, 'INIT004')
+                elseif strfind(tline, 'INIT008') 
+                elseif strfind(tline, 'SAMP005') 
                 elseif strfind(tline, 'KILL001') 
                 elseif strfind(tline, 'PARA001')
                 elseif strfind(tline, 'INIT005')
