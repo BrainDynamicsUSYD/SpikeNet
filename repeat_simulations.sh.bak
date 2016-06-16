@@ -22,7 +22,7 @@ me=`basename $0`;
 THIS_FILE=$(echo ${me});
 cp ${THIS_FILE} ${DATA_DIR}/${THIS_FILE}.log;
 # copy the matlab main function to data directory
-mfile=`find . -name "${MATLAB_PRE_PROCESS_FUNC}.m"`;
+mfile=`find . -name "${MATLAB_POST_PROCESS_FUNC}.m"`;
 MATLAB_FILE=$(echo ${mfile});
 MATLAB_FILENAME=`basename ${mfile}`;
 cp ${MATLAB_FILE} ${DATA_DIR}/${MATLAB_FILENAME}.log;
