@@ -7,7 +7,7 @@ function main_cc_embed_search_STD_2_LFP(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 40*sec; % use 10 second!
+step_tot = 20*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -16,7 +16,7 @@ delay = 2;
 
 in_deg_scale_exp = -0.5;
 
-for LFP_range = [1 1.5 2]
+for LFP_range = [0.5 1 1.5 2]
 for phi_E = 1
  phi_I = phi_E;
 for STD_on = [1 0]
@@ -57,7 +57,7 @@ for EE_factor = [0.5 ]; % 0.6?
                             save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...
                                 '_in_degree.mat'], 'in_degree');
                             [~,ind_sorted] = sort(in_degree);
-                            sample_neuron = ind_sorted(1:500:end);
+                            sample_neuron = ind_sorted(1:2000:end);
                             
                             
  
