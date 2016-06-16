@@ -56,11 +56,17 @@ for i = 1:num_files
 %     grid = R_temp.grid;
 %     save(files{i},'grid', '-append');
     
-    R_temp = get_stPR(R_temp);
-    stPR = R_temp.stPR;
-    save(files{i},'stPR', '-append');
+%     R_temp = get_stPR(R_temp);
+%     stPR = R_temp.stPR;
+%     save(files{i},'stPR', '-append');
     
 
+    R_temp = get_SWR(R_temp);
+    SWR = R_temp.SWR;
+    save(files{i},'SWR', '-append');
+    plot_SWR({R_temp}, save_fig);
+    
+    
     % R_temp = rmfield(R_temp,{'C_rate','C_label','up_down_analysis'});
     
     
