@@ -63,7 +63,8 @@ for r_num = 1:Result_num
         if save_figure == 1
             fprintf('\t Saving figure...');
             print(h_SWR, '-dpdf', strcat( R.stamp, '_SWR_',sprintf('%02g', seg)));
-            delete(h_SWR);
+            % delete(h_SWR);
+            close gcf; clear gcf;
             fprintf('done.\n');
         else
             next = input('\t Next figure?');

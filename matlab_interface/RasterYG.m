@@ -75,7 +75,8 @@ for r_num = 1:Result_num
         if save_figure == 1
             fprintf('\t Saving figure...');
             print(h_raster, '-dpdf', strcat( R.stamp, '_raster_',sprintf('%02g', seg)));
-            delete(h_raster);
+            % delete(h_raster);
+            close gcf; clear gcf;
             fprintf('done.\n');
         else
             next = input('\t Next figure?');
