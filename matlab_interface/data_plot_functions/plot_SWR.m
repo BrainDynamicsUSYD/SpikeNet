@@ -38,11 +38,11 @@ for r_num = 1:Result_num
             'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
         
         t = seg_ind*dt*1e-3; % second
-        subplot(3,1,1);
-        ax1 = plot(t, SWR.LFP_broad(seg_ind));
+        ax1 = subplot(3,1,1);
+        plot(t, SWR.LFP_broad(seg_ind));
         ylabel('Broadband LFP')
-        subplot(3,1,2);
-        ax2 = plot(t, SWR.LFP_ripple(seg_ind));
+        ax2 = subplot(3,1,2);
+        plot(t, SWR.LFP_ripple(seg_ind));
         ylabel('Rippleband LFP')
         xlabel('t (sec)');
         
