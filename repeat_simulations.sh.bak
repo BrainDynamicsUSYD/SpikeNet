@@ -37,7 +37,10 @@ printf "\n"
 ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 cd ${DATA_DIR};
 ${PBS_O_WORKDIR}/${CPP_MAIN_FUNC} ${ID}-*.ygin; # Simulate and output .ygout file
-OUTPUTFILE=$(echo ${ID}-*.ygout) # why here bash is different from c-shell?? 
+OUTPUTFILE_ALL=$(echo ${ID}-*.ygout) # why here bash is different from c-shell?? 
+# get the last (latest) ygout file
+set -- $OUTPUTFILE_ALL
+OUTPUTFILE=$(echo "${@: -1}")
 echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
 cd ${PBS_O_WORKDIR}
 # double quote here allows the real value of ${var} to be shown, otherwise echo will process it
