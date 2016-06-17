@@ -16,15 +16,7 @@ MATLAB_SOURCE_PATH='SpikeNet'
 MATLAB_SOURCE_PATH_2='SpikeNet'
 MATLAB_POST_PROCESS_FUNC="PostProcessMAT"
 
-# copy this script to data directory
-me=`basename $0`;
-THIS_FILE=$(echo ${me});
-cp ${THIS_FILE} ${DATA_DIR}/${THIS_FILE}.log;
-# copy the matlab main function to data directory
-mfile=`find . -name "${MATLAB_POST_PROCESS_FUNC}.m"`;
-MATLAB_FILE=$(echo ${mfile});
-MATLAB_FILENAME=`basename ${mfile}`;
-cp ${MATLAB_FILE} ${DATA_DIR}/${MATLAB_FILENAME}.log;
+
 
 
 echo "%%%%%%%%%%%%%%%%%%%%%%%>>>>>>>>>>>>>>>>>>%%%%%%%%%%%%%%%%%%%%%%%%%%"
@@ -32,6 +24,17 @@ A=`date '+%s'`
 echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 echo "ppmat: Current PBS_ARRAYID is ${PBS_ARRAYID}"
 printf "\n"
+
+# copy this script to data directory
+me=`basename $0`;
+THIS_FILE=$(echo ${me});
+cp ${THIS_FILE} ${DATA_DIR}/${A}-${THIS_FILE}.log;
+# copy the matlab main function to data directory
+mfile=`find . -name "${MATLAB_POST_PROCESS_FUNC}.m"`;
+MATLAB_FILE=$(echo ${mfile});
+MATLAB_FILENAME=`basename ${mfile}`;
+cp ${MATLAB_FILE} ${DATA_DIR}/${A}-${MATLAB_FILENAME}.log;
+
 
 ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 cd ${DATA_DIR};

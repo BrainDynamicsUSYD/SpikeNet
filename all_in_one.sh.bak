@@ -18,16 +18,6 @@ MATLAB_PRE_PROCESS_FUNC="main_cc_embed_search_STD_2_LFP"
 MATLAB_POST_PROCESS_FUNC="PostProcessYG"
 CPP_MAIN_FUNC="simulator"
 
-# copy this script to data directory
-me=`basename $0`;
-THIS_FILE=$(echo ${me});
-cp ${THIS_FILE} ${DATA_DIR}/${THIS_FILE}.log;
-# copy the matlab main function to data directory
-mfile=`find . -name "${MATLAB_PRE_PROCESS_FUNC}.m"`;
-MATLAB_FILE=$(echo ${mfile});
-MATLAB_FILENAME=`basename ${mfile}`;
-cp ${MATLAB_FILE} ${DATA_DIR}/${MATLAB_FILENAME}.log;
-
 
 echo "%%%%%%%%%%%%%%%%%%%%%%%>>>>>>>>>>>>>>>>>>%%%%%%%%%%%%%%%%%%%%%%%%%%"
 A=`date '+%s'`
@@ -36,6 +26,17 @@ echo "All_in_one: Current PBS_ARRAYID is ${PBS_ARRAYID}"
 printf "\n"
 
 ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
+
+
+# copy this script to data directory
+me=`basename $0`;
+THIS_FILE=$(echo ${me});
+cp ${THIS_FILE} ${DATA_DIR}/${A}-${THIS_FILE}.log;
+# copy the matlab main function to data directory
+mfile=`find . -name "${MATLAB_PRE_PROCESS_FUNC}.m"`;
+MATLAB_FILE=$(echo ${mfile});
+MATLAB_FILENAME=`basename ${mfile}`;
+cp ${MATLAB_FILE} ${DATA_DIR}/${A}-${MATLAB_FILENAME}.log;
 
 
 cd ${DATA_DIR};
