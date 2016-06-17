@@ -24,21 +24,23 @@ echo "All_in_one: Current PBS_ARRAYID is ${PBS_ARRAYID}"
 printf "\n"
 
 
+FIRST_LOOP=`printf "%04d" 1`; # so loop must start from 1
+ID=`printf "%04d" ${PBS_ARRAYID}`; # 4 digits, padded with leading  zeros
+if [ "${ID}" -eq "${FIRST_LOOP}" ]; then
+	# copy this script to data directory
+	me=`basename $0`;
+	THIS_FILE=$(echo ${me});
+	cp ${THIS_FILE} ${DATA_DIR}/${A}-${THIS_FILE}.log;
+	# copy the matlab main function to data directory
+	mfile=`find . -name "${MATLAB_POST_PROCESS_FUNC}.m"`;
+	MATLAB_FILE=$(echo ${mfile});
+	MATLAB_FILENAME=`basename ${mfile}`;
+	cp ${MATLAB_FILE} ${DATA_DIR}/${A}-${MATLAB_FILENAME}.log;
+fi
 
-# copy this script to data directory
-me=`basename $0`;
-THIS_FILE=$(echo ${me});
-cp ${THIS_FILE} ${DATA_DIR}/${A}-${THIS_FILE}.log;
-# copy the matlab main function to data directory
-mfile=`find . -name "${MATLAB_POST_PROCESS_FUNC}.m"`;
-MATLAB_FILE=$(echo ${mfile});
-MATLAB_FILENAME=`basename ${mfile}`;
-cp ${MATLAB_FILE} ${DATA_DIR}/${A}-${MATLAB_FILENAME}.log;
 
 
 
-
-ID=`printf "%04d" ${PBS_ARRAYID}`; # 3 digits, padded with leading  zeros
 cd ${DATA_DIR};
 ${PBS_O_WORKDIR}/${CPP_MAIN_FUNC} ${ID}-*.ygin; # Simulate and output .ygout file
 OUTPUTFILE_ALL=$(echo ${ID}-*.ygout) # why here bash is different from c-shell?? 
