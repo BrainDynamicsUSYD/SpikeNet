@@ -23,7 +23,7 @@ for EE_factor = 0.6; % 0.6?
             for degree_CV = [0.5] % 0.5?
                 for  P0_init = [0.1] % 0.25 gives P0_actual = 0.2
                     for I_ext_strength = [1.2 *ones(1,20)  1.1*ones(1,20)] 
-			for I_ext_std_ratio = 0.1
+                        for I_ext_std_ratio = 0.1
                         for  tau_c = [ 12 13 14 ]
                             
                             loop_num = loop_num + 1;

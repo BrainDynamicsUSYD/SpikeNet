@@ -288,8 +288,10 @@ Note that the protocols use three special characters, including ``\textgreater''
 	pop_ind_pre, pop_ind_post, syn_type,
 
 > SAMP005 # local field potential data record
-	pop_ind,
-	1, 0, 0, 1, $\dots$, (1-by-N logical values)
+	pop_ind, No_of_measures
+	1, 0, 0, 1, $\dots$, 
+	$\dots$
+	0, 0, 1, 1, $\dots$, (No_of_measures-by-N logical values)
 	
 \end{lstlisting}
 
@@ -348,8 +350,9 @@ Following is the complete list of the output data protocols.
 	step_X (sampled_neurons-by-data_types matrix),
 	
 > POPD007 # local field potential data
-	pop_ind, 
-	LFP_1, LFP_2, $\dots$, LFP_step_tot,
+	pop_ind,  No_of_measures, 
+	LFP_1, LFP_2, $\dots$, LFP_step_tot, (measure 1)
+	$\dots$ 
 	
 > SYND001 # synaptic connection parameters
 	number_of_parameters,

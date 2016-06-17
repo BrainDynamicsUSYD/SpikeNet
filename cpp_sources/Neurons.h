@@ -40,7 +40,7 @@ public:
 	
 	void start_stats_record();
 	void record_stats(int step_current); //
-	void start_LFP_record(vector<bool> LFP_neurons);
+	void start_LFP_record(vector< vector<bool> >& LFP_neurons);
 	void record_LFP();
 
 	void random_V(double firing_probability); // Generate random initial condition for V. This function is deprecated!
@@ -54,10 +54,10 @@ private:
 	void update_V(int step_current); // Update potential
 
 public:
-	void set_gaussian_I_ext(vector<double> mean, vector<double> std);
+	void set_gaussian_I_ext(vector<double>& mean, vector<double>& std);
 	
-	void add_sampling(vector<int> sample_neurons, vector<bool> sample_type, vector<bool> sample_time_points); 
-	void add_sampling_real_time(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input, string samp_file_name);
+	void add_sampling(vector<int>& sample_neurons, vector<bool>& sample_type, vector<bool>& sample_time_points); 
+	void add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name);
 
 		
 	void sample_data(int step_current);
@@ -135,9 +135,9 @@ ofstream samp_file; // someting is wrong here?
 
 	bool
 		LFP_record;
-	vector<bool> 
+	vector< vector<bool> >
 		LFP_neurons;
-	vector<double>
+	vector< vector<double> >
 		LFP;
 	
 	// parameters for Generate Gaussian random external current

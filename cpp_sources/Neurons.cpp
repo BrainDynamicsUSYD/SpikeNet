@@ -108,14 +108,19 @@ void Neurons::start_stats_record(){
 	IE_ratio.assign(N, 0.0);
 }
 
-void Neurons::start_LFP_record(vector<bool> LFP_neurons_input){
-	if (int(LFP_neurons_input.size()) != N){
+void Neurons::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
+	if (int(LFP_neurons_input[0].size()) != N){
 		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
 	}
 	else{
 		LFP_record = true;
-		LFP_neurons = LFP_neurons_input;
-		LFP.reserve(step_tot);
+		int n_LFP = int(LFP_neurons_input.size());
+		LFP_neurons.resize(n_LFP);
+		LFP.resize(n_LFP);
+		for (int ind = 0; ind < n_LFP; ++ind){
+			LFP_neurons[ind] = LFP_neurons_input[ind];
+			LFP[ind].reserve(step_tot);
+		}
 	}	
 }
 
@@ -320,7 +325,7 @@ void Neurons::update_V(int step_current){
 }
 
 
-void Neurons::add_sampling_real_time(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input, string samp_file_name_input){
+void Neurons::add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name_input){
 	sample_neurons = sample_neurons_input;
 	sample_type = sample_type_input;
 	sample_time_points = sample_time_points_input;
@@ -340,7 +345,7 @@ void Neurons::add_sampling_real_time(vector<int> sample_neurons_input, vector<bo
 
 
 
-void Neurons::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_type_input, vector<bool> sample_time_points_input){
+void Neurons::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input){
 	sample_neurons = sample_neurons_input;
 	sample_type = sample_type_input;
 	sample_time_points = sample_time_points_input;
@@ -391,7 +396,7 @@ void Neurons::sample_data(int step_current){
 }
 
 
-void Neurons::set_gaussian_I_ext(vector<double> mean, vector<double> std){
+void Neurons::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
 	I_ext_mean = mean;
 	I_ext_std = std;
 	
@@ -512,7 +517,7 @@ void Neurons::output_results(ofstream& output_file){
 	// POPD007 # local field potential
 	if (LFP_record){
 		output_file << indicator << " POPD007" << endl;
-		output_file << pop_ind << delim << endl;
+		output_file << pop_ind << delim << LFP.size() << delim << endl;
 		write2file(output_file, LFP);
 	}
 	
@@ -613,12 +618,14 @@ void Neurons::write2file(ofstream& output_file, vector<double>& v){
 
 void Neurons::record_LFP(){
 	if (LFP_record){
-		LFP.push_back(0.0);
-		for (int i = 0; i < N; ++i){
-			if (LFP_neurons[i]){
-				LFP.back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
-			}
-		} 
+		for (unsigned int ind = 0; ind < LFP_neurons.size(); ++ind){
+			LFP[ind].push_back(0.0);
+			for (int i = 0; i < N; ++i){
+				if (LFP_neurons[ind][i]){
+					LFP[ind].back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
+				}
+			} 
+		}
 	}
 }
 

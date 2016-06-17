@@ -59,7 +59,7 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector<int> spike_freq_adpt_setting; //
 	
 	vector<int> LFP_record_pop_ind; //
-	vector< vector<bool> > LFP_record_setting; //
+	vector< vector < vector<bool> > > LFP_record_setting; //
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
@@ -291,10 +291,14 @@ bool SimulatorInterface::import(string in_filename_input){
 			if (found != string::npos){// if found match
 				cout << "\t Reading LFP record settings..." << endl;
 				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
-				// int pop_ind;
+				// int pop_ind, sample_number;
 				LFP_record_pop_ind.push_back(read_next_entry<int>(line_ss));
+				int n = read_next_entry<int>(line_ss);
 				LFP_record_setting.resize(LFP_record_setting.size()+1);
-				read_next_line_as_vector(LFP_record_setting.back());
+				for (int ind = 0; ind < n; ++ind){
+					LFP_record_setting.back().resize(LFP_record_setting.back().size()+1);
+					read_next_line_as_vector(LFP_record_setting.back().back());
+				}
 				continue; // move to next line
 			}
 			

@@ -16,7 +16,7 @@ delay = 2;
 
 in_deg_scale_exp = -0.5;
 
-for LFP_range = [0.5 1 1.5 2]
+
 for phi_E = 1
  phi_I = phi_E;
 for STD_on = [1 0]
@@ -74,7 +74,10 @@ for EE_factor = [0.5 ]; % 0.6?
                             % Add LFP sampling
                             [Lattice, ~] = lattice_nD(2, hw);
                             dist_lattice = (Lattice(:,1).^2 + Lattice(:,2).^2).^0.5;
-                            LFP_neurons = (dist_lattice < hw*LFP_range);
+                            LFP_neurons = [];
+                            for LFP_range = [0.5 1 1.5 2]
+                                LFP_neurons = [LFP_neurons; transpose(dist_lattice < hw*LFP_range)]; %#ok<AGROW>
+                            end
                             writeLFPRecord(FID, 1, LFP_neurons);
                             
                             
@@ -174,7 +177,6 @@ for EE_factor = [0.5 ]; % 0.6?
                                 'I_ext_strength', I_ext_strength,...
                                 'P0_init', P0_init, ...
                                 'degree_CV', degree_CV,...
-                                'LFP_range', LFP_range,...
                                 'in_deg_scale_exp', in_deg_scale_exp, ...
                                 'tau_c', tau_c, ...
 				'STD_on', STD_on);
@@ -196,7 +198,6 @@ for EE_factor = [0.5 ]; % 0.6?
             end
         end
     end
-end
 end
 end
 end

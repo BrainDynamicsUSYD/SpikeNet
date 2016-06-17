@@ -16,10 +16,7 @@ hiFreq = 250;
 Wn = [lowFreq hiFreq]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
 LFP_broad = filter(b,a,LFP);
-% hilbert transformation
-LFP_broad = abs(hilbert(LFP_broad));
-% gaussian smoothing
-LFP_broad = conv( LFP_broad, Kernel,'same');
+
 
 % Butterworth filter
 order = 4; % 4th order
@@ -29,14 +26,14 @@ Wn = [lowFreq hiFreq]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
 
 LFP_ripple = filter(b,a,LFP);
-% hilbert transformation
-LFP_ripple = abs(hilbert(LFP_ripple));
-% gaussian smoothing
-LFP_ripple = conv( LFP_ripple, Kernel,'same');
+
+% hilbert transformation & gaussian smoothing
+LFP_ripple_hilbert = conv(abs(hilbert(LFP_ripple)), Kernel,'same');
 
 
 R.SWR.LFP_broad = LFP_broad;
 R.SWR.LFP_ripple = LFP_ripple;
+R.SWR.LFP_ripple_hilbert = LFP_ripple_hilbert;
 R.SWR.lowFreq = lowFreq;
 R.SWR.hiFreq = hiFreq;
 R.SWR.gauss_width = width;
