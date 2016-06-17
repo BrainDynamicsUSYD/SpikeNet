@@ -1,5 +1,5 @@
 
-function main_heterogeneous_search(varargin)
+function main_heterogeneous_LFP(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -9,7 +9,7 @@ function main_heterogeneous_search(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 8*sec; % use 10 second!
+step_tot = 20*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -73,6 +73,11 @@ for SpikeFreqAapt = [0 1]
                                                         end
                                                     end
                                                     
+                                                    loops_interesting = [1 4 11 13 14 15 16 18 21 23 31 33 35 37];
+                                                    if  sum(loops_interesting == loop_num) ~= 1
+                                                        continue;
+                                                    end
+                                                    
                                                     % seed the matlab rand function! The seed is global.
                                                     [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
                                                     
@@ -125,7 +130,7 @@ for SpikeFreqAapt = [0 1]
                                                     
                                                     
                                                     [~,ind_sorted] = sort(in_degree);
-                                                    sample_neuron = ind_sorted(1:250:end);
+                                                    sample_neuron = ind_sorted(1:500:end);
                                                     
                                                     % write basic parameters
                                                     writeBasicPara(FID, dt, step_tot, N);
@@ -147,6 +152,16 @@ for SpikeFreqAapt = [0 1]
                                                     if inh_STDP == 1
                                                         writeInhSTDP(FID, 2, 1, 1*sec);
                                                     end
+                                                    
+                                                     
+                                                    % Add LFP sampling
+                                                    [Lattice, ~] = lattice_nD(2, hw);
+                                                    dist_lattice = (Lattice(:,1).^2 + Lattice(:,2).^2).^0.5;
+                                                    LFP_neurons = [];
+                                                    for LFP_range = [0.5 1 1.5 2]
+                                                        LFP_neurons = [LFP_neurons; transpose(dist_lattice < hw*LFP_range)]; %#ok<AGROW>
+                                                    end
+                                                    writeLFPRecord(FID, 1, LFP_neurons);
                                                     
                                                     %%%%%%% write runaway killer
                                                     min_ms = 500; % 5 sec
