@@ -1,6 +1,7 @@
 #include "NeuronNetwork.h"
 #include "SimulatorInterface.h"
 #include <chrono> // #include <boost/chrono.hpp>
+#include <ctime>
 
 using namespace std;
 
@@ -637,10 +638,27 @@ bool SimulatorInterface::import(string in_filename_input){
 }
 
 void SimulatorInterface::simulate(){
-
+	clock_t begin = clock();
+	  
 	// simulate
-	for (int i = 0; i < network.step_tot; ++i){
-		network.update(i);
+	for (int step_current = 0; step_current < network.step_tot; ++step_current){
+		network.update(step_current);
+		/*---------------------------------------------------------------------*/
+		// Countdown
+		if (step_current == 0){
+			cout << "Commencing countdown, engines on..." << flush;	
+			// if not "flush", output will be delayed in buffer
+		}
+		int steps_left = network.step_tot - step_current - 1;
+		if ( (steps_left % (network.step_tot / 10)) == 0 ){
+			clock_t end = clock();
+			char str_min[80];
+			double elapsed_mins = double(end - begin) / CLOCKS_PER_SEC / 60.0;
+			sprintf(str_min, " (%0.1f min)...", elapsed_mins);
+			cout << steps_left / (network.step_tot / 10) << str_min << flush;
+		}
+		if (steps_left == 0){cout << endl;}
+		/*---------------------------------------------------------------------*/
 	}
 	cout << "Simulation done." << endl;
 	
