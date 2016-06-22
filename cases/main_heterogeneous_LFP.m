@@ -9,7 +9,7 @@ function main_heterogeneous_search(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 20*sec; % use 10 second!
+step_tot = 10*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -22,7 +22,7 @@ P0_init = 0.1;
 
 % parameter
 for SpikeFreqAapt = [0 1]
-    for in_out_r = [0.2 ];
+    for in_out_r = [0.2 0.4];
         for cn_scale_wire = [2 ];
             for cn_scale_weight = [2 ];
                 iter_num = 5;
@@ -48,7 +48,7 @@ for SpikeFreqAapt = [0 1]
                         
                         
                         
-                        for inh_STDP = [0 ];
+                        for inh_STDP = [0 1];
                             
                             
                             %  K_ee_mean is about 0.5, need 1000 in-coming connections.
@@ -57,11 +57,11 @@ for SpikeFreqAapt = [0 1]
                             %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                             
                             
-                            for g_EI = [ 14 18]*10^-3
+                            for g_EI = [ 14]*10^-3
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
-                                        for rate_ext = [0.2 0.2 0.4 0.4 0.6 0.6 0.8 0.8 ];
+                                        for rate_ext = [0.6 0.6 0.8 0.8  1 1 1.2 1.2 1.4 1.4];
                                             for  tau_c = [10]
                                                 loop_num = loop_num + 1;
                                                 
@@ -157,7 +157,7 @@ for SpikeFreqAapt = [0 1]
                                                 [Lattice, ~] = lattice_nD(2, hw);
                                                 dist_lattice = (Lattice(:,1).^2 + Lattice(:,2).^2).^0.5;
                                                 LFP_neurons = [];
-                                                for LFP_range = [0.5 1 1.5 2]
+                                                for LFP_range = [0.25 0.5 1 1.5 2]
                                                     LFP_neurons = [LFP_neurons; transpose(dist_lattice < hw*LFP_range)]; %#ok<AGROW>
                                                 end
                                                 writeLFPRecord(FID, 1, LFP_neurons);

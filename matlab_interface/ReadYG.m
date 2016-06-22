@@ -184,9 +184,6 @@ if ~isempty(files)
                     OutData{id_out}.neuron_stats.IE_ratio{pop_ind} = IE_ratio; clear IE_ratio;
                     
                 elseif strfind(tline,'POPD007')
-                    if ~isfield(OutData{id_out}, 'LFP')
-                        OutData{id_out}.LFP = cell(0,0);
-                    end
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%d','Delimiter',',');
                     pop_ind = scan_temp{1}(1)+1; % be careful here!
@@ -197,7 +194,7 @@ if ~isempty(files)
                         scan_temp = textscan(tline,'%f','Delimiter',',');
                         LFP = [LFP; transpose(scan_temp{1})]; %#ok<AGROW>
                     end
-                    OutData{id_out}.LFP{pop_ind} = LFP; clear LFP;
+                    OutData{id_out}.LFP.LFP{1, pop_ind} = LFP; clear LFP;
                     
                 elseif strfind(tline,'SYND002')
                     if ~isfield(OutData{id_out}, 'syn_sample')
@@ -232,7 +229,18 @@ if ~isempty(files)
                             OutData{id_out}.syn_sample{syn_ind}.t_ind = find(scan_temp{1}); % extract t_ind for pop_sample
                         end
                     end
-                    
+                elseif strfind(tline,'SAMP005')
+                    tline = fgetl(FID);
+                    scan_temp = textscan(tline,'%d','Delimiter',',');
+                    pop_ind = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
+                    samp_n = scan_temp{1}(2); 
+                    LFP_neurons = [];
+                    for i = 1:samp_n
+                            tline = fgetl(FID);
+                            scan_temp = textscan(tline,'%d','Delimiter',',');
+                            LFP_neurons = [LFP_neurons; logical(transpose(scan_temp{1}))]; %#ok<AGROW>
+                    end
+                    OutData{id_out}.LFP.LFP_neurons{1,pop_ind} = LFP_neurons; clear LFP_neurons;;
                     
                 elseif strfind(tline,'SYND003')
                     if ~isfield(OutData{id_out}, 'syn_stats')

@@ -7,7 +7,7 @@ function main_cc_embed_search_STD_2_LFP(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 20*sec; % use 10 second!
+step_tot = 10*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -16,9 +16,10 @@ delay = 2;
 
 in_deg_scale_exp = -0.5;
 
-
-for phi_E = 1
-    phi_I = phi_E;
+phi_mat = [ 1 1; 0.9 1; 1 1.1; 1.1 1.1; 1.2 1.2];
+for phi_ind = 1:5
+    phi_E = phi_mat(1,phia_ind);
+    phi_I = phi_mat(2,phi_ind);
     for STD_on = [1 0]
         discard_transient = 10; % ms
         for EE_factor = [0.5 ]; % 0.6?
@@ -26,7 +27,7 @@ for phi_E = 1
                 for EI_factor = [ 0.8 ]
                     for degree_CV = [0.1 ] % 0.5?
                         for  P0_init = [ 0.08 ] % 0.25 gives P0_actual = 0.2
-                            for I_ext_strength = [ 0.8*ones(1,10) ]% 0.9*ones(1,10)]
+                            for I_ext_strength = [ 0.8 0.9 ]% 0.9*ones(1,10)]
                                 for  tau_c = [10  ]
                                     loop_num = loop_num + 1;
                                     
@@ -38,6 +39,9 @@ for phi_E = 1
                                         end
                                     end
                                     
+                                         
+                                    % seed the matlab rand function! The seed is global.
+                                    [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
                                     
                                     % sptially embedded network
                                     
@@ -67,9 +71,7 @@ for phi_E = 1
                                     Num_pop = length(N);
                                     
                                     
-                                    
-                                    % seed the matlab rand function! The seed is global.
-                                    [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
+                               
                                     
                                     % Add LFP sampling
                                     [Lattice, ~] = lattice_nD(2, hw);
@@ -116,6 +118,14 @@ for phi_E = 1
                                     end
                                     writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1,0], sample_neuron, ones(1, step_tot) )
                                     
+                                    % Add LFP sampling
+                                    [Lattice, ~] = lattice_nD(2, hw);
+                                    dist_lattice = (Lattice(:,1).^2 + Lattice(:,2).^2).^0.5;
+                                    LFP_neurons = [];
+                                    for LFP_range = [0.25 0.5 1 1.5 2]
+                                        LFP_neurons = [LFP_neurons; transpose(dist_lattice < hw*LFP_range)]; %#ok<AGROW>
+                                    end
+                                    writeLFPRecord(FID, 1, LFP_neurons);
                                     
                                     %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                                     p_fire = -2.00*ones(size(N)); % between [0,1], 0.05
