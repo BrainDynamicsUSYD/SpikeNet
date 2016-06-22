@@ -1,8 +1,19 @@
 function [V, loop_num] = CollectCellYG(var, data, filenames)
-% Collect data into a cell
-% example:
-% var = 'cluster'
-% data = 'cluster.high_du{3}'
+% [result, loop_num] = CollectCellYG(var, data)
+%
+% Collect data into a cell. The function automatically loops through any
+% files with an extension "*RYG.mat" in the current working directory.
+% 
+% var : the name of the variable that should be loaded from *RYG.mat files
+% data: an expression to be evaluated to generated the data to be collected
+%
+% For example:
+%   >> var = 'cluster'
+%   >> data = 'mean(cluster.high_du{3})'
+%   >> [result, loop_num] = CollectCellYG(var, data)
+% 
+% [result, loop_num] = CollectCellYG(var, data, filenames)
+%
 
 % Prepare files
 if nargin == 2
@@ -21,7 +32,7 @@ V = cell(1,num_files);
 loop_num = [];
 fprintf('Collecting data %s from %d files: \n', data, num_files);
 for i = 1:num_files
-    fprintf('\t Loading data %s from file %s...', data, files{i});
+    % fprintf('\t Loading data %s from file %s...', data, files{i});
     load(files{i}, var, 'ExplVar');
     
     
@@ -30,8 +41,8 @@ for i = 1:num_files
     
     V{i} = data_tmp;
     
-    if exist('ExplVar')
-        loop_num = [loop_num, ExplVar.loop_num];
+    if exist('ExplVar','var')
+        loop_num = [loop_num, ExplVar.loop_num]; %#ok<AGROW>
     else
         loop_num = [];
     end
