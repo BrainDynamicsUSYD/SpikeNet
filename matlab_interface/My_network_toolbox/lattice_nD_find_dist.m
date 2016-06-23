@@ -11,7 +11,7 @@ function [dist] = lattice_nD_find_dist(Lattice, hw, varargin)
     if length(varargin) == 1
         i = varargin{1};
         p0 = Lattice(i,:);
-    elseif length(varargin) == 1
+    elseif length(varargin) == 2
         p0 = [varargin{1}, varargin{2}];
     end
         
