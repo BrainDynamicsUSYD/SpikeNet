@@ -1,5 +1,5 @@
 
-function main_heterogeneous_search(varargin)
+function main_heterogeneous_LFP(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
