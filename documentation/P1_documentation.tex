@@ -91,7 +91,7 @@ For those who have access to a high-performance computing cluster with PBS, Spik
 \item Edit the following variables in the bash script accordingly: 
 \begin{itemize}
 \item {\footnotesize MATLAB\_SOURCE\_PATH\_2=`your\_path'}
-\item {\footnotesize MATLAB\_PRE\_PROCESS\_FUNC=`your\_function'}
+\item {\footnotesize MATLAB\_PRE\_PROCESS\_FUNC=`your\_functions'}
 \end{itemize}
 \item Make a directory for PBS output: \mylstinline{mkdir PBSout}
 \item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
@@ -101,23 +101,24 @@ For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 Here are some basic tips on git.
 \begin{itemize}
 \item To get the most recent version of SpikeNet: \mylstinline{git pull origin master}
-\item Avoid directly modifying any existing files in SpikeNet unless you are a developer. Create another directory alongside SpikeNet and put all of your files there.\end{itemize} 
-
-\section{Matlab user interface}
-\label{sec:matlab user interface}
-See main\_demo.m for a complete list of available case-building matlab functions and their usages. Each such function implements one particular input protocol.
-
-\lstinputlisting{../main_demo.m}
-
-(More need to be added on the available post-processing Matlab functions. SpikeNet has a variety of statistical analysis and visualization tools for spiking networks.)
-
-++Add  descriptions of CollectVectorYG and CollectCellYG.
+\item Avoid directly modifying any existing files in SpikeNet unless you are a developer. Create another directory alongside SpikeNet and put all of your files there. In summary, your project folder should look like:
+\begin{itemize}
+\item tmp
+\begin{itemize}
+\item SpikeNet
+\item simulator
+\item tmp\_data
+\item my\_functions
+\item PBS\_out
+\item all\_in\_one.sh
+\end{itemize} 
+\end{itemize} 
+\end{itemize} 
 \section{Neuron and synapse models}
 \label{sec:model}
 
-
 \numberwithin{equation}{section}
-
+A description of the neuron and synapse models can also be found in a publication that used SpikeNet \cite{Gu2016}.
 The default neuron model in SpikeNet is leaky integrate-and-fire neuron. 
 The membrane potential $V^{\alpha}_{i}$ of the $i$-th neuron ($i=1,\cdots,N_{\alpha}$) from population $\alpha$ evolves according to
 
@@ -190,6 +191,16 @@ Default numerical integration is performed using Euler method and the suggested 
 
 
 
+
+
+\section{Matlab user interface}
+\label{sec:matlab user interface}
+See main\_demo.m for a list of the basic case-building matlab functions and their usages. Each such function implements one particular input protocol. 
+\lstinputlisting{../main_demo.m}
+
+(More need to be added on the available post-processing Matlab functions. SpikeNet has a variety of statistical analysis and visualization tools for spiking networks.)
+
+++Add  descriptions of CollectVectorYG and CollectCellYG.
 
 \section{Input protocols}
 \label{sec:Input protocols}
@@ -372,6 +383,9 @@ Following is the complete list of the output data protocols.
 	
 
 \end{lstlisting}
+
+\section{Publications }
+
 
 \bibliography{P1_documentation}{}
 \bibliographystyle{plain}

@@ -11,6 +11,11 @@ Alain Destexhe, Zachary~F Mainen, and Terrence~J Sejnowski.
 \newblock Kinetic models of synaptic transmission.
 \newblock In {\em Methods in neuronal modeling 2}, pages 1--25. 1998.
 
+\bibitem{Gu2016}
+Yifan Gu and Pulin Gong.
+\newblock The dynamics of memory retrieval in hierarchical networks.
+\newblock {\em Journal of Computational Neuroscience}, 40(3):247--268, 2016.
+
 \bibitem{hennig2015theoretical}
 Matthias~H Hennig.
 \newblock Theoretical models of synaptic short term plasticity.

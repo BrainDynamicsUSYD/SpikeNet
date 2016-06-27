@@ -188,7 +188,8 @@ sample_data_type = logical([1,1,1,1,0,0,1,0]);
 writeNeuronSampling(FID, pop, sample_data_type, ...
     sample_neuron, sample_steps)
 
-%%%% Record explanatory variables that are nacessary for post-processing
+%%%% Optional: record explanatory variables (scalars only)
+% They will also be used in pro-processsing for auto-generated comments
 discard_transient = 0; % transient period data to be discarded (ms)
 writeExplVar(FID, 'discard_transient', discard_transient, ...
     'g_EE', g_EE, ...
