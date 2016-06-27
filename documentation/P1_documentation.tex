@@ -11,6 +11,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[numbered, framed]{mcode}
 \usepackage[textwidth=365pt]{geometry}
+\usepackage{dirtree}
 
 \newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
  
@@ -102,18 +103,19 @@ Here are some basic tips on git.
 \begin{itemize}
 \item To get the most recent version of SpikeNet: \mylstinline{git pull origin master}
 \item Avoid directly modifying any existing files in SpikeNet unless you are a developer. Create another directory alongside SpikeNet and put all of your files there. In summary, your project folder should look like:
-\begin{itemize}
-\item tmp
-\begin{itemize}
-\item SpikeNet
-\item simulator
-\item tmp\_data
-\item my\_functions
-\item PBS\_out
-\item all\_in\_one.sh
-\end{itemize} 
-\end{itemize} 
-\end{itemize} 
+\end{itemize}
+\hfill\begin{minipage}{\dimexpr\textwidth-1cm}
+\dirtree{%
+.1 tmp.
+.2 SpikeNet.
+.2 simulator.
+.2 tmp\_data.
+.2 my\_functions.
+.2 PBS\_out.
+.2 all\_in\_one.sh.
+}
+\xdef\tpd{\the\prevdepth}
+\end{minipage}
 \section{Neuron and synapse models}
 \label{sec:model}
 
