@@ -68,6 +68,14 @@ I_ext_mean = 0.5*ones(1,N(2)); % defined for each neuron (nA)
 I_ext_std = 0.2*ones(1,N(2)); % defined for each neuron (nA)
 writeExtCurrentSettings(FID, pop, I_ext_mean, I_ext_std)
 
+%%%% Add external conductances (Gaussian white noise) to the 2nd population
+% The default reveral potential is V_ext = 0.0 mV.
+pop = 2;
+g_ext_mean = 50*10^-3*ones(1,N(2)); % defined for each neuron (muS)
+g_ext_std = 0.0*ones(1,N(2)); % defined for each neuron (muS)
+writeExtConductanceSettings(FID, pop, g_ext_mean, g_ext_std)
+
+
 %%%% Define runaway killer
 % The computational cost of the simulation is directly proportional to 
 % the avearage firing rate of the network. Very often, your parameters 
