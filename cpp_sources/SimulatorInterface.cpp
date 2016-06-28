@@ -40,6 +40,8 @@ bool SimulatorInterface::import(string in_filename_input){
 	
 	vector<int> ext_current_settings_pop_ind; // (int pop_ind)
 	vector< vector<double> > ext_current_settings; // (vector<double> mean, vector<double> std)
+	vector<int> ext_conductance_settings_pop_ind; // (int pop_ind)
+	vector< vector<double> > ext_conductance_settings; // (vector<double> mean, vector<double> std)
 	
 	vector<double> init_condition_settings_depre; // (double p_fire)
 	vector< vector<double> >  init_condition_settings; // (double r_V0, double p_fire)
@@ -184,6 +186,20 @@ bool SimulatorInterface::import(string in_filename_input){
 				read_next_line_as_vector(init_condition_settings[1]); // p_fire
 				continue; // move to next line
 			}
+			
+			// read external conductance setting
+			found = line_str.find("INIT012");
+			if (found != string::npos){// if found match
+				cout << "\t Reading external conductance settings..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
+				ext_conductance_settings_pop_ind.push_back(read_next_entry<int>(line_ss));
+				ext_conductance_settings.resize(ext_conductance_settings.size()+1);
+				read_next_line_as_vector(ext_conductance_settings.back()); // vector<double> mean
+				ext_conductance_settings.resize(ext_conductance_settings.size()+1);
+				read_next_line_as_vector(ext_conductance_settings.back()); // vector<double> std
+				continue; // move to next line
+			}
+			
 			
 			// read neuron population parameter setting
 			found = line_str.find("PARA001");
@@ -438,6 +454,19 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "done." << endl;
 	}
 
+	// external conductance setting
+	if (ext_conductance_settings_pop_ind.size() != 0){
+		cout << "\t External conductance settings...";
+		for (unsigned int ind = 0; ind < ext_conductance_settings_pop_ind.size(); ++ind){
+			int pop_ind = ext_conductance_settings_pop_ind[ind];
+			vector<double> mean = ext_conductance_settings[ ind*2 ];
+			vector<double> std = ext_conductance_settings[ ind*2+1 ];
+			network.NeuronPopArray[pop_ind]->set_gaussian_g_ext(mean, std);
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+	
 	// random initial condition settings (double p_fire)
 	if (init_condition_settings_depre.size() != 0){
 		cout << "\t Random initial condition settings...";

@@ -31,6 +31,9 @@ writeSynPara(FID, 'tau_decay_AMPA', 3.3);
 % I_ext_strength = 10; %1.4; % nA
 % writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
+g_ext_strength = 5e-3; % miuSiemens
+writeExtConductanceSettings(FID, 1, g_ext_strength, 0)
+
 % external spike settings
 rate = zeros(1, step_tot);
 rate(1:(round(step_tot/3))) = 2000;
@@ -40,8 +43,8 @@ writeExtSpikeSettings(FID, 1, 1, k,  1, rate, 1, N(1) );
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
 sample_steps(1:1:step_tot) =  true;
-writeNeuronSampling(FID, 1, ones(1,7), 1 , sample_steps);
-writeNeuronSampling(FID, 2, ones(1,7), 1 , sample_steps);
+writeNeuronSampling(FID, 1, ones(1,8), 1 , sample_steps);
+writeNeuronSampling(FID, 2, ones(1,8), 1 , sample_steps);
 
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1, sample_steps)

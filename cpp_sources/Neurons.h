@@ -55,6 +55,7 @@ private:
 
 public:
 	void set_gaussian_I_ext(vector<double>& mean, vector<double>& std);
+	void set_gaussian_g_ext(vector<double>& mean, vector<double>& std);
 	
 	void add_sampling(vector<int>& sample_neurons, vector<bool>& sample_type, vector<bool>& sample_time_points); 
 	void add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name);
@@ -145,6 +146,13 @@ ofstream samp_file; // someting is wrong here?
 		I_ext_mean,
 		I_ext_std;
 	
+	// parameters for Generate Gaussian random external conductance
+	vector<double> // a vector for each neuron
+		g_ext_mean,
+		g_ext_std;
+	double 
+		V_ext; // reversal potential for external conductance
+			
 	// spike-frequency adaptation
 	bool
 		spike_freq_adpt;

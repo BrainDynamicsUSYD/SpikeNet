@@ -261,6 +261,11 @@ Note that the protocols use three special characters, including ``\textgreater''
 > INIT011 # random initial conditions $\text{for}$ V and firing prob
 	r_V0_pop1 (range (0,1]), $\dots$,r_V0_popN, 
 	p_fire_pop1 (range (0,1]), $\dots$, p_fire_popN, 
+
+> INIT012 # external Gaussian conductance
+	pop_ind, 
+	mean_1 (${\mu}$S), mean_2, $\dots$,  mean_N, ($\text{for}$ each neuron)
+	std_1 (${\mu}$S), std_2, $\dots$,  std_N, 
 	
 > SYNF001 # non-default synapse definition file name
 	path/to/file_name (no comma!)
@@ -385,8 +390,6 @@ Following is the complete list of the output data protocols.
 	
 
 \end{lstlisting}
-
-\section{Publications }
 
 
 \bibliography{P1_documentation}{}

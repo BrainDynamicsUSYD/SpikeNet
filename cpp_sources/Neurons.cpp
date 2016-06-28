@@ -32,6 +32,7 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 	V_rt = -60.0;   // Reset, usually same as leak reversal, use -75.0 to model relative refractory period??
 	V_lk = -70.0;   // Leak reversal, -70.0
 	V_th = -50.0;   // Threshold // -55.0
+	V_ext = 0.0;    // reversal potential for external currents
 	// Leak conductance
 	g_lk = 0.0167;   // (uS=miuSiemens), time constants=Cm/gL=15 ms!
 	// spike-frequency adaptation parameter
@@ -160,6 +161,7 @@ string Neurons::dump_para(){
 	dump << "V_K" << delim << V_K << delim << endl;
 	dump << "dg_K" << delim << dg_K << delim << endl;
 	dump << "tau_K" << delim << tau_K << delim << endl;
+	dump << "V_ext" << delim << V_ext << delim << endl;
 	dump << "seed" << delim << my_seed << delim << endl;
 	return dump.str();
 }
@@ -282,6 +284,29 @@ void Neurons::update_V(int step_current){
 			} 
 		}
 	}
+	
+	// Gaussian white external conductance
+	if (g_ext_mean.size() != 0){
+		if (g_ext_std.size() != 0){
+			double one_on_sqrt_dt = 1.0/sqrt(dt); // Here sqrt_dt is on the denominator because I_ext will be multiplied by dt later. 
+			// Gaussian random generator
+			gen.seed(my_seed+step_current+step_tot);// reseed random engine!
+			normal_distribution<double> nrm_dist(0.0, 1.0);
+			auto gaus = bind(nrm_dist,gen);
+
+			for (int i = 0; i < N; ++i){ 
+				I_ext[i] += -(g_ext_mean[i] + gaus() * g_ext_std[i] * one_on_sqrt_dt) * (V[i] - V_ext); // be careful about the sqrt(dt) term (Wiener Process)
+			}
+		}
+		else{ 
+			for (int i = 0; i < N; ++i){ 
+				I_ext[i] += -g_ext_mean[i] * (V[i] - V_ext);
+			} 
+		}
+	}
+	
+	
+	
 	// potassium conductance for spike-frequency adaptation
 	if (spike_freq_adpt == true){
 		for (unsigned int ind = 0; ind < spikes_current.size(); ++ind){
@@ -403,6 +428,16 @@ void Neurons::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
 	double max_std = *max_element(I_ext_std.begin(), I_ext_std.end());
 	if (max_std == 0.0){
 		I_ext_std.resize(0);
+	}
+}
+
+void Neurons::set_gaussian_g_ext(vector<double>& mean, vector<double>& std){
+	g_ext_mean = mean;
+	g_ext_std = std;
+	
+	double max_std = *max_element(g_ext_std.begin(), g_ext_std.end());
+	if (max_std == 0.0){
+		g_ext_std.resize(0);
 	}
 }
 
