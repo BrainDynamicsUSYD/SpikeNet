@@ -22,9 +22,8 @@ Result_num = length(Result_cell);
 
 for r_num = 1:Result_num
     R = Result_cell{r_num};
-    t_1 = R.LFP.transient_steps;
     dt = R.dt;
-    step_tot = R.step_tot - t_1;
+    step_tot = R.step_tot;
 
     comments = R.comments;
     
@@ -41,7 +40,7 @@ for r_num = 1:Result_num
             h_SWR = figure('NumberTitle','Off','Name',strcat('Raster plot:', R.stamp),'units','normalized','position',[0 0 1 1], ...
                 'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
             
-            t = (t_1+seg_ind-1)*dt*1e-3; % second
+            t = (seg_ind-1)*dt*1e-3; % second
             ax1 = subplot(8,1,1);
             LFP_tmp = R.LFP.LFP{1}(i,seg_ind);
             plot(t, LFP_tmp);
@@ -71,7 +70,7 @@ for r_num = 1:Result_num
             ylim(freqrange)
             ylabel('Hz')
             
-          
+            % raster plot
             ax4 = subplot(8,1,4:7);
             reduced = R.reduced;
             R_LFP.N(1) = sum(R.LFP.LFP_neurons{1}(i,:));
@@ -79,7 +78,21 @@ for r_num = 1:Result_num
             R_LFP.reduced = reduced; clear reduced;
             raster_plot(R_LFP, 1, seg, [], 'seg_size', seg_size*(R.dt/R.reduced.dt))
             xlabel('t (sec)');
-              
+            % highlight detected ripple events
+            if ~isempty(R.LFP.ripple_event.ripple_du_steps{i});
+                ripple_start = R.LFP.ripple_event.ripple_start_steps{i};
+                ripple_du = R.LFP.ripple_event.ripple_du_steps{i};
+                hold on;
+                y_lim = get(gca,'ylim');
+                for i_r = 1:length(ripple_du)
+                    tA = ripple_start(i_r);
+                    tB = tA + ripple_du(i_r) - 1;
+                    plot([tA*dt tA*dt]*1e-3,y_lim,'r');
+                    plot([tB*dt tB*dt]*1e-3,y_lim,'r');
+                end
+            end
+            
+            
             % Link axes to synchronise them when zooming
             linkaxes([ax1 ax2 ax3 ax4],'x');
             

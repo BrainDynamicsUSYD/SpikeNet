@@ -38,20 +38,20 @@ seg_ind = get_seg(step_tot, seg_size, seg);
 % Dump fields
 num_spikes = R.reduced.num_spikes{pop_ind}(seg_ind);
 spike_hist = R.reduced.spike_hist{pop_ind}(:,seg_ind);
-T = seg_ind*dt;
+T = (seg_ind-1)*dt;
 
 % Plot raster plot
 if nnz(num_spikes) > 0
     % down-sampling
     if N(pop_ind) > sample_size
-        ind_sample = ceil(linspace(1,N(pop_ind),sample_size));
+        ind_sample = sort(randperm(N(pop_ind),sample_size));
     else
         ind_sample = 1:1:N(pop_ind);
     end
     
     if isempty(sample_color)
         [Y,X,~] = find(spike_hist(ind_sample,:));
-        xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt; % sec
+        xdata = ( [X(:)'; X(:)']+seg_ind(1)-1)*dt; % sec
         ydata = [Y(:)'-1;Y(:)'];
         line(xdata, ydata,'Color','k');
     else
@@ -65,7 +65,7 @@ if nnz(num_spikes) > 0
         for i = 1:length(ind_sample)
             color_tmp = jetmap( ceil(sample_color(i)*1000),:);
             [Y,X,~] = find(spike_hist(ind_sample(i),:));
-            xdata = ( [X(:)'; X(:)']+seg_ind(1)-1 )*dt; % sec
+            xdata = ( [X(:)'; X(:)']+seg_ind(1)-1)*dt; % sec
             ydata = [Y(:)'-1;Y(:)']+i-1;
             line(xdata, ydata, 'Color', color_tmp,'linewidth',0.1);
         end
