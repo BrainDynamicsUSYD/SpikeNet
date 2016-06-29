@@ -354,8 +354,11 @@ if ~isempty(files)
                 elseif strfind(tline, 'INIT003')
                 elseif strfind(tline, 'SAMP003')
                 elseif strfind(tline, 'SAMP004')
+                elseif strfind(tline, 'INIT009')
+                elseif strfind(tline, 'INIT011')
+                elseif strfind(tline, 'INIT012')
                 elseif strfind(tline, '############')
-                elseif strfind(tline, 'MATLAB script');
+                elseif strfind(tline, 'MATLAB script')
                     
                 else
                     warning('unrecognized data type: %s\n', tline);

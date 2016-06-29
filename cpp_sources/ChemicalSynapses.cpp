@@ -407,12 +407,10 @@ void ChemicalSynapses::sample_data(int step_current){
 void ChemicalSynapses::set_para(string para_str){
 	if (!para_str.empty()){
 		istringstream para(para_str);
-		string para_name, para_value_str, line_str; 
+		string para_name, para_value_str; 
 		double para_value;
-		while (getline(para, line_str)){
-			istringstream line_ss(line_str);
-			getline(line_ss, para_name, delim); // get parameter name
-			getline(line_ss, para_value_str, delim); // get parameter value (assume double)
+		while (getline(para, para_name, delim)){
+			getline(para, para_value_str, delim); // get parameter value (assume double)
 			stringstream(para_value_str) >> para_value; // from string to numerical value
 			if (para_name.find("V_ex") != string::npos){V_ex = para_value;}
 			else if (para_name.find("V_in") != string::npos){V_in = para_value;}

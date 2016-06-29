@@ -22,10 +22,10 @@ Num_pop = length(N);
 discard_transient = 0; % ms
 
 % write pop para
-writePopPara(FID, 1,  'tau_ref', 3.1);
+writePopPara(FID, 1,  'tau_ref', 3.1, 'V_rt', 70);
 writePopPara(FID, 2,  'tau_ref', 3.2);
 % write synapse para
-writeSynPara(FID, 'tau_decay_AMPA', 3.3);
+writeSynPara(FID, 'tau_decay_AMPA', 3.3, 'Dt_trans_AMPA', 0.5);
 
 % % external current settings (int pop_ind, double mean, double std)
 % I_ext_strength = 10; %1.4; % nA
