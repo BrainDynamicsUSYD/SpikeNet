@@ -12,6 +12,8 @@
 \usepackage[numbered, framed]{mcode}
 \usepackage[textwidth=365pt]{geometry}
 \usepackage{dirtree}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,calc}
 
 \newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
  
@@ -116,6 +118,72 @@ Here are some basic tips on git.
 }
 \xdef\tpd{\the\prevdepth}
 \end{minipage}
+
+\section{Workflow}
+The typical workflow of SpikeNet is as shown in the following flowchart.
+\vskip 0.5cm
+
+% Define block styles
+\tikzstyle{func} = [rectangle, draw, 
+     text centered, minimum height=1.5em,  text width=2.5cm]
+\tikzstyle{data} = [rectangle,
+     text centered, minimum height=2em]
+\tikzstyle{line} = [draw, -latex']
+\begin{tikzpicture}[node distance = 1.2cm, auto]
+    % Place nodes
+    \node (pre) [func, label=above right:{\tiny matlab}] {\footnotesize Pre-processing};
+    \node (ygin) [data, below of=pre] {\footnotesize A-T1.ygin};
+    \node [data, left of=ygin, node distance=3cm, align=left] (ygin_syn) {\footnotesize A-T1.ygin\_syn \\ \footnotesize (NF.ygin\_syn)};
+    \node (other) [data, right of=ygin, node distance=3cm, align=left]  {\footnotesize other.mat};
+    \node (c++) [func, below of=ygin, label=above right:{\tiny C\texttt{++}} ] {\footnotesize simulator};
+    \node (ygout) [data, below of=c++] {\footnotesize A-T1\_T2.ygout};
+    \node(ygout_samp)  [data, left of=ygout, node distance=3cm] {\footnotesize A-T1\_T2.ygout\_samp};
+    \node (ReadYG) [func, below of=ygout, label=above right:{\tiny matlab}] {\footnotesize ReadYG()};
+    \node (RYG) [data, below of=ReadYG] {\footnotesize A-T1\_T2\_RYG.mat};
+    \node (SAMP) [data, left of=RYG, node distance=3cm] {\footnotesize A-T1\_T2\_samp.mat};
+    \node (post) [func, below of=RYG, label=above right:{\tiny matlab}] {\footnotesize Post-processing};
+    \node (read_syn) [func, left of=ReadYG,  node distance=5cm, label=above right:{\tiny matlab}]  {\footnotesize read\_ygin\_syn()};
+    % Draw edges
+    \coordinate (Below pre) at ($(pre.south)+(0,-0.2cm)$);
+    \coordinate (Above c++) at ($(c++.north) + (0,0.15cm)$);
+    \coordinate (Below c++) at ($(c++.south)+(0,-0.2cm)$);
+    \coordinate (Above ReadYG) at ($(ReadYG.north) + (0,0.15cm)$);
+    \coordinate (Below ReadYG) at ($(ReadYG.south)+(0,-0.15cm)$);
+    \coordinate (Above post) at ($(post.north) + (0,0.3cm)$);
+    
+    \path [line] (other) |- (post);
+    \path [line] (Below pre) -| (ygin_syn);
+    \path [line] (pre) -- (ygin);
+    \path [line] (Below pre) -| (other);
+    \path [line, dashed] (ygin_syn) -- (c++);
+    \path [line] (ygin) -- (c++);
+    \path [line] (c++) -- (ygout);
+    \path [line] (Below c++) -| (ygout_samp);
+    \path [line, dashed] (ygout_samp) -- (ReadYG);
+    \path [line] (ygout) -- (ReadYG);
+    \path [line] (ReadYG) -- (SAMP);
+    \path [line] (ReadYG) -- (RYG);
+    \path [line] (SAMP) |- (Above post);
+    \path [line] (RYG) -- (post);
+    \path [line] (ygin_syn) -| (read_syn);
+    \path [line] (read_syn) |- (post);
+    \path [line] (SAMP) -- node [rotate=90,  text centered, anchor=south]  {\scriptsize delete} (ygout_samp);
+    \path [line] (ygin) -| ([xshift=0.5cm,yshift=0cm]c++.east) node [rotate=-90,  text centered, anchor=south] {\scriptsize attached to} |- (ygout);
+\end{tikzpicture}
+\vskip 1cm
+
+Although the C\texttt{++} simulator accepts input files with any names, A-T1 is the recommended and default naming format.
+A is a 4-digit PBS array ID number.
+T1 is a timestamp identifying when the ygin file was generated.
+Similarly, T2 is a timestamp identifying when the ygout file was generated.
+Note that T2 allows multiple simulations to be run for the same ygin file.
+The synaptic connectivity definition file ygin\_syn is separated from ygin for better memory management, since the connectivity definitions (protocol INIT006) are the single most memory-intensive component.
+Due to the same reason, the sampled time series data from simulation (protocol SAMP001) are stored separately in ygout\_samp and samp.mat.
+Non-default (NF) ygin\_syn file path should be given in ygin using the provided Matlab interface.
+The dashed lines mean that the C\texttt{++} simulator and the ReadYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
+
+
+
 \section{Neuron and synapse models}
 \label{sec:model}
 
