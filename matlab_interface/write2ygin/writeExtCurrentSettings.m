@@ -5,7 +5,7 @@ function writeExtCurrentSettings(FID, pop_ind, mean, std)
 %    mean: mean value for Gaussian currents (nA) for each neuron
 %     std: std for Gaussrian currents for each neuron
 
-if length(mean) == 1
+if length(mean) == 1 || length(std) == 1
     warning('INIT004 has been updated. MEAN and STD must be specified for each neuron.')
 end
 

@@ -5,7 +5,7 @@ function writeExtConductanceSettings(FID, pop_ind, mean, std)
 %    mean: mean value for Gaussian conductance (uS) for each neuron
 %     std: std for Gaussian conductance (uS) for each neuron
 
-if length(mean) == 1
+if length(mean) == 1 || length(std) == 1
     warning('INIT012: MEAN and STD must be specified for each neuron.')
 end
 

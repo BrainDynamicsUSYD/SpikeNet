@@ -138,10 +138,10 @@ The typical workflow of SpikeNet is as shown in the following flowchart.
     \node (c++) [func, below of=ygin, label=above right:{\tiny C\texttt{++}} ] {\footnotesize simulator};
     \node (ygout) [data, below of=c++] {\footnotesize A-T1\_T2.ygout};
     \node(ygout_samp)  [data, left of=ygout, node distance=3cm] {\footnotesize A-T1\_T2.ygout\_samp};
-    \node (ReadYG) [func, below of=ygout, label=above right:{\tiny matlab}] {\footnotesize ReadYG()};
+    \node (ReadYG) [func, below of=ygout, label=above right:{\tiny matlab}] {\footnotesize PostProcessYG()};
     \node (RYG) [data, below of=ReadYG] {\footnotesize A-T1\_T2\_RYG.mat};
     \node (SAMP) [data, left of=RYG, node distance=3cm] {\footnotesize A-T1\_T2\_samp.mat};
-    \node (post) [func, below of=RYG, label=above right:{\tiny matlab}] {\footnotesize Post-processing};
+    \node (post) [func, below of=RYG, label=above right:{\tiny matlab}] {\footnotesize More analysis};
     \node (read_syn) [func, left of=ReadYG,  node distance=5cm, label=above right:{\tiny matlab}]  {\footnotesize read\_ygin\_syn()};
     % Draw edges
     \coordinate (Below pre) at ($(pre.south)+(0,-0.2cm)$);
@@ -180,7 +180,7 @@ Note that T2 allows multiple simulations to be run for the same ygin file.
 The synaptic connectivity definition file ygin\_syn is separated from ygin for better memory management, since the connectivity definitions (protocol INIT006) are the single most memory-intensive component.
 Due to the same reason, the sampled time series data from simulation (protocol SAMP001) are stored separately in ygout\_samp and samp.mat.
 Non-default (NF) ygin\_syn file path should be given in ygin using the provided Matlab interface.
-The dashed lines mean that the C\texttt{++} simulator and the ReadYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
+The dashed lines mean that the C\texttt{++} simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
 
 
 
