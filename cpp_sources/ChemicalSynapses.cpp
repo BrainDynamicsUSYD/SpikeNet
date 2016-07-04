@@ -103,6 +103,10 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 	//
 	STD = false; 
 	inh_STDP = false;
+
+	// 
+	synapse_model = 0; // default model
+	
 	
 	// parameter-dependent initialisation
 	init();
@@ -117,15 +121,15 @@ void ChemicalSynapses::init(){
 	// Initialise chemical synapse parameters
 	if (synapses_type == 0){
 		tau_decay = tau_decay_AMPA;
-		steps_trans = int(round(Dt_trans_AMPA / dt));
+		tau_rise = Dt_trans_AMPA;
 	}
 	else if (synapses_type == 1){	
 		tau_decay = tau_decay_GABA;
-		steps_trans = int(round(Dt_trans_GABA / dt));
+		tau_rise = Dt_trans_GABA;
 	}
 	else if (synapses_type == 2){
 		tau_decay = tau_decay_NMDA;
-		steps_trans = int(round(Dt_trans_NMDA / dt));
+		tau_rise = Dt_trans_NMDA;
 		// non-linearity of NMDA
 		// voltage-dependent part B(V) (look-up table):
 		miuMg_NMDA = 0.33; // mM^-1, concentration of [Mg2+] is around 1 mM, 0.33
@@ -144,175 +148,74 @@ void ChemicalSynapses::init(){
 			i_B += 1;
 		}
 	}
-
-
-	// Initialize pre- and post-synaptic dynamic variables
-	buffer_steps = max_delay_steps + steps_trans + 1; // the +1 is vital
-	s.assign(N_pre, 0);
-	gs_sum.assign(N_post, 0);
-	d_gs_sum_buffer.resize(buffer_steps);
-	for (int i = 0; i < buffer_steps; ++i){
-		d_gs_sum_buffer[i].assign(N_post, 0);
-	}
-	I.assign(N_post, 0);
-	
-	
-	// transmitter_strength
-	K_trans.assign(N_pre, 1.0 / steps_trans); // be careful! 1 / transmitter steps gives zero (int)!!
-	trans_left.assign(N_pre, 0);
+	steps_trans = int(round(tau_rise / dt));
 
 	// Initialise exp_step
-	exp_step = exp(-dt / tau_decay); // single step
+	exp_step_decay = exp(-dt / tau_decay); // single step
+	exp_step_rise = exp(-dt / tau_rise);
+	I.assign(N_post, 0);
+	gs_sum.assign(N_post, 0);
 	
-
-
+	
+	// Synapse model choice
+	// model 0, the default model
+	if (synapse_model == 0){ 
+		// Initialize pre- and post-synaptic dynamic variables
+		buffer_steps = max_delay_steps + steps_trans + 1; // the +1 is vital
+		s.assign(N_pre, 0);
+		d_gs_sum_buffer.resize(buffer_steps);
+		for (int i = 0; i < buffer_steps; ++i){
+			d_gs_sum_buffer[i].assign(N_post, 0);
+		}
+		// transmitter_strength
+		K_trans.assign(N_pre, 1.0 / steps_trans); // be careful! 1 / transmitter steps gives zero (int)!!
+		trans_left.assign(N_pre, 0);
+	}
+	else if (synapse_model == 1){
+		// model 1
+		buffer_steps = max_delay_steps + 1; // the +1 is vital
+		gs_rise_sum.assign(N_post, 0);
+		gs_decay_sum.assign(N_post, 0);
+		d_gs_rd_sum_buffer.resize(buffer_steps);
+		for (int i = 0; i < buffer_steps; ++i){
+			d_gs_rd_sum_buffer[i].assign(N_post, 0);
+		}
+		// clear model 0
+		s.clear();
+		d_gs_sum_buffer.clear(); // clear() clears all of its components recursively
+		K_trans.clear();
+		trans_left.clear();
+	}
 }
 
 
+void ChemicalSynapses::set_synapse_model(int synapse_model_input){
+	if (synapse_model_input != 0){
+		synapse_model = synapse_model_input;
+		init(); // initialize again
+	}
+}
+
+	
+
 void ChemicalSynapses::update(int step_current){
 
-	
-	if (pop_ind_pre >= 0){
-		//
-		if (STD_on_step == step_current){STD = true;}
-		if (inh_STDP_on_step == step_current){inh_STDP = true;}
-		
-		// update pre-synaptic dynamics
-		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ // add spikes (transmitter release)
-			trans_left[spikes_pre->at(i)] += steps_trans;
-		}
-		
+	if (synapse_model == 0){ 
 		// short-term depression
-		if (STD == true){
-			for (unsigned int i = 0; i < spikes_pre->size(); ++i){ 
-				K_trans[spikes_pre->at(i)] = 1.0 / steps_trans * f_ves[i];
-			}
-		}
+		update_STD(step_current);
 		
 		// inhibitory STDP
-		if (inh_STDP == true){
-			// update x_trace
-			for (unsigned int i = 0; i < spikes_pre->size(); ++i){
-				x_trace_pre[spikes_pre->at(i)] += 1.0;
-			}
-			for (unsigned int j = 0; j < spikes_post->size(); ++j){
-				x_trace_post[spikes_post->at(j)] += 1.0;
-			}
-			// update K
-			int i_pre, j_post;
-			for (unsigned int ind_spike = 0; ind_spike < spikes_pre->size(); ++ind_spike){
-				i_pre = spikes_pre->at(ind_spike);
-				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
-					j_post = C[i_pre][syn_ind];
-					K[i_pre][syn_ind] += eta_STDP * ( x_trace_post[j_post] - alpha_STDP );
-				}
-			}
-			int syn_ind;
-			for (unsigned int ind_spike = 0; ind_spike < spikes_post->size(); ++ind_spike){
-				j_post = spikes_post->at(ind_spike);
-				for (unsigned int ind = 0; ind < j_2_i[j_post].size(); ++ind){
-					// j_2_i and j_2_syn_ind together serve as the "inverse function" of j_post = C[i_pre][syn_ind]
-					i_pre = j_2_i[j_post][ind];
-					syn_ind = j_2_syn_ind[j_post][ind];
-					K[i_pre][syn_ind] += eta_STDP * x_trace_pre[i_pre];
-				}
-			}
-			// for testing
-			//if (tmp_data.size() == 0){
-			//	tmp_data.resize(2);
-			//}
-			//tmp_data[0].push_back(K[0][0]);
-			//tmp_data[1].push_back(K[100][0]);
-		}
+		update_inh_STDP(step_current);
 		
-		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
-			if (trans_left[i_pre] > 0){
-				// conduction delay: put into d_gs_sum_buffer
-				int j_post, delay_step, t_ring;
-				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){ //loop through all the post-synapses
-					j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
-					delay_step = D[i_pre][syn_ind]; // delay in steps for this post-synaptic neuron
-					t_ring = int( (step_current + delay_step) % buffer_steps ); // index in the gs_buffer
-					d_gs_sum_buffer[t_ring][j_post] += K_trans[i_pre] * (1.0 - s[i_pre]) * K[i_pre][syn_ind];
-				}
-				trans_left[i_pre] -= 1;
-				s[i_pre] += K_trans[i_pre] * (1.0 - s[i_pre]);
-			}
-		}
-		
-	} // if pop_ind_pre >=0
-
-	else if (pop_ind_pre == -1){ // if external noisy population
-		// Contribution of external spikes, assuming square pulse transmitter release
-		// Generate current random number generator, note that rate_ext_t is in Hz
-		gen.seed(my_seed + step_current);// reseed random engine!!!
-		poisson_distribution<int> dist(Num_ext * rate_ext_t[step_current] * (dt / 1000.0));		
-		auto ext_spikes = bind(dist, gen);
-
-		
-		// Post-synaptic dynamics
-		int t_ring;
-		for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
-			t_ring = int( (step_current + t_trans) % buffer_steps );
-			for (int j = ia; j <= ib; ++j){
-				d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
-			}
-		}
+		// Update transmitter dynamics
+		update_gs_sum_model_0(step_current);
 	}
-
-	// update post-synaptic dynamics
-	int t_ring = int( step_current % buffer_steps );
-	for (int j_post = 0; j_post < N_post; ++j_post){
-		gs_sum[j_post] += d_gs_sum_buffer[t_ring][j_post];
+	else if (synapse_model == 1){
+		update_gs_sum_model_1(step_current);
 	}
-	// immediately reset the current buffer to zeros!!
-	fill(d_gs_sum_buffer[t_ring].begin(), d_gs_sum_buffer[t_ring].end(), 0.0);
 	
-
-	
-
 	// Calculate chemical currents
-	// need V from post population!!
-	if (synapses_type == 0){ //AMPA
-		for (int j = 0; j < N_post; ++j){
-			I[j] = -gs_sum[j] * (V_post->at(j) - V_ex);
-		}
-	}	
-	else if (synapses_type == 1){ //GABA
-		for (int j = 0; j < N_post; ++j){
-			I[j] = -gs_sum[j] * (V_post->at(j) - V_in);
-			// For inhibition, every equation is in the same form as excitation. 
-			// Only "V_in" encodes its inhibitory nature.
-		}
-	}
-	else if (synapses_type == 2){ //NMDA
-		for (int j = 0; j < N_post; ++j){
-			I[j] = -gs_sum[j] * B[(int)round((V_post->at(j) - B_V_min) / B_dV)] * (V_post->at(j) - V_ex);
-		}
-	}
-
-	if (pop_ind_pre >= 0){
-		// update short-term depression
-		if (STD == true){
-			for (unsigned int i = 0; i < spikes_pre->size(); ++i){
-				f_ves[spikes_pre->at(i)] *= 1.0 - p_ves; // decrease
-			}
-			for (int i = 0; i < N_pre; ++i){
-				f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]); // decay to 1.0
-			}
-		}
-		// update inhibitory STDP 
-		if (inh_STDP == true){
-			for (int i = 0; i < N_pre; ++i){ x_trace_pre[i] *= exp_step_STDP; }
-			for (int j = 0; j < N_post; ++j){ x_trace_post[j] *= exp_step_STDP; }
-		}
-		// decay pre-synaptic dynamics
-		for (int i = 0; i < N_pre; ++i){ s[i] *= exp_step; };
-	} 
-	
-
-	// decay post-synaptic dynamics
-	for (int j = 0; j < N_post; ++j){ gs_sum[j] *= exp_step; };
+	calc_I();
 
 	// sample data
 	sample_data(step_current);
@@ -324,45 +227,32 @@ void ChemicalSynapses::update(int step_current){
 
 
 
-void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
-	sample_neurons = sample_neurons_input;
-	sample_time_points = sample_time_points_input;
+void ChemicalSynapses::update_STD(int step_current){
+	// STD modifies K_trans
 	
-	// initialise
-	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
-	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
-		if (sample_time_points[i]){
-			sample_time_points_tot += 1;
+	if (STD_on_step == step_current){STD = true;}
+	// short-term depression
+	if (STD == true){
+		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ 
+			K_trans[spikes_pre->at(i)] = 1.0 / steps_trans * f_ves[i];
+			f_ves[spikes_pre->at(i)] *= 1.0 - p_ves; // decrease at spikes
+		}
+		for (int i = 0; i < N_pre; ++i){
+			f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]); // decay to 1.0
 		}
 	}
-	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
-
-	sample.resize(sample_neurons_tot);
-	for (int i = 0; i < sample_neurons_tot; ++i){
-		sample[i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
-	}
 
 }
 
-void ChemicalSynapses::add_short_term_depression(int STD_on_step_input){
-	if (synapses_type != 0){
-		cout << "Warning: initializing STD on non-AMPA synapses!" << endl;
-	}
-	STD_on_step = STD_on_step_input;
-	if (STD_on_step == 0){
-		STD = true;
-	}
-	// short term depression
-	p_ves =  0.4; // see X. Wang, 1999, The Journal of Neuroscience
-	tau_ves =  700; // ms
-	f_ves.assign(N_pre, 1.0);
-	exp_ves = exp(-dt / tau_ves);
-}
 
 void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
 	if (synapses_type != 1){
 		cout << "Warning: initializing inhibitory STDP on non-GABA synapses!" << endl;
 	}
+	if (synapse_model != 0){
+		cout << "Warning: inhibitory STDP is not supported for synapse models other than 0 yet!" << endl;
+	}
+	
 	inh_STDP_on_step = inh_STDP_on_step_input;
 	if (inh_STDP_on_step == 0){
 		inh_STDP = true;
@@ -389,6 +279,194 @@ void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
 		}
 	}
 }	
+
+void ChemicalSynapses::calc_I(){
+	// need V from post population
+	// need gs_sum from previous calculations
+	
+	if (synapses_type == 0){ //AMPA
+		for (int j = 0; j < N_post; ++j){
+			I[j] = -gs_sum[j] * (V_post->at(j) - V_ex);
+		}
+	}	
+	else if (synapses_type == 1){ //GABA
+		for (int j = 0; j < N_post; ++j){
+			I[j] = -gs_sum[j] * (V_post->at(j) - V_in);
+			// For inhibition, every equation is in the same form as excitation. 
+			// Only "V_in" encodes its inhibitory nature.
+		}
+	}
+	else if (synapses_type == 2){ //NMDA
+		for (int j = 0; j < N_post; ++j){
+			I[j] = -gs_sum[j] * B[(int)round((V_post->at(j) - B_V_min) / B_dV)] * (V_post->at(j) - V_ex);
+		}
+	}
+
+	// decay gs_sum
+	// numerical error of this integration scheme should be less 1.5%
+	for (int j = 0; j < N_post; ++j){ gs_sum[j] *= exp_step_decay; };
+	
+}
+
+void ChemicalSynapses::update_gs_sum_model_0(int step_current){
+	// See Gu, Yifan, Gong, Pulin, 2016, The dynamics of memory retrieval in hierarchical networks: a modeling study
+	// this function updates gs_sum
+	if (pop_ind_pre >= 0){
+		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ // add spikes (transmitter release)
+			trans_left[spikes_pre->at(i)] += steps_trans;
+		}
+		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
+			if (trans_left[i_pre] > 0){
+				// conduction delay: put into d_gs_sum_buffer
+				int j_post, delay_step, t_ring;
+				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){ //loop through all the post-synapses
+					j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
+					delay_step = D[i_pre][syn_ind]; // delay in steps for this post-synaptic neuron
+					t_ring = int( (step_current + delay_step) % buffer_steps ); // index in the gs_buffer
+					d_gs_sum_buffer[t_ring][j_post] += K_trans[i_pre] * (1.0 - s[i_pre]) * K[i_pre][syn_ind];
+				}
+				trans_left[i_pre] -= 1;
+				s[i_pre] += K_trans[i_pre] * (1.0 - s[i_pre]);
+			}
+		}
+		// decay pre-synaptic dynamics
+		for (int i = 0; i < N_pre; ++i){ s[i] *= exp_step_decay; };
+	}
+	else if (pop_ind_pre == -1){ // if external noisy population
+		// Contribution of external spikes, assuming square pulse transmitter release
+		// Generate current random number generator, note that rate_ext_t is in Hz
+		gen.seed(my_seed + step_current);// reseed random engine!!!
+		poisson_distribution<int> dist(Num_ext * rate_ext_t[step_current] * (dt / 1000.0));		
+		auto ext_spikes = bind(dist, gen);
+
+		// Post-synaptic dynamics
+		int t_ring;
+		for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
+			t_ring = int( (step_current + t_trans) % buffer_steps );
+			for (int j = ia; j <= ib; ++j){
+				d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
+			}
+		}
+	}
+	// update post-synaptic dynamics
+	int t_ring = int( step_current % buffer_steps );
+	for (int j_post = 0; j_post < N_post; ++j_post){
+		gs_sum[j_post] += d_gs_sum_buffer[t_ring][j_post];
+		// should I decay gs_sum here??
+	}
+	// immediately reset the current buffer to zeros after being used!!
+	fill(d_gs_sum_buffer[t_ring].begin(), d_gs_sum_buffer[t_ring].end(), 0.0);
+}
+
+void ChemicalSynapses::update_gs_sum_model_1(int step_current){
+	// See Keane, A., Gong, P., 2015, Propagating Waves Can Explain Irregular Neural Dynamics
+	// this function updates gs_sum
+	for (unsigned int ind = 0; ind < spikes_pre->size(); ++ind){ // loop through all the spikes
+		int i_pre = spikes_pre->at(ind);
+		int j_post, delay_step, t_ring;
+		for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){ //loop through all the post-synapses
+			j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
+			delay_step = D[i_pre][syn_ind]; // delay in steps for this post-synaptic neuron
+			t_ring = int( (step_current + delay_step) % buffer_steps ); // index in the gs_buffer
+			d_gs_rd_sum_buffer[t_ring][j_post] += K[i_pre][syn_ind];  // the peak value is linear to the initial impulse. 
+		}
+	}
+	int t_ring = int( step_current % buffer_steps );
+	for (int j_post = 0; j_post < N_post; ++j_post){ // Check the error of the following numerical scheme!
+		gs_rise_sum[j_post] *= exp_step_rise;
+		gs_decay_sum[j_post] *= exp_step_decay;
+		gs_sum[j_post] = (gs_decay_sum[j_post] - gs_rise_sum[j_post]) / (tau_decay - tau_rise); 
+		gs_rise_sum[j_post] += d_gs_rd_sum_buffer[t_ring][j_post];
+		gs_decay_sum[j_post] += d_gs_rd_sum_buffer[t_ring][j_post];
+	}
+	// immediately reset the current buffer to zeros after being used!!
+	fill(d_gs_rd_sum_buffer[t_ring].begin(), d_gs_rd_sum_buffer[t_ring].end(), 0.0);
+}
+
+
+void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
+	sample_neurons = sample_neurons_input;
+	sample_time_points = sample_time_points_input;
+	
+	// initialise
+	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
+	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
+		if (sample_time_points[i]){
+			sample_time_points_tot += 1;
+		}
+	}
+	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
+
+	sample.resize(sample_neurons_tot);
+	for (int i = 0; i < sample_neurons_tot; ++i){
+		sample[i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
+	}
+
+}
+
+void ChemicalSynapses::add_short_term_depression(int STD_on_step_input){
+	if (synapses_type != 0){
+		cout << "Warning: initializing STD on non-AMPA synapses!" << endl;
+	}
+	if (synapse_model != 0){
+		cout << "Warning: STD is not supported for synapse models other than 0 yet!" << endl;
+	}
+	
+	STD_on_step = STD_on_step_input;
+	if (STD_on_step == 0){
+		STD = true;
+	}
+	// short term depression
+	p_ves =  0.4; // see X. Wang, 1999, The Journal of Neuroscience
+	tau_ves =  700; // ms
+	f_ves.assign(N_pre, 1.0);
+	exp_ves = exp(-dt / tau_ves);
+}
+
+
+
+
+void ChemicalSynapses::update_inh_STDP(int step_current){
+	// inh_STDP modifies K
+	
+	if (inh_STDP_on_step == step_current){inh_STDP = true;}
+	if (inh_STDP == true){
+		// update x_trace
+		for (unsigned int i = 0; i < spikes_pre->size(); ++i){
+			x_trace_pre[spikes_pre->at(i)] += 1.0;
+		}
+		for (unsigned int j = 0; j < spikes_post->size(); ++j){
+			x_trace_post[spikes_post->at(j)] += 1.0;
+		}
+		// update K
+		int i_pre, j_post;
+		for (unsigned int ind_spike = 0; ind_spike < spikes_pre->size(); ++ind_spike){
+			i_pre = spikes_pre->at(ind_spike);
+			for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
+				j_post = C[i_pre][syn_ind];
+				K[i_pre][syn_ind] += eta_STDP * ( x_trace_post[j_post] - alpha_STDP );
+			}
+		}
+		int syn_ind;
+		for (unsigned int ind_spike = 0; ind_spike < spikes_post->size(); ++ind_spike){
+			j_post = spikes_post->at(ind_spike);
+			for (unsigned int ind = 0; ind < j_2_i[j_post].size(); ++ind){
+				// j_2_i and j_2_syn_ind together serve as the "inverse function" of j_post = C[i_pre][syn_ind]
+				i_pre = j_2_i[j_post][ind];
+				syn_ind = j_2_syn_ind[j_post][ind];
+				K[i_pre][syn_ind] += eta_STDP * x_trace_pre[i_pre];
+			}
+		}
+		// for testing
+		//if (tmp_data.size() == 0){
+		//	tmp_data.resize(2);
+		//}
+		//tmp_data[0].push_back(K[0][0]);
+		//tmp_data[1].push_back(K[100][0]);
+		for (int i = 0; i < N_pre; ++i){ x_trace_pre[i] *= exp_step_STDP; }
+		for (int j = 0; j < N_post; ++j){ x_trace_post[j] *= exp_step_STDP; }
+	}
+}
 
 
 void ChemicalSynapses::sample_data(int step_current){
@@ -440,6 +518,8 @@ string ChemicalSynapses::dump_para(){
 	dump << "V_in" << delim << V_in << delim << endl;
 
 	dump << "seed" << delim << my_seed << delim << endl;
+
+	dump << "synapse_model" << delim << synapse_model << endl;
 	
 	if (synapses_type == 0){
 		dump << "Dt_trans_AMPA" << delim << Dt_trans_AMPA << delim << endl;
@@ -454,6 +534,7 @@ string ChemicalSynapses::dump_para(){
 		dump << "tau_decay_NMDA" << delim << tau_decay_NMDA << delim << endl;
 	}
 
+		
 	return dump.str();
 }
 

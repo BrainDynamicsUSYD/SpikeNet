@@ -12,6 +12,7 @@ seed = 1;
 [FID, FID_syn] = new_ygin_files_and_randseed(seed);
 % If no FID_syn is needed, use FID = new_ygin_files_and_randseed(seed,0)
 
+
 %%%% Define some basic parameters
 % Time step (ms)
 dt = 0.1; % 0.1 is usually small enough
@@ -42,6 +43,11 @@ end
 %%%% Add spike-frequency adaptation to the 1st population
 pop = 1;
 writeSpikeFreqAdpt(FID, pop);
+
+
+% % Use Adam 2016 synapse model
+% model_choice = 2;
+% writeSynapseModelChoice(FID, model_choice)
 
 
 %%%% Define the initial condition

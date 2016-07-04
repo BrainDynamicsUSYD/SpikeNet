@@ -15,31 +15,48 @@ seed = 1;
 [FID, FID_syn] = new_ygin_files_and_randseed(seed);
 % If no FID_syn is needed, use FID = new_ygin_files_and_randseed(seed,0)
 
+% Use Adam 2016 synapse model instead of the default model
+model_choice = 2;
+writeSynapseModelChoice(FID, model_choice)
+
 %%%% Define some basic parameters
 % Time step (ms)
-dt = 0.1; % 0.1 is usually small enough
+dt = 0.05; % 0.1 is usually small enough
 % Total number of simulation steps
 step_tot = 10*10^3;
 
 %Define grids [no rows, no columns, grid step size]
-Grid(1,:)=[60,60,1];
-Grid(2,:)=[30,30,2];
+Grid(1,:)=[50,50,1];
+Grid(2,:)=[25,25,2];
 
 
-Drange=[10,10;
-    15,15]; % maximum connection range
+% Drange=[10,10;
+%     15, 15]; % maximum connection range
+% sigma=[12,12;
+%     1000,1000]; % connection streength spatial Gaussain 
+% W=[0.23,0.23;
+%     0.3,0.3;]; % max connection strength (muS)
+% 
+% % weight conversion
+% W(1,:) = W(1,:);
+% W(2,:) = W(2,:);
+% 
+% pbc=1; % periodic boundary conditions
+% 
+% F=[15,2]*10^-3; % muS
+
+Drange=[15,15;
+    15, 15]; % maximum connection range
 sigma=[12,12;
-    1000,1000]; % connection streength spatial Gaussain 
-W=[0.23,0.23;
-    0.3,0.3;]; % max connection strength (muS)
-
-% weight conversion
-W(1,:) = W(1,:)*0.7493;
-W(2,:) = W(2,:)*0.2194;
+    90,90]; % connection streength spatial Gaussain 
+W=[0.24,0.24;
+    0.79,0.79;]; % max connection strength (muS)
 
 pbc=1; % periodic boundary conditions
 
-F=[15,2]*10^-3; % muS
+F=[15,0]*10^-3; % muS
+
+
 
 SynapseType=[1 1;
     2 2];
@@ -71,7 +88,7 @@ end
 %%%% Define the initial condition
 p_fire = 0*ones(1,length(N)); % initial firing probabilities for both populations
 % set initial V distribution to be [V_rt, V_rt + (V_th-V_rt)*r_V0] 
-r_V0 = ones(1,length(N));
+r_V0 = 1*ones(1,length(N));
 writeInitCond(FID, r_V0, p_fire)
 
 
@@ -147,8 +164,8 @@ end
 % 'tau_decay_AMPA', 2.0, 'Dt_trans_GABA', 0.5)
 
 %%%% synapse parameters conversion
-writeSynPara(FID, 'tau_decay_GABA', 7, 'Dt_trans_AMPA' , 1.4210,...
-'tau_decay_AMPA', 2.0, 'Dt_trans_GABA', 0.9242)
+writeSynPara(FID, 'tau_decay_GABA', 7, 'Dt_trans_GABA', 0.5,...
+'tau_decay_AMPA', 2.0, 'Dt_trans_AMPA' , 0.5)
 
 % "help writeSynPara" to see all the parameter names and default values
 

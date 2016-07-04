@@ -357,6 +357,7 @@ if ~isempty(files)
                 elseif strfind(tline, 'INIT009')
                 elseif strfind(tline, 'INIT011')
                 elseif strfind(tline, 'INIT012')
+                elseif strfind(tline, 'INIT013')
                 elseif strfind(tline, '############')
                 elseif strfind(tline, 'MATLAB script')
                     

@@ -44,9 +44,6 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 
 }
 
-
-
-
 void Neurons::init(){
 
 	// Initialise arrarys storing instantaneous neuron states
@@ -86,7 +83,6 @@ void Neurons::init(){
 	// perturbation
 	step_perturb = -1;
 	spike_removed = -1;
-
 
 }
 
@@ -206,7 +202,7 @@ void Neurons::update_spikes(int step_current){
 	fill(I_NMDA.begin(), I_NMDA.end(), 0);
 	fill(I_GJ.begin(), I_GJ.end(), 0);
 	fill(I_ext.begin(), I_ext.end(), 0);// fast way to do it, dump in 16 bytes at a time until it gets close to the end
-
+	
 	// Find the firing neurons, record them, reset their potential and set them to be refractory
 	spikes_current.clear(); // empty vector
 	int spike_counter = 0;
@@ -242,7 +238,6 @@ void Neurons::update_spikes(int step_current){
 		copy(spikes_current.begin(), spikes_current.end(), back_inserter(spike_hist_tot));
 	}
 
-
 	// Refraction count-down and record number of refractory neurons
 	int num_ref_temp = 0;
 	for (int i = 0; i < N; ++i){
@@ -259,10 +254,8 @@ void Neurons::update_spikes(int step_current){
 	
 }
 
-
-void Neurons::update_V(int step_current){
-	// This function updates menbrane potentials for non-refractory neurons
-
+void Neurons::generate_I_ext(int step_current){
+	
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0){
 		if (I_ext_std.size() != 0){
@@ -302,8 +295,12 @@ void Neurons::update_V(int step_current){
 			} 
 		}
 	}
-	
-	
+}
+void Neurons::update_V(int step_current){
+	// This function updates menbrane potentials for non-refractory neurons
+
+	// Generate external currents
+	generate_I_ext(step_current);
 	
 	// potassium conductance for spike-frequency adaptation
 	if (spike_freq_adpt == true){

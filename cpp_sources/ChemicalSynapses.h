@@ -34,10 +34,18 @@ public:
 
 	void recv_pop_data(vector<Neurons*> &NeuronPopArray);
 	void update(int step_current);
+	void calc_I();
+	void update_gs_sum_model_0(int step_current);
+	void update_gs_sum_model_1(int step_current);
+	
+	void set_synapse_model(int synapse_model_input);
+	
 	void send_pop_data(vector<Neurons*> &NeuronPopArray);
 
 	void add_short_term_depression(int STD_on_step);
+	void update_STD(int step_current);
 	void add_inh_STDP(int inh_STDP_on_step);
+	void update_inh_STDP(int step_current);
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points); 
 	void sample_data(int step_current);
 
@@ -112,14 +120,16 @@ protected:
 		tau_decay_GABA,
 		tau_decay_NMDA;
 	double
+		tau_rise,
 		tau_decay; // msec, decay time
 	int
 		steps_trans; // tranmitter duration in simulation steps
 	vector<double>
 		K_trans; // 1.0/transmitter_steps!
 	double
-		exp_step; // exp(-dt/tau)
-
+		exp_step_decay, // exp(-dt/tau_decay)
+		exp_step_rise;
+		
 	// voltage-dependent part B(V) (look-up table):
 	double
 		miuMg_NMDA, // mM^-1, concentration of [Mg2+] is around 1 mM
@@ -160,7 +170,14 @@ protected:
 		STD; //  
 	int
 		STD_on_step; // the step where STD should turned on
-
+	
+	//
+	int
+		synapse_model;
+	int
+		buffer_steps;
+	
+	// model 1
 	vector<double>
 		s, // pre-synaptic dynamics
 		gs_sum, // post-synaptic dynamics
@@ -169,8 +186,13 @@ protected:
 		trans_left; // 
 	vector< vector<double> >
 		d_gs_sum_buffer; // d_gs_sum_buffer[time index][post-synaptic neuron index], ring buffer
-	int
-		buffer_steps;
+	
+	// model 2
+	vector<double>
+		gs_rise_sum,
+		gs_decay_sum;
+	vector< vector<double> >
+		d_gs_rd_sum_buffer; // d_gs_rd_sum_buffer[time index][post-synaptic neuron index], ring buffer
 	
 	vector< vector<int> >
 		C, // connection index

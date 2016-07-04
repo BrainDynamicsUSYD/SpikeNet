@@ -69,6 +69,8 @@ bool SimulatorInterface::import(string in_filename_input){
 	
 	vector< vector<int> > step_perturb_setting; // [pop_ind step_perturb]
 
+	int synapse_model_choice = 0;
+	
 	// read data
 	string line_str, entry_str; // temporary container for the entire while loop
 	size_t found;
@@ -200,6 +202,14 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 			
+			// read synapse model choice
+			found = line_str.find("INIT013");
+			if (found != string::npos){// if found match
+				cout << "\t Reading synapse model choice..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
+				synapse_model_choice = read_next_entry<int>(line_ss); 
+				continue; // move to next line
+			}
 			
 			// read neuron population parameter setting
 			found = line_str.find("PARA001");
@@ -216,8 +226,6 @@ bool SimulatorInterface::import(string in_filename_input){
 				}
 				continue; // move to next line
 			}
-
-
 
 			// read synapse parameter setting
 			found = line_str.find("PARA002");
@@ -417,6 +425,9 @@ bool SimulatorInterface::import(string in_filename_input){
 			network.ChemicalSynapsesArray.push_back(new ChemicalSynapses(network.dt, network.step_tot, delim, indicator));
 			network.ChemicalSynapsesArray.back()->init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I_temp[ind], J_temp[ind], K_temp[ind], D_temp[ind]);
 			network.ChemicalSynapsesArray.back()->set_para(syn_para);
+			if (synapse_model_choice != 0){
+				network.ChemicalSynapsesArray.back()->set_synapse_model(synapse_model_choice);
+			}
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;

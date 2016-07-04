@@ -51,6 +51,7 @@ public:
 	void update_spikes(int step_current); // Find the firing neurons, record them, reset their potential and update nonref
 	// Following member(s) should not be inherited
 private:
+	void generate_I_ext(int step_current);
 	void update_V(int step_current); // Update potential
 
 public:
