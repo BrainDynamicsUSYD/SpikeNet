@@ -2,6 +2,7 @@ EXEC_DIR = ..
 EXEC = $(EXEC_DIR)/simulator
 SRC_DIR = cpp_sources
 SRC_FILES = $(SRC_DIR)/*.cpp
+HEADER_FILES = $(SRC_DIR)/*.h
 #OBJ = main.o Neurons.o NeuronNetwork.o ElectricalSynapses.o ChemicalSynapses.o SimulatorInterface.o
 OBJ = main.o Neurons.o NeuronNetwork.o ChemicalSynapses.o SimulatorInterface.o
 
@@ -50,7 +51,10 @@ ChemicalSynapses.o: $(SRC_DIR)/ChemicalSynapses.cpp $(SRC_DIR)/ChemicalSynapses.
 #	$(COMPILE_THIS_ONE)
 #	@echo "ElectricalSynapses.o updated"
 
-
+#documentation
+docs: html/index.html
+html/index.html: ${SRC_FILES} ${HEADER_FILES} Doxyfile
+	doxygen Doxyfile
 
 #$(OBJ): $(SRC_FILES)
 #	$(CXX) $(CXXFLAGS) $(arguments) $(CXXOPTIMFLAGS) -c $?

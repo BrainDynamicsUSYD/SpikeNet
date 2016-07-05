@@ -1,3 +1,4 @@
+/// \file
 #include <iostream>
 #include <cmath> // always cmath instead of math.h ?
 #include <algorithm>
