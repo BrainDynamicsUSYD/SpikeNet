@@ -3,6 +3,7 @@ function [ K ] = shuffle_K_common_neighbour( K, I, J, cn_scale_weight )
 %   Detailed explanation goes here
 show_wait_bar = 0;
 
+fprintf('shuffle_K_common_neighbour....')
 %%%%% find number of common pre-synaptic neighbours
 A = sparse(I,J, ones(size(I))); % I:pre, J:post
 cn = A'* A; % A * A' gives common post-synaptic neighbours, note that cn is symmetric
@@ -19,6 +20,9 @@ if show_wait_bar == 1
 end
 
 for j = 1:N
+    if mod(j*10,round(N/10)*10) == 0
+        fprintf('%d...', 10 - j*10 / (round(N/10)*10));
+    end
     if show_wait_bar == 1
         wb_p = wb_p + 1; waitbar(wb_p / wb_p_tot, wb_h);
     end
@@ -38,6 +42,6 @@ end
 if show_wait_bar == 1
     close(wb_h)
 end
-
+fprintf('\n');
 end
 

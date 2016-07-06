@@ -8,7 +8,7 @@ function main_heterogeneous_finite_I_LFP(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 4*sec; % use 10 second!
+step_tot = 2*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -34,7 +34,7 @@ Type_mat(end, :) = 2;
 
 
 % parameter
-for SpikeFreqAapt = [0 1]
+for SpikeFreqAapt = [ 1]
     for in_out_r = [0.2 ];
         for cn_scale_wire = [2 ];
             for cn_scale_weight = [2 ];
@@ -70,13 +70,13 @@ for SpikeFreqAapt = [0 1]
                             %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                             
                             
-                            for g_EI = [ 11 12 ]*10^-3
+                            for g_EI = [ 8 10 12 ]*10^-3
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
-                                        for rate_ext = [1.6:0.1:2.5];
-                                            for  tau_c_E = [8 10]
-                                                for tau_c_I = [15 20]
+                                        for rate_ext = [1.9:0.1:2.5];
+                                            for  tau_c_E = [8 ]
+                                                for tau_c_I = [ 25  30 35 ]
                                                     loop_num = loop_num + 1;
                                                     
                                                     % For PBS array job
@@ -85,15 +85,6 @@ for SpikeFreqAapt = [0 1]
                                                         if loop_num ~=  PBS_ARRAYID
                                                             continue;
                                                         end
-                                                    end
-                                                    
-                                                    loops_interesting = [...
-                                                        43    47    48    51    52    55    59    63    83    84    87    88    91    92    95    99 ...
-                                                        103   107   111   121   122   123   124   125   126   127   128   129   130   131   132   133 ...
-                                                        134   135   136   137   138   139   140   141   142   143   144   145   146   147   148   149 ...
-                                                        150   151   152   153   155   156   157   159   160];
-                                                    if  sum(loops_interesting == loop_num) ~= 1
-                                                        continue;
                                                     end
    
                                                     % seed the matlab rand function! The seed is global.
@@ -183,7 +174,7 @@ for SpikeFreqAapt = [0 1]
                                                     clear I J K D;
                                                     
                                                     [~,ind_sorted] = sort(in_degree);
-                                                    sample_neuron = ind_sorted(1:500:end);
+                                                    sample_neuron = ind_sorted(1:1000:end);
                                                     
                                                     %%%%%%%%%%%%%%%%%%%%%%
                                                     [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );
