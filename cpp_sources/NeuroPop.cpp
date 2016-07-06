@@ -8,8 +8,8 @@
 #include "NeuroPop.h"
 #include <functional> // for bind(), plus
 
-NeuroPop::NeuroPop(int pop_ind_input, int N_input, double dt_input, int step_tot_input, char delim_input, char indicator_input){
-
+NeuroPop::NeuroPop(int pop_ind_input, int N_input, double dt_input, int step_tot_input, char delim_input, char indicator_input)
+{
 	pop_ind = pop_ind_input;
 	N = N_input;
 	dt = dt_input;
@@ -65,13 +65,13 @@ void NeuroPop::init()
 	//cout << "My_seed is: " << my_seed << endl;
 
 	// Runaway killer is initially a sleeper agent
-	killer_license = false;
-	runaway_killed = false;
-	step_killed = -1;
+	killer.license = false;
+	killer.runaway_killed = false;
+	killer.step_killed = -1;
 	
 	//
-	stats_record = false;
-	LFP_record = false;
+	stats.record = false;
+	LFP.record = false;
 	spike_freq_adpt = false;
 	
 	// perturbation
@@ -92,7 +92,7 @@ const vector< double > & NeuroPop::get_V()
 
 const bool & NeuroPop::get_runaway_killed()
 {
-	return runaway_killed;
+	return killer.runaway_killed;
 };
 
 void NeuroPop::recv_I(vector<double>& I, int pop_ind_pre, int syn_type)
@@ -124,22 +124,22 @@ void NeuroPop::recv_I(vector<double>& I, int pop_ind_pre, int syn_type)
 
 void NeuroPop::start_stats_record()
 {
-	stats_record = true;
+	stats.record = true;
 	
-	V_mean.reserve(step_tot);
-	V_std.reserve(step_tot);
+	stats.V_mean.reserve(step_tot);
+	stats.V_std.reserve(step_tot);
 	
-	I_input_mean.reserve(step_tot);
-	I_input_std.reserve(step_tot);
+	stats.I_input_mean.reserve(step_tot);
+	stats.I_input_std.reserve(step_tot);
 	
-	I_AMPA_acc.assign(N, 0.0);
-	I_AMPA_time_avg.assign(N, 0.0);
-	I_NMDA_acc.assign(N, 0.0);
-	I_NMDA_time_avg.assign(N, 0.0);
-	I_GABA_acc.assign(N, 0.0);
-	I_GABA_time_avg.assign(N, 0.0);
+	stats.I_AMPA_acc.assign(N, 0.0);
+	stats.I_AMPA_time_avg.assign(N, 0.0);
+	stats.I_NMDA_acc.assign(N, 0.0);
+	stats.I_NMDA_time_avg.assign(N, 0.0);
+	stats.I_GABA_acc.assign(N, 0.0);
+	stats.I_GABA_time_avg.assign(N, 0.0);
 	
-	IE_ratio.assign(N, 0.0);
+	stats.IE_ratio.assign(N, 0.0);
 }
 
 void NeuroPop::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
@@ -147,13 +147,13 @@ void NeuroPop::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
 		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
 	}
 	else{
-		LFP_record = true;
+		LFP.record = true;
 		int n_LFP = int(LFP_neurons_input.size());
-		LFP_neurons.resize(n_LFP);
-		LFP.resize(n_LFP);
+		LFP.neurons.resize(n_LFP);
+		LFP.data.resize(n_LFP);
 		for (int ind = 0; ind < n_LFP; ++ind){
-			LFP_neurons[ind] = LFP_neurons_input[ind];
-			LFP[ind].reserve(step_tot);
+			LFP.neurons[ind] = LFP_neurons_input[ind];
+			LFP.data[ind].reserve(step_tot);
 		}
 	}	
 }
@@ -382,49 +382,41 @@ void NeuroPop::update_V(int step_current){
 }
 
 
-void NeuroPop::add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name_input){
-	sample_neurons = sample_neurons_input;
-	sample_type = sample_type_input;
-	sample_time_points = sample_time_points_input;
+void NeuroPop::add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string sample_file_name_input){
+	sample.neurons = sample_neurons_input;
+	sample.type = sample_type_input;
+	sample.time_points = sample_time_points_input;
 	
-	samp_file_name = samp_file_name_input.append(to_string(pop_ind)).append(".ygout_samp");
-	samp_file.open(samp_file_name);
-			
-	// initialise
-	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
-	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
-		if (sample_time_points[i]){
-			sample_time_points_tot += 1;
-		}
-	}
+	sample.file_name = sample_file_name_input.append(to_string(pop_ind)).append(".ygout_samp");
+	sample.file.open(sample.file_name);
 	
 }
 
 
 
 void NeuroPop::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input){
-	sample_neurons = sample_neurons_input;
-	sample_type = sample_type_input;
-	sample_time_points = sample_time_points_input;
+	sample.neurons = sample_neurons_input;
+	sample.type = sample_type_input;
+	sample.time_points = sample_time_points_input;
 	
 	
 	// initialise
 	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
-	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
-		if (sample_time_points[i]){
+	for (unsigned int i = 0; i < sample.time_points.size(); ++i){
+		if (sample.time_points[i]){
 			sample_time_points_tot += 1;
 		}
 	}
-	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
-	int sample_type_tot = sample_type.size(); // 8 different data types
+	int sample_neurons_tot = sample.neurons.size();// count non zero elements in sample_time_points
+	int sample_type_tot = sample.type.size(); // 8 different data types
 	
 	
-	sample.resize(sample_type_tot); 
+	sample.data.resize(sample_type_tot); 
 	for (int c = 0; c < sample_type_tot; ++c){
-		if (sample_type[c]){
-			sample[c].resize(sample_neurons_tot);
+		if (sample.type[c]){
+			sample.data[c].resize(sample_neurons_tot);
 			for (int i = 0; i < sample_neurons_tot; ++i){
-				sample[c][i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
+				sample.data[c][i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
 			}
 		}
 	}
@@ -434,18 +426,18 @@ void NeuroPop::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sam
 
 void NeuroPop::sample_data(int step_current){
 	
-	if (!sample_neurons.empty()){
-		if (sample_time_points[step_current]){ // push_back is amazing
-			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
-				int ind_temp = sample_neurons[i];
-				if (sample_type[0]){sample[0][i].push_back( V[ind_temp] );}
-				if (sample_type[1]){sample[1][i].push_back( I_leak[ind_temp] );}
-				if (sample_type[2]){sample[2][i].push_back( I_AMPA[ind_temp] );}
-				if (sample_type[3]){sample[3][i].push_back( I_GABA[ind_temp] );}
-				if (sample_type[4]){sample[4][i].push_back( I_NMDA[ind_temp] );}
-				if (sample_type[5]){sample[5][i].push_back( I_GJ[ind_temp] );}
-				if (sample_type[6]){sample[6][i].push_back( I_ext[ind_temp] );}
-				if (sample_type[7]){sample[7][i].push_back( I_K[ind_temp] );}
+	if (!sample.neurons.empty()){
+		if (sample.time_points[step_current]){ // push_back is amazing
+			for (unsigned int i = 0; i < sample.neurons.size(); ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample.neurons[i];
+				if (sample.type[0]){sample.data[0][i].push_back( V[ind_temp] );}
+				if (sample.type[1]){sample.data[1][i].push_back( I_leak[ind_temp] );}
+				if (sample.type[2]){sample.data[2][i].push_back( I_AMPA[ind_temp] );}
+				if (sample.type[3]){sample.data[3][i].push_back( I_GABA[ind_temp] );}
+				if (sample.type[4]){sample.data[4][i].push_back( I_NMDA[ind_temp] );}
+				if (sample.type[5]){sample.data[5][i].push_back( I_GJ[ind_temp] );}
+				if (sample.type[6]){sample.data[6][i].push_back( I_ext[ind_temp] );}
+				if (sample.type[7]){sample.data[7][i].push_back( I_K[ind_temp] );}
 			}
 		}
 	}
@@ -485,30 +477,31 @@ void NeuroPop::add_spike_freq_adpt(){
 }
 
 
-void NeuroPop::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
-
-	min_pop_size = 100;
-	if (N > min_pop_size){
-		killer_license = true;
-		min_steps = int(round(min_ms / dt));
-		runaway_Hz = Hz;
-		Hz_steps = int(round(Hz_ms / dt));
+void NeuroPop::init_runaway_killer(double min_ms, double Hz, double Hz_ms)
+{
+	killer.min_pop_size = 100;
+	if (N > killer.min_pop_size){
+		killer.license = true;
+		killer.min_steps = int(round(min_ms / dt));
+		killer.runaway_Hz = Hz;
+		killer.Hz_steps = int(round(Hz_ms / dt));
 	}
 }
 
-void NeuroPop::runaway_check(int step_current){
-	if (killer_license == true && runaway_killed == false && step_current > min_steps && step_current > Hz_steps){
+void NeuroPop::runaway_check(int step_current)
+{
+	if (killer.license == true && killer.runaway_killed == false && step_current > killer.min_steps && step_current > killer.Hz_steps){
 		// find mean value of num_ref over the last runaway_steps
 		vector<int>::const_iterator first, last;
 		// first element to be accumulated
-		first = num_spikes_pop.begin() + (step_current - Hz_steps + 1); 
+		first = num_spikes_pop.begin() + (step_current - killer.Hz_steps + 1); 
 		// one element pass the last element to be accumulated
 		last = num_spikes_pop.begin() + (step_current + 1); 
-		double mean_Hz = accumulate(first, last, 0.0) / (Hz_steps * dt * 0.001 * N); // 0.001 for converting from ms to sec.
+		double mean_Hz = accumulate(first, last, 0.0) / (killer.Hz_steps * dt * 0.001 * N); // 0.001 for converting from ms to sec.
 		//be careful!! accumulate range is : [first,last)
-		if (mean_Hz >= runaway_Hz){
-			runaway_killed = true;
-			step_killed = step_current;
+		if (mean_Hz >= killer.runaway_Hz){
+			killer.runaway_killed = true;
+			killer.step_killed = step_current;
 			cout << "warning: runaway killed at " << step_current*dt << " (ms) in population" << pop_ind << flush;
 			cout << "\t with firing rate at " << mean_Hz << " Hz."<< flush;
 		}
@@ -517,33 +510,33 @@ void NeuroPop::runaway_check(int step_current){
 
 void NeuroPop::output_sampled_data_real_time(int step_current){
 	
-	if (!sample_neurons.empty() && step_current == 0){
+	if (!sample.neurons.empty() && step_current == 0){
 		int sample_step_number = 0;
 		for (int tt = 0; tt < step_tot; ++tt){
-			if (sample_time_points[tt]){sample_step_number += 1;}
+			if (sample.time_points[tt]){sample_step_number += 1;}
 		}
-		samp_file << indicator << " POPD006" << endl;
-		samp_file << pop_ind << delim << sample_neurons.size() << delim << sample_step_number << delim << endl;
+		sample.file << indicator << " POPD006" << endl;
+		sample.file << pop_ind << delim << sample.neurons.size() << delim << sample_step_number << delim << endl;
   		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
 		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
-			if (sample_type[tt]){samp_file << data_types[tt] << delim; }
+			if (sample.type[tt]){sample.file << data_types[tt] << delim; }
 		}
-		samp_file << endl;
+		sample.file << endl;
 	}
 	
-	if (!sample_neurons.empty()){
-		if (sample_time_points[step_current]){ // push_back is amazing
-			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
-				int ind_temp = sample_neurons[i];
-				if (sample_type[0]){samp_file << V[ind_temp] << delim;}
-				if (sample_type[1]){samp_file << I_leak[ind_temp] << delim;}
-				if (sample_type[2]){samp_file << I_AMPA[ind_temp] << delim;}
-				if (sample_type[3]){samp_file << I_GABA[ind_temp] << delim;}
-				if (sample_type[4]){samp_file << I_NMDA[ind_temp] << delim;}
-				if (sample_type[5]){samp_file << I_GJ[ind_temp] << delim;}
-				if (sample_type[6]){samp_file << I_ext[ind_temp] << delim;}
-				if (sample_type[7]){samp_file << I_K[ind_temp] << delim;}
-				samp_file << endl;
+	if (!sample.neurons.empty()){
+		if (sample.time_points[step_current]){ // push_back is amazing
+			for (unsigned int i = 0; i < sample.neurons.size(); ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample.neurons[i];
+				if (sample.type[0]){sample.file << V[ind_temp] << delim;}
+				if (sample.type[1]){sample.file << I_leak[ind_temp] << delim;}
+				if (sample.type[2]){sample.file << I_AMPA[ind_temp] << delim;}
+				if (sample.type[3]){sample.file << I_GABA[ind_temp] << delim;}
+				if (sample.type[4]){sample.file << I_NMDA[ind_temp] << delim;}
+				if (sample.type[5]){sample.file << I_GJ[ind_temp] << delim;}
+				if (sample.type[6]){sample.file << I_ext[ind_temp] << delim;}
+				if (sample.type[7]){sample.file << I_K[ind_temp] << delim;}
+				sample.file << endl;
 			}
 		}
 	}
@@ -572,34 +565,34 @@ void NeuroPop::output_results(ofstream& output_file){
 	output_file << para_str;
 
 	// POPD003 # membrane potential mean and std
-	if (stats_record){
+	if (stats.record){
 		output_file << indicator << " POPD003" << endl;
 		output_file << pop_ind << delim << endl;
-		write2file(output_file, V_mean);
-		write2file(output_file, V_std);
-		write2file(output_file, I_input_mean);
-		write2file(output_file, I_input_std);
+		write2file(output_file, stats.V_mean);
+		write2file(output_file, stats.V_std);
+		write2file(output_file, stats.I_input_mean);
+		write2file(output_file, stats.I_input_std);
 	}
 	
 	// POPD007 # local field potential
-	if (LFP_record){
+	if (LFP.record){
 		output_file << indicator << " POPD007" << endl;
-		output_file << pop_ind << delim << LFP.size() << delim << endl;
-		write2file(output_file, LFP);
+		output_file << pop_ind << delim << LFP.data.size() << delim << endl;
+		write2file(output_file, LFP.data);
 	}
 	
 	
 	// POPD005 # E-I ratio for each neuron
-	if (stats_record){
+	if (stats.record){
 		output_file << indicator << " POPD005" << endl;
 		output_file << pop_ind << delim << endl;
-		write2file(output_file, IE_ratio);
+		write2file(output_file, stats.IE_ratio);
 	}
 	
 	// SAMF001 # sampled data file name
-	if (!samp_file_name.empty()){
+	if (!sample.file_name.empty()){
 		output_file << indicator << " SAMF001" << endl;
-		output_file << samp_file_name << endl;
+		output_file << sample.file_name << endl;
 	}
 
 
@@ -607,18 +600,18 @@ void NeuroPop::output_results(ofstream& output_file){
 	// POPD004 # sampled neuron data
 	if (!sample_neurons.empty()){
 		output_file << indicator << " POPD004" << endl;
-		output_file << pop_ind << delim << sample_neurons.size() << delim << endl;
+		output_file << pop_ind << delim << sample.neurons.size() << delim << endl;
 
   		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
 		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
-			if (sample_type[tt] == true){output_file << data_types[tt] << delim;}
+			if (sample.type[tt] == true){output_file << data_types[tt] << delim;}
 		}
 		output_file << endl;
 
 
-		for (unsigned int c = 0; c < sample_type.size(); ++c){
-			if (!sample[c].empty()){
-				NeuroPop::write2file(output_file, sample[c]); // 2D matrix
+		for (unsigned int c = 0; c < sample.type.size(); ++c){
+			if (!sample.data[c].empty()){
+				NeuroPop::write2file(output_file, sample.data[c]); // 2D matrix
 			}
 		}
 	}
@@ -684,12 +677,12 @@ void NeuroPop::write2file(ofstream& output_file, vector<double>& v){
 }
 
 void NeuroPop::record_LFP(){
-	if (LFP_record){
-		for (unsigned int ind = 0; ind < LFP_neurons.size(); ++ind){
-			LFP[ind].push_back(0.0);
+	if (LFP.record){
+		for (unsigned int ind = 0; ind < LFP.neurons.size(); ++ind){
+			LFP.data[ind].push_back(0.0);
 			for (int i = 0; i < N; ++i){
-				if (LFP_neurons[ind][i]){
-					LFP[ind].back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
+				if (LFP.neurons[ind][i]){
+					LFP.data[ind].back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
 				}
 			} 
 		}
@@ -698,7 +691,7 @@ void NeuroPop::record_LFP(){
 
 
 void NeuroPop::record_stats(int step_current){
-	if (stats_record){
+	if (stats.record){
 		// get mean
 		double sum_mean_V = 0.0;
 		double sum_mean_I = 0.0;
@@ -720,27 +713,27 @@ void NeuroPop::record_stats(int step_current){
 		double std_tmp_I = sqrt( sum_std_I / double(V.size()));
 	
 		// record   
-		V_mean.push_back(mean_tmp_V);
-		V_std.push_back(std_tmp_V);
-		I_input_mean.push_back(mean_tmp_I);
-		I_input_std.push_back(std_tmp_I);
+		stats.V_mean.push_back(mean_tmp_V);
+		stats.V_std.push_back(std_tmp_V);
+		stats.I_input_mean.push_back(mean_tmp_I);
+		stats.I_input_std.push_back(std_tmp_I);
 		
 		// accumulate
 		//for (unsigned int i = 0; i < N; ++i){ // this manual loop is slow, use transform()
 		//	I_input_acc[i] += I_input[i];
 		//}
-		transform( I_AMPA_acc.begin(), I_AMPA_acc.end(), I_AMPA.begin(), I_AMPA_acc.begin(), plus<double>() );
-		transform( I_NMDA_acc.begin(), I_NMDA_acc.end(), I_NMDA.begin(), I_NMDA_acc.begin(), plus<double>() );
-		transform( I_GABA_acc.begin(), I_GABA_acc.end(), I_GABA.begin(), I_GABA_acc.begin(), plus<double>() );
+		transform( stats.I_AMPA_acc.begin(), stats.I_AMPA_acc.end(), I_AMPA.begin(), stats.I_AMPA_acc.begin(), plus<double>() );
+		transform( stats.I_NMDA_acc.begin(), stats.I_NMDA_acc.end(), I_NMDA.begin(), stats.I_NMDA_acc.begin(), plus<double>() );
+		transform( stats.I_GABA_acc.begin(), stats.I_GABA_acc.end(), I_GABA.begin(), stats.I_GABA_acc.begin(), plus<double>() );
 		// get time average for each neuron
 		if (step_current == step_tot - 1){ // at the end of the last time step
 			for (int i = 0; i < N; ++i){
-				I_AMPA_time_avg[i] = I_AMPA_acc[i] / step_tot;
-				I_NMDA_time_avg[i] = I_NMDA_acc[i] / step_tot;
-				I_GABA_time_avg[i] = I_GABA_acc[i] / step_tot;
+				stats.I_AMPA_time_avg[i] = stats.I_AMPA_acc[i] / step_tot;
+				stats.I_NMDA_time_avg[i] = stats.I_NMDA_acc[i] / step_tot;
+				stats.I_GABA_time_avg[i] = stats.I_GABA_acc[i] / step_tot;
 				// be careful here, for IE_ratio, I_ext is assumed to be always excitatory and I_GJ is not considered
 				// also, the only source of I_ext is generated internally
-				IE_ratio[i] = I_GABA_time_avg[i] / (I_AMPA_time_avg[i] + I_NMDA_time_avg[i] + I_ext_mean[i]);
+				stats.IE_ratio[i] = stats.I_GABA_time_avg[i] / (stats.I_AMPA_time_avg[i] + stats.I_NMDA_time_avg[i] + I_ext_mean[i]);
 			}
 		}
 	}

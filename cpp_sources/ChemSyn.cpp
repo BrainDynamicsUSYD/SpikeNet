@@ -28,10 +28,10 @@ ChemSyn::ChemSyn(double dt_input, int step_tot_input, char delim_input, char ind
 
 	// default settting
 	stats_record = false;
-	STD = false; 
-	STD_on_step = -1;
-	inh_STDP_on_step = -1;
-	inh_STDP = false;
+	STD.on = false; 
+	STD.on_step = -1;
+	inh_STDP.on_step = -1;
+	inh_STDP.on = false;
 	synapse_model = 0; // default model
 	
 }
@@ -151,35 +151,36 @@ void ChemSyn::init(){
 	I.assign(N_post, 0);
 	gs_sum.assign(N_post, 0);
 	
+	// transmitter_strength
+	K_trans.assign(N_pre, 1.0 / steps_trans); // be careful! 1 / transmitter steps gives zero (int)!!
 	
 	// Synapse model choice
 	// model 0, the default model
 	if (synapse_model == 0){ 
 		// Initialize pre- and post-synaptic dynamic variables
-		buffer_steps = max_delay_steps + steps_trans + 1; // the +1 is vital
-		s.assign(N_pre, 0);
-		d_gs_sum_buffer.resize(buffer_steps);
-		for (int i = 0; i < buffer_steps; ++i){
-			d_gs_sum_buffer[i].assign(N_post, 0);
+		gsm_0.buffer_steps = max_delay_steps + steps_trans + 1; // the +1 is vital
+		gsm_0.s.assign(N_pre, 0);
+		gsm_0.d_gs_sum_buffer.resize(gsm_0.buffer_steps);
+		for (int i = 0; i < gsm_0.buffer_steps; ++i){
+			gsm_0.d_gs_sum_buffer[i].assign(N_post, 0);
 		}
 		// transmitter_strength
 		K_trans.assign(N_pre, 1.0 / steps_trans); // be careful! 1 / transmitter steps gives zero (int)!!
-		trans_left.assign(N_pre, 0);
+		gsm_0.trans_left.assign(N_pre, 0);
 	}
 	else if (synapse_model == 1){
 		// model 1
-		buffer_steps = max_delay_steps + 1; // the +1 is vital
-		gs_rise_sum.assign(N_post, 0);
-		gs_decay_sum.assign(N_post, 0);
-		d_gs_rd_sum_buffer.resize(buffer_steps);
-		for (int i = 0; i < buffer_steps; ++i){
-			d_gs_rd_sum_buffer[i].assign(N_post, 0);
+		gsm_1.buffer_steps = max_delay_steps + 1; // the +1 is vital
+		gsm_1.gs_rise_sum.assign(N_post, 0);
+		gsm_1.gs_decay_sum.assign(N_post, 0);
+		gsm_1.d_gs_rd_sum_buffer.resize(gsm_1.buffer_steps);
+		for (int i = 0; i < gsm_1.buffer_steps; ++i){
+			gsm_1.d_gs_rd_sum_buffer[i].assign(N_post, 0);
 		}
 		// clear model 0
-		s.clear();
-		d_gs_sum_buffer.clear(); // clear() clears all of its components recursively
-		K_trans.clear();
-		trans_left.clear();
+		gsm_0.s.clear();
+		gsm_0.d_gs_sum_buffer.clear(); // clear() clears all of its components recursively
+		gsm_0.trans_left.clear();
 	}
 }
 
@@ -237,15 +238,15 @@ void ChemSyn::update(int step_current){
 void ChemSyn::update_STD(int step_current){
 	// STD modifies K_trans
 	
-	if (STD_on_step == step_current){STD = true;}
+	if (STD.on_step == step_current){STD.on = true;}
 	// short-term depression
-	if (STD == true){
+	if (STD.on == true){
 		for (unsigned int i = 0; i < spikes_pre.size(); ++i){ 
-			K_trans[spikes_pre.at(i)] = 1.0 / steps_trans * f_ves[i];
-			f_ves[spikes_pre.at(i)] *= 1.0 - p_ves; // decrease at spikes
+			K_trans[spikes_pre.at(i)] = 1.0 / steps_trans * STD.f_ves[i];
+			STD.f_ves[spikes_pre.at(i)] *= 1.0 - STD.p_ves; // decrease at spikes
 		}
 		for (int i = 0; i < N_pre; ++i){
-			f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]); // decay to 1.0
+			STD.f_ves[i] = 1.0 - STD.exp_ves * (1.0 - STD.f_ves[i]); // decay to 1.0
 		}
 	}
 
@@ -260,29 +261,29 @@ void ChemSyn::add_inh_STDP(int inh_STDP_on_step_input){
 		cout << "Warning: inhibitory STDP is not supported for synapse models other than 0 yet!" << endl;
 	}
 	
-	inh_STDP_on_step = inh_STDP_on_step_input;
-	if (inh_STDP_on_step == 0){
-		inh_STDP = true;
+	inh_STDP.on_step = inh_STDP_on_step_input;
+	if (inh_STDP.on_step == 0){
+		inh_STDP.on = true;
 	}
 	
-	x_trace_pre.assign(N_pre, 0.0);
-	x_trace_post.assign(N_post, 0.0);
+	inh_STDP.x_trace_pre.assign(N_pre, 0.0);
+	inh_STDP.x_trace_post.assign(N_post, 0.0);
 	
-	tau_STDP = 20; // ms
-	exp_step_STDP = exp(-dt / tau_STDP);
-	eta_STDP = 0.0001; // learning rate, 0.0001 is the published value but requires 60min of simulation
-	rho_0_STDP = 0.010; //kHz
-	alpha_STDP = 2.0 * rho_0_STDP * tau_STDP; // depression factor
+	inh_STDP.tau = 20; // ms
+	inh_STDP.exp_step = exp(-dt / inh_STDP.tau);
+	inh_STDP.eta = 0.0001; // learning rate, 0.0001 is the published value but requires 60min of simulation
+	inh_STDP.rho_0 = 0.010; //kHz
+	inh_STDP.alpha = 2.0 * inh_STDP.rho_0 * inh_STDP.tau; // depression factor
 
 	// j_2_i and j_2_syn_ind
-	j_2_i.resize(N_post);
-	j_2_syn_ind.resize(N_post);
+	inh_STDP.j_2_i.resize(N_post);
+	inh_STDP.j_2_syn_ind.resize(N_post);
 	int j_post;
 	for (int i_pre = 0; i_pre < N_pre; ++i_pre){ 
 		for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
 			j_post = C[i_pre][syn_ind];
-			j_2_i[j_post].push_back( i_pre );
-			j_2_syn_ind[j_post].push_back( int(syn_ind) );
+			inh_STDP.j_2_i[j_post].push_back( i_pre );
+			inh_STDP.j_2_syn_ind[j_post].push_back( int(syn_ind) );
 		}
 	}
 }	
@@ -320,24 +321,24 @@ void ChemSyn::update_gs_sum_model_0(int step_current){
 	// this function updates gs_sum
 	if (pop_ind_pre >= 0){
 		for (unsigned int i = 0; i < spikes_pre.size(); ++i){ // add spikes (transmitter release)
-			trans_left[spikes_pre.at(i)] += steps_trans;
+			gsm_0.trans_left[spikes_pre.at(i)] += steps_trans;
 		}
 		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
-			if (trans_left[i_pre] > 0){
+			if (gsm_0.trans_left[i_pre] > 0){
 				// conduction delay: put into d_gs_sum_buffer
 				int j_post, delay_step, t_ring;
 				for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){ //loop through all the post-synapses
 					j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
 					delay_step = D[i_pre][syn_ind]; // delay in steps for this post-synaptic neuron
-					t_ring = int( (step_current + delay_step) % buffer_steps ); // index in the gs_buffer
-					d_gs_sum_buffer[t_ring][j_post] += K_trans[i_pre] * (1.0 - s[i_pre]) * K[i_pre][syn_ind];
+					t_ring = int( (step_current + delay_step) % gsm_0.buffer_steps ); // index in the gs_buffer
+					gsm_0.d_gs_sum_buffer[t_ring][j_post] += K_trans[i_pre] * (1.0 - gsm_0.s[i_pre]) * K[i_pre][syn_ind];
 				}
-				trans_left[i_pre] -= 1;
-				s[i_pre] += K_trans[i_pre] * (1.0 - s[i_pre]);
+				gsm_0.trans_left[i_pre] -= 1;
+				gsm_0.s[i_pre] += K_trans[i_pre] * (1.0 - gsm_0.s[i_pre]);
 			}
 		}
 		// decay pre-synaptic dynamics
-		for (int i = 0; i < N_pre; ++i){ s[i] *= exp_step_decay; };
+		for (int i = 0; i < N_pre; ++i){ gsm_0.s[i] *= exp_step_decay; };
 	}
 	else if (pop_ind_pre == -1){ // if external noisy population
 		// Contribution of external spikes, assuming square pulse transmitter release
@@ -349,20 +350,20 @@ void ChemSyn::update_gs_sum_model_0(int step_current){
 		// Post-synaptic dynamics
 		int t_ring;
 		for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
-			t_ring = int( (step_current + t_trans) % buffer_steps );
+			t_ring = int( (step_current + t_trans) % gsm_0.buffer_steps );
 			for (int j = ia; j <= ib; ++j){
-				d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
+				gsm_0.d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
 			}
 		}
 	}
 	// update post-synaptic dynamics
-	int t_ring = int( step_current % buffer_steps );
+	int t_ring = int( step_current % gsm_0.buffer_steps );
 	for (int j_post = 0; j_post < N_post; ++j_post){
-		gs_sum[j_post] += d_gs_sum_buffer[t_ring][j_post];
+		gs_sum[j_post] += gsm_0.d_gs_sum_buffer[t_ring][j_post];
 		// should I decay gs_sum here??
 	}
 	// immediately reset the current buffer to zeros after being used!!
-	fill(d_gs_sum_buffer[t_ring].begin(), d_gs_sum_buffer[t_ring].end(), 0.0);
+	fill(gsm_0.d_gs_sum_buffer[t_ring].begin(), gsm_0.d_gs_sum_buffer[t_ring].end(), 0.0);
 }
 
 void ChemSyn::update_gs_sum_model_1(int step_current){
@@ -374,20 +375,20 @@ void ChemSyn::update_gs_sum_model_1(int step_current){
 		for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){ //loop through all the post-synapses
 			j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
 			delay_step = D[i_pre][syn_ind]; // delay in steps for this post-synaptic neuron
-			t_ring = int( (step_current + delay_step) % buffer_steps ); // index in the gs_buffer
-			d_gs_rd_sum_buffer[t_ring][j_post] += K[i_pre][syn_ind];  // the peak value is linear to the initial impulse. 
+			t_ring = int( (step_current + delay_step) % gsm_1.buffer_steps ); // index in the gs_buffer
+			gsm_1.d_gs_rd_sum_buffer[t_ring][j_post] += K[i_pre][syn_ind];  // the peak value is linear to the initial impulse. 
 		}
 	}
-	int t_ring = int( step_current % buffer_steps );
+	int t_ring = int( step_current % gsm_1.buffer_steps );
 	for (int j_post = 0; j_post < N_post; ++j_post){ // Check the error of the following numerical scheme!
-		gs_rise_sum[j_post] *= exp_step_rise;
-		gs_decay_sum[j_post] *= exp_step_decay;
-		gs_sum[j_post] = (gs_decay_sum[j_post] - gs_rise_sum[j_post]) / (tau_decay - tau_rise); 
-		gs_rise_sum[j_post] += d_gs_rd_sum_buffer[t_ring][j_post];
-		gs_decay_sum[j_post] += d_gs_rd_sum_buffer[t_ring][j_post];
+		gsm_1.gs_rise_sum[j_post] *= exp_step_rise;
+		gsm_1.gs_decay_sum[j_post] *= exp_step_decay;
+		gs_sum[j_post] = (gsm_1.gs_decay_sum[j_post] - gsm_1.gs_rise_sum[j_post]) / (tau_decay - tau_rise); 
+		gsm_1.gs_rise_sum[j_post] += gsm_1.d_gs_rd_sum_buffer[t_ring][j_post];
+		gsm_1.gs_decay_sum[j_post] += gsm_1.d_gs_rd_sum_buffer[t_ring][j_post];
 	}
 	// immediately reset the current buffer to zeros after being used!!
-	fill(d_gs_rd_sum_buffer[t_ring].begin(), d_gs_rd_sum_buffer[t_ring].end(), 0.0);
+	fill(gsm_1.d_gs_rd_sum_buffer[t_ring].begin(), gsm_1.d_gs_rd_sum_buffer[t_ring].end(), 0.0);
 }
 
 
@@ -419,15 +420,15 @@ void ChemSyn::add_short_term_depression(int STD_on_step_input){
 		cout << "Warning: STD is not supported for synapse models other than 0 yet!" << endl;
 	}
 	
-	STD_on_step = STD_on_step_input;
-	if (STD_on_step == 0){
-		STD = true;
+	STD.on_step = STD_on_step_input;
+	if (STD.on_step == 0){
+		STD.on = true;
 	}
 	// short term depression
-	p_ves =  0.4; // see X. Wang, 1999, The Journal of Neuroscience
-	tau_ves =  700; // ms
-	f_ves.assign(N_pre, 1.0);
-	exp_ves = exp(-dt / tau_ves);
+	STD.p_ves =  0.4; // see X. Wang, 1999, The Journal of Neuroscience
+	STD.tau_ves =  700; // ms
+	STD.f_ves.assign(N_pre, 1.0);
+	STD.exp_ves = exp(-dt / STD.tau_ves);
 }
 
 
@@ -436,14 +437,14 @@ void ChemSyn::add_short_term_depression(int STD_on_step_input){
 void ChemSyn::update_inh_STDP(int step_current){
 	// inh_STDP modifies K
 	
-	if (inh_STDP_on_step == step_current){inh_STDP = true;}
-	if (inh_STDP == true){
+	if (inh_STDP.on_step == step_current){inh_STDP.on = true;}
+	if (inh_STDP.on == true){
 		// update x_trace
 		for (unsigned int i = 0; i < spikes_pre.size(); ++i){
-			x_trace_pre[spikes_pre.at(i)] += 1.0;
+			inh_STDP.x_trace_pre[spikes_pre.at(i)] += 1.0;
 		}
 		for (unsigned int j = 0; j < spikes_post.size(); ++j){
-			x_trace_post[spikes_post.at(j)] += 1.0;
+			inh_STDP.x_trace_post[spikes_post.at(j)] += 1.0;
 		}
 		// update K
 		int i_pre, j_post;
@@ -451,17 +452,17 @@ void ChemSyn::update_inh_STDP(int step_current){
 			i_pre = spikes_pre.at(ind_spike);
 			for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
 				j_post = C[i_pre][syn_ind];
-				K[i_pre][syn_ind] += eta_STDP * ( x_trace_post[j_post] - alpha_STDP );
+				K[i_pre][syn_ind] += inh_STDP.eta * ( inh_STDP.x_trace_post[j_post] - inh_STDP.alpha );
 			}
 		}
 		int syn_ind;
 		for (unsigned int ind_spike = 0; ind_spike < spikes_post.size(); ++ind_spike){
 			j_post = spikes_post.at(ind_spike);
-			for (unsigned int ind = 0; ind < j_2_i[j_post].size(); ++ind){
+			for (unsigned int ind = 0; ind < inh_STDP.j_2_i[j_post].size(); ++ind){
 				// j_2_i and j_2_syn_ind together serve as the "inverse function" of j_post = C[i_pre][syn_ind]
-				i_pre = j_2_i[j_post][ind];
-				syn_ind = j_2_syn_ind[j_post][ind];
-				K[i_pre][syn_ind] += eta_STDP * x_trace_pre[i_pre];
+				i_pre = inh_STDP.j_2_i[j_post][ind];
+				syn_ind = inh_STDP.j_2_syn_ind[j_post][ind];
+				K[i_pre][syn_ind] += inh_STDP.eta * inh_STDP.x_trace_pre[i_pre];
 			}
 		}
 		// for testing
@@ -470,8 +471,8 @@ void ChemSyn::update_inh_STDP(int step_current){
 		//}
 		//tmp_data[0].push_back(K[0][0]);
 		//tmp_data[1].push_back(K[100][0]);
-		for (int i = 0; i < N_pre; ++i){ x_trace_pre[i] *= exp_step_STDP; }
-		for (int j = 0; j < N_post; ++j){ x_trace_post[j] *= exp_step_STDP; }
+		for (int i = 0; i < N_pre; ++i){ inh_STDP.x_trace_pre[i] *= inh_STDP.exp_step; }
+		for (int j = 0; j < N_post; ++j){ inh_STDP.x_trace_post[j] *= inh_STDP.exp_step; }
 	}
 }
 

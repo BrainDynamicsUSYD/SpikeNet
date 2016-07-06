@@ -110,9 +110,6 @@ protected:
 	vector< vector<double> >
 		sample; //  sampled neurons x time points
 
-	
-	
-
 
 	// Build-in paramters for time-evolution of post-synaptic conductance change
 	// 1-variable "s(t)" kinetic synapses model
@@ -149,63 +146,76 @@ protected:
 
 	// Inhibitory-to-excitatory coupling STDP plasticity as in
 	// ref: Inhibitory plasticity balances excitation and inhibition in sensory pathways and memory networks
-	bool
-		inh_STDP;
-	vector<double>
-		x_trace_pre,
-		x_trace_post;
-	double 
-		tau_STDP,
-		exp_step_STDP, // exp(-dt/tau_STPD)
-		eta_STDP, // learning rate
-		rho_0_STDP,
-		alpha_STDP; // depression factor
-	int
-		inh_STDP_on_step;
-	vector< vector<int> >
-		j_2_i, // j_2_i[j_post] gives all the i_pre's (indices of pre-synaptic neurons)
-		j_2_syn_ind; // j_2_syn_ind[j_post] gives all the syn_ind's so that K[i_pre][syn_ind] is a synapse onto j_post
-
+	struct Inh_STDP {
+		bool
+			on;
+		vector<double>
+			x_trace_pre,
+			x_trace_post;
+		double 
+			tau,
+			exp_step, // exp(-dt/tau_STPD)
+			eta, // learning rate
+			rho_0,
+			alpha; // depression factor
+		int
+			on_step;
+		vector< vector<int> >
+			j_2_i, // j_2_i[j_post] gives all the i_pre's (indices of pre-synaptic neurons)
+			j_2_syn_ind; // j_2_syn_ind[j_post] gives all the syn_ind's so that K[i_pre][syn_ind] is a synapse onto j_post
+	} inh_STDP;
 
 	// connection matrices and bookkeeping for 1-variable kinetic synapse model
-	double // short-term depression constants
-		p_ves, // ves for vesicle
-		tau_ves,
-		exp_ves;
-	bool
-		STD; //  
-	int
-		STD_on_step; // the step where STD should turned on
-	
+	struct Std {
+		double // short-term depression constants
+			p_ves, // ves for vesicle
+			tau_ves,
+			exp_ves;
+		bool
+			on; //  
+		int
+			on_step; // the step where STD should turned on
+		vector<double>
+			f_ves; // the fraction of available vesicles
+	} STD;
+
 	//
 	int
 		synapse_model;
-	int
-		buffer_steps;
 	
+	vector<double>
+		gs_sum; // post-synaptic dynamics
+	
+	// model 0
+	struct Gsm_0 {
+		int
+			buffer_steps;
+		vector<double>
+			s; // pre-synaptic dynamics
+		vector<int>
+			trans_left; // 
+		vector< vector<double> >
+			d_gs_sum_buffer; // d_gs_sum_buffer[time index][post-synaptic neuron index], ring buffer
+	} gsm_0;
+
 	// model 1
-	vector<double>
-		s, // pre-synaptic dynamics
-		gs_sum, // post-synaptic dynamics
-		f_ves; // short-term depression: the fraction of available vesicles
-	vector<int>
-		trans_left; // 
-	vector< vector<double> >
-		d_gs_sum_buffer; // d_gs_sum_buffer[time index][post-synaptic neuron index], ring buffer
-	
-	// model 2
-	vector<double>
-		gs_rise_sum,
-		gs_decay_sum;
-	vector< vector<double> >
-		d_gs_rd_sum_buffer; // d_gs_rd_sum_buffer[time index][post-synaptic neuron index], ring buffer
+	struct Gsm_1 {
+		int
+			buffer_steps;
+		vector<double>
+			gs_rise_sum,
+			gs_decay_sum;
+		vector< vector<double> >
+			d_gs_rd_sum_buffer; // d_gs_rd_sum_buffer[time index][post-synaptic neuron index], ring buffer
+	} gsm_1;
 	
 	vector< vector<int> >
 		C, // connection index
-		   // each entry in the C matrix is the index of a POST-SYNAPTIC neuron (pre to post)
+		  // each entry in the C matrix is the index of a POST-SYNAPTIC neuron (pre to post)
 		D; // connection delay (in simulation time steps)
 	vector< vector<double> >
 		K; // connection strength, measuring the strength of synaptic conductance between two cells
+
 
 	vector< vector<double> > 
 		tmp_data; // temporary data container for debugging

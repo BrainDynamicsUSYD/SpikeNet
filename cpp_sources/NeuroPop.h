@@ -35,7 +35,7 @@ public:
 	void start_stats_record();
 
 	void start_LFP_record(vector< vector<bool> >& LFP_neurons);
-	void record_LFP();
+
 
 	void random_V(double firing_probability); /// Generate random initial condition for V. This function is deprecated!
 	void set_init_condition(double r_V0, double p_fire); /// Uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
@@ -51,7 +51,7 @@ public:
 
 	void init_runaway_killer(double min_ms, double Hz, double Hz_ms); /// kill the simulation when runaway activity of the network is detected: 
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
-	void runaway_check(int step_current);
+	
 	void add_perturbation(int step_perturb);
 	void add_spike_freq_adpt(); /// add spike-frequency adaptation
 	
@@ -66,12 +66,11 @@ private:
 	char delim;
 	char indicator;
 	void sample_data(int step_current);
-
+	void runaway_check(int step_current);
+	void record_LFP();
+		
 protected:
-	ofstream 
-		samp_file; /// the output file stream for sampled time series
-	string 
-		samp_file_name; /// the file name for sampled time series
+	
 	
 	// Space and time
 	int // actually we can use "unsigned int" here
@@ -119,28 +118,32 @@ protected:
 		num_spikes_pop, /// number of spikes at each time step
 		num_ref_pop; /// number of refractory neurons at each time step
 
-	bool
-		stats_record; /// whether stats should be recorded (false by default)
-	vector<double>
-		V_mean, /// mean of membrane potential averaged over neurons at each time step
-		V_std, /// std of membrane potential averaged over neurons at each time step
-		I_input_mean, /// mean of I_input averaged over neurons at each time step
-		I_input_std, /// std of I_input averaged over neurons at each time step
-		I_AMPA_acc, /// accumulator for AMPA input currents into each neuron
-		I_AMPA_time_avg, /// I_AMPA averaged over time for each neuron
-		I_NMDA_acc,  /// accumulator for NMDA input currents into each neuron
-		I_NMDA_time_avg, /// I_NMDA averaged over time for each neuron
-		I_GABA_acc, /// accumulator for GABA input currents into each neuron
-		I_GABA_time_avg, /// I_GABA averaged over time for each neuron
-		IE_ratio; /// I-E ratio for each neuron
-
-	bool
-		LFP_record; /// whether LFP should be recorded (false by default)
-	vector< vector<bool> >
-		LFP_neurons; /// each component vector defines a LFP measure by specifying which neurons should be included
-	vector< vector<double> >
-		LFP; /// each component vector is a LFP time series
+	struct Stats {
+		bool
+			record; /// whether stats should be recorded (false by default)
+		vector<double>
+			V_mean, /// mean of membrane potential averaged over neurons at each time step
+			V_std, /// std of membrane potential averaged over neurons at each time step
+			I_input_mean, /// mean of I_input averaged over neurons at each time step
+			I_input_std, /// std of I_input averaged over neurons at each time step
+			I_AMPA_acc, /// accumulator for AMPA input currents into each neuron
+			I_AMPA_time_avg, /// I_AMPA averaged over time for each neuron
+			I_NMDA_acc,  /// accumulator for NMDA input currents into each neuron
+			I_NMDA_time_avg, /// I_NMDA averaged over time for each neuron
+			I_GABA_acc, /// accumulator for GABA input currents into each neuron
+			I_GABA_time_avg, /// I_GABA averaged over time for each neuron
+			IE_ratio; /// I-E ratio for each neuron
+	} stats;
 	
+	struct Lfp {
+		bool
+			record; /// whether LFP should be recorded (false by default)
+		vector< vector<bool> >
+			neurons; /// each component vector defines a LFP measure by specifying which neurons should be included
+		vector< vector<double> >
+			data; /// each component vector is a LFP time series
+	} LFP;
+
 	// parameters for Generate Gaussian random external current
 	vector<double> // a vector for each neuron
 		I_ext_mean, /// mean of external currents (Gaussian noise) for each neuron
@@ -166,16 +169,22 @@ protected:
 		exp_K_step; 
 		
 	// Data sampling
-	vector<int> 
-		sample_neurons; /// indices of the neurons to be sampled
-	vector<bool> 
-		sample_type; /// specifies which data to be sampled;
-					 /// must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
-	vector<bool> 
-		sample_time_points; /// specifies which time steps to be sampled;
-	vector< vector< vector<double> > >
-		sample; /// sampled data with a dimension (types of data) by (sampled neurons) by (time points)
-
+	struct Sample {
+		ofstream 
+			file; /// the output file stream for sampled time series
+		string 
+			file_name; /// the file name for sampled time series
+		vector<int> 
+			neurons; /// indices of the neurons to be sampled
+		vector<bool> 
+			type; /// specifies which data to be sampled;
+						 /// must correspond to [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
+		vector<bool> 
+			time_points; /// specifies which time steps to be sampled;
+		vector< vector< vector<double> > >
+			data; /// sampled data with a dimension (types of data) by (sampled neurons) by (time points)
+	} sample;
+	
 
 	// perturbation
 	int
@@ -190,18 +199,22 @@ protected:
 		base_generator_type; /// a typedef is used so that base generator type can be changed
     base_generator_type 
 		gen; /// the random number generator
-	
 
+	
 	// runaway-killer parameters
-	bool killer_license; /// you need a license to kill (false by default)
-	bool runaway_killed; /// whether the simulation has been killed
-	int step_killed; /// if killed, record when
-	int Hz_steps; /// the number of steps to be averaged over to calculate population firing rate (Hz)
-	double runaway_Hz; /// if the population firing rate is higher than this, kill the simulation
-	int min_steps; /// minimum number of steps the simulation should run before being killed
-	int min_pop_size; /// No women, no kids;
+	struct Runaway_killer {
+		bool license; /// you need a license to kill (false by default)
+		bool runaway_killed; /// whether the simulation has been killed
+		int step_killed; /// if killed, record when
+		int Hz_steps; /// the number of steps to be averaged over to calculate population firing rate (Hz)
+		double runaway_Hz; /// if the population firing rate is higher than this, kill the simulation
+		int min_steps; /// minimum number of steps the simulation should run before being killed
+		int min_pop_size; /// No women, no kids;
+	} killer;
 
 }; //class declaration must end with a semi-colon.
+
+
 
 
 inline NeuroPop::NeuroPop(){}; /// default constructor
