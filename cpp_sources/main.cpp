@@ -1,11 +1,11 @@
-#include "SimulatorInterface.h"
+#include "SimuInterface.h"
 using namespace std;
 
 int main(int argc, char* argv[]){// arguments should be input file path
 	cout << "Number of input files: " << argc-1 << endl;
 	for (int i = 1; i < argc; ++i){
 		cout << "Processing input file No." << i << " out of " << argc-1 << "..." << endl;
-		SimulatorInterface simulator;
+		SimuInterface simulator;
 		if (simulator.import(argv[i])){ // return true if import is successful
 			simulator.simulate();
 			cout << "Input file No." << i << " out of " << argc-1 << " processed." << endl;

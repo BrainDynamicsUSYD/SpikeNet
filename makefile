@@ -3,8 +3,8 @@ EXEC = $(EXEC_DIR)/simulator
 SRC_DIR = cpp_sources
 SRC_FILES = $(SRC_DIR)/*.cpp
 HEADER_FILES = $(SRC_DIR)/*.h
-#OBJ = main.o Neurons.o NeuronNetwork.o ElectricalSynapses.o ChemicalSynapses.o SimulatorInterface.o
-OBJ = main.o Neurons.o NeuronNetwork.o ChemicalSynapses.o SimulatorInterface.o
+#OBJ = main.o NeuroPop.o NeuroNet.o ElectricalSynapses.o ChemSyn.o SimulatorInterface.o
+OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o
 
 ###########################################################################
 CXX = g++ # must use version that MATLAB supp
@@ -27,27 +27,27 @@ $(EXEC): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) -O $(OBJ) -o $@ $(CXXLIBS)
 	@echo "EXEC compiled"
 
-main.o: $(SRC_DIR)/main.cpp $(SRC_DIR)/SimulatorInterface.h
+main.o: $(SRC_DIR)/main.cpp $(SRC_DIR)/SimuInterface.h
 	$(COMPILE_THIS_ONE)
 	@echo "main.o updated"
 
-SimulatorInterface.o: $(SRC_DIR)/SimulatorInterface.cpp $(SRC_DIR)/SimulatorInterface.h $(SRC_DIR)/NeuronNetwork.h
+SimuInterface.o: $(SRC_DIR)/SimuInterface.cpp $(SRC_DIR)/SimuInterface.h $(SRC_DIR)/NeuroNet.h
 	$(COMPILE_THIS_ONE)
-	@echo "SimulatorInterface.o updated"
+	@echo "SimuInterface.o updated"
 
-NeuronNetwork.o: $(SRC_DIR)/NeuronNetwork.cpp $(SRC_DIR)/NeuronNetwork.h $(SRC_DIR)/Neurons.h $(SRC_DIR)/ChemicalSynapses.h $(SRC_DIR)/ElectricalSynapses.h
+NeuroNet.o: $(SRC_DIR)/NeuroNet.cpp $(SRC_DIR)/NeuroNet.h $(SRC_DIR)/NeuroPop.h $(SRC_DIR)/ChemSyn.h $(SRC_DIR)/ElectricalSynapses.h
 	$(COMPILE_THIS_ONE)
-	@echo "NeuronNetwork.o updated"
+	@echo "NeuroNet.o updated"
 
-Neurons.o: $(SRC_DIR)/Neurons.cpp $(SRC_DIR)/Neurons.h
+NeuroPop.o: $(SRC_DIR)/NeuroPop.cpp $(SRC_DIR)/NeuroPop.h
 	$(COMPILE_THIS_ONE)
-	@echo "Neurons.o updated"
+	@echo "NeuroPop.o updated"
 
-ChemicalSynapses.o: $(SRC_DIR)/ChemicalSynapses.cpp $(SRC_DIR)/ChemicalSynapses.h $(SRC_DIR)/Neurons.h
+ChemSyn.o: $(SRC_DIR)/ChemSyn.cpp $(SRC_DIR)/ChemSyn.h $(SRC_DIR)/NeuroPop.h
 	$(COMPILE_THIS_ONE)
-	@echo "ChemicalSynapses.o updated"
+	@echo "ChemSyn.o updated"
 
-#ElectricalSynapses.o: $(SRC_DIR)/ElectricalSynapses.cpp $(SRC_DIR)/ElectricalSynapses.h $(SRC_DIR)/Neurons.h
+#ElectricalSynapses.o: $(SRC_DIR)/ElectricalSynapses.cpp $(SRC_DIR)/ElectricalSynapses.h $(SRC_DIR)/NeuroPop.h
 #	$(COMPILE_THIS_ONE)
 #	@echo "ElectricalSynapses.o updated"
 

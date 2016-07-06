@@ -1,13 +1,13 @@
 /// \file
-#include <iostream>
+//#include <iostream>
 #include <cmath> // always cmath instead of math.h ?
 #include <algorithm>
 #include <sstream>
-#include <fstream>
+//#include <fstream>
 
-#include "ChemicalSynapses.h"
+#include "ChemSyn.h"
 
-ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input, char delim_input, char indicator_input){
+ChemSyn::ChemSyn(double dt_input, int step_tot_input, char delim_input, char indicator_input){
 	
 	dt = dt_input;
 	step_tot = step_tot_input;
@@ -38,10 +38,10 @@ ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input, char del
 
 
 
-void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int N_pre_input, int N_post_input, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij){
+void ChemSyn::init(int syn_type_input, int i_pre, int j_post, int N_pre_input, int N_post_input, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij){
 
 	// read parameter
-	synapses_type = synapses_type_input;
+	syn_type = syn_type_input;
 	pop_ind_pre = i_pre;
 	pop_ind_post = j_post;
 	N_pre = N_pre_input;
@@ -79,10 +79,10 @@ void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int 
 }
 
 
-void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_input, double K_ext_input, int Num_ext_input, vector<double> &rate_ext_t_input, int ia_input, int ib_input){
+void ChemSyn::init(int syn_type_input, int j_post, int N_post_input, double K_ext_input, int Num_ext_input, vector<double> &rate_ext_t_input, int ia_input, int ib_input){
 
 	// Initialise chemical synapses for simulating external neuron population
-	synapses_type = synapses_type_input;
+	syn_type = syn_type_input;
 	pop_ind_pre = -1; // -1 for external noisy population
 	pop_ind_post = j_post;
 	N_pre = 1; // just for initialization
@@ -109,22 +109,20 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 
 
 
-void ChemicalSynapses::init(){
+void ChemSyn::init(){
 	// parameter-dependent initialisation
 
-
-	
 	
 	// Initialise chemical synapse parameters
-	if (synapses_type == 0){
+	if (syn_type == 0){
 		tau_decay = tau_decay_AMPA;
 		tau_rise = Dt_trans_AMPA;
 	}
-	else if (synapses_type == 1){	
+	else if (syn_type == 1){	
 		tau_decay = tau_decay_GABA;
 		tau_rise = Dt_trans_GABA;
 	}
-	else if (synapses_type == 2){
+	else if (syn_type == 2){
 		tau_decay = tau_decay_NMDA;
 		tau_rise = Dt_trans_NMDA;
 		// non-linearity of NMDA
@@ -185,8 +183,20 @@ void ChemicalSynapses::init(){
 	}
 }
 
+const int & ChemSyn::get_syn_type()
+{
+	return syn_type;
+}
+const int & ChemSyn::get_pop_ind_pre()
+{
+	return pop_ind_pre;
+}
+const int & ChemSyn::get_pop_ind_post()
+{
+	return pop_ind_post;
+}
 
-void ChemicalSynapses::set_synapse_model(int synapse_model_input){
+void ChemSyn::set_synapse_model(int synapse_model_input){
 	if (synapse_model_input != 0){
 		synapse_model = synapse_model_input;
 		init(); // initialize again
@@ -195,7 +205,7 @@ void ChemicalSynapses::set_synapse_model(int synapse_model_input){
 
 	
 
-void ChemicalSynapses::update(int step_current){
+void ChemSyn::update(int step_current){
 
 	if (synapse_model == 0){ 
 		// short-term depression
@@ -224,15 +234,15 @@ void ChemicalSynapses::update(int step_current){
 
 
 
-void ChemicalSynapses::update_STD(int step_current){
+void ChemSyn::update_STD(int step_current){
 	// STD modifies K_trans
 	
 	if (STD_on_step == step_current){STD = true;}
 	// short-term depression
 	if (STD == true){
-		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ 
-			K_trans[spikes_pre->at(i)] = 1.0 / steps_trans * f_ves[i];
-			f_ves[spikes_pre->at(i)] *= 1.0 - p_ves; // decrease at spikes
+		for (unsigned int i = 0; i < spikes_pre.size(); ++i){ 
+			K_trans[spikes_pre.at(i)] = 1.0 / steps_trans * f_ves[i];
+			f_ves[spikes_pre.at(i)] *= 1.0 - p_ves; // decrease at spikes
 		}
 		for (int i = 0; i < N_pre; ++i){
 			f_ves[i] = 1.0 - exp_ves * (1.0 - f_ves[i]); // decay to 1.0
@@ -242,8 +252,8 @@ void ChemicalSynapses::update_STD(int step_current){
 }
 
 
-void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
-	if (synapses_type != 1){
+void ChemSyn::add_inh_STDP(int inh_STDP_on_step_input){
+	if (syn_type != 1){
 		cout << "Warning: initializing inhibitory STDP on non-GABA synapses!" << endl;
 	}
 	if (synapse_model != 0){
@@ -277,25 +287,25 @@ void ChemicalSynapses::add_inh_STDP(int inh_STDP_on_step_input){
 	}
 }	
 
-void ChemicalSynapses::calc_I(){
+void ChemSyn::calc_I(){
 	// need V from post population
 	// need gs_sum from previous calculations
 	
-	if (synapses_type == 0){ //AMPA
+	if (syn_type == 0){ //AMPA
 		for (int j = 0; j < N_post; ++j){
-			I[j] = -gs_sum[j] * (V_post->at(j) - V_ex);
+			I[j] = -gs_sum[j] * (V_post.at(j) - V_ex);
 		}
 	}	
-	else if (synapses_type == 1){ //GABA
+	else if (syn_type == 1){ //GABA
 		for (int j = 0; j < N_post; ++j){
-			I[j] = -gs_sum[j] * (V_post->at(j) - V_in);
+			I[j] = -gs_sum[j] * (V_post.at(j) - V_in);
 			// For inhibition, every equation is in the same form as excitation. 
 			// Only "V_in" encodes its inhibitory nature.
 		}
 	}
-	else if (synapses_type == 2){ //NMDA
+	else if (syn_type == 2){ //NMDA
 		for (int j = 0; j < N_post; ++j){
-			I[j] = -gs_sum[j] * B[(int)round((V_post->at(j) - B_V_min) / B_dV)] * (V_post->at(j) - V_ex);
+			I[j] = -gs_sum[j] * B[(int)round((V_post.at(j) - B_V_min) / B_dV)] * (V_post.at(j) - V_ex);
 		}
 	}
 
@@ -305,12 +315,12 @@ void ChemicalSynapses::calc_I(){
 	
 }
 
-void ChemicalSynapses::update_gs_sum_model_0(int step_current){
+void ChemSyn::update_gs_sum_model_0(int step_current){
 	// See Gu, Yifan, Gong, Pulin, 2016, The dynamics of memory retrieval in hierarchical networks: a modeling study
 	// this function updates gs_sum
 	if (pop_ind_pre >= 0){
-		for (unsigned int i = 0; i < spikes_pre->size(); ++i){ // add spikes (transmitter release)
-			trans_left[spikes_pre->at(i)] += steps_trans;
+		for (unsigned int i = 0; i < spikes_pre.size(); ++i){ // add spikes (transmitter release)
+			trans_left[spikes_pre.at(i)] += steps_trans;
 		}
 		for (int i_pre = 0; i_pre < N_pre; ++i_pre){
 			if (trans_left[i_pre] > 0){
@@ -355,11 +365,11 @@ void ChemicalSynapses::update_gs_sum_model_0(int step_current){
 	fill(d_gs_sum_buffer[t_ring].begin(), d_gs_sum_buffer[t_ring].end(), 0.0);
 }
 
-void ChemicalSynapses::update_gs_sum_model_1(int step_current){
+void ChemSyn::update_gs_sum_model_1(int step_current){
 	// See Keane, A., Gong, P., 2015, Propagating Waves Can Explain Irregular Neural Dynamics
 	// this function updates gs_sum
-	for (unsigned int ind = 0; ind < spikes_pre->size(); ++ind){ // loop through all the spikes
-		int i_pre = spikes_pre->at(ind);
+	for (unsigned int ind = 0; ind < spikes_pre.size(); ++ind){ // loop through all the spikes
+		int i_pre = spikes_pre.at(ind);
 		int j_post, delay_step, t_ring;
 		for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){ //loop through all the post-synapses
 			j_post = C[i_pre][syn_ind]; // index of the post-synaptic neuron
@@ -381,7 +391,7 @@ void ChemicalSynapses::update_gs_sum_model_1(int step_current){
 }
 
 
-void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
+void ChemSyn::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
 	sample_neurons = sample_neurons_input;
 	sample_time_points = sample_time_points_input;
 	
@@ -401,8 +411,8 @@ void ChemicalSynapses::add_sampling(vector<int> sample_neurons_input, vector<boo
 
 }
 
-void ChemicalSynapses::add_short_term_depression(int STD_on_step_input){
-	if (synapses_type != 0){
+void ChemSyn::add_short_term_depression(int STD_on_step_input){
+	if (syn_type != 0){
 		cout << "Warning: initializing STD on non-AMPA synapses!" << endl;
 	}
 	if (synapse_model != 0){
@@ -423,30 +433,30 @@ void ChemicalSynapses::add_short_term_depression(int STD_on_step_input){
 
 
 
-void ChemicalSynapses::update_inh_STDP(int step_current){
+void ChemSyn::update_inh_STDP(int step_current){
 	// inh_STDP modifies K
 	
 	if (inh_STDP_on_step == step_current){inh_STDP = true;}
 	if (inh_STDP == true){
 		// update x_trace
-		for (unsigned int i = 0; i < spikes_pre->size(); ++i){
-			x_trace_pre[spikes_pre->at(i)] += 1.0;
+		for (unsigned int i = 0; i < spikes_pre.size(); ++i){
+			x_trace_pre[spikes_pre.at(i)] += 1.0;
 		}
-		for (unsigned int j = 0; j < spikes_post->size(); ++j){
-			x_trace_post[spikes_post->at(j)] += 1.0;
+		for (unsigned int j = 0; j < spikes_post.size(); ++j){
+			x_trace_post[spikes_post.at(j)] += 1.0;
 		}
 		// update K
 		int i_pre, j_post;
-		for (unsigned int ind_spike = 0; ind_spike < spikes_pre->size(); ++ind_spike){
-			i_pre = spikes_pre->at(ind_spike);
+		for (unsigned int ind_spike = 0; ind_spike < spikes_pre.size(); ++ind_spike){
+			i_pre = spikes_pre.at(ind_spike);
 			for (unsigned int syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
 				j_post = C[i_pre][syn_ind];
 				K[i_pre][syn_ind] += eta_STDP * ( x_trace_post[j_post] - alpha_STDP );
 			}
 		}
 		int syn_ind;
-		for (unsigned int ind_spike = 0; ind_spike < spikes_post->size(); ++ind_spike){
-			j_post = spikes_post->at(ind_spike);
+		for (unsigned int ind_spike = 0; ind_spike < spikes_post.size(); ++ind_spike){
+			j_post = spikes_post.at(ind_spike);
 			for (unsigned int ind = 0; ind < j_2_i[j_post].size(); ++ind){
 				// j_2_i and j_2_syn_ind together serve as the "inverse function" of j_post = C[i_pre][syn_ind]
 				i_pre = j_2_i[j_post][ind];
@@ -466,7 +476,7 @@ void ChemicalSynapses::update_inh_STDP(int step_current){
 }
 
 
-void ChemicalSynapses::sample_data(int step_current){
+void ChemSyn::sample_data(int step_current){
 	if (!sample_neurons.empty()){
 		if (sample_time_points[step_current]){ // push_back is amazing
 			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
@@ -479,7 +489,7 @@ void ChemicalSynapses::sample_data(int step_current){
 
 
 
-void ChemicalSynapses::set_para(string para_str){
+void ChemSyn::set_para(string para_str){
 	if (!para_str.empty()){
 		istringstream para(para_str);
 		string para_name, para_value_str; 
@@ -503,13 +513,13 @@ void ChemicalSynapses::set_para(string para_str){
 }
 
 
-string ChemicalSynapses::dump_para(){
+string ChemSyn::dump_para(){
 	stringstream dump;
 
 
 	dump << "pop_ind_pre" << delim << pop_ind_pre << delim << endl;
 	dump << "pop_ind_post" << delim << pop_ind_post << delim << endl;
-	dump << "synapses_type" << delim << synapses_type << delim << endl;
+	dump << "syn_type" << delim << syn_type << delim << endl;
 
 	dump << "V_ex" << delim << V_ex << delim << endl;
 	dump << "V_in" << delim << V_in << delim << endl;
@@ -518,15 +528,15 @@ string ChemicalSynapses::dump_para(){
 
 	dump << "synapse_model" << delim << synapse_model << endl;
 	
-	if (synapses_type == 0){
+	if (syn_type == 0){
 		dump << "Dt_trans_AMPA" << delim << Dt_trans_AMPA << delim << endl;
 		dump << "tau_decay_AMPA" << delim << tau_decay_AMPA << delim << endl;
 	}
-	else if (synapses_type == 1){
+	else if (syn_type == 1){
 		dump << "Dt_trans_GABA" << delim << Dt_trans_GABA << delim << endl;
 		dump << "tau_decay_GABA" << delim << tau_decay_GABA << delim << endl;
 	}
-	else if (synapses_type == 2){
+	else if (syn_type == 2){
 		dump << "Dt_trans_NMDA" << delim << Dt_trans_NMDA << delim << endl;
 		dump << "tau_decay_NMDA" << delim << tau_decay_NMDA << delim << endl;
 	}
@@ -535,14 +545,14 @@ string ChemicalSynapses::dump_para(){
 	return dump.str();
 }
 
-void ChemicalSynapses::start_stats_record(){
+void ChemSyn::start_stats_record(){
 	stats_record = true;
 	I_mean.reserve(step_tot);
 	I_std.reserve(step_tot);
 }
 
 
-void ChemicalSynapses::output_results(ofstream& output_file){
+void ChemSyn::output_results(ofstream& output_file){
 	// SYND001 # synapse parameters
 	// count number of variables
 	stringstream dump_count;
@@ -559,7 +569,7 @@ void ChemicalSynapses::output_results(ofstream& output_file){
 	// SYND002 # sampled synapse data
 	if (!sample_neurons.empty()){
 		output_file << indicator << " SYND002" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << sample_neurons.size() << delim << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << sample_neurons.size() << delim << endl;
 		write2file(output_file, sample); // 2D matrix
 	}
 
@@ -567,7 +577,7 @@ void ChemicalSynapses::output_results(ofstream& output_file){
 	// SYND003 # currents mean and std
 	if (stats_record){
 		output_file << indicator << " SYND003" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << endl;
 		write2file(output_file, I_mean);
 		write2file(output_file, I_std);
 	}
@@ -575,58 +585,35 @@ void ChemicalSynapses::output_results(ofstream& output_file){
 	// tmp data
 	if (tmp_data.size() != 0){
 		output_file << indicator << " SYND004" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << synapses_type << delim << tmp_data.size() << delim << endl;
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << tmp_data.size() << delim << endl;
 		write2file(output_file, tmp_data);	
 	}
 }
 
 
 
-void ChemicalSynapses::recv_pop_data(vector<Neurons*> &NeuronPopArray){
+void ChemSyn::recv_pop_data(vector<NeuroPop*> &NeuronPopArray){
 	// get current spikes from pre-pop
 	if (pop_ind_pre >= 0){
-		spikes_pre = &(NeuronPopArray[pop_ind_pre]->spikes_current); // This might be problematic!!!
-		spikes_post = &(NeuronPopArray[pop_ind_post]->spikes_current);
+		spikes_pre = NeuronPopArray[pop_ind_pre]->get_spikes_current(); // This might be problematic!!!
+		spikes_post = NeuronPopArray[pop_ind_post]->get_spikes_current();
 	}
 	// get current V from post-pop
-	V_post = &(NeuronPopArray[pop_ind_post]->V); // This is problematic!!!
-	
+	V_post = NeuronPopArray[pop_ind_post]->get_V(); // This  might be  problematic!!!
 }
 
 
-void ChemicalSynapses::send_pop_data(vector<Neurons*> &NeuronPopArray){
+void ChemSyn::send_pop_data(vector<NeuroPop*> &NeuronPopArray){
 	
-	// send currents to post-pop
-	if (pop_ind_pre == -1){ // if noisy external currents, always send to I_ext regardless of the synapse type
-		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post]->I_ext[j] += I[j];
-		}
-	}
-	// AMPA
-	else if (synapses_type == 0){
-		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post]->I_AMPA[j] += I[j];
-		}
-	}
-	//GABA
-	else if (synapses_type == 1){
-		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post]->I_GABA[j] += I[j];
-		}
-	}
-	//NMDA
-	else if (synapses_type == 2){
-		for (int j = 0; j < N_post; ++j){
-			NeuronPopArray[pop_ind_post]->I_NMDA[j] += I[j];
-		}
-	}
+	NeuronPopArray[pop_ind_post]->recv_I(I, pop_ind_pre, syn_type);
+
 }
 
 
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
 // In this case, just save yourself the trouble and use overloading.
-void ChemicalSynapses::write2file(ofstream& output_file, vector< vector<int> >& v){
+void ChemSyn::write2file(ofstream& output_file, vector< vector<int> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -641,7 +628,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, vector< vector<int> >& 
 
 
 
-void ChemicalSynapses::write2file(ofstream& output_file, vector< vector<double> >& v){
+void ChemSyn::write2file(ofstream& output_file, vector< vector<double> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -655,7 +642,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, vector< vector<double> 
 }
 
 
-void ChemicalSynapses::write2file(ofstream& output_file, vector<int>& v){
+void ChemSyn::write2file(ofstream& output_file, vector<int>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -666,7 +653,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, vector<int>& v){
 	else {output_file << " " << endl;}
 }
 
-void ChemicalSynapses::write2file(ofstream& output_file, vector<double>& v){
+void ChemSyn::write2file(ofstream& output_file, vector<double>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -679,7 +666,7 @@ void ChemicalSynapses::write2file(ofstream& output_file, vector<double>& v){
 
 
 
-void ChemicalSynapses::record_stats(){
+void ChemSyn::record_stats(){
 	if (stats_record){
 		// get mean
 		double sum_mean = 0.0;

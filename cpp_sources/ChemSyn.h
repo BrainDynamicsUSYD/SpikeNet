@@ -1,61 +1,67 @@
-#ifndef CHEMICALSYNAPSES_H
-#define CHEMICALSYNAPSES_H
-#include <vector>
+#ifndef CHEMSYN_H
+#define CHEMSYN_H
+//#include <vector>
 #include <functional> // pass function as parameter
-#include <string> 
-#include <iostream> 
+//#include <string> 
+//#include <iostream> 
 
-#include "Neurons.h"
-class Neurons; // #include ".h" for accessing its members, forward declaration for "syntax error: identifier xx" (why both are needed??)
+#include "NeuroPop.h"
+class NeuroPop; // #include ".h" for accessing its members, forward declaration for "syntax error: identifier xx" (why both are needed??)
 
 using namespace std;
 
 // Excitatory and inhibitory chemical synapses with transmission delay
-class ChemicalSynapses{
+class ChemSyn{
 public:
-	ChemicalSynapses(); // default constructor
-	ChemicalSynapses(double dt, int step_tot, char delim, char indicator); // parameterised constructor
-	friend class NeuronNetwork; // Let NeuronNetwork access its private members
-	friend class SimulatorInterface;
+	ChemSyn(); // default constructor
+	ChemSyn(double dt, int step_tot, char delim, char indicator); // parameterised constructor
 
-	void init(int synapses_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); // initialise chemical synapses by reading already prepared connections
+	void init(int syn_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); // initialise chemical synapses by reading already prepared connections
 
-	void init(int synapses_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, int ia, int ib); // initialise chemical synapses for simulating external Poissonian neuron population
+	void init(int syn_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, int ia, int ib); // initialise chemical synapses for simulating external Poissonian neuron population
 	// [ia,ib] specifies the neuron index range in post population to receive the external stimulation 
 
-	char delim;
-	char indicator;
-		
-
-	void init();
 	void set_para(string para_str);
-	string dump_para(); // dump all the parameter values used
-	void output_results(ofstream& output_file);
 
-	void recv_pop_data(vector<Neurons*> &NeuronPopArray);
+	void recv_pop_data(vector<NeuroPop*> &NeuronPopArray);
 	void update(int step_current);
-	void calc_I();
-	void update_gs_sum_model_0(int step_current);
-	void update_gs_sum_model_1(int step_current);
 	
 	void set_synapse_model(int synapse_model_input);
 	
-	void send_pop_data(vector<Neurons*> &NeuronPopArray);
+	void send_pop_data(vector<NeuroPop*> &NeuronPopArray);
 
 	void add_short_term_depression(int STD_on_step);
-	void update_STD(int step_current);
+	
 	void add_inh_STDP(int inh_STDP_on_step);
-	void update_inh_STDP(int step_current);
+	
 	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points); 
-	void sample_data(int step_current);
 
+	void start_stats_record();
+	void output_results(ofstream& output_file);
+
+	const int & get_syn_type();
+	const int & get_pop_ind_pre();
+	const int & get_pop_ind_post();
+private:
+
+	char delim;
+	char indicator;
+	void init();
+	
+	string dump_para(); // dump all the parameter values used
+	
+		
+	void calc_I();
+	void update_gs_sum_model_0(int step_current);
+	void update_gs_sum_model_1(int step_current);
+	void update_STD(int step_current);
+	void update_inh_STDP(int step_current);
+	void sample_data(int step_current);
 
 	void write2file(ofstream& output_file, vector< vector<int> >& v);
 	void write2file(ofstream& output_file, vector< vector<double> >& v);
 	void write2file(ofstream& output_file, vector<int>& v);
 	void write2file(ofstream& output_file, vector<double>& v);
-	
-	void start_stats_record();
 	void record_stats(); //
 	
 	
@@ -70,7 +76,7 @@ protected:
 		N_pre, // pre-synaptic population size
 		N_post;
 	int
-		synapses_type; // 0 = AMPA, 1 = GABA, 2 = NMDA
+		syn_type; // 0 = AMPA, 1 = GABA, 2 = NMDA
 	double
 		V_ex, // Excitatory reversal
 		V_in; // Inhibitory reversal
@@ -79,10 +85,10 @@ protected:
 		
 	// A copy of data from pre-synaptic population
 	vector<double> // This is problematic!!!
-		*V_post; // from post-synaptic population
+		V_post; // from post-synaptic population
 	vector<int>
-		*spikes_pre,
-		*spikes_post; // current spikes from pre-synaptic population
+		spikes_pre,
+		spikes_post; // current spikes from pre-synaptic population
 
 
 	// currents into post-synaptic population
@@ -226,6 +232,6 @@ protected:
 
 };
 
-inline ChemicalSynapses::ChemicalSynapses(){};
+inline ChemSyn::ChemSyn(){};
 
 #endif

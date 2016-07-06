@@ -1,20 +1,14 @@
 #include <stdlib.h>
 #include <iomanip>
-#include <random> //<boost/random.hpp>
 #include <cmath>
 #include <algorithm> // for transform
 #include <stdio.h> // for printf
 #include <time.h>       /* time */
-
-#include <fstream> // fstream : Stream class to both read and write from / to files
 #include <sstream>  // stringstream is input and output
-
-
-#include "Neurons.h"
+#include "NeuroPop.h"
 #include <functional> // for bind(), plus
-// no need to include what have been included in the header file
 
-Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_input, char delim_input, char indicator_input){
+NeuroPop::NeuroPop(int pop_ind_input, int N_input, double dt_input, int step_tot_input, char delim_input, char indicator_input){
 
 	pop_ind = pop_ind_input;
 	N = N_input;
@@ -44,8 +38,8 @@ Neurons::Neurons(int pop_ind_input, int N_input, double dt_input, int step_tot_i
 
 }
 
-void Neurons::init(){
-
+void NeuroPop::init()
+{
 	// Initialise arrarys storing instantaneous neuron states
 	V.assign(N, V_lk); // All zeros	
 	I_input.assign(N, 0.0);
@@ -86,7 +80,50 @@ void Neurons::init(){
 
 }
 
-void Neurons::start_stats_record(){
+const vector< int > & NeuroPop::get_spikes_current() 
+{
+	return spikes_current;
+}
+
+const vector< double > & NeuroPop::get_V()
+{
+	return V;
+}
+
+const bool & NeuroPop::get_runaway_killed()
+{
+	return runaway_killed;
+};
+
+void NeuroPop::recv_I(vector<double>& I, int pop_ind_pre, int syn_type)
+{
+	if (pop_ind_pre == -1){ // if noisy external currents, always send to I_ext regardless of the synapse type
+		for (int j = 0; j < N; ++j){
+			I_ext[j] += I[j];
+		}
+	}
+	// AMPA
+	else if (syn_type == 0){
+		for (int j = 0; j < N; ++j){
+			I_AMPA[j] += I[j];
+		}
+	}
+	//GABA
+	else if (syn_type == 1){
+		for (int j = 0; j < N; ++j){
+			I_GABA[j] += I[j];
+		}
+	}
+	//NMDA
+	else if (syn_type == 2){
+		for (int j = 0; j < N; ++j){
+			I_NMDA[j] += I[j];
+		}
+	}
+}
+
+void NeuroPop::start_stats_record()
+{
 	stats_record = true;
 	
 	V_mean.reserve(step_tot);
@@ -105,7 +142,7 @@ void Neurons::start_stats_record(){
 	IE_ratio.assign(N, 0.0);
 }
 
-void Neurons::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
+void NeuroPop::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
 	if (int(LFP_neurons_input[0].size()) != N){
 		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
 	}
@@ -123,7 +160,7 @@ void Neurons::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
 
 
 
-void Neurons::set_para(string para_str){
+void NeuroPop::set_para(string para_str){
 	if (!para_str.empty()){
 		istringstream para(para_str);
 		string para_name, para_value_str; 
@@ -144,7 +181,7 @@ void Neurons::set_para(string para_str){
 	init();
 }
 
-string Neurons::dump_para(){
+string NeuroPop::dump_para(){
 	stringstream dump;
 	dump << "Cm" << delim << Cm << delim << endl;
 	dump << "tau_ref" << delim << tau_ref << delim << endl;
@@ -161,10 +198,10 @@ string Neurons::dump_para(){
 }
 
 
-void Neurons::random_V(double p){
+void NeuroPop::random_V(double p){
 	// Generate random initial condition for V.
 	// Generate uniform random distribution 
-	cout << "Function Neurons::random_V(double p) is deprecated!" << endl;
+	cout << "Function NeuroPop::random_V(double p) is deprecated!" << endl;
 	if (p < 1.0){
 		gen.seed(my_seed);// reseed random engine!
 		uniform_real_distribution<double> uniform_dis(0.0, 1.0);
@@ -179,7 +216,7 @@ void Neurons::random_V(double p){
 	else {cout << "Initial firing rate cannot be 100%!" << endl;}
 }
 
-void Neurons::set_init_condition(double r_V0, double p_fire){
+void NeuroPop::set_init_condition(double r_V0, double p_fire){
 	// Set V to be uniformly distributed between [V_rt, V_rt + (V_th - V_rt)*r_V0]
 	// And then randomly set some of them above firing threshold according to p_fire
 	gen.seed(my_seed);// reseed random engine!
@@ -194,7 +231,7 @@ void Neurons::set_init_condition(double r_V0, double p_fire){
 }
 
 
-void Neurons::update_spikes(int step_current){
+void NeuroPop::update_spikes(int step_current){
 	// Reset currents to be zeros, because they need to be re-calculated at every step
 	// no need to reset I_leak
 	fill(I_AMPA.begin(), I_AMPA.end(), 0);
@@ -254,7 +291,7 @@ void Neurons::update_spikes(int step_current){
 	
 }
 
-void Neurons::generate_I_ext(int step_current){
+void NeuroPop::generate_I_ext(int step_current){
 	
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0){
@@ -296,7 +333,7 @@ void Neurons::generate_I_ext(int step_current){
 		}
 	}
 }
-void Neurons::update_V(int step_current){
+void NeuroPop::update_V(int step_current){
 	// This function updates menbrane potentials for non-refractory neurons
 
 	// Generate external currents
@@ -345,7 +382,7 @@ void Neurons::update_V(int step_current){
 }
 
 
-void Neurons::add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name_input){
+void NeuroPop::add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name_input){
 	sample_neurons = sample_neurons_input;
 	sample_type = sample_type_input;
 	sample_time_points = sample_time_points_input;
@@ -365,7 +402,7 @@ void Neurons::add_sampling_real_time(vector<int>& sample_neurons_input, vector<b
 
 
 
-void Neurons::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input){
+void NeuroPop::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input){
 	sample_neurons = sample_neurons_input;
 	sample_type = sample_type_input;
 	sample_time_points = sample_time_points_input;
@@ -395,7 +432,7 @@ void Neurons::add_sampling(vector<int>& sample_neurons_input, vector<bool>& samp
 
 
 
-void Neurons::sample_data(int step_current){
+void NeuroPop::sample_data(int step_current){
 	
 	if (!sample_neurons.empty()){
 		if (sample_time_points[step_current]){ // push_back is amazing
@@ -416,7 +453,7 @@ void Neurons::sample_data(int step_current){
 }
 
 
-void Neurons::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
+void NeuroPop::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
 	I_ext_mean = mean;
 	I_ext_std = std;
 	
@@ -426,7 +463,7 @@ void Neurons::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
 	}
 }
 
-void Neurons::set_gaussian_g_ext(vector<double>& mean, vector<double>& std){
+void NeuroPop::set_gaussian_g_ext(vector<double>& mean, vector<double>& std){
 	g_ext_mean = mean;
 	g_ext_std = std;
 	
@@ -437,18 +474,18 @@ void Neurons::set_gaussian_g_ext(vector<double>& mean, vector<double>& std){
 }
 
 
-void Neurons::add_perturbation(int step_perturb_input){
+void NeuroPop::add_perturbation(int step_perturb_input){
 	step_perturb = step_perturb_input;
 }
 
-void Neurons::add_spike_freq_adpt(){
+void NeuroPop::add_spike_freq_adpt(){
 	spike_freq_adpt = true;
 	exp_K_step = exp( -dt / tau_K );
 	g_K.assign(N, 0.0);
 }
 
 
-void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
+void NeuroPop::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
 
 	min_pop_size = 100;
 	if (N > min_pop_size){
@@ -459,7 +496,7 @@ void Neurons::init_runaway_killer(double min_ms, double Hz, double Hz_ms){
 	}
 }
 
-void Neurons::runaway_check(int step_current){
+void NeuroPop::runaway_check(int step_current){
 	if (killer_license == true && runaway_killed == false && step_current > min_steps && step_current > Hz_steps){
 		// find mean value of num_ref over the last runaway_steps
 		vector<int>::const_iterator first, last;
@@ -478,7 +515,7 @@ void Neurons::runaway_check(int step_current){
 	}
 }
 
-void Neurons::output_sampled_data_real_time(int step_current){
+void NeuroPop::output_sampled_data_real_time(int step_current){
 	
 	if (!sample_neurons.empty() && step_current == 0){
 		int sample_step_number = 0;
@@ -514,7 +551,7 @@ void Neurons::output_sampled_data_real_time(int step_current){
 	
 }
 
-void Neurons::output_results(ofstream& output_file){
+void NeuroPop::output_results(ofstream& output_file){
 
 	// POPD001 # spike history of neuron population
 	output_file << indicator << " POPD001" << endl;
@@ -581,7 +618,7 @@ void Neurons::output_results(ofstream& output_file){
 
 		for (unsigned int c = 0; c < sample_type.size(); ++c){
 			if (!sample[c].empty()){
-				Neurons::write2file(output_file, sample[c]); // 2D matrix
+				NeuroPop::write2file(output_file, sample[c]); // 2D matrix
 			}
 		}
 	}
@@ -593,7 +630,7 @@ void Neurons::output_results(ofstream& output_file){
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
 // In this case, just save yourself the trouble and use overloading.
-void Neurons::write2file(ofstream& output_file,  vector< vector<int> >& v){
+void NeuroPop::write2file(ofstream& output_file,  vector< vector<int> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -608,7 +645,7 @@ void Neurons::write2file(ofstream& output_file,  vector< vector<int> >& v){
 
 
 
-void Neurons::write2file(ofstream& output_file, vector< vector<double> >& v){
+void NeuroPop::write2file(ofstream& output_file, vector< vector<double> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -622,7 +659,7 @@ void Neurons::write2file(ofstream& output_file, vector< vector<double> >& v){
 }
 
 
-void Neurons::write2file(ofstream& output_file, vector<int>& v){
+void NeuroPop::write2file(ofstream& output_file, vector<int>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -635,7 +672,7 @@ void Neurons::write2file(ofstream& output_file, vector<int>& v){
 
 
 
-void Neurons::write2file(ofstream& output_file, vector<double>& v){
+void NeuroPop::write2file(ofstream& output_file, vector<double>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -646,7 +683,7 @@ void Neurons::write2file(ofstream& output_file, vector<double>& v){
 	else {output_file << " " << endl;}
 }
 
-void Neurons::record_LFP(){
+void NeuroPop::record_LFP(){
 	if (LFP_record){
 		for (unsigned int ind = 0; ind < LFP_neurons.size(); ++ind){
 			LFP[ind].push_back(0.0);
@@ -660,7 +697,7 @@ void Neurons::record_LFP(){
 }
 
 
-void Neurons::record_stats(int step_current){
+void NeuroPop::record_stats(int step_current){
 	if (stats_record){
 		// get mean
 		double sum_mean_V = 0.0;
