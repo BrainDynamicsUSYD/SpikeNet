@@ -103,7 +103,8 @@ For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
 Here are some basic tips on git.
 \begin{itemize}
-\item To get the most recent version of SpikeNet: \mylstinline{git pull origin master; make; make clean;}
+\item To get the most recent version of SpikeNet: \mylstinline{git pull origin master}
+\item Build the new simulator: \mylstinline{make; make clean}
 \item Avoid directly modifying any existing files in SpikeNet unless you are a developer. Create another directory alongside SpikeNet and put all of your files there. In summary, your project folder should look like:
 \end{itemize}
 \hfill\begin{minipage}{\dimexpr\textwidth-1cm}
@@ -186,10 +187,10 @@ The dashed lines mean that the C\texttt{++} simulator and the PostProcessYG() ma
 \section{Documentation for the C\texttt{++} simulator}
 To view the documentation
 \begin{itemize}
-\item Make sure you have doxygen and graphviz installed.
-\item Go to the SpikeNet directory.
-\item Generate the documents: \mylstinline{doxygen}
-\item Edit the following variables in the bash script accordingly: 
+\item Make sure doxygen and graphviz are installed
+\item Go to the SpikeNet directory
+\item Generate the documentation: \mylstinline{doxygen}
+\item Open the documentation: \mylstinline{open docu*/html/index.html}
 \end{itemize}
 
 
