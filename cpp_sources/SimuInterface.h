@@ -1,21 +1,17 @@
-#ifndef SIMULATORINTERFACE_H
-#define SIMULATORINTERFACE_H
+#ifndef SIMUINTERFACE_H
+#define SIMUINTERFACE_H
 
-
-//#include <iostream> // ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
-//#include <fstream> // fstream : Stream class to both read and write from / to files
 #include <sstream>  // stringstream is input and output
-//#include <string> // "" for string, '' for char
-//#include <vector>
 
-#include "NeuronNetwork.h"
+
+#include "NeuroNet.h"
 
 using namespace std;
 
-class SimulatorInterface{
+class SimuInterface{
 public:
-	SimulatorInterface();
-	NeuronNetwork network; // use container?
+	SimuInterface();
+	NeuroNet network; // use container?
 	
 	// Format
 	char delim; // delim used to delimit the entries in the same line in files, note that the last entry of each line also has a delim

@@ -1,12 +1,12 @@
-#ifndef NEURONS_H
-#define NEURONS_H
+#ifndef NEUROPOP_H
+#define NEUROPOP_H
 #include <vector>
 #include <random> // <boost/random.hpp>
 #include <string> // "" for string, '' for char
 #include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
 #include <fstream> // fstream : Stream class to both read and write from / to files
 class NeuronNetwork; //forward declaration, better than #include "NeuronNetwork.h", if you do not need to access the internal of the class
-class ChemicalSynapses;
+class ChemSyn;
 // class ElectricalSynapses;
 class SimulatorInterface;
 using namespace std;
@@ -15,31 +15,25 @@ using namespace std;
 // Two types of synapses are supported:
 // 1) chemical synapses, both excitatory and inhibitory, conductance-based, with transmission delay, post-synaptic conductance described by alpha-function
 // 2) electrical synapses (the most common type is modelled, i.e., gap junction)
-class Neurons{
+class NeuroPop{
 public:
-	Neurons(); /// default constructor
-	Neurons(int pop_ind, int N_input, double dt_input, int step_tot, char delim, char indicator); /// parameterised constructor
-	friend class NeuronNetwork; /// Let NeuronNetwork access its private members
-	friend class ChemicalSynapses; /// considers ChemicalSynapses as its friend so that ChemicalSynapses can access its private members.
-	//friend class ElectricalSynapses;
-	friend class SimulatorInterface;
+	NeuroPop(); /// default constructor
+	NeuroPop(int pop_ind, int N_input, double dt_input, int step_tot, char delim, char indicator); /// parameterised constructor
 
 	void init(); // initialise neurons, called by constructor after parameter assignment
-
 	void set_para(string para); /// set parameters if not using default ones
-	string dump_para(); /// dump all the parameter values used
-	
-	char delim;
-	char indicator;
+
 	void output_results(ofstream& output_file);
 	void output_sampled_data_real_time(int step_current);
-	void write2file(ofstream& output_file, vector< vector<int> >& v);
-	void write2file(ofstream& output_file, vector< vector<double> >& v);
-	void write2file(ofstream& output_file, vector<int>& v);
-	void write2file(ofstream& output_file, vector<double>& v);
+
+	
+	void recv_I(vector<double>& I_add, int pop_ind_pre, int syn_type);
+	const vector< int >& get_spikes_current();
+	const vector< double >& get_V();
+	const bool & get_runaway_killed();
 	
 	void start_stats_record();
-	void record_stats(int step_current); //
+
 	void start_LFP_record(vector< vector<bool> >& LFP_neurons);
 	void record_LFP();
 
@@ -48,25 +42,31 @@ public:
 
 	void update_spikes(int step_current); /// Find the firing neurons, record them, reset their potential and update nonref
 	// Following member(s) should not be inherited
-private:
-	void generate_I_ext(int step_current);
 	void update_V(int step_current); // Update potential
-
-public:
 	void set_gaussian_I_ext(vector<double>& mean, vector<double>& std);
 	void set_gaussian_g_ext(vector<double>& mean, vector<double>& std);
 	
 	void add_sampling(vector<int>& sample_neurons, vector<bool>& sample_type, vector<bool>& sample_time_points); 
 	void add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name);
 
-		
-	void sample_data(int step_current);
 	void init_runaway_killer(double min_ms, double Hz, double Hz_ms); /// kill the simulation when runaway activity of the network is detected: 
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 	void runaway_check(int step_current);
 	void add_perturbation(int step_perturb);
 	void add_spike_freq_adpt(); /// add spike-frequency adaptation
-	 
+	
+private:
+	void generate_I_ext(int step_current);
+	void record_stats(int step_current); 
+	void write2file(ofstream& output_file, vector< vector<int> >& v);
+	void write2file(ofstream& output_file, vector< vector<double> >& v);
+	void write2file(ofstream& output_file, vector<int>& v);
+	void write2file(ofstream& output_file, vector<double>& v);
+	string dump_para(); /// dump all the parameter values used
+	char delim;
+	char indicator;
+	void sample_data(int step_current);
+
 protected:
 	ofstream 
 		samp_file; /// the output file stream for sampled time series
@@ -204,6 +204,6 @@ protected:
 }; //class declaration must end with a semi-colon.
 
 
-inline Neurons::Neurons(){}; /// default constructor
+inline NeuroPop::NeuroPop(){}; /// default constructor
 
 #endif

@@ -1,19 +1,20 @@
-#include "NeuronNetwork.h"
-#include "SimulatorInterface.h"
-
+//#include "NeuroNet.h"
+#include "SimuInterface.h"
 #include <chrono> // #include <boost/chrono.hpp>
+#include <ctime>
 
 using namespace std;
 
-SimulatorInterface::SimulatorInterface(){
+SimuInterface::SimuInterface(){
 	// define default output data file format
 	output_suffix = ".ygout"; // filename extension
 	delim = ',';
 	indicator = '>';
 	commentor = '#';
+	
 }
 
-bool SimulatorInterface::import(string in_filename_input){
+bool SimuInterface::import(string in_filename_input){
 	// read main input file
 	in_filename = in_filename_input;
 	inputfile.open(in_filename, ifstream::in);
@@ -36,8 +37,14 @@ bool SimulatorInterface::import(string in_filename_input){
 	string syn_para; // parameters of synapses
 	vector< vector<double> > ext_spike_settings; // (int pop_ind, int type_ext, double K_ext, int Num_ext, double rate_ext, int ia, int ib)
 	vector< vector<double> > rate_ext_t; // vector<duoble> rate_ext(t)
-	vector< vector<double> > ext_current_settings; // (int pop_ind, double mean, double std)
-	vector<double> init_condition_settings; // (double p_fire)
+	
+	vector<int> ext_current_settings_pop_ind; // (int pop_ind)
+	vector< vector<double> > ext_current_settings; // (vector<double> mean, vector<double> std)
+	vector<int> ext_conductance_settings_pop_ind; // (int pop_ind)
+	vector< vector<double> > ext_conductance_settings; // (vector<double> mean, vector<double> std)
+	
+	vector<double> init_condition_settings_depre; // (double p_fire)
+	vector< vector<double> >  init_condition_settings; // (double r_V0, double p_fire)
 	
 	vector<int> neuron_sample_pop_ind; //
 	vector< vector<int> > neuron_sample_neurons; //
@@ -51,12 +58,19 @@ bool SimulatorInterface::import(string in_filename_input){
 	vector<int> neuron_stats_setting;
 	vector< vector<int> > syn_stats_setting;
 	vector< vector<int> > STD_setting;
+	vector< vector<int> > inh_STDP_setting;
+	vector<int> spike_freq_adpt_setting; //
+	
+	vector<int> LFP_record_pop_ind; //
+	vector< vector < vector<bool> > > LFP_record_setting; //
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
 	
 	vector< vector<int> > step_perturb_setting; // [pop_ind step_perturb]
 
+	int synapse_model_choice = 0;
+	
 	// read data
 	string line_str, entry_str; // temporary container for the entire while loop
 	size_t found;
@@ -92,22 +106,24 @@ bool SimulatorInterface::import(string in_filename_input){
 
 
 
-			// Random initial distributions for membrane potentials 
+			// Random initial distributions for membrane potentials (deprecated)
 			found = line_str.find("INIT003");
 			if (found != string::npos){// if found match
 				cout << "\t Reading random initial distributions for membrane potentials..." << endl;
-				read_next_line_as_vector(init_condition_settings); // p_fire
+				read_next_line_as_vector(init_condition_settings_depre); // p_fire
 				continue; // move to next line
 			}
-
-
+			
 			// read external current setting
 			found = line_str.find("INIT004");
 			if (found != string::npos){// if found match
 				cout << "\t Reading external current settings..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
+				ext_current_settings_pop_ind.push_back(read_next_entry<int>(line_ss));
 				ext_current_settings.resize(ext_current_settings.size()+1);
-				// [pop_ind, mean, std];
-				read_next_line_as_vector(ext_current_settings.back()); // vec[vec.size()-1] ?
+				read_next_line_as_vector(ext_current_settings.back()); // vector<double> mean
+				ext_current_settings.resize(ext_current_settings.size()+1);
+				read_next_line_as_vector(ext_current_settings.back()); // vector<double> std
 				continue; // move to next line
 			}
 
@@ -139,9 +155,59 @@ bool SimulatorInterface::import(string in_filename_input){
 			found = line_str.find("INIT008");
 			if (found != string::npos){// if found match
 				cout << "\t Reading short term depression settings..." << endl;
-				// [pop_ind_pre, pop_ind_post]
+				// [pop_ind_pre, pop_ind_post, STD_on_step]
 				STD_setting.resize(STD_setting.size()+1);
 				read_next_line_as_vector(STD_setting.back());
+				continue; // move to next line
+			}
+			
+			found = line_str.find("INIT009");
+			if (found != string::npos){// if found match
+				cout << "\t Reading inhibitory STDP settings..." << endl;
+				// [pop_ind_pre, pop_ind_post, inh_STDP_on_step]
+				inh_STDP_setting.resize(inh_STDP_setting.size()+1);
+				read_next_line_as_vector(inh_STDP_setting.back());
+				continue; // move to next line
+			}
+			
+			found = line_str.find("INIT010");
+			if (found != string::npos){// if found match
+				cout << "\t Reading spike-frequency adaptation settings..." << endl;
+				// [pop_ind]
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
+				spike_freq_adpt_setting.push_back(read_next_entry<int>(line_ss));			
+				continue; // move to next line
+			}
+			
+			// Random initial distributions for membrane potentials and initial firing probabilities
+			found = line_str.find("INIT011");
+			if (found != string::npos){// if found match
+				cout << "\t Reading random initial distributions for membrane potentials and initial firing probabilities..." << endl;
+				init_condition_settings.resize(2);
+				read_next_line_as_vector(init_condition_settings[0]); // r_V0
+				read_next_line_as_vector(init_condition_settings[1]); // p_fire
+				continue; // move to next line
+			}
+			
+			// read external conductance setting
+			found = line_str.find("INIT012");
+			if (found != string::npos){// if found match
+				cout << "\t Reading external conductance settings..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line 
+				ext_conductance_settings_pop_ind.push_back(read_next_entry<int>(line_ss));
+				ext_conductance_settings.resize(ext_conductance_settings.size()+1);
+				read_next_line_as_vector(ext_conductance_settings.back()); // vector<double> mean
+				ext_conductance_settings.resize(ext_conductance_settings.size()+1);
+				read_next_line_as_vector(ext_conductance_settings.back()); // vector<double> std
+				continue; // move to next line
+			}
+			
+			// read synapse model choice
+			found = line_str.find("INIT013");
+			if (found != string::npos){// if found match
+				cout << "\t Reading synapse model choice..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
+				synapse_model_choice = read_next_entry<int>(line_ss); 
 				continue; // move to next line
 			}
 			
@@ -160,8 +226,6 @@ bool SimulatorInterface::import(string in_filename_input){
 				}
 				continue; // move to next line
 			}
-
-
 
 			// read synapse parameter setting
 			found = line_str.find("PARA002");
@@ -247,6 +311,22 @@ bool SimulatorInterface::import(string in_filename_input){
 				continue; // move to next line
 			}
 			
+			// LFP record
+			found = line_str.find("SAMP005");
+			if (found != string::npos){// if found match
+				cout << "\t Reading LFP record settings..." << endl;
+				getline(inputfile, line_str);istringstream line_ss(line_str);// Read next line
+				// int pop_ind, sample_number;
+				LFP_record_pop_ind.push_back(read_next_entry<int>(line_ss));
+				int n = read_next_entry<int>(line_ss);
+				LFP_record_setting.resize(LFP_record_setting.size()+1);
+				for (int ind = 0; ind < n; ++ind){
+					LFP_record_setting.back().resize(LFP_record_setting.back().size()+1);
+					read_next_line_as_vector(LFP_record_setting.back().back());
+				}
+				continue; // move to next line
+			}
+			
 
 			// read non-default synapse definition file name
 			found = line_str.find("SYNF001");
@@ -321,15 +401,16 @@ bool SimulatorInterface::import(string in_filename_input){
 	inputfile.close();
 	inputfile.clear();
 
+	out_filename = gen_out_filename();
 
 
-	// build NeuronNetwork based on data imported
-	network = NeuronNetwork(N_array, dt, step_tot);
+	// build NeuroNet based on data imported
+	network = NeuroNet(N_array, dt, step_tot, delim, indicator);
 	cout << "\t Network created." << endl;
 	cout << "\t Initialising neuron populations...";
 	for (unsigned int ind = 0; ind < N_array.size(); ++ind){
-		network.NeuronPopArray.push_back(Neurons(ind, N_array[ind], network.dt, network.step_tot));
-		network.NeuronPopArray.back().set_para(pop_para[ind], delim);
+		network.NeuroPopArray.push_back(new NeuroPop(ind, N_array[ind], network.dt, network.step_tot, delim, indicator));
+		network.NeuroPopArray.back()->set_para(pop_para[ind]);
 		cout << ind+1 << "...";
 	}
 	cout << "done." << endl;
@@ -341,9 +422,12 @@ bool SimulatorInterface::import(string in_filename_input){
 			int type = IJKD_chem_info[ind][0];
 			int i_pre = IJKD_chem_info[ind][1];
 			int j_post = IJKD_chem_info[ind][2];
-			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot));
-			network.ChemicalSynapsesArray.back().init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I_temp[ind], J_temp[ind], K_temp[ind], D_temp[ind]);
-			network.ChemicalSynapsesArray.back().set_para(syn_para, delim);
+			network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
+			network.ChemSynArray.back()->init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I_temp[ind], J_temp[ind], K_temp[ind], D_temp[ind]);
+			network.ChemSynArray.back()->set_para(syn_para);
+			if (synapse_model_choice != 0){
+				network.ChemSynArray.back()->set_synapse_model(synapse_model_choice);
+			}
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -360,37 +444,63 @@ bool SimulatorInterface::import(string in_filename_input){
 			int Num_ext = int(ext_spike_settings[ind][3]);
 			int ia = int(ext_spike_settings[ind][4]);
 			int ib = int(ext_spike_settings[ind][5]);
-			network.ChemicalSynapsesArray.push_back(ChemicalSynapses(network.dt, network.step_tot));
-			network.ChemicalSynapsesArray.back().init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ia, ib);
-			network.ChemicalSynapsesArray.back().set_para(syn_para, delim);
+			network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
+			network.ChemSynArray.back()->init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ia, ib);
+			network.ChemSynArray.back()->set_para(syn_para);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}
 
-	// external current setting (int pop_ind, double mean, double std)
-	if (ext_current_settings.size() != 0){
+	// external current setting
+	if (ext_current_settings_pop_ind.size() != 0){
 		cout << "\t External current settings...";
-		for (unsigned int ind = 0; ind < ext_current_settings.size(); ++ind){
-			int pop_ind = int(ext_current_settings[ind][0]);
-			double mean = ext_current_settings[ind][1];
-			double std = ext_current_settings[ind][2];
-			network.NeuronPopArray[pop_ind].set_gaussian_I_ext(mean, std);
+		for (unsigned int ind = 0; ind < ext_current_settings_pop_ind.size(); ++ind){
+			int pop_ind = ext_current_settings_pop_ind[ind];
+			vector<double> mean = ext_current_settings[ ind*2 ];
+			vector<double> std = ext_current_settings[ ind*2+1 ];
+			network.NeuroPopArray[pop_ind]->set_gaussian_I_ext(mean, std);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}
 
+	// external conductance setting
+	if (ext_conductance_settings_pop_ind.size() != 0){
+		cout << "\t External conductance settings...";
+		for (unsigned int ind = 0; ind < ext_conductance_settings_pop_ind.size(); ++ind){
+			int pop_ind = ext_conductance_settings_pop_ind[ind];
+			vector<double> mean = ext_conductance_settings[ ind*2 ];
+			vector<double> std = ext_conductance_settings[ ind*2+1 ];
+			network.NeuroPopArray[pop_ind]->set_gaussian_g_ext(mean, std);
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+	
 	// random initial condition settings (double p_fire)
-	if (init_condition_settings.size() != 0){
+	if (init_condition_settings_depre.size() != 0){
 		cout << "\t Random initial condition settings...";
-		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings.size(); ++pop_ind){
-			double p_fire = init_condition_settings[pop_ind];
-			network.NeuronPopArray[pop_ind].random_V(p_fire);
+		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings_depre.size(); ++pop_ind){
+			double p_fire = init_condition_settings_depre[pop_ind];
+			network.NeuroPopArray[pop_ind]->random_V(p_fire);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}
+	
+	// random initial condition settings (double r_V0, double p_fire)
+	if (init_condition_settings.size() != 0){
+		cout << "\t Random initial condition settings...";
+		for (unsigned int pop_ind = 0; pop_ind < init_condition_settings.size(); ++pop_ind){
+			double r_V0 = init_condition_settings[0][pop_ind];
+			double p_fire = init_condition_settings[1][pop_ind];
+			network.NeuroPopArray[pop_ind]->set_init_condition(r_V0, p_fire);
+			cout << pop_ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+	
 	
 	// perturbation setting
 	if (step_perturb_setting.size() != 0){
@@ -398,7 +508,7 @@ bool SimulatorInterface::import(string in_filename_input){
 		for (unsigned int i = 0; i < step_perturb_setting.size(); ++i){
 			int pop_ind = step_perturb_setting[i][0];
 			int step_perturb = step_perturb_setting[i][1];
-			network.NeuronPopArray[pop_ind].add_perturbation(step_perturb);
+			network.NeuroPopArray[pop_ind]->add_perturbation(step_perturb);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -411,12 +521,13 @@ bool SimulatorInterface::import(string in_filename_input){
 		for (unsigned int i = 0; i < STD_setting.size(); ++i){
 			int pop_ind_pre = STD_setting[i][0];
 			int pop_ind_post = STD_setting[i][1];
-			
+			int STD_on_step = STD_setting[i][2];
+
 			int syn_match = false;
-			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-				network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].add_short_term_depression();
+			for (unsigned int s = 0; s < network.ChemSynArray.size(); ++s){
+				if (network.ChemSynArray[s]->get_pop_ind_pre() == pop_ind_pre &&
+				network.ChemSynArray[s]->get_pop_ind_post() == pop_ind_post){ // find the right synapse object
+					network.ChemSynArray[s]->add_short_term_depression(STD_on_step);
 					cout << i+1 << "...";
 					syn_match = true;
 				}
@@ -428,12 +539,46 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "done." << endl;
 	}
 	
+	if (inh_STDP_setting.size() != 0){
+		cout << "\t Inhibitory STDP settings...";
+		
+		for (unsigned int i = 0; i < inh_STDP_setting.size(); ++i){
+			int pop_ind_pre = inh_STDP_setting[i][0];
+			int pop_ind_post = inh_STDP_setting[i][1];
+			int inh_STDP_on_step = inh_STDP_setting[i][2];
+
+			int syn_match = false;
+			for (unsigned int s = 0; s < network.ChemSynArray.size(); ++s){
+				if (network.ChemSynArray[s]->get_pop_ind_pre() == pop_ind_pre &&
+				network.ChemSynArray[s]->get_pop_ind_post() == pop_ind_post){ // find the right synapse object
+					network.ChemSynArray[s]->add_inh_STDP(inh_STDP_on_step);
+					cout << i+1 << "...";
+					syn_match = true;
+				}
+			}
+			if (!syn_match){
+				cout << "(no match found!)...";
+			}
+		}
+		cout << "done." << endl;
+	}
+	
+	if (spike_freq_adpt_setting.size() != 0){
+		cout << "\t Spike-frequency adaptation settings...";
+		for (unsigned int i = 0; i < spike_freq_adpt_setting.size(); ++i){
+			int pop_ind = spike_freq_adpt_setting[i];
+			network.NeuroPopArray[pop_ind]->add_spike_freq_adpt();
+			cout << pop_ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+	
 	// neuron data sampling settings
 	if (neuron_sample_pop_ind.size() != 0){
 		cout << "\t Neuron data sampling settings...";
 		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
 			int pop_ind = neuron_sample_pop_ind[ind];
-			network.NeuronPopArray[pop_ind].add_sampling(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind]);
+			network.NeuroPopArray[pop_ind]->add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -444,13 +589,22 @@ bool SimulatorInterface::import(string in_filename_input){
 		cout << "\t Neuron stats record settings...";
 		for (unsigned int ind = 0; ind < neuron_stats_setting.size(); ++ind){
 			int pop_ind = neuron_stats_setting[ind];
-			network.NeuronPopArray[pop_ind].start_stats_record();
+			network.NeuroPopArray[pop_ind]->start_stats_record();
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
 	}	
 	
-	
+	// LFP record settings
+	if (LFP_record_pop_ind.size() != 0){
+		cout << "\t LFP record settings...";
+		for (unsigned int ind = 0; ind < LFP_record_pop_ind.size(); ++ind){
+			int pop_ind = LFP_record_pop_ind[ind];
+			network.NeuroPopArray[pop_ind]->start_LFP_record(LFP_record_setting[ind]);
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}	
 	
 	// syn data sampling settings
 	if (syn_sample_pop_ind.size() != 0){
@@ -462,11 +616,11 @@ bool SimulatorInterface::import(string in_filename_input){
 			int syn_type = syn_sample_pop_ind[ind][2];
 			
 			int syn_sample_match = false;
-			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-					network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post &&
-				network.ChemicalSynapsesArray[s].synapses_type == syn_type){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].add_sampling(syn_sample_neurons[ind], syn_sample_time_points[ind]);
+			for (unsigned int s = 0; s < network.ChemSynArray.size(); ++s){
+				if (network.ChemSynArray[s]->get_pop_ind_pre() == pop_ind_pre &&
+					network.ChemSynArray[s]->get_pop_ind_post() == pop_ind_post &&
+				network.ChemSynArray[s]->get_syn_type() == syn_type){ // find the right synapse object
+					network.ChemSynArray[s]->add_sampling(syn_sample_neurons[ind], syn_sample_time_points[ind]);
 					cout << ind+1 << "...";
 					syn_sample_match = true;
 				}
@@ -490,11 +644,11 @@ bool SimulatorInterface::import(string in_filename_input){
 			int syn_type = syn_stats_setting[ind][2];
 			
 			int syn_I_match = false;
-			for (unsigned int s = 0; s < network.ChemicalSynapsesArray.size(); ++s){
-				if (network.ChemicalSynapsesArray[s].pop_ind_pre == pop_ind_pre &&
-					network.ChemicalSynapsesArray[s].pop_ind_post == pop_ind_post &&
-				network.ChemicalSynapsesArray[s].synapses_type == syn_type){ // find the right synapse object
-					network.ChemicalSynapsesArray[s].start_stats_record();
+			for (unsigned int s = 0; s < network.ChemSynArray.size(); ++s){
+				if (network.ChemSynArray[s]->get_pop_ind_pre() == pop_ind_pre &&
+					network.ChemSynArray[s]->get_pop_ind_post() == pop_ind_post &&
+				network.ChemSynArray[s]->get_syn_type() == syn_type){ // find the right synapse object
+					network.ChemSynArray[s]->start_stats_record();
 					cout << ind+1 << "...";
 					syn_I_match = true;
 				}
@@ -505,16 +659,13 @@ bool SimulatorInterface::import(string in_filename_input){
 		}
 		cout << "done." << endl;
 	}	
-
-
-
-
+	
 	// initialise runaway-killer
 	if (runaway_killer_setting.size() != 0){
 		cout << "\t Runaway killer licensing for pop...";
 		for (unsigned int ind = 0; ind < runaway_killer_setting.size(); ++ind){
 			int pop_ind = int(runaway_killer_setting[ind][0]);
-			network.NeuronPopArray[pop_ind].init_runaway_killer(runaway_killer_setting[ind][1], runaway_killer_setting[ind][2], runaway_killer_setting[ind][3]);
+			network.NeuroPopArray[pop_ind]->init_runaway_killer(runaway_killer_setting[ind][1], runaway_killer_setting[ind][2], runaway_killer_setting[ind][3]);
 			cout << pop_ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -526,53 +677,51 @@ bool SimulatorInterface::import(string in_filename_input){
 	return 1;
 }
 
-void SimulatorInterface::simulate(){
+void SimuInterface::simulate(){
+	clock_t begin = clock();
+	  
 	// simulate
-	for (int i = 0; i < network.step_tot; ++i){
-		network.update(i);
+	for (int step_current = 0; step_current < network.step_tot; ++step_current){
+		network.update(step_current);
+		/*---------------------------------------------------------------------*/
+		// Countdown
+		if (step_current == 0){
+			cout << "Commencing countdown, engines on..." << flush;	
+			// if not "flush", output will be delayed in buffer
+		}
+		int steps_left = network.step_tot - step_current - 1;
+		if ( (steps_left % (network.step_tot / 10)) == 0 ){
+			clock_t end = clock();
+			char str_min[80];
+			double elapsed_mins = double(end - begin) / CLOCKS_PER_SEC / 60.0;
+			sprintf(str_min, " (%0.1f min)...", elapsed_mins);
+			cout << steps_left / (network.step_tot / 10) << str_min << flush;
+		}
+		if (steps_left == 0){cout << endl;}
+		/*---------------------------------------------------------------------*/
 	}
 	cout << "Simulation done." << endl;
-}
-
-void SimulatorInterface::output_results(){
-
-
-	// creat output file
-	out_filename = gen_out_filename();
-	output_file.open(out_filename);
 	
-	
-	// write data
-	cout << "Outputting results into file..." << endl;
-	
-	// KILL002 # step at which runaway activity is killed
-	output_file << indicator << " KILL002" << endl;
-	output_file << network.step_killed << delim << endl;
-
-	// dump population data
-	for (int i = 0; i < network.Num_pop; i++){
-		network.NeuronPopArray[i].output_results(output_file, delim, indicator);
-	}
-
-	// dump synapse data
-	for (unsigned int i = 0; i < network.ChemicalSynapsesArray.size(); i++){
-		network.ChemicalSynapsesArray[i].output_results(output_file, delim, indicator);
-	}
-
+	// output results
+	ofstream output_file;
+	output_file.open(out_filename.append(output_suffix));
+	network.output_results(output_file);
 	// attach input file (.ygin) to the output file for data completeness
  	ifstream in_file_attach( in_filename ) ;
-        output_file << in_file_attach.rdbuf() ;
-
+    output_file << in_file_attach.rdbuf() ;
+		
 
 	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
 	// Write data file name to stdout and use "grep ygout" to extract it!
 	cout << "Data file name is: " << endl;
 	cout << "	" << out_filename << endl;
+		
 }
 
 
 
-string SimulatorInterface::gen_out_filename(){
+
+string SimuInterface::gen_out_filename(){
 	// creat output file name using some pre-defined format
 	ostringstream convert_temp;   // stream used for the conversion
 	// Make use of the input file path and name
@@ -584,48 +733,37 @@ string SimulatorInterface::gen_out_filename(){
 	chrono::milliseconds tse_ms = chrono::duration_cast<chrono::milliseconds>(tse);
 	unsigned long long time_stamp = tse_ms.count(); // ms from epoch, better than "time_t time_stamp = time(0);"
 	// Combine all the parts of the output file path and name
-	convert_temp << in_filename_trim << "_" << time_stamp << output_suffix; // insert the textual representation of 'Number' in the characters in the stream
+	convert_temp << in_filename_trim << "_" << time_stamp; // insert the textual representation of 'Number' in the characters in the stream
 	return convert_temp.str(); // set 'Result' to the contents of the stream
 }
 
 
 
 
-template < typename Type > Type SimulatorInterface::read_next_entry(istringstream &line_ss){
+template < typename Type > Type SimuInterface::read_next_entry(istringstream &line_ss){
 	string entry_str;
 	Type entry;
 	getline(line_ss, entry_str, delim);
 	if (entry_str.empty()){
-		cout << "ERROR: SimulatorInterface::read_next_entry: empty content!" << endl;
+		cout << "ERROR: SimuInterface::read_next_entry: empty content!" << endl;
 	}
 	stringstream(entry_str) >> entry;
 	return entry;
 }
 
-template < typename Type, typename A > void SimulatorInterface::read_next_line_as_vector(vector<Type, A> &vec){
+template < typename Type, typename A > void SimuInterface::read_next_line_as_vector(vector<Type, A> &vec){
 	
 	string line_str, entry_str;
 	Type entry;
 	getline(inputfile, line_str); istringstream line_ss(line_str); // read next line
 	if (line_str.empty()){
-		cout << "ERROR: SimulatorInterface::read_next_line_as_vector: empty string!" << endl;
+		cout << "ERROR: SimuInterface::read_next_line_as_vector: empty string!" << endl;
 	}
 	while (getline(line_ss, entry_str, delim)){
 		stringstream(entry_str) >> entry;
 		vec.push_back(entry);
 	}
 
-}
-
-void SimulatorInterface::write2file(vector<int>& v){
-	if (!v.empty()){
-		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
-		for (unsigned int i = 0; i < v.size(); ++i){
-			output_file << v[i] << delim;
-		}
-		output_file << endl;
-	}
-	else {output_file << " " << endl;}
 }
 
 
