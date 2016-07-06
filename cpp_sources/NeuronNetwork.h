@@ -2,12 +2,12 @@
 #ifndef NEURONNETWORK_H
 #define NEURONNETWORK_H
 
-#include <vector>
-#include "Neurons.h"
+//#include <vector>
+//#include "Neurons.h"
 #include "ChemicalSynapses.h" 
 //#include "ElectricalSynapses.h"
-#include <iostream> // ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
-#include <fstream> // fstream : Stream class to both read and write from / to files
+//#include <iostream> // ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
+//#include <fstream> // fstream : Stream class to both read and write from / to files
 
 
 using namespace std;

@@ -1,9 +1,9 @@
 #ifndef CHEMICALSYNAPSES_H
 #define CHEMICALSYNAPSES_H
-#include <vector>
+//#include <vector>
 #include <functional> // pass function as parameter
-#include <string> 
-#include <iostream> 
+//#include <string> 
+//#include <iostream> 
 
 #include "Neurons.h"
 class Neurons; // #include ".h" for accessing its members, forward declaration for "syntax error: identifier xx" (why both are needed??)

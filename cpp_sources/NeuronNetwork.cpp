@@ -1,7 +1,7 @@
 #include "NeuronNetwork.h"
-#include <iostream>
+//#include <iostream>
 //#include <random>
-#include <vector>
+//#include <vector>
 #include <iterator>     // std::back_inserter
 #include <algorithm>    // std::for_each, copy
 #include <numeric>      // std::accumulate

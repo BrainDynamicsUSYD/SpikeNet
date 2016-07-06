@@ -1,7 +1,7 @@
 #ifndef ELECTRICALSYNAPSES_H
 #define ELECTRICALSYNAPSES_H
 
-#include <vector>
+//#include <vector>
 
 #include "Neurons.h"
 

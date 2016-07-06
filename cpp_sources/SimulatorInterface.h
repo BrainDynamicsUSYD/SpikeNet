@@ -2,13 +2,11 @@
 #define SIMULATORINTERFACE_H
 
 
-#include <iostream> // ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
-#include <fstream> // fstream : Stream class to both read and write from / to files
+//#include <iostream> // ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
+//#include <fstream> // fstream : Stream class to both read and write from / to files
 #include <sstream>  // stringstream is input and output
-#include <string> // "" for string, '' for char
-
-
-#include <vector>
+//#include <string> // "" for string, '' for char
+//#include <vector>
 
 #include "NeuronNetwork.h"
 

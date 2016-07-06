@@ -1,4 +1,4 @@
-#include "NeuronNetwork.h"
+//#include "NeuronNetwork.h"
 #include "SimulatorInterface.h"
 #include <chrono> // #include <boost/chrono.hpp>
 #include <ctime>
