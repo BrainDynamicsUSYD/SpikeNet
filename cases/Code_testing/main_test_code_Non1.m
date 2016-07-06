@@ -55,7 +55,9 @@ p_fire = [0 0]; % initial firing probabilities for both populations
 r_V0 = [1 0];
 writeInitCond(FID, r_V0, p_fire)
 
-% 
+
+writeSpikeFreqAdpt(FID, 1);
+
 % %%%%%%% write runaway killer
 % min_ms = 10*1000; % 10 sec
 % runaway_Hz = 20; % ??

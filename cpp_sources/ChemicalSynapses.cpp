@@ -26,8 +26,14 @@ ChemicalSynapses::ChemicalSynapses(double dt_input, int step_tot_input, char del
 	tau_decay_GABA = 3.0; // 7.0
 	tau_decay_NMDA = 80.0; // 80.0
 
-	// 
+	// default settting
 	stats_record = false;
+	STD = false; 
+	STD_on_step = -1;
+	inh_STDP_on_step = -1;
+	inh_STDP = false;
+	synapse_model = 0; // default model
+	
 }
 
 
@@ -65,11 +71,7 @@ void ChemicalSynapses::init(int synapses_type_input, int i_pre, int j_post, int 
 		else{ continue; }
 	}
 
-	// default settting
-	STD = false; 
-	STD_on_step = -1;
-	inh_STDP_on_step = -1;
-	inh_STDP = false;
+
 	
 	// parameter-dependent initialisation
 	init();
@@ -100,14 +102,6 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 	my_seed = rd(); // record seed
 	//my_seed = 321;
 	//cout << "My_seed is: " << my_seed << endl;
-
-	//
-	STD = false; 
-	inh_STDP = false;
-
-	// 
-	synapse_model = 0; // default model
-	
 	
 	// parameter-dependent initialisation
 	init();
@@ -118,6 +112,8 @@ void ChemicalSynapses::init(int synapses_type_input, int j_post, int N_post_inpu
 void ChemicalSynapses::init(){
 	// parameter-dependent initialisation
 
+
+	
 	
 	// Initialise chemical synapse parameters
 	if (synapses_type == 0){
