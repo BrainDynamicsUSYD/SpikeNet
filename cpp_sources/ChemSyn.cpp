@@ -164,8 +164,6 @@ void ChemSyn::init(){
 		for (int i = 0; i < gsm_0.buffer_steps; ++i){
 			gsm_0.d_gs_sum_buffer[i].assign(N_post, 0);
 		}
-		// transmitter_strength
-		K_trans.assign(N_pre, 1.0 / steps_trans); // be careful! 1 / transmitter steps gives zero (int)!!
 		gsm_0.trans_left.assign(N_pre, 0);
 	}
 	else if (synapse_model == 1){
