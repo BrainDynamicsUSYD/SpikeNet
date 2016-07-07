@@ -27,7 +27,7 @@ ChemSyn::ChemSyn(double dt_input, int step_tot_input, char delim_input, char ind
 	tau_decay_NMDA = 80.0; // 80.0
 
 	// default settting
-	stats_record = false;
+	stats.record = false;
 	STD.on = false; 
 	STD.on_step = -1;
 	inh_STDP.on_step = -1;
@@ -391,21 +391,21 @@ void ChemSyn::update_gs_sum_model_1(int step_current){
 
 
 void ChemSyn::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
-	sample_neurons = sample_neurons_input;
-	sample_time_points = sample_time_points_input;
+	sample.neurons = sample_neurons_input;
+	sample.time_points = sample_time_points_input;
 	
 	// initialise
 	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
-	for (unsigned int i = 0; i < sample_time_points.size(); ++i){
-		if (sample_time_points[i]){
+	for (unsigned int i = 0; i < sample.time_points.size(); ++i){
+		if (sample.time_points[i]){
 			sample_time_points_tot += 1;
 		}
 	}
-	int sample_neurons_tot = sample_neurons.size();// count non zero elements in sample_time_points
+	int sample_neurons_tot = sample.neurons.size();// count non zero elements in sample_time_points
 
-	sample.resize(sample_neurons_tot);
+	sample.data.resize(sample_neurons_tot);
 	for (int i = 0; i < sample_neurons_tot; ++i){
-		sample[i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
+		sample.data[i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
 	}
 
 }
@@ -476,11 +476,11 @@ void ChemSyn::update_inh_STDP(int step_current){
 
 
 void ChemSyn::sample_data(int step_current){
-	if (!sample_neurons.empty()){
-		if (sample_time_points[step_current]){ // push_back is amazing
-			for (unsigned int i = 0; i < sample_neurons.size(); ++i){ // performance issue when sampling many neurons?
-				int ind_temp = sample_neurons[i];
-				sample[i].push_back( I[ind_temp] );
+	if (!sample.neurons.empty()){
+		if (sample.time_points[step_current]){ // push_back is amazing
+			for (unsigned int i = 0; i < sample.neurons.size(); ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample.neurons[i];
+				sample.data[i].push_back( I[ind_temp] );
 			}
 		}
 	}
@@ -545,9 +545,9 @@ string ChemSyn::dump_para(){
 }
 
 void ChemSyn::start_stats_record(){
-	stats_record = true;
-	I_mean.reserve(step_tot);
-	I_std.reserve(step_tot);
+	stats.record = true;
+	stats.I_mean.reserve(step_tot);
+	stats.I_std.reserve(step_tot);
 }
 
 
@@ -566,19 +566,19 @@ void ChemSyn::output_results(ofstream& output_file){
 	
 	
 	// SYND002 # sampled synapse data
-	if (!sample_neurons.empty()){
+	if (!sample.neurons.empty()){
 		output_file << indicator << " SYND002" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << sample_neurons.size() << delim << endl;
-		write2file(output_file, sample); // 2D matrix
+		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << sample.neurons.size() << delim << endl;
+		write2file(output_file, sample.data); // 2D matrix
 	}
 
 	
 	// SYND003 # currents mean and std
-	if (stats_record){
+	if (stats.record){
 		output_file << indicator << " SYND003" << endl;
 		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << endl;
-		write2file(output_file, I_mean);
-		write2file(output_file, I_std);
+		write2file(output_file, stats.I_mean);
+		write2file(output_file, stats.I_std);
 	}
 	
 	// tmp data
@@ -666,7 +666,7 @@ void ChemSyn::write2file(ofstream& output_file, vector<double>& v){
 
 
 void ChemSyn::record_stats(){
-	if (stats_record){
+	if (stats.record){
 		// get mean
 		double sum_mean = 0.0;
 		for (unsigned int i = 0; i < I.size(); ++i){
@@ -682,7 +682,7 @@ void ChemSyn::record_stats(){
 		double std_tmp = sqrt( sum_std / double(I.size()));
 	
 		// record   
-		I_mean.push_back(mean_tmp);
-		I_std.push_back(std_tmp);
+		stats.I_mean.push_back(mean_tmp);
+		stats.I_std.push_back(std_tmp);
 	}
 }
