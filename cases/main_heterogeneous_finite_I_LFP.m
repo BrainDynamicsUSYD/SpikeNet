@@ -70,13 +70,13 @@ for SpikeFreqAapt = [0 1]
                             %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                             
                             
-                            for g_EI = [ 14 15 16 ]*10^-3
+                            for g_EI = [ 14  16  18]*10^-3
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
                                         for rate_ext = [1.2:0.2:1.8];
                                             for  tau_c_E = [8 ]
-                                                for tau_c_I = [ 25  30 35 ]
+                                                for tau_c_I = [  40 60 80]
                                                     loop_num = loop_num + 1;
                                                     
                                                     % For PBS array job
