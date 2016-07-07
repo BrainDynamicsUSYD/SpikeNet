@@ -2,7 +2,7 @@
 #PBS -N all_in_one
 ##PBS -q yossarian
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=111:59:59
+#PBS -l walltime=1:59:59
 #PBS -l mem=1500MB
 #PBS -V
 #PBS -e PBSout/one_err_av
@@ -14,7 +14,7 @@ cd "$PBS_O_WORKDIR"
 DATA_DIR="tmp_data"
 MATLAB_SOURCE_PATH='SpikeNet'
 MATLAB_SOURCE_PATH_2='SpikeNet'
-MATLAB_PRE_PROCESS_FUNC="main_cc_embed_search_STD_2_LFP"
+MATLAB_PRE_PROCESS_FUNC="main_heterogeneous_finite_I_LFP"
 MATLAB_POST_PROCESS_FUNC="PostProcessYG"
 CPP_MAIN_FUNC="simulator"
 
@@ -47,6 +47,7 @@ fi
 cd ${DATA_DIR};
 matdone=`ls *RYG.mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
 ygoutdone=`ls *ygout | sed -n '/^'${ID}'-.*ygout$/p'| wc -l`;
+ygindone=`ls *ygin | sed -n '/^'${ID}'-.*ygin$/p'| wc -l`;
 cd ${PBS_O_WORKDIR};
 
 
@@ -62,10 +63,20 @@ elif [ "${ygoutdone}" == "1" ]; then
 	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
+elif [ "${ygindone}" == "1" ]; then
+	echo ${ID} has been processed till ygin;
+	cd ${DATA_DIR};
+	${PBS_O_WORKDIR}/${CPP_MAIN_FUNC} ${ID}-*.ygin; # Simulate and output .ygout file
+	OUTPUTFILE=$(echo ${ID}-*.ygout) # why here bash is different from c-shell?? 
+	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
+	cd ${PBS_O_WORKDIR};
+	matlab -singleCompThread -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+			               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 else
 	echo  ${ID} has not been processed yet;
 	rm ${DATA_DIR}/${ID}-*.ygin ${DATA_DIR}/${ID}-*.ygin_syn; # delete previous input files if exists, cannot bother checking them
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , \
+	matlab -singleCompThread -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}') , \
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${DATA_DIR}'), ${MATLAB_PRE_PROCESS_FUNC}(${PBS_ARRAYID}), exit" # Create .ygin file
 	cd ${DATA_DIR};
@@ -78,7 +89,7 @@ else
 	# double quote "" prevents shell from expanding meta-characters like "*" and "?"
 	# single quote '' prevents almost anything from happening to the text
 	# back quote `` means command substitution
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+	matlab -singleCompThread -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 			               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 	# the single quote here is for matlab to recognize string

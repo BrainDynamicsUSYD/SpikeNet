@@ -36,7 +36,7 @@ for i = 1:num_files
     
     load(files{i}, var, 'ExplVar');
 
-    fprintf('done.\n');
+    %fprintf('done.\n');
     
         expr = sprintf('data_tmp = %s;', data);
         eval(expr);
