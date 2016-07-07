@@ -11,58 +11,60 @@ class NeuroPop; // #include ".h" for accessing its members, forward declaration 
 using namespace std;
 
 // Excitatory and inhibitory chemical synapses with transmission delay
-class ChemSyn{
+class ChemSyn
+{
 public:
-	ChemSyn(); // default constructor
-	ChemSyn(double dt, int step_tot, char delim, char indicator); // parameterised constructor
+	ChemSyn(); /// default constructor
+	ChemSyn(double dt, int step_tot, char delim, char indicator); /// parameterised constructor
 
-	void init(int syn_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); // initialise chemical synapses by reading already prepared connections
+	void init(int syn_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); /// initialise chemical synapses by reading already prepared connections
 
-	void init(int syn_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, int ia, int ib); // initialise chemical synapses for simulating external Poissonian neuron population
-	// [ia,ib] specifies the neuron index range in post population to receive the external stimulation 
+	void init(int syn_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, int ia, int ib); /// initialise chemical synapses for simulating external Poissonian neuron population;
+	/// [ia,ib] specifies the neuron index range in post population to receive the external stimulation 
 
-	void set_para(string para_str);
+	void set_para(string para_str); /// set parameter values
 
-	void recv_pop_data(vector<NeuroPop*> &NeuronPopArray);
-	void update(int step_current);
+	void recv_pop_data(vector<NeuroPop*> &NeuronPopArray); /// receive data from neuron populations
+	void update(int step_current); /// update by one step
 	
-	void set_synapse_model(int synapse_model_input);
+	void set_synapse_model(int synapse_model_input); /// set synapse model
 	
-	void send_pop_data(vector<NeuroPop*> &NeuronPopArray);
+	void send_pop_data(vector<NeuroPop*> &NeuronPopArray); ///  send data to neuron populations
 
-	void add_short_term_depression(int STD_on_step);
+	void add_short_term_depression(int STD_on_step); /// turn on short term depression
 	
-	void add_inh_STDP(int inh_STDP_on_step);
+	void add_inh_STDP(int inh_STDP_on_step); /// turn on inhibitory STDP
 	
-	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points); 
+	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points);  /// add data sampling 
 
-	void start_stats_record();
-	void output_results(ofstream& output_file);
+	void start_stats_record(); /// turn on basic statistics recording
+	void output_results(ofstream& output_file); /// write output to file
 
-	const int & get_syn_type();
-	const int & get_pop_ind_pre();
-	const int & get_pop_ind_post();
+	const int & get_syn_type(); /// get synapse type
+	const int & get_pop_ind_pre(); /// get index of pre-synaptic population
+	const int & get_pop_ind_post(); /// get index of post-synaptic population
 private:
 
-	char delim;
-	char indicator;
-	void init();
+	char delim; /// delimiter for input and output files, usually comma
+	char indicator; /// indicator for protocols, usually a single greater than operator
+	void init(); /// parameter-dependent initialisation
 	
 	string dump_para(); // dump all the parameter values used
 	
 		
-	void calc_I();
-	void update_gs_sum_model_0(int step_current);
-	void update_gs_sum_model_1(int step_current);
-	void update_STD(int step_current);
-	void update_inh_STDP(int step_current);
-	void sample_data(int step_current);
+	void calc_I(); /// calculate currents into each post-synaptic neuron
+	void update_gs_sum_model_0(int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 0
+	void update_gs_sum_model_1(int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 1
+	void update_STD(int step_current); /// update short-term depression
+	void update_inh_STDP(int step_current); /// update inhibitory STDP
+	void sample_data(int step_current); /// sample data
+	void record_stats(); /// record basic statistics
 
-	void write2file(ofstream& output_file, vector< vector<int> >& v);
-	void write2file(ofstream& output_file, vector< vector<double> >& v);
-	void write2file(ofstream& output_file, vector<int>& v);
-	void write2file(ofstream& output_file, vector<double>& v);
-	void record_stats(); //
+	void write2file(ofstream& output_file, vector< vector<int> >& v); /// write integer matrix to output file
+	void write2file(ofstream& output_file, vector< vector<double> >& v); /// write double matrix to output file
+	void write2file(ofstream& output_file, vector<int>& v); /// write integer vector to output file
+	void write2file(ofstream& output_file, vector<double>& v); /// write double vector to output file
+	
 	
 	
 protected:
@@ -94,22 +96,27 @@ protected:
 	// currents into post-synaptic population
 	vector<double>
 		I; 
+	
 	//
-	bool
-		stats_record;
-	vector<double>
-		I_mean,
-		I_std;
+	struct Stats {
+		bool
+			record;
+		vector<double>
+			I_mean,
+			I_std;
+	} stats;
+	
 
 
 	// Data sampling
-	vector<int> 
-		sample_neurons; // post-synaptic neuron indices
-	vector<bool> 
-		sample_time_points; // logical vector as long as time vector
-	vector< vector<double> >
-		sample; //  sampled neurons x time points
-
+	struct Sample {
+		vector<int> 
+			neurons; // post-synaptic neuron indices
+		vector<bool> 
+			time_points; // logical vector as long as time vector
+		vector< vector<double> >
+			data; //  sampled neurons x time points
+	} sample;
 
 	// Build-in paramters for time-evolution of post-synaptic conductance change
 	// 1-variable "s(t)" kinetic synapses model
