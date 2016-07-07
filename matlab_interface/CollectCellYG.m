@@ -49,7 +49,7 @@ for i = 1:num_files
 
     clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
     
-    fprintf('done.\n');
+    %fprintf('done.\n');
 end
 
 fprintf('\n');

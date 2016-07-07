@@ -54,7 +54,7 @@ cd ${PBS_O_WORKDIR}
 # double quote "" prevents shell from expanding meta-characters like "*" and "?"
 # single quote '' prevents almost anything from happening to the text
 # back quote `` means command substitution
-matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+matlab -nodisplay -singleCompThread -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 					   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 		               cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 # the single quote here is for matlab to recognize string
