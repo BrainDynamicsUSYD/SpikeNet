@@ -16,7 +16,7 @@ k = 1*2.4e-3; % miuSiemens
 % Basic parameters
 dt = 0.1;
 step_tot = 1000;
-N = [10; 1];
+N = [10; 1; 10; 20;];
 writeBasicPara(FID, dt, step_tot, N)
 Num_pop = length(N);
 discard_transient = 0; % ms
@@ -36,10 +36,11 @@ writeExtCurrentSettings(FID, 1, I_ext_strength*ones(1,N(1)), 0*ones(1,N(1)));
 
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
-sample_steps(1:1:step_tot) =  true;
-writeNeuronSampling(FID, 1, ones(1,8), 1 , sample_steps);
+sample_steps(1:2:step_tot) =  true;
+writeNeuronSampling(FID, 1, ones(1,8), 1:2:10 , sample_steps);
 writeNeuronSampling(FID, 2, ones(1,8), 1 , sample_steps);
-
+writeNeuronSampling(FID, 3, ones(1,8), 1:2:10 , ones(1,step_tot));
+writeNeuronSampling(FID, 4, ones(1,8), 1:2:10 , ones(1,step_tot));
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1, sample_steps)
 

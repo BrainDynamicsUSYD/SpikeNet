@@ -1,4 +1,4 @@
-function Read_and_save_YGSamp( files )
+function Read_and_save_YGSamp( files, R )
 
 
 % Prepare filenames
@@ -37,6 +37,15 @@ if ~isempty(files)
                     pop_ind = scan_temp{1}+1; % be careful here!
                     n_neuron = scan_temp{2};
                     n_steps = scan_temp{3};
+                    % if the simulation is killed, correct n_steps
+                    if nargin == 2
+                        if R.step_killed > 0
+                            n_steps = sum(R.neuron_sample.t_ind{pop_ind} <= R.step_killed);
+                        end
+                    else
+                        warning('Need the 2nd input argument to correct n_steps if the simulation is killed.')
+                    end
+                    
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%s','Delimiter',',');
                     data_name = scan_temp{1};

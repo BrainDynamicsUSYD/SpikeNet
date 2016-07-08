@@ -33,7 +33,7 @@ for id_out = 1:num_files
     disp('Done');
     for ind = 1:length(R)
         if isfield(R{ind}, 'samp_file')
-            Read_and_save_YGSamp(R{ind}.samp_file);
+            Read_and_save_YGSamp(R{ind}.samp_file, R{ind});
         end
     end
     RasterYG(R, save_fig); % generate raster plot for spiking history
