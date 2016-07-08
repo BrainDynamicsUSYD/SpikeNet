@@ -116,10 +116,10 @@ if ~isempty(files)
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%f','Delimiter',',');
                     I_input_std = transpose(scan_temp{1});
-                    OutData{id_out}.pop_stats.V_mean{pop_ind} = V_mean;
-                    OutData{id_out}.pop_stats.V_std{pop_ind} = V_std;
-                    OutData{id_out}.pop_stats.I_input_mean{pop_ind} = I_input_mean;
-                    OutData{id_out}.pop_stats.I_input_std{pop_ind} = I_input_std;
+                    OutData{id_out}.pop_stats.V_mean{pop_ind} = V_mean; clear V_mean;
+                    OutData{id_out}.pop_stats.V_std{pop_ind} = V_std; clear V_std;
+                    OutData{id_out}.pop_stats.I_input_mean{pop_ind} = I_input_mean; clear I_input_mean;
+                    OutData{id_out}.pop_stats.I_input_std{pop_ind} = I_input_std; clear I_input_std;
                     
                     
                     
@@ -181,19 +181,20 @@ if ~isempty(files)
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%f','Delimiter',',');
                     IE_ratio = transpose(scan_temp{1});
-                    OutData{id_out}.neuron_stats.IE_ratio{pop_ind} = IE_ratio;
+                    OutData{id_out}.neuron_stats.IE_ratio{pop_ind} = IE_ratio; clear IE_ratio;
                     
                 elseif strfind(tline,'POPD007')
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%d','Delimiter',',');
-                    pop_ind = scan_temp{1}+1; % be careful here!
-                    tline = fgetl(FID);
-                    scan_temp = textscan(tline,'%f','Delimiter',',');
-                    LFP = transpose(scan_temp{1});
-                    if ~isfield(OutData{id_out}, 'LFP')
-                        OutData{id_out}.LFP = cell(0,0);
+                    pop_ind = scan_temp{1}(1)+1; % be careful here!
+                    n_LFP = scan_temp{1}(2); % number of lines 
+                    LFP = [];
+                    for nn = 1:n_LFP
+                        tline = fgetl(FID);
+                        scan_temp = textscan(tline,'%f','Delimiter',',');
+                        LFP = [LFP; transpose(scan_temp{1})]; %#ok<AGROW>
                     end
-                    OutData{id_out}.LFP{pop_ind} = LFP;
+                    OutData{id_out}.LFP.LFP{1, pop_ind} = LFP; clear LFP;
                     
                 elseif strfind(tline,'SYND002')
                     if ~isfield(OutData{id_out}, 'syn_sample')
@@ -228,7 +229,18 @@ if ~isempty(files)
                             OutData{id_out}.syn_sample{syn_ind}.t_ind = find(scan_temp{1}); % extract t_ind for pop_sample
                         end
                     end
-                    
+                elseif strfind(tline,'SAMP005')
+                    tline = fgetl(FID);
+                    scan_temp = textscan(tline,'%d','Delimiter',',');
+                    pop_ind = scan_temp{1}(1)+1; % Be careful here! C/C++ index convection!
+                    samp_n = scan_temp{1}(2); 
+                    LFP_neurons = [];
+                    for i = 1:samp_n
+                            tline = fgetl(FID);
+                            scan_temp = textscan(tline,'%d','Delimiter',',');
+                            LFP_neurons = [LFP_neurons; logical(transpose(scan_temp{1}))]; %#ok<AGROW>
+                    end
+                    OutData{id_out}.LFP.LFP_neurons{1,pop_ind} = LFP_neurons; clear LFP_neurons;;
                     
                 elseif strfind(tline,'SYND003')
                     if ~isfield(OutData{id_out}, 'syn_stats')
@@ -245,8 +257,8 @@ if ~isempty(files)
                     tline = fgetl(FID);
                     scan_temp = textscan(tline,'%f','Delimiter',',');
                     I_std = transpose(scan_temp{1});
-                    OutData{id_out}.syn_stats{end}.I_mean = I_mean;
-                    OutData{id_out}.syn_stats{end}.I_std = I_std;
+                    OutData{id_out}.syn_stats{end}.I_mean = I_mean; clear I_mean;
+                    OutData{id_out}.syn_stats{end}.I_std = I_std; clear I_std;
                     
                 elseif strfind(tline,'SYND004')
                     if ~isfield(OutData{id_out}, 'syn_tmp_data')
@@ -275,7 +287,7 @@ if ~isempty(files)
                         scan_temp = textscan(tline, '%s %f', 'Delimiter', ',');
                         para_name = scan_temp{1}{1};
                         para_value = scan_temp{2};
-                        OutData{id_out}.PopPara{pop_ind,1}.(para_name) = para_value;
+                        OutData{id_out}.PopPara{pop_ind,1}.(para_name) = para_value; clear para_value;
                     end
                 elseif strfind(tline,'SYND001')
                     tline = fgetl(FID);
@@ -287,7 +299,7 @@ if ~isempty(files)
                         scan_temp = textscan(tline, '%s %f', 'Delimiter', ',');
                         para_name = scan_temp{1}{1};
                         para_value = scan_temp{2};
-                        OutData{id_out}.SynPara{num_syn,1}.(para_name) = para_value;
+                        OutData{id_out}.SynPara{num_syn,1}.(para_name) = para_value; clear para_value;
                     end
                     
                     
@@ -342,8 +354,13 @@ if ~isempty(files)
                 elseif strfind(tline, 'INIT003')
                 elseif strfind(tline, 'SAMP003')
                 elseif strfind(tline, 'SAMP004')
+                elseif strfind(tline, 'INIT009')
+                elseif strfind(tline, 'INIT010')
+                elseif strfind(tline, 'INIT011')
+                elseif strfind(tline, 'INIT012')
+                elseif strfind(tline, 'INIT013')
                 elseif strfind(tline, '############')
-                elseif strfind(tline, 'MATLAB script');
+                elseif strfind(tline, 'MATLAB script')
                     
                 else
                     warning('unrecognized data type: %s\n', tline);

@@ -9,7 +9,7 @@ rate_E = CollectVectorYG('Analysis', 'mean(Analysis.rate{1})' );
 rate_I = CollectVectorYG('Analysis', 'mean(Analysis.rate{2})' );
 non_silence = CollectVectorYG('reduced', 'nnz(reduced.num_spikes{1})/length(reduced.num_spikes{1})');
 
-loop_interesting = loop(rate_E < 50 & CV2_ISI.^0.5 > 0.5 & abs(IE_ratio) > 0.8 & non_silence > 0.8 );
+loop_interesting = loop(rate_E < 20 & CV2_ISI.^0.5 > 0.5 & abs(IE_ratio) > 0.8 & non_silence > 0.8 );
 interesting_definition = 'loop_interesting = loop(rate_E < 50 & CV2_ISI.^0.5 > 0.5 & abs(IE_ratio) > 0.8 & non_silence > 0.8 );';
 
 toc;

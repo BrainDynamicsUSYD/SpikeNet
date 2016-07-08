@@ -8,7 +8,7 @@ N_post = length(L_post(:,1));
 I = [];
 J = [];
 for i = 1:N_pre
-    dist = lattice_nD_find_dist(L_post, hw, L_pre(i,:));
+    dist = lattice_nD_find_dist(L_post, hw, L_pre(i,1), L_pre(i,2) );
     dist_factor = exp(-dist/tau_c);
     
     [~, ind] = sort( rand(N_post,1)./dist_factor, 'ascend' );

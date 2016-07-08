@@ -12,6 +12,7 @@ seed = 1;
 [FID, FID_syn] = new_ygin_files_and_randseed(seed);
 % If no FID_syn is needed, use FID = new_ygin_files_and_randseed(seed,0)
 
+
 %%%% Define some basic parameters
 % Time step (ms)
 dt = 0.1; % 0.1 is usually small enough
@@ -44,6 +45,11 @@ pop = 1;
 writeSpikeFreqAdpt(FID, pop);
 
 
+% % Use Adam 2016 synapse model
+% model_choice = 2;
+% writeSynapseModelChoice(FID, model_choice)
+
+
 %%%% Define the initial condition
 p_fire = [0.1 0.1]; % initial firing probabilities for both populations
 % set initial V distribution to be [V_rt, V_rt + (V_th-V_rt)*r_V0] 
@@ -67,6 +73,14 @@ pop = 2;
 I_ext_mean = 0.5*ones(1,N(2)); % defined for each neuron (nA)
 I_ext_std = 0.2*ones(1,N(2)); % defined for each neuron (nA)
 writeExtCurrentSettings(FID, pop, I_ext_mean, I_ext_std)
+
+%%%% Add external conductances (Gaussian white noise) to the 2nd population
+% The default reveral potential is V_ext = 0.0 mV.
+pop = 2;
+g_ext_mean = 50*10^-3*ones(1,N(2)); % defined for each neuron (muS)
+g_ext_std = 0.0*ones(1,N(2)); % defined for each neuron (muS)
+writeExtConductanceSettings(FID, pop, g_ext_mean, g_ext_std)
+
 
 %%%% Define runaway killer
 % The computational cost of the simulation is directly proportional to 
@@ -188,7 +202,8 @@ sample_data_type = logical([1,1,1,1,0,0,1,0]);
 writeNeuronSampling(FID, pop, sample_data_type, ...
     sample_neuron, sample_steps)
 
-%%%% Record explanatory variables that are nacessary for post-processing
+%%%% Optional: record explanatory variables (scalars only)
+% They will also be used in pro-processsing for auto-generated comments
 discard_transient = 0; % transient period data to be discarded (ms)
 writeExplVar(FID, 'discard_transient', discard_transient, ...
     'g_EE', g_EE, ...

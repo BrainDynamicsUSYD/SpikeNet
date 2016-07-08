@@ -22,14 +22,17 @@ Num_pop = length(N);
 discard_transient = 0; % ms
 
 % write pop para
-writePopPara(FID, 1,  'tau_ref', 3.1);
+writePopPara(FID, 1,  'tau_ref', 3.1, 'V_rt', 70);
 writePopPara(FID, 2,  'tau_ref', 3.2);
 % write synapse para
-writeSynPara(FID, 'tau_decay_AMPA', 3.3);
+writeSynPara(FID, 'tau_decay_AMPA', 3.3, 'Dt_trans_AMPA', 0.5);
 
 % % external current settings (int pop_ind, double mean, double std)
 % I_ext_strength = 10; %1.4; % nA
 % writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
+
+g_ext_strength = 5e-3; % miuSiemens
+writeExtConductanceSettings(FID, 1, g_ext_strength, 0)
 
 % external spike settings
 rate = zeros(1, step_tot);
@@ -40,8 +43,8 @@ writeExtSpikeSettings(FID, 1, 1, k,  1, rate, 1, N(1) );
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
 sample_steps(1:1:step_tot) =  true;
-writeNeuronSampling(FID, 1, ones(1,7), 1 , sample_steps);
-writeNeuronSampling(FID, 2, ones(1,7), 1 , sample_steps);
+writeNeuronSampling(FID, 1, ones(1,8), 1 , sample_steps);
+writeNeuronSampling(FID, 2, ones(1,8), 1 , sample_steps);
 
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1, sample_steps)

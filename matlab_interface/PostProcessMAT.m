@@ -62,8 +62,8 @@ for i = 1:num_files
     
 
     R_temp = get_SWR(R_temp);
-    SWR = R_temp.SWR;
-    save(files{i},'SWR', '-append');
+    LFP = R_temp.LFP;
+    save(files{i},'LFP', '-append');
     plot_SWR({R_temp}, save_fig);
     
     

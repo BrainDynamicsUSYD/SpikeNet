@@ -4,7 +4,7 @@ function main_test_code_1on1(varargin)
 % addpath(genpath(cd));
 % cd ~/tmp_data
     
-loop_num = 1;
+loop_num = 2;
 
 % seed the matlab rand function! The seed is global.
 [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
@@ -25,10 +25,10 @@ discard_transient = 0; % ms
 writePopPara(FID, 1,  'tau_ref', 3.1);
 writePopPara(FID, 2,  'tau_ref', 3.2);
 % write synapse para
-writeSynPara(FID, 'tau_decay_AMPA', 3.3);
+writeSynPara(FID, 'tau_decay_AMPA', 5.0, 'Dt_trans_AMPA', 0.5);
 
 % external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 1; %1.4; % nA
+I_ext_strength = 0.5; %1.4; % nA
 writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
@@ -37,8 +37,8 @@ writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
 sample_steps(1:1:step_tot) =  true;
-writeNeuronSampling(FID, 1, ones(1,7), 1 , sample_steps);
-writeNeuronSampling(FID, 2, ones(1,7), 1 , sample_steps);
+writeNeuronSampling(FID, 1, ones(1,8), 1 , sample_steps);
+writeNeuronSampling(FID, 2, ones(1,8), 1 , sample_steps);
 
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1, sample_steps)

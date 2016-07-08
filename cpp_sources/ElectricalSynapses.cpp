@@ -1,5 +1,5 @@
 #include "ElectricalSynapses.h"
-#include <iostream>
+//#include <iostream>
 #include <math.h> // for round, sqrt, ceil
 
 

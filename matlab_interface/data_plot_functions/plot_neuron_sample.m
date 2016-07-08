@@ -18,7 +18,11 @@ if nargin == 2
         I_AMPA = R.neuron_sample.I_AMPA{pop}(sample_ind,:);
         I_GABA = R.neuron_sample.I_GABA{pop}(sample_ind,:);
         I_ext = R.neuron_sample.I_ext{pop}(sample_ind,:);
-        % I_K = R.neuron_sample.I_K{pop}(sample_ind,:);
+        if isfield( R.neuron_sample, 'I_K')
+            I_K = R.neuron_sample.I_K{pop}(sample_ind,:);
+        else
+            I_K = zeros(size(I_ext));
+        end
         neuron_ind = R.neuron_sample.neuron_ind{pop}(sample_ind);
         fprintf('Current sample neuron index = %d.\n', neuron_ind);
         
@@ -31,14 +35,31 @@ if nargin == 2
         V_lk = R.PopPara{pop}.V_lk;
         g_leak = R.PopPara{pop}.g_lk;
         V_th = R.PopPara{pop}.V_th;
-        % V_K = R.PopPara{pop}.V_K;
-        % dg_K = R.PopPara{pop}.dg_K;
-        % tau_K = R.PopPara{pop}.tau_K;
-        V_K = -85;
-        dg_K = 0.01;
-        tau_K = 80;
+        V_K = R.PopPara{pop}.V_K;
+        dg_K = R.PopPara{pop}.dg_K;
+        tau_K = R.PopPara{pop}.tau_K;
+
+       
+        % find threshold current for neuron to fire
+        I_th = g_leak*(V_th - V_lk); % important!!!!!!!!!!!!!
+        I_tot_mean = mean(I_AMPA + I_ext + I_GABA + I_K);
+        I_tot_std = std(I_AMPA + I_ext + I_GABA + I_K);
+        I_ext_mean = mean(I_ext);
+        I_ext_std = std(I_ext);
+        I_E_mean = mean(I_AMPA + I_ext);
+        I_E_std = std(I_AMPA + I_ext);
+        I_I_mean = mean(I_GABA + I_K);
+        I_I_std = std(I_GABA + I_K);
+        IE_ratio = I_I_mean/I_E_mean;
+        
+        fprintf('\t I-E ratio = %.3g.\n', IE_ratio);
+        fprintf('\t I_E = %.3g (%.3g) including I_ext = %.3g (%.3g).\n', I_E_mean, I_E_std, I_ext_mean, I_ext_std);
+        fprintf('\t I_I is %.3g (%.3g).\n',  I_I_mean, I_I_std);
+        fprintf('\t I_th = %.3g\n', I_th);
+        fprintf('\t I_tot = %.3g (%.3g).\n',  I_tot_mean, I_tot_std);
         
         
+         
         % simulate the stuff again in matlab (xx_new)
         % reproduce the behavior of the C++ code
         
@@ -87,26 +108,7 @@ if nargin == 2
         if length(spikes_new) ~= length(spikes) || nnz(sort(spikes_new) - sort(spikes)) > 0
             warning('Simulator does not behave identically as c++ code!');
         end
-        
-        
-        % find threshold current for neuron to fire
-        I_th = g_leak*(V_th - V_lk); % important!!!!!!!!!!!!!
-        I_tot_mean = mean(I_AMPA + I_ext + I_GABA + I_K);
-        I_tot_std = std(I_AMPA + I_ext + I_GABA + I_K);
-        I_ext_mean = mean(I_ext);
-        I_ext_std = std(I_ext);
-        I_E_mean = mean(I_AMPA + I_ext);
-        I_E_std = std(I_AMPA + I_ext);
-        I_I_mean = mean(I_GABA + I_K);
-        I_I_std = std(I_GABA + I_K);
-        IE_ratio = I_I_mean/I_E_mean;
-        
-        fprintf('\t I-E ratio = %.3g.\n', IE_ratio);
-        fprintf('\t I_E = %.3g (%.3g) including I_ext = %.3g (%.3g).\n', I_E_mean, I_E_std, I_ext_mean, I_ext_std);
-        fprintf('\t I_I is %.3g (%.3g).\n',  I_I_mean, I_I_std);
-        fprintf('\t I_th = %.3g\n', I_th);
-        fprintf('\t I_tot = %.3g (%.3g).\n',  I_tot_mean, I_tot_std);
-        
+
         % Segmetation
         seg_size = 4*10^5; % 40 sec
         seg_size_reduced = round(seg_size*dt/dt_reduced); % be careful!!!
