@@ -14,6 +14,7 @@
 \usepackage{dirtree}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,calc}
+\usepackage{authblk}
 
 \newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
  
@@ -22,10 +23,12 @@
   
   
 \title{SpikeNet Documentation}
-\author{Yifan Gu  \\
-	Complex System Group, School of Physics, USYD  \\
-	yigu8115@gmail.com \\
-	}
+\author[1]{Yifan Gu\thanks{yigu8115@gmail.com}}
+\author[1]{James Henderson}
+\author[1]{Yuxi Liu}
+\affil[1]{School of Physics, University of Sydney, NSW 2006, Australia}
+
+%%\renewcommand\Authands{ and }
 
 \date{\today} 
 
@@ -33,7 +36,7 @@
  \maketitle
 
 \section{Overview}
-SpikeNet is a software developed for simulating spiking neuronal networks, of which the design provides the following four features.
+SpikeNet is a software developed for simulating spiking neuronal networks, of which the design provides the following four main features.
 
 \begin{description}
 
@@ -315,7 +318,8 @@ Note that the protocols use three special characters, including ``\textgreater''
 	std_1 (nA), std_2, $\dots$,  std_N, 
 
 > INIT005 # external Poissonian spikes
-	pop_ind, type_ext, K_ext ($\mu$S), Num_ext, ia, ib,
+	pop_ind, type_ext, K_ext ($\mu$S), Num_ext,
+	1, 1, 0, 0, $\dots$, (1-by-N_pop logical values)
 	rate_1 (Hz), rate_2, $\dots$, rate_step_tot
 
 > INIT006 # chemical connection definition

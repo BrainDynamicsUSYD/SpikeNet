@@ -62,10 +62,10 @@ type_ext = 1; % 1 for AMPA-like syanpses
 g_ext = 2*10^-3; % synaptic coupling strength (miuS)
 N_ext = 1000; % No. of independent external connections onto each neuron
 rate_ext = 2*ones(1, step_tot); % Poisson rate for each time step (Hz) 
-N_start = 1;
-N_end = 10; % only add to neuron No.1-10.
+neurons_recv = zeros(1, N(pop));
+neurons_recv(1:10) = 1; % only neurons #1-10 receive such external input
 writeExtSpikeSettings(FID, pop, type_ext, g_ext,  N_ext, rate_ext,...
-    N_start, N_end );
+    neurons_recv );
 
 
 %%%% Add external currents (Gaussian white noise) to the 2nd population

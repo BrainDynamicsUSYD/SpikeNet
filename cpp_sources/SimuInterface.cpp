@@ -35,8 +35,9 @@ bool SimuInterface::import(string in_filename_input){
 	// temporary data storage
 	vector<string> pop_para; // parameters of neuron popluation
 	string syn_para; // parameters of synapses
-	vector< vector<double> > ext_spike_settings; // (int pop_ind, int type_ext, double K_ext, int Num_ext, double rate_ext, int ia, int ib)
+	vector< vector<double> > ext_spike_settings; // (int pop_ind, int type_ext, double K_ext, int Num_ext, double rate_ext)
 	vector< vector<double> > rate_ext_t; // vector<duoble> rate_ext(t)
+	vector< vector<bool> > ext_spike_neurons; //
 	
 	vector<int> ext_current_settings_pop_ind; // (int pop_ind)
 	vector< vector<double> > ext_current_settings; // (vector<double> mean, vector<double> std)
@@ -133,9 +134,12 @@ bool SimuInterface::import(string in_filename_input){
 			found = line_str.find("INIT005");
 			if (found != string::npos){// if found match
 				cout << "\t Reading external spike settings..." << endl;
-				// [pop_ind,type_ext,K_ext,Num_ext,ia,ib]
+				// [pop_ind,type_ext,K_ext,Num_ext]
 				ext_spike_settings.resize(ext_spike_settings.size()+1);
 				read_next_line_as_vector(ext_spike_settings.back());
+				//	ext_spike_neurons
+				ext_spike_neurons.resize(ext_spike_neurons.size()+1);
+				read_next_line_as_vector(ext_spike_neurons.back());
 				// [rate_ext_t]
 				rate_ext_t.resize(rate_ext_t.size()+1);
 				read_next_line_as_vector(rate_ext_t.back());
@@ -442,10 +446,8 @@ bool SimuInterface::import(string in_filename_input){
 			int type_ext = int(ext_spike_settings[ind][1]);
 			double K_ext = ext_spike_settings[ind][2];
 			int Num_ext = int(ext_spike_settings[ind][3]);
-			int ia = int(ext_spike_settings[ind][4]);
-			int ib = int(ext_spike_settings[ind][5]);
 			network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
-			network.ChemSynArray.back()->init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ia, ib);
+			network.ChemSynArray.back()->init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t[ind], ext_spike_neurons[ind]);
 			network.ChemSynArray.back()->set_para(syn_para);
 			cout << ind+1 << "...";
 		}

@@ -79,7 +79,7 @@ void ChemSyn::init(int syn_type_input, int i_pre, int j_post, int N_pre_input, i
 }
 
 
-void ChemSyn::init(int syn_type_input, int j_post, int N_post_input, double K_ext_input, int Num_ext_input, vector<double> &rate_ext_t_input, int ia_input, int ib_input){
+void ChemSyn::init(int syn_type_input, int j_post, int N_post_input, double K_ext, int Num_ext, vector<double> &rate_ext_t, vector<bool> &neurons){
 
 	// Initialise chemical synapses for simulating external neuron population
 	syn_type = syn_type_input;
@@ -88,15 +88,14 @@ void ChemSyn::init(int syn_type_input, int j_post, int N_post_input, double K_ex
 	N_pre = 1; // just for initialization
 	N_post = N_post_input;
 	max_delay_steps = 0; // no delay;
-	ia = ia_input; // start of neuron index range in post population
-	ib = ib_input; // end of neuron index range in post population
 
 
 	// Parameters for noise generation
-	K_ext = K_ext_input;
-	Num_ext = Num_ext_input;
-	rate_ext_t = rate_ext_t_input;	
-
+	ext_noise.K_ext = K_ext;
+	ext_noise.Num_ext = Num_ext;
+	ext_noise.rate_ext_t = rate_ext_t;	
+	ext_noise.neurons = neurons;
+	
 	// Random seed (random engine should be feed with DIFFERENT seed at every implementation)
 	random_device rd; // random number from operating system for seed
 	my_seed = rd(); // record seed
@@ -342,15 +341,17 @@ void ChemSyn::update_gs_sum_model_0(int step_current){
 		// Contribution of external spikes, assuming square pulse transmitter release
 		// Generate current random number generator, note that rate_ext_t is in Hz
 		gen.seed(my_seed + step_current);// reseed random engine!!!
-		poisson_distribution<int> dist(Num_ext * rate_ext_t[step_current] * (dt / 1000.0));		
+		poisson_distribution<int> dist(ext_noise.Num_ext * ext_noise.rate_ext_t[step_current] * (dt / 1000.0));		
 		auto ext_spikes = bind(dist, gen);
 
 		// Post-synaptic dynamics
 		int t_ring;
 		for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
 			t_ring = int( (step_current + t_trans) % gsm_0.buffer_steps );
-			for (int j = ia; j <= ib; ++j){
-				gsm_0.d_gs_sum_buffer[t_ring][j] += K_trans[0] * K_ext * ext_spikes(); 
+			for (int j_post = 0; j_post < N_post; ++j_post){
+				if (ext_noise.neurons[j_post]){
+					gsm_0.d_gs_sum_buffer[t_ring][j_post] += K_trans[0] * ext_noise.K_ext * ext_spikes(); 
+				}
 			}
 		}
 	}

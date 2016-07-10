@@ -19,8 +19,7 @@ public:
 
 	void init(int syn_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); /// initialise chemical synapses by reading already prepared connections
 
-	void init(int syn_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, int ia, int ib); /// initialise chemical synapses for simulating external Poissonian neuron population;
-	/// [ia,ib] specifies the neuron index range in post population to receive the external stimulation 
+	void init(int syn_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population;
 
 	void set_para(string para_str); /// set parameter values
 
@@ -229,15 +228,16 @@ protected:
 
 
 	// Simulating external Poisson population (noise)
-	double 
-		K_ext; // identical connection strength for external pre-synaptic neurons (chemical synapses)
-	int 
-		Num_ext, // number of external pre-synaptic neurons (chemical synapses) per post-synaptic neuron
-		ia, 
-		ib; // range of neuron index in post population [ia,ib]
-		
-	vector<double> 
-		rate_ext_t; // identical rate of firing for external pre-synaptic neurons (chemical synapses)
+	struct Ext_noise {
+		double 
+			K_ext; /// identical connection strength for external pre-synaptic neurons
+		int 
+			Num_ext; /// number of external pre-synaptic neurons per post-synaptic neuron
+		vector<bool> 
+			neurons; /// true if the post-synaptic neuron receives such noise
+		vector<double> 
+			rate_ext_t; // identical rate of firing for external pre-synaptic neurons (chemical synapses)
+	} ext_noise;
 
 	// Random number generator
 	int 
