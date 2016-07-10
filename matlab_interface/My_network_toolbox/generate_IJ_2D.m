@@ -13,6 +13,10 @@ if nargin == 4
     iter_num = 5;% 5 is arbitrary, try something else?
 end
 
+if cn_scale_wire < 1
+    warning('cn_scale_wire cannot be less than 1!');
+end
+
 for iter = 1:iter_num
     fprintf('Generate I and J: Iteration = %d \n', iter)
     if show_wait_bar == 1

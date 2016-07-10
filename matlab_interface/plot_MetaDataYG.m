@@ -18,5 +18,5 @@ plot(loop, CV2_ISI.^0.5,'o');
 ylabel('CV of ISI');
 
 
-loop_interesting = loop(rate_E < 50 & CV2_ISI.^0.5 > 0.5 & abs(IE_ratio) > 0.8 & non_silence > 0.8 )
+loop_interesting = loop(rate_E < 20 & CV2_ISI.^0.5 > 0.5 & abs(IE_ratio) > 0.8 & abs(IE_ratio) < 2 & non_silence > 0.8 )
 

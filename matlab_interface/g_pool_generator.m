@@ -39,6 +39,7 @@ EPSP_max = 20; % mV
 % mu_p = -0.2; % 
 % s_p = 0.5; %
 
+disp('Note that log-bin correction is being used!')
 EPSP_mu_norm = mu_p-s_p^2; % log-bin correction to parameter mu!!
 EPSP_sigma_norm = s_p;
 

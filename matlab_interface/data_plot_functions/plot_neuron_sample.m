@@ -9,6 +9,7 @@ step_tot = R.step_tot;
 dt_reduced =  R.reduced.dt;
 step_tot_reduced = R.reduced.step_tot;
 
+check_cpp_matlab_match = 1;
 
 if nargin == 2
     for sample_ind = 1:length(R.neuron_sample.neuron_ind{pop})
@@ -35,11 +36,68 @@ if nargin == 2
         V_lk = R.PopPara{pop}.V_lk;
         g_leak = R.PopPara{pop}.g_lk;
         V_th = R.PopPara{pop}.V_th;
-        V_K = R.PopPara{pop}.V_K;
-        dg_K = R.PopPara{pop}.dg_K;
-        tau_K = R.PopPara{pop}.tau_K;
-
-       
+        if isfield(R.PopPara{pop}, 'V_K');
+            V_K = R.PopPara{pop}.V_K;
+            dg_K = R.PopPara{pop}.dg_K;
+            tau_K = R.PopPara{pop}.tau_K;
+        else
+            V_K = -85.0; % mV
+            dg_K = 0.01; %(uS=miuSiemens)
+            tau_K = 80; % ms
+        end
+        
+         % simulate the stuff again in matlab (xx_new)
+        % reproduce the behavior of the C++ code
+        if check_cpp_matlab_match == 1
+            spikes_new = [];
+            V_new = zeros(1,step_tot);
+            V_new(1) = V(1);
+            tau_steps = round(tau_ref/dt);
+            ref_tmp = 0;
+            
+            g_K = zeros(1,step_tot);
+            I_K = zeros(1,step_tot);
+            for t = 1:(step_tot-1)
+                % update_spikes
+                if ref_tmp == 0 && (V_new(t) >= V_th || (t == 1 && spikes(1) == 1))
+                    ref_tmp = tau_steps;
+                    spikes_new = [spikes_new t];
+                    g_K(t) = g_K(t) + dg_K;
+                end
+                if any( strcmp(fieldnames(R.ExplVar), 'SpikeFreqAapt') ) && R.ExplVar.SpikeFreqAapt == 1
+                    g_K(t) = g_K(t)*exp(-dt/tau_K);
+                    I_K(t) = -g_K(t)*(V(t)-V_K);
+                    g_K(t+1) = g_K(t);
+                end
+                if ref_tmp > 0
+                    ref_tmp = ref_tmp - 1;
+                    V_new(t) = V_rt;
+                end
+                % update_V
+                if ref_tmp == 0
+                    I_leak = -g_leak*(V_new(t) - V_lk);
+                    
+                    %I_GABA(t) = 0;
+                    %I_AMPA(t) = 0;
+                    %I_ext(t) = 0;
+                    
+                    V_dot =  (I_leak + I_AMPA(t) + I_GABA(t) + I_ext(t) + + I_K(t))/Cm;
+                    
+                    %V_dot = (I_leak + I_th)/Cm;
+                    
+                    V_new(t+1) = V_new(t) + V_dot*dt;
+                end
+            end
+            
+            spikes = spikes(:)';
+            spikes_new = spikes_new(:)';
+            if length(spikes_new) ~= length(spikes) || nnz(sort(spikes_new) - sort(spikes)) > 0
+                warning('Simulator does not behave identically as c++ code!');
+            end
+            
+        end
+        
+        
         % find threshold current for neuron to fire
         I_th = g_leak*(V_th - V_lk); % important!!!!!!!!!!!!!
         I_tot_mean = mean(I_AMPA + I_ext + I_GABA + I_K);
@@ -59,56 +117,8 @@ if nargin == 2
         fprintf('\t I_tot = %.3g (%.3g).\n',  I_tot_mean, I_tot_std);
         
         
-         
-        % simulate the stuff again in matlab (xx_new)
-        % reproduce the behavior of the C++ code
         
-        spikes_new = [];
-        V_new = zeros(1,step_tot);
-        V_new(1) = V(1);
-        tau_steps = round(tau_ref/dt);
-        ref_tmp = 0;
-        
-        g_K = zeros(1,step_tot);
-        I_K = zeros(1,step_tot);
-        for t = 1:(step_tot-1)
-            % update_spikes
-            if ref_tmp == 0 && (V_new(t) >= V_th || (t == 1 && spikes(1) == 1))
-                ref_tmp = tau_steps;
-                spikes_new = [spikes_new t];
-                g_K(t) = g_K(t) + dg_K;
-            end
-            if any( strcmp(fieldnames(R.ExplVar), 'SpikeFreqAapt') ) && R.ExplVar.SpikeFreqAapt == 1
-                g_K(t) = g_K(t)*exp(-dt/tau_K);
-                I_K(t) = -g_K(t)*(V(t)-V_K);
-                g_K(t+1) = g_K(t);
-            end
-            if ref_tmp > 0
-                ref_tmp = ref_tmp - 1;
-                V_new(t) = V_rt;
-            end
-            % update_V
-            if ref_tmp == 0
-                I_leak = -g_leak*(V_new(t) - V_lk);
-                
-                %I_GABA(t) = 0;
-                %I_AMPA(t) = 0;
-                %I_ext(t) = 0;
-                
-                V_dot =  (I_leak + I_AMPA(t) + I_GABA(t) + I_ext(t) + + I_K(t))/Cm;
-                
-                %V_dot = (I_leak + I_th)/Cm;
-                
-                V_new(t+1) = V_new(t) + V_dot*dt;
-            end
-        end
-        
-        spikes = spikes(:)';
-        spikes_new = spikes_new(:)';
-        if length(spikes_new) ~= length(spikes) || nnz(sort(spikes_new) - sort(spikes)) > 0
-            warning('Simulator does not behave identically as c++ code!');
-        end
-
+       
         % Segmetation
         seg_size = 4*10^5; % 40 sec
         seg_size_reduced = round(seg_size*dt/dt_reduced); % be careful!!!
