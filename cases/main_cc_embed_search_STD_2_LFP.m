@@ -18,7 +18,7 @@ in_deg_scale_exp = -0.5;
 
 phi_mat = [ 1 1; 0.9 1; 1 1.1; 1.1 1.1; 1.2 1.2];
 for phi_ind = 1:5
-    phi_E = phi_mat(1,phia_ind);
+    phi_E = phi_mat(1,phi_ind);
     phi_I = phi_mat(2,phi_ind);
     for STD_on = [1 0]
         discard_transient = 10; % ms
