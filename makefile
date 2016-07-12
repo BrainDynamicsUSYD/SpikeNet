@@ -15,16 +15,18 @@ CXXDEBUGFLAGS = -Wall -g #-pg #-pg for gprof
 
 CXXOPTIMFLAGS = #-O1 #higher level: -O2 or -O3
 
-CXXLIBS  = 
+CXXINCLUDE = -I/usr/local/include 
 
-COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) -c $<
+CXXLIBS =  -L/usr/local/lib/ -lhdf5_cpp -lhdf5
+
+COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
 ###########################################################################
 all: $(EXEC)
 	
 
 # The main idea is that compile each .o separately and then link them
 $(EXEC): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) -O $(OBJ) -o $@ $(CXXLIBS)
+	$(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) -O $(OBJ) -o $@  $(CXXLIBS)
 	@echo "EXEC compiled"
 
 main.o: $(SRC_DIR)/main.cpp $(SRC_DIR)/SimuInterface.h
@@ -35,7 +37,7 @@ SimuInterface.o: $(SRC_DIR)/SimuInterface.cpp $(SRC_DIR)/SimuInterface.h $(SRC_D
 	$(COMPILE_THIS_ONE)
 	@echo "SimuInterface.o updated"
 
-NeuroNet.o: $(SRC_DIR)/NeuroNet.cpp $(SRC_DIR)/NeuroNet.h $(SRC_DIR)/NeuroPop.h $(SRC_DIR)/ChemSyn.h $(SRC_DIR)/ElectricalSynapses.h
+NeuroNet.o: $(SRC_DIR)/NeuroNet.cpp $(SRC_DIR)/NeuroNet.h $(SRC_DIR)/ChemSyn.h
 	$(COMPILE_THIS_ONE)
 	@echo "NeuroNet.o updated"
 

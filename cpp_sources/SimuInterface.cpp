@@ -580,7 +580,7 @@ bool SimuInterface::import(string in_filename_input){
 		cout << "\t Neuron data sampling settings...";
 		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
 			int pop_ind = neuron_sample_pop_ind[ind];
-			network.NeuroPopArray[pop_ind]->add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
+			network.NeuroPopArray[pop_ind]->add_sampling_real_time_HDF5(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -704,14 +704,23 @@ void SimuInterface::simulate(){
 	}
 	cout << "Simulation done." << endl;
 	
-	// output results
+	// output results into text file
+	output_results();
+	
+	// output results into text file
+	output_results_HDF5();
+
+}
+
+void SimuInterface::output_results(){
+	// output results into text file
 	ofstream output_file;
+	cout << "Creating text output file...\n";
 	output_file.open(out_filename.append(output_suffix));
 	network.output_results(output_file);
 	// attach input file (.ygin) to the output file for data completeness
- 	ifstream in_file_attach( in_filename ) ;
-    output_file << in_file_attach.rdbuf() ;
-		
+ 	ifstream in_file_attach( in_filename );
+    output_file << in_file_attach.rdbuf();
 
 	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
 	// Write data file name to stdout and use "grep ygout" to extract it!
@@ -720,6 +729,20 @@ void SimuInterface::simulate(){
 		
 }
 
+void SimuInterface::output_results_HDF5(){
+	// output results into text file
+	H5File file_HDF5;
+	string file_name_HDF5 = gen_out_filename().append(".h5");
+	cout << "Creating HDF5 output file...\n";
+	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
+	network.output_results(file_HDF5);
+
+	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
+	// Write data file name to stdout and use "grep ygout" to extract it!
+	cout << "Data file name is: " << endl;
+	cout << "	" << out_filename << endl;
+		
+}
 
 
 

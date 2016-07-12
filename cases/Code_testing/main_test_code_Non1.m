@@ -31,6 +31,9 @@ writeSynPara(FID, 'tau_decay_AMPA', 2.0, 'Dt_trans_AMPA', 0.5);
 I_ext_strength = 0.5; %1.4; % nA
 writeExtCurrentSettings(FID, 1, I_ext_strength*ones(1,N(1)), 0*ones(1,N(1)));
 
+
+writeExtCurrentSettings(FID, 3, I_ext_strength*ones(1,N(1))*2, 0*ones(1,N(1)));
+
 % external spike settings
 % writeExtSpikeSettings(FID, 1, 1, k,  20, 10*ones(1,step_tot), 1, N(1) );
 
@@ -44,6 +47,10 @@ writeNeuronSampling(FID, 4, ones(1,8), 1:2:10 , ones(1,step_tot));
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1, sample_steps)
 
+% Add LFP sampling
+writeLFPRecord(FID, 1, ones(3, 10));
+
+
 % V mean and std record
 writePopStatsRecord(FID, 1);
 
@@ -53,7 +60,7 @@ writeSynStatsRecord(FID, 1,  2, 1);
 %%%% Define the initial condition
 p_fire = [0 0]; % initial firing probabilities for both populations
 % set initial V distribution to be [V_rt, V_rt + (V_th-V_rt)*r_V0] 
-r_V0 = [1 0];
+r_V0 = [0 0];
 writeInitCond(FID, r_V0, p_fire)
 
 

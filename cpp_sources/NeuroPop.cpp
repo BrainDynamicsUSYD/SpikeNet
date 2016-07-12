@@ -8,7 +8,7 @@
 #include "NeuroPop.h"
 #include <functional> // for bind(), plus
 
-NeuroPop::NeuroPop(int pop_ind_input, int N_input, double dt_input, int step_tot_input, char delim_input, char indicator_input)
+NeuroPop::NeuroPop(const int pop_ind_input, const int N_input, const double dt_input, const int step_tot_input, const char delim_input, const char indicator_input)
 {
 	pop_ind = pop_ind_input;
 	N = N_input;
@@ -95,7 +95,7 @@ const bool & NeuroPop::get_runaway_killed()
 	return killer.runaway_killed;
 };
 
-void NeuroPop::recv_I(vector<double>& I, int pop_ind_pre, int syn_type)
+void NeuroPop::recv_I(vector<double>& I, const int pop_ind_pre, const int syn_type)
 {
 	if (pop_ind_pre == -1){ // if noisy external currents, always send to I_ext regardless of the synapse type
 		for (int j = 0; j < N; ++j){
@@ -198,7 +198,7 @@ string NeuroPop::dump_para(){
 }
 
 
-void NeuroPop::random_V(double p){
+void NeuroPop::random_V(const double p){
 	// Generate random initial condition for V.
 	// Generate uniform random distribution 
 	cout << "Function NeuroPop::random_V(double p) is deprecated!" << endl;
@@ -216,7 +216,7 @@ void NeuroPop::random_V(double p){
 	else {cout << "Initial firing rate cannot be 100%!" << endl;}
 }
 
-void NeuroPop::set_init_condition(double r_V0, double p_fire){
+void NeuroPop::set_init_condition(const double r_V0, const double p_fire){
 	// Set V to be uniformly distributed between [V_rt, V_rt + (V_th - V_rt)*r_V0]
 	// And then randomly set some of them above firing threshold according to p_fire
 	gen.seed(my_seed);// reseed random engine!
@@ -231,7 +231,7 @@ void NeuroPop::set_init_condition(double r_V0, double p_fire){
 }
 
 
-void NeuroPop::update_spikes(int step_current){
+void NeuroPop::update_spikes(const int step_current){
 	// Reset currents to be zeros, because they need to be re-calculated at every step
 	// no need to reset I_leak
 	fill(I_AMPA.begin(), I_AMPA.end(), 0);
@@ -291,7 +291,7 @@ void NeuroPop::update_spikes(int step_current){
 	
 }
 
-void NeuroPop::generate_I_ext(int step_current){
+void NeuroPop::generate_I_ext(const int step_current){
 	
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0){
@@ -333,7 +333,7 @@ void NeuroPop::generate_I_ext(int step_current){
 		}
 	}
 }
-void NeuroPop::update_V(int step_current){
+void NeuroPop::update_V(const int step_current){
 	// This function updates menbrane potentials for non-refractory neurons
 
 	// Generate external currents
@@ -356,7 +356,7 @@ void NeuroPop::update_V(int step_current){
 
 	// Data sampling, which must be done here!
 	// sample_data(step_current);  // this is deprecated due to poor memory performance
-	output_sampled_data_real_time(step_current);
+	output_sampled_data_real_time_HDF5(step_current);
 	// we want to sample the V[] before it's updated!
 
 
@@ -382,7 +382,7 @@ void NeuroPop::update_V(int step_current){
 }
 
 
-void NeuroPop::add_sampling_real_time(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string sample_file_name_input){
+void NeuroPop::add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string sample_file_name_input){
 	sample.neurons = sample_neurons_input;
 	sample.type = sample_type_input;
 	sample.time_points = sample_time_points_input;
@@ -390,6 +390,184 @@ void NeuroPop::add_sampling_real_time(vector<int>& sample_neurons_input, vector<
 	sample.file_name = sample_file_name_input.append(to_string(pop_ind)).append(".ygout_samp");
 	sample.file.open(sample.file_name);
 	
+	sample.N_steps = 0;
+	for (int tt = 0; tt < step_tot; ++tt){
+		if (sample.time_points[tt]){sample.N_steps += 1;}
+	}
+	sample.N_neurons = sample.neurons.size();
+}
+
+
+void NeuroPop::add_sampling_real_time_HDF5(vector<int>& sample_neurons_input, vector<bool>& sample_type_input,  vector<bool>& sample_time_points_input, string sample_file_name_input){
+	sample.neurons = sample_neurons_input;
+	sample.type = sample_type_input;
+	sample.time_points = sample_time_points_input;
+	
+	sample.N_steps = 0;
+	for (int tt = 0; tt < step_tot; ++tt){
+		if (sample.time_points[tt]){sample.N_steps += 1;}
+	}
+	sample.N_neurons = sample.neurons.size();
+	
+	sample.file_name = sample_file_name_input.append("_");
+	sample.file_name.append(to_string(pop_ind));
+	
+	sample.file_name.append("_out.h5");
+	// Create a new file using default properties. 
+	cout << "Creating HDF5 output file...\n";
+	sample.file_HDF5 = new H5File( sample.file_name.c_str(), H5F_ACC_TRUNC );
+	// dataset dimensions
+	hsize_t dims[2]; 
+	dims[1] = sample.N_neurons;
+	dims[0] = sample.N_steps;
+	// file dataspace
+	DataSpace fspace(2, dims); 
+	// create datasets
+	if(sample.type[0]){
+		sample.V_dataset = sample.file_HDF5->createDataSet("V", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[1]){
+		sample.I_leak_dataset = sample.file_HDF5->createDataSet("I_leak", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[2]){
+		sample.I_AMPA_dataset = sample.file_HDF5->createDataSet("I_AMPA", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[3]){
+		sample.I_GABA_dataset = sample.file_HDF5->createDataSet("I_GABA", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[4]){
+		sample.I_NMDA_dataset = sample.file_HDF5->createDataSet("I_NMDA", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[5]){
+		sample.I_GJ_dataset = sample.file_HDF5->createDataSet("I_GJ", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[6]){
+		sample.I_ext_dataset = sample.file_HDF5->createDataSet("I_ext", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[7]){
+		sample.I_K_dataset = sample.file_HDF5->createDataSet("I_K", PredType::NATIVE_DOUBLE, fspace);
+	}
+}
+
+void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current){
+	if (!sample.neurons.empty()){
+		if (sample.time_points[step_current]){ // push_back is amazing
+
+			// use double *temp_data=new double[sample.N_neurons]; and later delete[] tmp_data?
+			vector<double> temp_data;
+			temp_data.resize(sample.N_neurons);
+			
+			int ind_temp;	
+			if (sample.type[0]){	// "V"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = V[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.V_dataset, temp_data,  sample.ctr);
+			}
+			if (sample.type[1]){	// "I_leak"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_leak[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_leak_dataset, temp_data,  sample.ctr);
+			}	
+			if (sample.type[2]){	// "I_AMPA"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_AMPA[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_AMPA_dataset, temp_data,  sample.ctr);
+			}	
+			if (sample.type[3]){	// "I_GABA"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_GABA[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_GABA_dataset, temp_data,  sample.ctr);	
+			}	
+			if (sample.type[4]){	// "I_NMDA"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_NMDA[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_NMDA_dataset, temp_data,  sample.ctr);	
+			}	
+			if (sample.type[5]){	// "I_GJ"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_GJ[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_GJ_dataset, temp_data,  sample.ctr);		
+			}	
+			if (sample.type[6]){	// "I_ext"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_ext[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_ext_dataset, temp_data,  sample.ctr);
+			}	
+			if (sample.type[7]){	// "I_K"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i]= I_K[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_K_dataset, temp_data,  sample.ctr);
+			}	
+			sample.ctr++;
+		}
+	}
+}
+
+
+
+
+void NeuroPop::output_sampled_data_real_time(const int step_current){
+	
+	if (!sample.neurons.empty() && step_current == 0){
+		
+		sample.file << indicator << " POPD006" << endl;
+		sample.file << pop_ind << delim << sample.N_neurons << delim << sample.N_steps << delim << endl;
+  		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
+		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
+			if (sample.type[tt]){sample.file << data_types[tt] << delim; }
+		}
+		sample.file << endl;
+	}
+	
+	if (!sample.neurons.empty()){
+		if (sample.time_points[step_current]){ // push_back is amazing
+			for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+				int ind_temp = sample.neurons[i];
+				if (sample.type[0]){sample.file << V[ind_temp] << delim;}
+				if (sample.type[1]){sample.file << I_leak[ind_temp] << delim;}
+				if (sample.type[2]){sample.file << I_AMPA[ind_temp] << delim;}
+				if (sample.type[3]){sample.file << I_GABA[ind_temp] << delim;}
+				if (sample.type[4]){sample.file << I_NMDA[ind_temp] << delim;}
+				if (sample.type[5]){sample.file << I_GJ[ind_temp] << delim;}
+				if (sample.type[6]){sample.file << I_ext[ind_temp] << delim;}
+				if (sample.type[7]){sample.file << I_K[ind_temp] << delim;}
+				sample.file << endl;
+			}
+		}
+	}
+
 }
 
 
@@ -401,22 +579,21 @@ void NeuroPop::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sam
 	
 	
 	// initialise
-	int sample_time_points_tot = 0;// count non zero elements in sample_time_points
-	for (unsigned int i = 0; i < sample.time_points.size(); ++i){
-		if (sample.time_points[i]){
-			sample_time_points_tot += 1;
-		}
+	sample.N_steps = 0;
+	for (int tt = 0; tt < step_tot; ++tt){
+		if (sample.time_points[tt]){sample.N_steps += 1;}
 	}
-	int sample_neurons_tot = sample.neurons.size();// count non zero elements in sample_time_points
+	sample.N_neurons = sample.neurons.size();
+
 	int sample_type_tot = sample.type.size(); // 8 different data types
 	
 	
 	sample.data.resize(sample_type_tot); 
 	for (int c = 0; c < sample_type_tot; ++c){
 		if (sample.type[c]){
-			sample.data[c].resize(sample_neurons_tot);
-			for (int i = 0; i < sample_neurons_tot; ++i){
-				sample.data[c][i].reserve(sample_time_points_tot); // reserve and push_back so that it won't be affected by adapting step_tot
+			sample.data[c].resize(sample.N_neurons);
+			for (int i = 0; i < sample.N_neurons; ++i){
+				sample.data[c][i].reserve(sample.N_neurons); // reserve and push_back so that it won't be affected by adapting step_tot
 			}
 		}
 	}
@@ -424,11 +601,11 @@ void NeuroPop::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sam
 
 
 
-void NeuroPop::sample_data(int step_current){
+void NeuroPop::sample_data(const int step_current){
 	
 	if (!sample.neurons.empty()){
 		if (sample.time_points[step_current]){ // push_back is amazing
-			for (unsigned int i = 0; i < sample.neurons.size(); ++i){ // performance issue when sampling many neurons?
+			for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
 				int ind_temp = sample.neurons[i];
 				if (sample.type[0]){sample.data[0][i].push_back( V[ind_temp] );}
 				if (sample.type[1]){sample.data[1][i].push_back( I_leak[ind_temp] );}
@@ -466,7 +643,7 @@ void NeuroPop::set_gaussian_g_ext(vector<double>& mean, vector<double>& std){
 }
 
 
-void NeuroPop::add_perturbation(int step_perturb_input){
+void NeuroPop::add_perturbation(const int step_perturb_input){
 	step_perturb = step_perturb_input;
 }
 
@@ -477,7 +654,7 @@ void NeuroPop::add_spike_freq_adpt(){
 }
 
 
-void NeuroPop::init_runaway_killer(double min_ms, double Hz, double Hz_ms)
+void NeuroPop::init_runaway_killer(const double min_ms, const double Hz, const double Hz_ms)
 {
 	killer.min_pop_size = 100;
 	if (N > killer.min_pop_size){
@@ -488,7 +665,7 @@ void NeuroPop::init_runaway_killer(double min_ms, double Hz, double Hz_ms)
 	}
 }
 
-void NeuroPop::runaway_check(int step_current)
+void NeuroPop::runaway_check(const int step_current)
 {
 	if (killer.license == true && killer.runaway_killed == false && step_current > killer.min_steps && step_current > killer.Hz_steps){
 		// find mean value of num_ref over the last runaway_steps
@@ -508,41 +685,34 @@ void NeuroPop::runaway_check(int step_current)
 	}
 }
 
-void NeuroPop::output_sampled_data_real_time(int step_current){
+
+void NeuroPop::output_results(H5File& file){
+
+	// new group
+	string group_name = "/pop_result_";
+	group_name.append(to_string(pop_ind));
+	Group group_pop = file.createGroup(group_name);
+
+	write_vector_HDF5(group_pop, spike_hist_tot, string("spike_hist_tot"));
+	write_vector_HDF5(group_pop, num_spikes_pop, string("num_spikes_pop"));
+	write_vector_HDF5(group_pop, num_ref_pop, string("num_ref_pop"));
 	
-	if (!sample.neurons.empty() && step_current == 0){
-		int sample_step_number = 0;
-		for (int tt = 0; tt < step_tot; ++tt){
-			if (sample.time_points[tt]){sample_step_number += 1;}
-		}
-		sample.file << indicator << " POPD006" << endl;
-		sample.file << pop_ind << delim << sample.neurons.size() << delim << sample_step_number << delim << endl;
-  		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
-		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
-			if (sample.type[tt]){sample.file << data_types[tt] << delim; }
-		}
-		sample.file << endl;
+	write_string_HDF5(group_pop, dump_para(), string("pop_para"));
+		
+	if (stats.record){
+		write_vector_HDF5(group_pop, stats.V_mean, string("stats_V_mean"));
+		write_vector_HDF5(group_pop, stats.V_std, string("stats_V_std"));
+		write_vector_HDF5(group_pop, stats.I_input_mean, string("stats_I_input_mean"));
+		write_vector_HDF5(group_pop, stats.I_input_std, string("stats_I_input_std"));
+		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
 	}
 	
-	if (!sample.neurons.empty()){
-		if (sample.time_points[step_current]){ // push_back is amazing
-			for (unsigned int i = 0; i < sample.neurons.size(); ++i){ // performance issue when sampling many neurons?
-				int ind_temp = sample.neurons[i];
-				if (sample.type[0]){sample.file << V[ind_temp] << delim;}
-				if (sample.type[1]){sample.file << I_leak[ind_temp] << delim;}
-				if (sample.type[2]){sample.file << I_AMPA[ind_temp] << delim;}
-				if (sample.type[3]){sample.file << I_GABA[ind_temp] << delim;}
-				if (sample.type[4]){sample.file << I_NMDA[ind_temp] << delim;}
-				if (sample.type[5]){sample.file << I_GJ[ind_temp] << delim;}
-				if (sample.type[6]){sample.file << I_ext[ind_temp] << delim;}
-				if (sample.type[7]){sample.file << I_K[ind_temp] << delim;}
-				sample.file << endl;
-			}
-		}
+	if (LFP.record){
+		write_matrix_HDF5(group_pop, LFP.data, string("LFP_data"));
 	}
-	
 	
 }
+
 
 void NeuroPop::output_results(ofstream& output_file){
 
@@ -580,8 +750,7 @@ void NeuroPop::output_results(ofstream& output_file){
 		output_file << pop_ind << delim << LFP.data.size() << delim << endl;
 		write2file(output_file, LFP.data);
 	}
-	
-	
+
 	// POPD005 # E-I ratio for each neuron
 	if (stats.record){
 		output_file << indicator << " POPD005" << endl;
@@ -620,61 +789,6 @@ void NeuroPop::output_results(ofstream& output_file){
 }
 
 
-// Use function templates when you want to perform the same action on types that can be different.
-// Use function overloading when you want to apply different operations depending on the type.
-// In this case, just save yourself the trouble and use overloading.
-void NeuroPop::write2file(ofstream& output_file,  vector< vector<int> >& v){
-	if (!v.empty()){
-		for (unsigned int i = 0; i < v.size(); ++i){
-			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
-			for (unsigned int j = 0; j < v[i].size(); ++j){
-				output_file << v[i][j] << delim;
-			}
-			output_file << endl;
-		}
-	}
-	else {output_file << " " << endl;}
-}
-
-
-
-void NeuroPop::write2file(ofstream& output_file, vector< vector<double> >& v){
-	if (!v.empty()){
-		for (unsigned int i = 0; i < v.size(); ++i){
-			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
-			for (unsigned int j = 0; j < v[i].size(); ++j){
-				output_file << v[i][j] << delim;
-			}
-			output_file << endl;
-		}
-	}
-	else {output_file << " " << endl;}
-}
-
-
-void NeuroPop::write2file(ofstream& output_file, vector<int>& v){
-	if (!v.empty()){
-		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
-		for (unsigned int i = 0; i < v.size(); ++i){
-			output_file << v[i] << delim;
-		}
-		output_file << endl;
-	}
-	else {output_file << " " << endl;}
-}
-
-
-
-void NeuroPop::write2file(ofstream& output_file, vector<double>& v){
-	if (!v.empty()){
-		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
-		for (unsigned int i = 0; i < v.size(); ++i){
-			output_file << v[i] << delim;
-		}
-		output_file << endl;
-	}
-	else {output_file << " " << endl;}
-}
 
 void NeuroPop::record_LFP(){
 	if (LFP.record){
@@ -690,7 +804,7 @@ void NeuroPop::record_LFP(){
 }
 
 
-void NeuroPop::record_stats(int step_current){
+void NeuroPop::record_stats(const int step_current){
 	if (stats.record){
 		// get mean
 		double sum_mean_V = 0.0;
@@ -737,6 +851,121 @@ void NeuroPop::record_stats(int step_current){
 			}
 		}
 	}
+}
+
+
+
+// Use function templates when you want to perform the same action on types that can be different.
+// Use function overloading when you want to apply different operations depending on the type.
+// In this case, just save yourself the trouble and use overloading.
+void NeuroPop::write2file(ofstream& output_file,  vector< vector<int> >& v){
+	if (!v.empty()){
+		for (unsigned int i = 0; i < v.size(); ++i){
+			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
+			for (unsigned int j = 0; j < v[i].size(); ++j){
+				output_file << v[i][j] << delim;
+			}
+			output_file << endl;
+		}
+	}
+	else {output_file << " " << endl;}
+}
+
+
+
+void NeuroPop::write2file(ofstream& output_file, vector< vector<double> >& v){
+	if (!v.empty()){
+		for (unsigned int i = 0; i < v.size(); ++i){
+			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
+			for (unsigned int j = 0; j < v[i].size(); ++j){
+				output_file << v[i][j] << delim;
+			}
+			output_file << endl;
+		}
+	}
+	else {output_file << " " << endl;}
+}
+
+
+void NeuroPop::write2file(ofstream& output_file, const vector<int>& v){
+	if (!v.empty()){
+		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
+		for (unsigned int i = 0; i < v.size(); ++i){
+			output_file << v[i] << delim;
+		}
+		output_file << endl;
+	}
+	else {output_file << " " << endl;}
+}
+
+
+void NeuroPop::write2file(ofstream& output_file, const vector<double>& v){
+	if (!v.empty()){
+		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
+		for (unsigned int i = 0; i < v.size(); ++i){
+			output_file << v[i] << delim;
+		}
+		output_file << endl;
+	}
+	else {output_file << " " << endl;}
+}
+
+void NeuroPop::write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
+	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
+}
+
+void NeuroPop::write_vector_HDF5(Group & group, const vector<double> & v, const string &   v_name){
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_DOUBLE, fspace);
+	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
+}
+
+void NeuroPop::write_string_HDF5(Group & group, const string & s, const string &  s_name){
+   // HDF5 only understands vector of char* :-(
+   vector<const char*> arr_c_str;
+   arr_c_str.push_back(s.c_str());
+
+   hsize_t str_dimsf[1] {arr_c_str.size()};
+   DataSpace dataspace(1, str_dimsf);
+
+   // Variable length string
+   StrType datatype(PredType::C_S1, H5T_VARIABLE); 
+   DataSet str_dataset = group.createDataSet(s_name, datatype, dataspace);
+
+   str_dataset.write(arr_c_str.data(), datatype);
+}
+
+void NeuroPop::write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string &  m_name){
+	hsize_t dims[2]; 
+	dims[0] = m.size();
+	dims[1] = m[0].size();
+	DataSpace fspace(2, dims); 
+	DataSet m_dataset = group.createDataSet(m_name, PredType::NATIVE_DOUBLE, fspace);
+	for (int i = 0; i < int(m.size()); i++){
+		append_vector_to_matrix_HDF5(m_dataset, m[i],  i);
+	}
+}
+
+
+void NeuroPop::append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum){
+   	hsize_t offset[2];
+    offset[1] = 0;
+    offset[0] = colNum;
+	
+    hsize_t fdims[2];            // new data dimensions 
+	fdims[0] = 1;
+	fdims[1] = v.size();
+	DataSpace mspace( 2, fdims );
+
+	DataSpace fspace = dataset_tmp.getSpace();
+    fspace.selectHyperslab( H5S_SELECT_SET, fdims, offset );
+    dataset_tmp.write(  v.data(), PredType::NATIVE_DOUBLE, mspace, fspace );	
 }
 
 
