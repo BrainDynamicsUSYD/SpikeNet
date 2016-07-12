@@ -73,7 +73,7 @@ void NeuroNet::update(int step_current){
 void NeuroNet::output_results(ofstream& output_file){
 
 	// write data
-	cout << "Outputting results into file..." << endl;
+	cout << "Outputting results into text file..." << endl;
 	
 	// KILL002 # step at which runaway activity is killed
 	output_file << indicator << " KILL002" << endl;
@@ -91,5 +91,25 @@ void NeuroNet::output_results(ofstream& output_file){
 	
 }
 
+void NeuroNet::output_results(H5File & file_HDF5){
+
+	// write data
+	cout << "Outputting results into HDF5 file..." << endl;
+
+	// KILL002 # step at which runaway activity is killed
+	//output_file << indicator << " KILL002" << endl;
+	//output_file << step_killed << delim << endl;
+
+	// dump population data
+	for (int i = 0; i < Num_pop; i++){
+		NeuroPopArray[i]->output_results(file_HDF5);
+	}
+
+	// dump synapse data
+	for (unsigned int i = 0; i < ChemSynArray.size(); i++){
+		//ChemSynArray[i]->output_results(output_file);
+	}
+	
+}
 
 
