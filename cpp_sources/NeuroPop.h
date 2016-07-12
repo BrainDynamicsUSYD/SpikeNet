@@ -42,7 +42,7 @@ public:
 	
 	void start_stats_record();
 
-	void start_LFP_record(vector< vector<bool> >& LFP_neurons);
+	void start_LFP_record(const vector< vector<bool> >& LFP_neurons);
 
 
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
@@ -51,13 +51,14 @@ public:
 	void update_spikes(const int step_current); /// Find the firing neurons, record them, reset their potential and update nonref
 	// Following member(s) should not be inherited
 	void update_V(const int step_current); // Update potential
-	void set_gaussian_I_ext(vector<double>& mean, vector<double>& std);
-	void set_gaussian_g_ext(vector<double>& mean, vector<double>& std);
+	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std);
+	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std);
 	
-	void add_sampling(vector<int>& sample_neurons, vector<bool>& sample_type, vector<bool>& sample_time_points); 
+	void add_sampling(const vector<int>& sample_neurons, const vector<bool>& sample_type, const vector<bool>& sample_time_points); 
 	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
 #ifdef HDF5
-	void add_sampling_real_time_HDF5(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name);
+	void output_results(H5File& file_HDF5);
+	void add_sampling_real_time_HDF5(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
 #endif
 	void init_runaway_killer(const double min_ms, const double Hz, const double Hz_ms); /// kill the simulation when runaway activity of the network is detected: 
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
@@ -68,18 +69,17 @@ public:
 private:
 	void generate_I_ext(const int step_current);
 	void record_stats(const int step_current); 
-	void write2file(ofstream& output_file, vector< vector<int> >& v);
-	void write2file(ofstream& output_file, vector< vector<double> >& v);
+	void write2file(ofstream& output_file, const vector< vector<int> >& v);
+	void write2file(ofstream& output_file, const vector< vector<double> >& v);
 	void write2file(ofstream& output_file, const vector<int>& v);
 	void write2file(ofstream& output_file, const vector<double>& v);
 	void output_sampled_data_real_time(const int step_current);
 	
 #ifdef HDF5
-	void output_results(H5File& file_HDF5);
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
 	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
-	void write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string & m_name);
+	void write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string & m_name);
 	void write_string_HDF5(Group & group, const string & s, const string & s_name);
 	void output_sampled_data_real_time_HDF5(const int step_current);
 #endif

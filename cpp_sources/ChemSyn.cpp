@@ -391,7 +391,7 @@ void ChemSyn::update_gs_sum_model_1(const int step_current){
 }
 
 
-void ChemSyn::add_sampling(vector<int> & sample_neurons_input, vector<bool> & sample_time_points_input){
+void ChemSyn::add_sampling(const vector<int> & sample_neurons_input, const vector<bool> & sample_time_points_input){
 	sample.neurons = sample_neurons_input;
 	sample.time_points = sample_time_points_input;
 	
@@ -634,7 +634,7 @@ void ChemSyn::record_stats(){
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
 // In this case, just save yourself the trouble and use overloading.
-void ChemSyn::write2file(ofstream& output_file, vector< vector<int> >& v){
+void ChemSyn::write2file(ofstream& output_file, const vector< vector<int> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -649,7 +649,7 @@ void ChemSyn::write2file(ofstream& output_file, vector< vector<int> >& v){
 
 
 
-void ChemSyn::write2file(ofstream& output_file, vector< vector<double> >& v){
+void ChemSyn::write2file(ofstream& output_file, const vector< vector<double> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -663,7 +663,7 @@ void ChemSyn::write2file(ofstream& output_file, vector< vector<double> >& v){
 }
 
 
-void ChemSyn::write2file(ofstream& output_file, vector<int>& v){
+void ChemSyn::write2file(ofstream& output_file, const vector<int>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -674,7 +674,7 @@ void ChemSyn::write2file(ofstream& output_file, vector<int>& v){
 	else {output_file << " " << endl;}
 }
 
-void ChemSyn::write2file(ofstream& output_file, vector<double>& v){
+void ChemSyn::write2file(ofstream& output_file, const vector<double>& v){
 	if (!v.empty()){
 		//for (int f : v){ output_file << f << delim; } // range-based "for" in C++11
 		for (unsigned int i = 0; i < v.size(); ++i){
@@ -737,7 +737,7 @@ void ChemSyn::write_string_HDF5(Group & group, const string & s, const string & 
    str_dataset.write(arr_c_str.data(), datatype);
 }
 
-void ChemSyn::write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string &  m_name){
+void ChemSyn::write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string &  m_name){
 	hsize_t dims[2]; 
 	dims[0] = m.size();
 	dims[1] = m[0].size();

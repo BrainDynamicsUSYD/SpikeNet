@@ -1,4 +1,4 @@
-function writeExtCurrentSettings(FID, pop_ind, mean, std)
+function writeExtCurrentSettingsHDF5(FID, pop_ind, mean, std)
 % write external current settings
 %     FID: file id for writing data
 % pop_ind: neuron population index

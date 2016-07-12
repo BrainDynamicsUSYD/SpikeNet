@@ -21,6 +21,7 @@ public:
 	// Import Network Setup Data
 	string in_filename; // path+name
 	ifstream inputfile; // current input file (.ygin or .ygin_syn)
+	
 	bool import(string in_filename);
 	void simulate();
 	
@@ -32,6 +33,10 @@ public:
 	void output_results();
 #ifdef HDF5
 	void output_results_HDF5();
+	bool import_HDF5(string in_filename);
+	void read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_tmp);
+	void read_vector_HDF5(const H5File & file, const string & name, vector<double> & v_tmp);
+	template < typename Type > Type read_scalar_HDF5(const H5File & file, const string & name);
 #endif
 	// Helper functions
 	template < typename Type > Type read_next_entry(istringstream &line_ss);

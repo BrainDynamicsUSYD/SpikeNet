@@ -34,7 +34,7 @@ public:
 	
 	void add_inh_STDP(const int inh_STDP_on_step); /// turn on inhibitory STDP
 	
-	void add_sampling(vector<int> & sample_neurons, vector<bool> & sample_time_points);  /// add data sampling 
+	void add_sampling(const vector<int> & sample_neurons, const vector<bool> & sample_time_points);  /// add data sampling 
 
 	void start_stats_record(); /// turn on basic statistics recording
 	void output_results(ofstream& output_file); /// write output to file
@@ -61,15 +61,15 @@ private:
 	void sample_data(const int step_current); /// sample data
 	void record_stats(); /// record basic statistics
 
-	void write2file(ofstream& output_file, vector< vector<int> >& v); /// write integer matrix to output file
-	void write2file(ofstream& output_file, vector< vector<double> >& v); /// write double matrix to output file
-	void write2file(ofstream& output_file, vector<int>& v); /// write integer vector to output file
-	void write2file(ofstream& output_file, vector<double>& v); /// write double vector to output file
+	void write2file(ofstream& output_file, const vector< vector<int> >& v); /// write integer matrix to output file
+	void write2file(ofstream& output_file, const vector< vector<double> >& v); /// write double matrix to output file
+	void write2file(ofstream& output_file, const vector<int>& v); /// write integer vector to output file
+	void write2file(ofstream& output_file, const vector<double>& v); /// write double vector to output file
 	#ifdef HDF5
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
 	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
-	void write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string & m_name);
+	void write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string & m_name);
 	void write_string_HDF5(Group & group, const string & s, const string & s_name);
 	#endif
 protected:

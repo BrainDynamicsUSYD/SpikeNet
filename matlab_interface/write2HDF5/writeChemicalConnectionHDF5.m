@@ -1,4 +1,4 @@
-function writeChemicalConnection(FID, type, i_pre, j_post, I, J, K, D)
+function writeChemicalConnectionHDF5(FID, type, i_pre, j_post, I, J, K, D)
 %      FID: file id for writing data
 %     type: type of chemical connection (1:AMPA, 2:GABA, 3:NMDA)
 %    i_pre: pre-synaptic population index

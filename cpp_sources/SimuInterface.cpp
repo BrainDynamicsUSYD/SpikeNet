@@ -731,24 +731,6 @@ void SimuInterface::output_results(){
 		
 }
 
-#ifdef HDF5
-void SimuInterface::output_results_HDF5(){
-	// output results into text file
-	H5File file_HDF5;
-	string file_name_HDF5 = gen_out_filename().append(".h5");
-	cout << "Creating HDF5 output file...\n";
-	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
-	network.output_results(file_HDF5);
-
-	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
-	// Write data file name to stdout and use "grep ygout" to extract it!
-	cout << "Data file name is: " << endl;
-	cout << "	" << out_filename << endl;
-		
-}
-#endif
-
-
 string SimuInterface::gen_out_filename(){
 	// creat output file name using some pre-defined format
 	ostringstream convert_temp;   // stream used for the conversion
@@ -795,5 +777,126 @@ template < typename Type, typename A > void SimuInterface::read_next_line_as_vec
 }
 
 
+
+
+#ifdef HDF5
+void SimuInterface::output_results_HDF5(){
+	// output results into text file
+	H5File file_HDF5;
+	string file_name_HDF5 = gen_out_filename().append(".h5");
+	cout << "Creating HDF5 output file...\n";
+	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
+	network.output_results(file_HDF5);
+
+	cout << "Outputting done." << endl << "------------------------------------------------------------" << endl;
+	// Write data file name to stdout and use "grep ygout" to extract it!
+	cout << "Data file name is: " << endl;
+	cout << "	" << out_filename << endl;
+		
+}
+
+
+bool SimuInterface::import_HDF5(string in_filename){
+	const H5std_string file_name( in_filename );
+	H5File file( file_name, H5F_ACC_RDONLY );
+	
+	// build NeuroNet based on data imported
+	if (true){
+		vector<int> N_array, step_tot_v;
+		read_vector_HDF5(file, string("/config/Net/INIT001/N"), N_array);
+		int step_tot = read_scalar_HDF5<int>(file, string("/config/Net/INIT002/step_tot"));
+		double dt = read_scalar_HDF5<double>(file, string("/config/Net/INIT002/dt"));
+		network = NeuroNet( N_array, dt, step_tot, delim, indicator);
+		cout << "\t Network created." << endl;
+		cout << "\t Initialising neuron populations...";
+		for (unsigned int ind = 0; ind < N_array.size(); ++ind){
+			network.NeuroPopArray.push_back(new NeuroPop(ind, N_array[ind], network.dt, network.step_tot, delim, indicator));
+			//network.NeuroPopArray.back()->set_para(pop_para[ind]);
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+
+	// chemical connections
+	if (false){
+		cout << "\t Initialising chemical synapses... ";
+		int n_syns = read_scalar_HDF5<int>(file, string("/config/syns/n_syns"));
+		for (int ind = 0; ind < n_syns; ++ind){
+			string syn_n = "/config/syns/syn" + to_string(ind);
+			int type = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/type"));
+			int i_pre = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/i_pre"));
+			int j_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/j_post"));
+			vector<int> I, J;
+			vector<double> K, D;
+			read_vector_HDF5(file, syn_n + string("/INIT006/I"), I);
+			read_vector_HDF5(file, syn_n + string("/INIT006/J"), J);
+			read_vector_HDF5(file, syn_n + string("/INIT006/K"), K);
+			read_vector_HDF5(file, syn_n + string("/INIT006/D"), D);
+			network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
+			network.ChemSynArray.back()->init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I, J, K, D);
+			
+			// network.ChemSynArray.back()->set_para(syn_para);
+			//if (synapse_model_choice != 0){
+				//network.ChemSynArray.back()->set_synapse_model(synapse_model_choice);
+			//}
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}
+
+	cout << "Importing done." << endl;
+	return true;
+}
+
+void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+	
+	DataSpace dataspace = dataset.getSpace();
+	hsize_t dims_out[1];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+
+	v_tmp.resize((unsigned long)(dims_out[0]));
+	dataset.read( v_tmp.data(), PredType::NATIVE_INT, dataspace, dataspace );
+	
+	/*
+	cout << "The length of the vector (int) is: " << (unsigned long)(dims_out[0]) << endl;
+	cout << "The vector is: ";
+	for (unsigned i = 0; i < v_tmp.size(); i++){
+		cout << v_tmp[i] << ",";
+	}
+	cout << endl;
+	*/
+	
+}
+
+void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<double> & v_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+	
+	DataSpace dataspace = dataset.getSpace();
+	hsize_t dims_out[1];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+
+	v_tmp.resize((unsigned long)(dims_out[0]));
+	dataset.read( v_tmp.data(), PredType::NATIVE_DOUBLE, dataspace, dataspace );
+	
+	/*
+	cout << "The length of the vector (double) is: " << (unsigned long)(dims_out[0]) << endl;
+	cout << "The vector is: ";
+	for (unsigned i = 0; i < v_tmp.size(); i++){
+		cout << v_tmp[i] << ",";
+	}
+	cout << endl;
+	*/
+}
+
+template < typename Type > Type SimuInterface::read_scalar_HDF5(const H5File & file, const string & name){
+	vector<Type> v_tmp;
+	read_vector_HDF5(file, name, v_tmp);
+	return v_tmp[0];
+}
+
+#endif
 
 

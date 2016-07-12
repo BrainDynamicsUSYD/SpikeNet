@@ -142,7 +142,7 @@ void NeuroPop::start_stats_record()
 	stats.IE_ratio.assign(N, 0.0);
 }
 
-void NeuroPop::start_LFP_record(vector <vector<bool> >& LFP_neurons_input){
+void NeuroPop::start_LFP_record(const vector <vector<bool> >& LFP_neurons_input){
 	if (int(LFP_neurons_input[0].size()) != N){
 		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
 	}
@@ -435,7 +435,7 @@ void NeuroPop::output_sampled_data_real_time(const int step_current){
 
 
 
-void NeuroPop::add_sampling(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input){
+void NeuroPop::add_sampling(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input){
 	sample.neurons = sample_neurons_input;
 	sample.type = sample_type_input;
 	sample.time_points = sample_time_points_input;
@@ -485,7 +485,7 @@ void NeuroPop::sample_data(const int step_current){
 }
 
 
-void NeuroPop::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
+void NeuroPop::set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std){
 	I_ext_mean = mean;
 	I_ext_std = std;
 	
@@ -495,7 +495,7 @@ void NeuroPop::set_gaussian_I_ext(vector<double>& mean, vector<double>& std){
 	}
 }
 
-void NeuroPop::set_gaussian_g_ext(vector<double>& mean, vector<double>& std){
+void NeuroPop::set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std){
 	g_ext_mean = mean;
 	g_ext_std = std;
 	
@@ -694,7 +694,7 @@ void NeuroPop::record_stats(const int step_current){
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
 // In this case, just save yourself the trouble and use overloading.
-void NeuroPop::write2file(ofstream& output_file,  vector< vector<int> >& v){
+void NeuroPop::write2file(ofstream& output_file,  const vector< vector<int> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -709,7 +709,7 @@ void NeuroPop::write2file(ofstream& output_file,  vector< vector<int> >& v){
 
 
 
-void NeuroPop::write2file(ofstream& output_file, vector< vector<double> >& v){
+void NeuroPop::write2file(ofstream& output_file, const vector< vector<double> >& v){
 	if (!v.empty()){
 		for (unsigned int i = 0; i < v.size(); ++i){
 			//for (double f : v[i]){ output_file << f << delim; } // range-based "for" in C++11
@@ -778,7 +778,7 @@ void NeuroPop::output_results(H5File& file){
 }
 
 
-void NeuroPop::add_sampling_real_time_HDF5(vector<int>& sample_neurons_input, vector<bool>& sample_type_input,  vector<bool>& sample_time_points_input, string sample_file_name_input){
+void NeuroPop::add_sampling_real_time_HDF5(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input,  const vector<bool>& sample_time_points_input, string sample_file_name_input){
 	sample.neurons = sample_neurons_input;
 	sample.type = sample_type_input;
 	sample.time_points = sample_time_points_input;
@@ -946,7 +946,7 @@ void NeuroPop::write_string_HDF5(Group & group, const string & s, const string &
    str_dataset.write(arr_c_str.data(), datatype);
 }
 
-void NeuroPop::write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string &  m_name){
+void NeuroPop::write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string &  m_name){
 	hsize_t dims[2]; 
 	dims[0] = m.size();
 	dims[1] = m[0].size();

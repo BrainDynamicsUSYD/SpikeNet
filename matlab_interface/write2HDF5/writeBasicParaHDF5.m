@@ -7,7 +7,7 @@ function writeBasicParaHDF5(FID, dt, step_tot, N)
 
 
 hdf5write(FID,'/config/Net/INIT001/N',N,'WriteMode','append');
-hdf5write(FID,'/config/pops/n_pops',int32(length(N)),'WriteMode','append');
+% hdf5write(FID,'/config/pops/n_pops',int32(length(N)),'WriteMode','append');
 
 
 hdf5write(FID,'/config/Net/INIT002/dt',dt,'WriteMode','append');

@@ -6,8 +6,11 @@ HEADER_FILES = $(SRC_DIR)/*.h
 #OBJ = main.o NeuroPop.o NeuroNet.o ElectricalSynapses.o ChemSyn.o SimulatorInterface.o
 OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o
 
+
 ###########################################################################
 CXX = g++ # must use version that MATLAB supp
+
+CXXHDF5FLAG = -DHDF5
 
 CXXFLAGS = -std=c++11 -Wall -Wextra
 
@@ -19,7 +22,7 @@ CXXINCLUDE = -I/usr/local/include
 
 CXXLIBS =  -L/usr/local/lib/ -lhdf5_cpp -lhdf5
 
-COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
+COMPILE_THIS_ONE = $(CXX) ${CXXHDF5FLAG} $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
 ###########################################################################
 #include includes.mk
 all: $(EXEC)
