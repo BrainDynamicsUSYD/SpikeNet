@@ -27,10 +27,13 @@ if ~isempty(files)
         
         sum_K_EE_local = zeros(fw);
         sum_K_EIE_local = zeros(fw);
-       
+        tic;
+        fprintf('Reading ygin_syn file...');
         R_EE = read_ygin_syn(files{fi},1,1);
         R_IE = read_ygin_syn(files{fi},1,2);
         R_EI = read_ygin_syn(files{fi},2,1);
+        fprintf('done.\n');
+        toc;
         R_EE = R_EE{1};
         R_IE = R_IE{1};
         R_EI = R_EI{1};
