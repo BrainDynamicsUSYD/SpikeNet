@@ -580,7 +580,7 @@ bool SimuInterface::import(string in_filename_input){
 		cout << "\t Neuron data sampling settings...";
 		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
 			int pop_ind = neuron_sample_pop_ind[ind];
-			network.NeuroPopArray[pop_ind]->add_sampling_real_time_HDF5(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
+			network.NeuroPopArray[pop_ind]->add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
 			cout << ind+1 << "...";
 		}
 		cout << "done." << endl;
@@ -707,9 +707,11 @@ void SimuInterface::simulate(){
 	// output results into text file
 	output_results();
 	
-	// output results into text file
+	// output results into HDF5 file
+#ifdef HDF5
 	output_results_HDF5();
-
+#endif
+	
 }
 
 void SimuInterface::output_results(){
@@ -729,6 +731,7 @@ void SimuInterface::output_results(){
 		
 }
 
+#ifdef HDF5
 void SimuInterface::output_results_HDF5(){
 	// output results into text file
 	H5File file_HDF5;
@@ -743,7 +746,7 @@ void SimuInterface::output_results_HDF5(){
 	cout << "	" << out_filename << endl;
 		
 }
-
+#endif
 
 
 string SimuInterface::gen_out_filename(){

@@ -15,30 +15,32 @@ class ChemSyn
 {
 public:
 	ChemSyn(); /// default constructor
-	ChemSyn(double dt, int step_tot, char delim, char indicator); /// parameterised constructor
+	ChemSyn(const double dt, const int step_tot, const char delim, const char indicator); /// parameterised constructor
 
-	void init(int syn_type, int pop_ind_pre, int pop_ind_post, int N_pre, int N_post, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij); /// initialise chemical synapses by reading already prepared connections
+	void init(const int syn_type, const int pop_ind_pre, const int pop_ind_post, const int N_pre, const int N_post, const vector<int> &C_i, const vector<int> &C_j, const vector<double> &K_ij, const vector<double> &D_ij); /// initialise chemical synapses by reading already prepared connections
 
-	void init(int syn_type, int pop_ind_post, int N_pre, double K_ext, int Num_ext, vector<double> &rate_ext_t, vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population;
+	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_t, const vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population;
 
 	void set_para(string para_str); /// set parameter values
 
 	void recv_pop_data(vector<NeuroPop*> &NeuronPopArray); /// receive data from neuron populations
-	void update(int step_current); /// update by one step
+	void update(const int step_current); /// update by one step
 	
-	void set_synapse_model(int synapse_model_input); /// set synapse model
+	void set_synapse_model(const int synapse_model_input); /// set synapse model
 	
 	void send_pop_data(vector<NeuroPop*> &NeuronPopArray); ///  send data to neuron populations
 
-	void add_short_term_depression(int STD_on_step); /// turn on short term depression
+	void add_short_term_depression(const int STD_on_step); /// turn on short term depression
 	
-	void add_inh_STDP(int inh_STDP_on_step); /// turn on inhibitory STDP
+	void add_inh_STDP(const int inh_STDP_on_step); /// turn on inhibitory STDP
 	
-	void add_sampling(vector<int> sample_neurons, vector<bool> sample_time_points);  /// add data sampling 
+	void add_sampling(vector<int> & sample_neurons, vector<bool> & sample_time_points);  /// add data sampling 
 
 	void start_stats_record(); /// turn on basic statistics recording
 	void output_results(ofstream& output_file); /// write output to file
-
+#ifdef HDF5
+	void output_results(H5File& file_HDF5);
+#endif
 	const int & get_syn_type(); /// get synapse type
 	const int & get_pop_ind_pre(); /// get index of pre-synaptic population
 	const int & get_pop_ind_post(); /// get index of post-synaptic population
@@ -52,20 +54,24 @@ private:
 	
 		
 	void calc_I(); /// calculate currents into each post-synaptic neuron
-	void update_gs_sum_model_0(int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 0
-	void update_gs_sum_model_1(int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 1
-	void update_STD(int step_current); /// update short-term depression
-	void update_inh_STDP(int step_current); /// update inhibitory STDP
-	void sample_data(int step_current); /// sample data
+	void update_gs_sum_model_0(const int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 0
+	void update_gs_sum_model_1(const int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 1
+	void update_STD(const int step_current); /// update short-term depression
+	void update_inh_STDP(const int step_current); /// update inhibitory STDP
+	void sample_data(const int step_current); /// sample data
 	void record_stats(); /// record basic statistics
 
 	void write2file(ofstream& output_file, vector< vector<int> >& v); /// write integer matrix to output file
 	void write2file(ofstream& output_file, vector< vector<double> >& v); /// write double matrix to output file
 	void write2file(ofstream& output_file, vector<int>& v); /// write integer vector to output file
 	void write2file(ofstream& output_file, vector<double>& v); /// write double vector to output file
-	
-	
-	
+	#ifdef HDF5
+	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
+	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
+	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
+	void write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string & m_name);
+	void write_string_HDF5(Group & group, const string & s, const string & s_name);
+	#endif
 protected:
 	// constants
 	double

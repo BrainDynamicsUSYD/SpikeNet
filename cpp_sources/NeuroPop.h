@@ -5,12 +5,14 @@
 #include <string> // "" for string, '' for char
 #include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
 #include <fstream> // fstream : Stream class to both read and write from / to files
-#include <H5Cpp.h>
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
+#ifdef HDF5
+	#include <H5Cpp.h>
+	#ifndef H5_NO_NAMESPACE
+	    using namespace H5;
+	#endif
 #endif
-	
+
 class NeuronNetwork; //forward declaration, better than #include "NeuronNetwork.h", if you do not need to access the internal of the class
 class ChemSyn;
 // class ElectricalSynapses;
@@ -30,9 +32,8 @@ public:
 	void set_para(string para); /// set parameters if not using default ones
 
 	void output_results(ofstream& output_file);
-	void output_results(H5File& file_HDF5);
-	void output_sampled_data_real_time(const int step_current);
-	void output_sampled_data_real_time_HDF5(const int step_current);
+
+
 	
 	void recv_I(vector<double>& I_add, const int pop_ind_pre, const int syn_type);
 	const vector< int >& get_spikes_current();
@@ -55,8 +56,9 @@ public:
 	
 	void add_sampling(vector<int>& sample_neurons, vector<bool>& sample_type, vector<bool>& sample_time_points); 
 	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
+#ifdef HDF5
 	void add_sampling_real_time_HDF5(vector<int>& sample_neurons_input, vector<bool>& sample_type_input, vector<bool>& sample_time_points_input, string samp_file_name);
-	
+#endif
 	void init_runaway_killer(const double min_ms, const double Hz, const double Hz_ms); /// kill the simulation when runaway activity of the network is detected: 
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 	
@@ -70,13 +72,17 @@ private:
 	void write2file(ofstream& output_file, vector< vector<double> >& v);
 	void write2file(ofstream& output_file, const vector<int>& v);
 	void write2file(ofstream& output_file, const vector<double>& v);
+	void output_sampled_data_real_time(const int step_current);
 	
+#ifdef HDF5
+	void output_results(H5File& file_HDF5);
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
 	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
 	void write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string & m_name);
 	void write_string_HDF5(Group & group, const string & s, const string & s_name);
-		
+	void output_sampled_data_real_time_HDF5(const int step_current);
+#endif
 	string dump_para(); /// dump all the parameter values used
 	char delim;
 	char indicator;
@@ -185,14 +191,16 @@ protected:
 		
 	// Data sampling
 	struct Sample {
-		ofstream 
-			file; /// the output file stream for sampled time series
 		string 
 			file_name; /// the file name for sampled time series
+		ofstream 
+			file; /// the output file stream for sampled time series
+		#ifdef HDF5
 		H5File *
 			file_HDF5;
 		DataSet 
 			V_dataset, I_leak_dataset, I_AMPA_dataset, I_GABA_dataset, I_NMDA_dataset, I_GJ_dataset, I_ext_dataset, I_K_dataset;
+		#endif
 		int 
 			ctr = 0; /// counter that counts how many steps have been sampled
 		vector<int> 

@@ -27,7 +27,9 @@ public:
 	char delim;
 	char indicator;
 	void output_results(ofstream& output_file);
+#ifdef HDF5
 	void output_results(H5File& file_HDF5);
+#endif
 	
 
 

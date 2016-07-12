@@ -47,6 +47,7 @@ writeNeuronSampling(FID, 4, ones(1,8), 1:2:10 , ones(1,step_tot));
 % synapse data sampling
 writeSynSampling(FID, 1,  2, 1,  1, sample_steps)
 
+
 % Add LFP sampling
 writeLFPRecord(FID, 1, ones(3, 10));
 

@@ -91,6 +91,7 @@ void NeuroNet::output_results(ofstream& output_file){
 	
 }
 
+#ifdef HDF5
 void NeuroNet::output_results(H5File & file_HDF5){
 
 	// write data
@@ -107,9 +108,9 @@ void NeuroNet::output_results(H5File & file_HDF5){
 
 	// dump synapse data
 	for (unsigned int i = 0; i < ChemSynArray.size(); i++){
-		//ChemSynArray[i]->output_results(output_file);
+		ChemSynArray[i]->output_results(file_HDF5);
 	}
 	
 }
-
+#endif
 

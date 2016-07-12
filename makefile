@@ -21,6 +21,7 @@ CXXLIBS =  -L/usr/local/lib/ -lhdf5_cpp -lhdf5
 
 COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
 ###########################################################################
+#include includes.mk
 all: $(EXEC)
 	
 

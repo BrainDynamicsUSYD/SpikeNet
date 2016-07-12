@@ -7,7 +7,7 @@
 
 #include "ChemSyn.h"
 
-ChemSyn::ChemSyn(double dt_input, int step_tot_input, char delim_input, char indicator_input){
+ChemSyn::ChemSyn(const double dt_input, const int step_tot_input, const char delim_input, const char indicator_input){
 	
 	dt = dt_input;
 	step_tot = step_tot_input;
@@ -38,7 +38,7 @@ ChemSyn::ChemSyn(double dt_input, int step_tot_input, char delim_input, char ind
 
 
 
-void ChemSyn::init(int syn_type_input, int i_pre, int j_post, int N_pre_input, int N_post_input, vector<int> &C_i, vector<int> &C_j, vector<double> &K_ij, vector<double> &D_ij){
+void ChemSyn::init(const int syn_type_input, const int i_pre, const int j_post, const int N_pre_input, const int N_post_input, const vector<int> &C_i, const vector<int> &C_j, const vector<double> &K_ij, const vector<double> &D_ij){
 
 	// read parameter
 	syn_type = syn_type_input;
@@ -79,7 +79,7 @@ void ChemSyn::init(int syn_type_input, int i_pre, int j_post, int N_pre_input, i
 }
 
 
-void ChemSyn::init(int syn_type_input, int j_post, int N_post_input, double K_ext, int Num_ext, vector<double> &rate_ext_t, vector<bool> &neurons){
+void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_input, const double K_ext, const int Num_ext, const vector<double> &rate_ext_t, const vector<bool> &neurons){
 
 	// Initialise chemical synapses for simulating external neuron population
 	syn_type = syn_type_input;
@@ -194,7 +194,7 @@ const int & ChemSyn::get_pop_ind_post()
 	return pop_ind_post;
 }
 
-void ChemSyn::set_synapse_model(int synapse_model_input){
+void ChemSyn::set_synapse_model(const int synapse_model_input){
 	if (synapse_model_input != 0){
 		synapse_model = synapse_model_input;
 		init(); // initialize again
@@ -203,7 +203,7 @@ void ChemSyn::set_synapse_model(int synapse_model_input){
 
 	
 
-void ChemSyn::update(int step_current){
+void ChemSyn::update(const int step_current){
 
 	if (synapse_model == 0){ 
 		// short-term depression
@@ -232,7 +232,7 @@ void ChemSyn::update(int step_current){
 
 
 
-void ChemSyn::update_STD(int step_current){
+void ChemSyn::update_STD(const int step_current){
 	// STD modifies K_trans
 	
 	if (STD.on_step == step_current){STD.on = true;}
@@ -250,7 +250,7 @@ void ChemSyn::update_STD(int step_current){
 }
 
 
-void ChemSyn::add_inh_STDP(int inh_STDP_on_step_input){
+void ChemSyn::add_inh_STDP(const int inh_STDP_on_step_input){
 	if (syn_type != 1){
 		cout << "Warning: initializing inhibitory STDP on non-GABA synapses!" << endl;
 	}
@@ -313,7 +313,7 @@ void ChemSyn::calc_I(){
 	
 }
 
-void ChemSyn::update_gs_sum_model_0(int step_current){
+void ChemSyn::update_gs_sum_model_0(const int step_current){
 	// See Gu, Yifan, Gong, Pulin, 2016, The dynamics of memory retrieval in hierarchical networks: a modeling study
 	// this function updates gs_sum
 	if (pop_ind_pre >= 0){
@@ -365,7 +365,7 @@ void ChemSyn::update_gs_sum_model_0(int step_current){
 	fill(gsm_0.d_gs_sum_buffer[t_ring].begin(), gsm_0.d_gs_sum_buffer[t_ring].end(), 0.0);
 }
 
-void ChemSyn::update_gs_sum_model_1(int step_current){
+void ChemSyn::update_gs_sum_model_1(const int step_current){
 	// See Keane, A., Gong, P., 2015, Propagating Waves Can Explain Irregular Neural Dynamics
 	// this function updates gs_sum
 	for (unsigned int ind = 0; ind < spikes_pre.size(); ++ind){ // loop through all the spikes
@@ -391,7 +391,7 @@ void ChemSyn::update_gs_sum_model_1(int step_current){
 }
 
 
-void ChemSyn::add_sampling(vector<int> sample_neurons_input, vector<bool> sample_time_points_input){
+void ChemSyn::add_sampling(vector<int> & sample_neurons_input, vector<bool> & sample_time_points_input){
 	sample.neurons = sample_neurons_input;
 	sample.time_points = sample_time_points_input;
 	
@@ -411,7 +411,7 @@ void ChemSyn::add_sampling(vector<int> sample_neurons_input, vector<bool> sample
 
 }
 
-void ChemSyn::add_short_term_depression(int STD_on_step_input){
+void ChemSyn::add_short_term_depression(const int STD_on_step_input){
 	if (syn_type != 0){
 		cout << "Warning: initializing STD on non-AMPA synapses!" << endl;
 	}
@@ -433,7 +433,7 @@ void ChemSyn::add_short_term_depression(int STD_on_step_input){
 
 
 
-void ChemSyn::update_inh_STDP(int step_current){
+void ChemSyn::update_inh_STDP(const int step_current){
 	// inh_STDP modifies K
 	
 	if (inh_STDP.on_step == step_current){inh_STDP.on = true;}
@@ -476,7 +476,7 @@ void ChemSyn::update_inh_STDP(int step_current){
 }
 
 
-void ChemSyn::sample_data(int step_current){
+void ChemSyn::sample_data(const int step_current){
 	if (!sample.neurons.empty()){
 		if (sample.time_points[step_current]){ // push_back is amazing
 			for (unsigned int i = 0; i < sample.neurons.size(); ++i){ // performance issue when sampling many neurons?
@@ -551,7 +551,6 @@ void ChemSyn::start_stats_record(){
 	stats.I_std.reserve(step_tot);
 }
 
-
 void ChemSyn::output_results(ofstream& output_file){
 	// SYND001 # synapse parameters
 	// count number of variables
@@ -607,6 +606,28 @@ void ChemSyn::send_pop_data(vector<NeuroPop*> &NeuronPopArray){
 	
 	NeuronPopArray[pop_ind_post]->recv_I(I, pop_ind_pre, syn_type);
 
+}
+
+void ChemSyn::record_stats(){
+	if (stats.record){
+		// get mean
+		double sum_mean = 0.0;
+		for (unsigned int i = 0; i < I.size(); ++i){
+			sum_mean += I[i];
+		}
+		double mean_tmp = sum_mean / double(I.size());
+	
+		// get std
+		double sum_std = 0.0;
+		for (unsigned int i = 0; i < I.size(); ++i){
+			sum_std += (I[i]-mean_tmp)*(I[i]-mean_tmp);
+		}
+		double std_tmp = sqrt( sum_std / double(I.size()));
+	
+		// record   
+		stats.I_mean.push_back(mean_tmp);
+		stats.I_std.push_back(std_tmp);
+	}
 }
 
 
@@ -665,25 +686,82 @@ void ChemSyn::write2file(ofstream& output_file, vector<double>& v){
 }
 
 
-
-void ChemSyn::record_stats(){
+#ifdef HDF5
+void ChemSyn::output_results(H5File& file){
+	// new group
+	stringstream group_name;
+	group_name << "/syn_result_"  << pop_ind_pre << "_" << pop_ind_post  << "_" << syn_type;
+	Group group_syn = file.createGroup(group_name.str());
+	
+	write_string_HDF5(group_syn, dump_para(), string("pop_para"));
+	
+	if (!sample.neurons.empty()){
+		write_matrix_HDF5(group_syn, sample.data, string("sample_data"));
+	}
+	
 	if (stats.record){
-		// get mean
-		double sum_mean = 0.0;
-		for (unsigned int i = 0; i < I.size(); ++i){
-			sum_mean += I[i];
-		}
-		double mean_tmp = sum_mean / double(I.size());
-	
-		// get std
-		double sum_std = 0.0;
-		for (unsigned int i = 0; i < I.size(); ++i){
-			sum_std += (I[i]-mean_tmp)*(I[i]-mean_tmp);
-		}
-		double std_tmp = sqrt( sum_std / double(I.size()));
-	
-		// record   
-		stats.I_mean.push_back(mean_tmp);
-		stats.I_std.push_back(std_tmp);
+		write_vector_HDF5(group_syn, stats.I_mean, string("stats_I_mean"));
+		write_vector_HDF5(group_syn, stats.I_std, string("stats_I_std"));
 	}
 }
+
+
+void ChemSyn::write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
+	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
+}
+
+void ChemSyn::write_vector_HDF5(Group & group, const vector<double> & v, const string &   v_name){
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_DOUBLE, fspace);
+	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
+}
+
+void ChemSyn::write_string_HDF5(Group & group, const string & s, const string &  s_name){
+   // HDF5 only understands vector of char* :-(
+   vector<const char*> arr_c_str;
+   arr_c_str.push_back(s.c_str());
+
+   hsize_t str_dimsf[1] {arr_c_str.size()};
+   DataSpace dataspace(1, str_dimsf);
+
+   // Variable length string
+   StrType datatype(PredType::C_S1, H5T_VARIABLE); 
+   DataSet str_dataset = group.createDataSet(s_name, datatype, dataspace);
+
+   str_dataset.write(arr_c_str.data(), datatype);
+}
+
+void ChemSyn::write_matrix_HDF5(Group & group, vector< vector<double> > & m, const string &  m_name){
+	hsize_t dims[2]; 
+	dims[0] = m.size();
+	dims[1] = m[0].size();
+	DataSpace fspace(2, dims); 
+	DataSet m_dataset = group.createDataSet(m_name, PredType::NATIVE_DOUBLE, fspace);
+	for (int i = 0; i < int(m.size()); i++){
+		append_vector_to_matrix_HDF5(m_dataset, m[i],  i);
+	}
+}
+
+
+void ChemSyn::append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum){
+   	hsize_t offset[2];
+    offset[1] = 0;
+    offset[0] = colNum;
+	
+    hsize_t fdims[2];            // new data dimensions 
+	fdims[0] = 1;
+	fdims[1] = v.size();
+	DataSpace mspace( 2, fdims );
+
+	DataSpace fspace = dataset_tmp.getSpace();
+    fspace.selectHyperslab( H5S_SELECT_SET, fdims, offset );
+    dataset_tmp.write(  v.data(), PredType::NATIVE_DOUBLE, mspace, fspace );	
+}
+
+#endif

@@ -30,7 +30,9 @@ public:
 	string gen_out_filename(); // generate unique file name using time stamp
 
 	void output_results();
+#ifdef HDF5
 	void output_results_HDF5();
+#endif
 	// Helper functions
 	template < typename Type > Type read_next_entry(istringstream &line_ss);
 	template < typename T, typename A > void read_next_line_as_vector( vector<T,A> &vec );

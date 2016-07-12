@@ -356,9 +356,10 @@ void NeuroPop::update_V(const int step_current){
 
 	// Data sampling, which must be done here!
 	// sample_data(step_current);  // this is deprecated due to poor memory performance
+#ifdef HDF5
 	output_sampled_data_real_time_HDF5(step_current);
 	// we want to sample the V[] before it's updated!
-
+#endif
 
 
 	// update menbrane potentials
@@ -395,144 +396,6 @@ void NeuroPop::add_sampling_real_time(const vector<int>& sample_neurons_input, c
 		if (sample.time_points[tt]){sample.N_steps += 1;}
 	}
 	sample.N_neurons = sample.neurons.size();
-}
-
-
-void NeuroPop::add_sampling_real_time_HDF5(vector<int>& sample_neurons_input, vector<bool>& sample_type_input,  vector<bool>& sample_time_points_input, string sample_file_name_input){
-	sample.neurons = sample_neurons_input;
-	sample.type = sample_type_input;
-	sample.time_points = sample_time_points_input;
-	
-	sample.N_steps = 0;
-	for (int tt = 0; tt < step_tot; ++tt){
-		if (sample.time_points[tt]){sample.N_steps += 1;}
-	}
-	sample.N_neurons = sample.neurons.size();
-	
-	sample.file_name = sample_file_name_input.append("_");
-	sample.file_name.append(to_string(pop_ind));
-	
-	sample.file_name.append("_out.h5");
-	// Create a new file using default properties. 
-	cout << "Creating HDF5 output file...\n";
-	sample.file_HDF5 = new H5File( sample.file_name.c_str(), H5F_ACC_TRUNC );
-	// dataset dimensions
-	hsize_t dims[2]; 
-	dims[1] = sample.N_neurons;
-	dims[0] = sample.N_steps;
-	// file dataspace
-	DataSpace fspace(2, dims); 
-	// create datasets
-	if(sample.type[0]){
-		sample.V_dataset = sample.file_HDF5->createDataSet("V", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[1]){
-		sample.I_leak_dataset = sample.file_HDF5->createDataSet("I_leak", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[2]){
-		sample.I_AMPA_dataset = sample.file_HDF5->createDataSet("I_AMPA", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[3]){
-		sample.I_GABA_dataset = sample.file_HDF5->createDataSet("I_GABA", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[4]){
-		sample.I_NMDA_dataset = sample.file_HDF5->createDataSet("I_NMDA", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[5]){
-		sample.I_GJ_dataset = sample.file_HDF5->createDataSet("I_GJ", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[6]){
-		sample.I_ext_dataset = sample.file_HDF5->createDataSet("I_ext", PredType::NATIVE_DOUBLE, fspace);
-	}
-	if(sample.type[7]){
-		sample.I_K_dataset = sample.file_HDF5->createDataSet("I_K", PredType::NATIVE_DOUBLE, fspace);
-	}
-}
-
-void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current){
-	if (!sample.neurons.empty()){
-		if (sample.time_points[step_current]){ // push_back is amazing
-
-			// use double *temp_data=new double[sample.N_neurons]; and later delete[] tmp_data?
-			vector<double> temp_data;
-			temp_data.resize(sample.N_neurons);
-			
-			int ind_temp;	
-			if (sample.type[0]){	// "V"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = V[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.V_dataset, temp_data,  sample.ctr);
-			}
-			if (sample.type[1]){	// "I_leak"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = I_leak[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_leak_dataset, temp_data,  sample.ctr);
-			}	
-			if (sample.type[2]){	// "I_AMPA"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = I_AMPA[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_AMPA_dataset, temp_data,  sample.ctr);
-			}	
-			if (sample.type[3]){	// "I_GABA"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = I_GABA[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_GABA_dataset, temp_data,  sample.ctr);	
-			}	
-			if (sample.type[4]){	// "I_NMDA"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = I_NMDA[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_NMDA_dataset, temp_data,  sample.ctr);	
-			}	
-			if (sample.type[5]){	// "I_GJ"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = I_GJ[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_GJ_dataset, temp_data,  sample.ctr);		
-			}	
-			if (sample.type[6]){	// "I_ext"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i] = I_ext[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_ext_dataset, temp_data,  sample.ctr);
-			}	
-			if (sample.type[7]){	// "I_K"
-				fill(temp_data.begin(), temp_data.end(), 0);
-				// Collect the data to write in a temp vector
-				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
-					ind_temp = sample.neurons[i];
-					temp_data[i]= I_K[ind_temp];
-				}
-				append_vector_to_matrix_HDF5(sample.I_K_dataset, temp_data,  sample.ctr);
-			}	
-			sample.ctr++;
-		}
-	}
 }
 
 
@@ -685,33 +548,6 @@ void NeuroPop::runaway_check(const int step_current)
 	}
 }
 
-
-void NeuroPop::output_results(H5File& file){
-
-	// new group
-	string group_name = "/pop_result_";
-	group_name.append(to_string(pop_ind));
-	Group group_pop = file.createGroup(group_name);
-
-	write_vector_HDF5(group_pop, spike_hist_tot, string("spike_hist_tot"));
-	write_vector_HDF5(group_pop, num_spikes_pop, string("num_spikes_pop"));
-	write_vector_HDF5(group_pop, num_ref_pop, string("num_ref_pop"));
-	
-	write_string_HDF5(group_pop, dump_para(), string("pop_para"));
-		
-	if (stats.record){
-		write_vector_HDF5(group_pop, stats.V_mean, string("stats_V_mean"));
-		write_vector_HDF5(group_pop, stats.V_std, string("stats_V_std"));
-		write_vector_HDF5(group_pop, stats.I_input_mean, string("stats_I_input_mean"));
-		write_vector_HDF5(group_pop, stats.I_input_std, string("stats_I_input_std"));
-		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
-	}
-	
-	if (LFP.record){
-		write_matrix_HDF5(group_pop, LFP.data, string("LFP_data"));
-	}
-	
-}
 
 
 void NeuroPop::output_results(ofstream& output_file){
@@ -910,6 +746,175 @@ void NeuroPop::write2file(ofstream& output_file, const vector<double>& v){
 	else {output_file << " " << endl;}
 }
 
+
+
+#ifdef HDF5
+
+void NeuroPop::output_results(H5File& file){
+
+	// new group
+	string group_name = "/pop_result_";
+	group_name.append(to_string(pop_ind));
+	Group group_pop = file.createGroup(group_name);
+
+	write_vector_HDF5(group_pop, spike_hist_tot, string("spike_hist_tot"));
+	write_vector_HDF5(group_pop, num_spikes_pop, string("num_spikes_pop"));
+	write_vector_HDF5(group_pop, num_ref_pop, string("num_ref_pop"));
+	
+	write_string_HDF5(group_pop, dump_para(), string("pop_para"));
+		
+	if (stats.record){
+		write_vector_HDF5(group_pop, stats.V_mean, string("stats_V_mean"));
+		write_vector_HDF5(group_pop, stats.V_std, string("stats_V_std"));
+		write_vector_HDF5(group_pop, stats.I_input_mean, string("stats_I_input_mean"));
+		write_vector_HDF5(group_pop, stats.I_input_std, string("stats_I_input_std"));
+		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
+	}
+	
+	if (LFP.record){
+		write_matrix_HDF5(group_pop, LFP.data, string("LFP_data"));
+	}
+	
+}
+
+
+void NeuroPop::add_sampling_real_time_HDF5(vector<int>& sample_neurons_input, vector<bool>& sample_type_input,  vector<bool>& sample_time_points_input, string sample_file_name_input){
+	sample.neurons = sample_neurons_input;
+	sample.type = sample_type_input;
+	sample.time_points = sample_time_points_input;
+	
+	sample.N_steps = 0;
+	for (int tt = 0; tt < step_tot; ++tt){
+		if (sample.time_points[tt]){sample.N_steps += 1;}
+	}
+	sample.N_neurons = sample.neurons.size();
+	
+	sample.file_name = sample_file_name_input.append("_");
+	sample.file_name.append(to_string(pop_ind));
+	
+	sample.file_name.append("_out.h5");
+	// Create a new file using default properties. 
+	cout << "Creating HDF5 output file...\n";
+	sample.file_HDF5 = new H5File( sample.file_name.c_str(), H5F_ACC_TRUNC );
+	// dataset dimensions
+	hsize_t dims[2]; 
+	dims[1] = sample.N_neurons;
+	dims[0] = sample.N_steps;
+	// file dataspace
+	DataSpace fspace(2, dims); 
+	// create datasets
+	if(sample.type[0]){
+		sample.V_dataset = sample.file_HDF5->createDataSet("V", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[1]){
+		sample.I_leak_dataset = sample.file_HDF5->createDataSet("I_leak", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[2]){
+		sample.I_AMPA_dataset = sample.file_HDF5->createDataSet("I_AMPA", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[3]){
+		sample.I_GABA_dataset = sample.file_HDF5->createDataSet("I_GABA", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[4]){
+		sample.I_NMDA_dataset = sample.file_HDF5->createDataSet("I_NMDA", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[5]){
+		sample.I_GJ_dataset = sample.file_HDF5->createDataSet("I_GJ", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[6]){
+		sample.I_ext_dataset = sample.file_HDF5->createDataSet("I_ext", PredType::NATIVE_DOUBLE, fspace);
+	}
+	if(sample.type[7]){
+		sample.I_K_dataset = sample.file_HDF5->createDataSet("I_K", PredType::NATIVE_DOUBLE, fspace);
+	}
+}
+
+void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current){
+	if (!sample.neurons.empty()){
+		if (sample.time_points[step_current]){ // push_back is amazing
+
+			// use double *temp_data=new double[sample.N_neurons]; and later delete[] tmp_data?
+			vector<double> temp_data;
+			temp_data.resize(sample.N_neurons);
+			
+			int ind_temp;	
+			if (sample.type[0]){	// "V"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = V[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.V_dataset, temp_data,  sample.ctr);
+			}
+			if (sample.type[1]){	// "I_leak"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_leak[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_leak_dataset, temp_data,  sample.ctr);
+			}	
+			if (sample.type[2]){	// "I_AMPA"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_AMPA[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_AMPA_dataset, temp_data,  sample.ctr);
+			}	
+			if (sample.type[3]){	// "I_GABA"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_GABA[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_GABA_dataset, temp_data,  sample.ctr);	
+			}	
+			if (sample.type[4]){	// "I_NMDA"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_NMDA[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_NMDA_dataset, temp_data,  sample.ctr);	
+			}	
+			if (sample.type[5]){	// "I_GJ"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_GJ[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_GJ_dataset, temp_data,  sample.ctr);		
+			}	
+			if (sample.type[6]){	// "I_ext"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i] = I_ext[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_ext_dataset, temp_data,  sample.ctr);
+			}	
+			if (sample.type[7]){	// "I_K"
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i]= I_K[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.I_K_dataset, temp_data,  sample.ctr);
+			}	
+			sample.ctr++;
+		}
+	}
+}
+
 void NeuroPop::write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
 	hsize_t dims[1]; 
 	dims[0] = v.size();
@@ -967,5 +972,5 @@ void NeuroPop::append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<
     fspace.selectHyperslab( H5S_SELECT_SET, fdims, offset );
     dataset_tmp.write(  v.data(), PredType::NATIVE_DOUBLE, mspace, fspace );	
 }
-
+#endif
 
