@@ -6,12 +6,17 @@ function writeBasicParaHDF5(FID, dt, step_tot, N)
 %        N: vector for number of neurons in each population
 
 
-hdf5write(FID,'/config/Net/INIT001/N',N,'WriteMode','append');
-% hdf5write(FID,'/config/pops/n_pops',int32(length(N)),'WriteMode','append');
+hdf5write(FID,'/config/Net/INIT001/N', N, 'WriteMode', 'append');
+hdf5write(FID,'/config/Net/INIT002/dt',dt , 'WriteMode', 'append');
+hdf5write(FID,'/config/Net/INIT002/step_tot', step_tot, 'WriteMode', 'append');
 
+% h5create(FID,'/config/Net/INIT001/N', size(N));
+% h5write(FID,'/config/Net/INIT001/N', N);
+% h5create(FID,'/config/Net/INIT002/dt',1);
+% h5write(FID,'/config/Net/INIT002/dt',dt);
+% h5create(FID,'/config/Net/INIT002/step_tot', 1 );
+% h5write(FID,'/config/Net/INIT002/step_tot', step_tot);
 
-hdf5write(FID,'/config/Net/INIT002/dt',dt,'WriteMode','append');
-hdf5write(FID,'/config/Net/INIT002/step_tot',step_tot,'WriteMode','append');
 
 end
 

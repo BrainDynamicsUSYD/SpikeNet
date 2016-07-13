@@ -35,7 +35,10 @@ public:
 	void output_results_HDF5();
 	bool import_HDF5(string in_filename);
 	void read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_tmp);
+	void read_vector_HDF5(const H5File & file, const string & name, vector<bool> & v_tmp);
 	void read_vector_HDF5(const H5File & file, const string & name, vector<double> & v_tmp);
+	bool group_exist_HDF5(const H5File & file, const string & name);
+	void read_matrix_HDF5(const H5File & file, const string & name, vector< vector <double> > & m_tmp);
 	template < typename Type > Type read_scalar_HDF5(const H5File & file, const string & name);
 #endif
 	// Helper functions

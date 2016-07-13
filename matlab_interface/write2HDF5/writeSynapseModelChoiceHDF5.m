@@ -10,7 +10,7 @@ if model_choice <= 0 || mod(model_choice, 1) ~= 0
     warning('model_choise must be an positive integer!')
 elseif model_choice ~= 1 % 1 is default, no need to change it
     model_choice = model_choice-1; % for C/C++ index convetion
-    hdf5write(FID,'/config/syns/INIT001',model_choice,'WriteMode','append');
+    hdf5write(FID,'/config/syns/INIT013/model_choice',model_choice,'WriteMode','append');
 end
 
 end

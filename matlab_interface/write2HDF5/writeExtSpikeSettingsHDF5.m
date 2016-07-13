@@ -12,14 +12,26 @@ function writeExtSpikeSettingsHDF5(FID, pop_ind, type_ext, K_ext,  Num_ext, rate
 pop_ind = pop_ind - 1;
 type_ext = type_ext - 1;
 
-
+try
+    n_syns = h5read(FID,'/config/syns/n_syns');
+catch ME
+    if (strcmp(ME.identifier,'MATLAB:imagesci:h5read:libraryError'))
+        n_syns = 0;
+        h5create(FID,'/config/syns/n_syns', 1);
+        h5write(FID,'/config/syns/n_syns', n_syns);
+    end
+end
+n_syns = n_syns + 1;
+h5write(FID,'/config/syns/n_syns', n_syns);
+n = n_syns - 1; % c++ zero-based index
 
 % fprintf(FID, '%s\n', '# external spikes // (pop_ind, type_ext, K_ext:miuSiemens,  Num_ext, ia, ib;  rate_ext(t):Hz)');
-hdf5write(FID,['/config/pop',num2str(pop_ind),'/INIT005/type_ext'],type_ext,'WriteMode','append'); 
-hdf5write(FID,['/config/pop',num2str(pop_ind),'/INIT005/K_ext'],K_ext,'WriteMode','append'); 
-hdf5write(FID,['/config/pop',num2str(pop_ind),'/INIT005/Num_ext'],Num_ext,'WriteMode','append'); 
-hdf5write(FID,['/config/pop',num2str(pop_ind),'/INIT005/neurons'],neurons,'WriteMode','append'); 
-hdf5write(FID,['/config/pop',num2str(pop_ind),'/INIT005/rate_ext_t'],rate_ext_t,'WriteMode','append'); 
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/pop_ind'],pop_ind,'WriteMode','append'); 
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/type_ext'],type_ext,'WriteMode','append'); 
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/K_ext'],K_ext,'WriteMode','append'); 
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/Num_ext'],Num_ext,'WriteMode','append'); 
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/neurons'],neurons,'WriteMode','append'); 
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/rate_ext_t'],rate_ext_t,'WriteMode','append'); 
 
 end
 

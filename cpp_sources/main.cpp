@@ -10,7 +10,7 @@ int main(int argc, char* argv[]){// arguments should be input file path
 #ifdef HDF5
 		bool success = simulator.import_HDF5(argv[i]);
 #else
-		// bool success = simulator.import(argv[i]);
+		bool success = simulator.import(argv[i]);
 #endif
 		
 		if (success){ // return true if import is successful

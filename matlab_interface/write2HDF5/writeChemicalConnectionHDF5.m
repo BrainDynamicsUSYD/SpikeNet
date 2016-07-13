@@ -22,21 +22,30 @@ if nargin == 7
 end
 % write (note: no white space!!!)
 %fprintf(FID, '%s\n', '# chemical connection // (type,i_pre,j_post);I;J;K;D;');
-%work out how many synapses already added
-info=h5info(FID,'/config/syns');
-n_syn=length(info.Groups);
-n_syn=n_syn+1;
-if n_syn==1
-    h5create(FID,'/config/syns/n_syns',1,'Datatype','int32');
-end
-h5write(FID,'/config/syns/n_syns',int32(n_syn));
 
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/type'],type,'WriteMode','append');
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/i_pre'],i_pre,'WriteMode','append');
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/j_post'],j_post,'WriteMode','append');
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/I'],I,'WriteMode','append');
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/J'],J,'WriteMode','append');
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/K'],K,'WriteMode','append');
-hdf5write(FID,['/config/syns/syn',num2str(n_syn),'/INIT006/D'],D,'WriteMode','append');
+
+try
+    n_syns = h5read(FID,'/config/syns/n_syns');
+catch ME
+    if (strcmp(ME.identifier,'MATLAB:imagesci:h5read:libraryError'))
+        n_syns = 0;
+        h5create(FID,'/config/syns/n_syns', 1);
+        h5write(FID,'/config/syns/n_syns', n_syns);
+    end
+end
+n_syns = n_syns + 1;
+h5write(FID,'/config/syns/n_syns', n_syns);
+n = n_syns - 1; % c++ zero-based index
+
+
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/type'],type,'WriteMode','append');
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/i_pre'],i_pre,'WriteMode','append');
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/j_post'],j_post,'WriteMode','append');
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/I'],I,'WriteMode','append');
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/J'],J,'WriteMode','append');
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/K'],K,'WriteMode','append');
+hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT006/D'],D,'WriteMode','append');
+
+
 
 end

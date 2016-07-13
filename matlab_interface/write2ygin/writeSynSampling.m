@@ -20,9 +20,13 @@ pop_ind_post = pop_ind_post-1;
 syn_type = syn_type-1;
 sample_ind = sample_ind-1;
 
+
 % write
 % fprintf(FID, '%s\n', '# synapse data sampling');
 fprintf(FID, '%s\n', '> SAMP002');
 fprintf(FID, '%d, %d, %d,\n', pop_ind_pre, pop_ind_post, syn_type);
 fprintf(FID, '%d,', sample_ind); fprintf(FID,'\n');
 fprintf(FID, '%d,', time_index); fprintf(FID,'\n\n');
+
+
+end

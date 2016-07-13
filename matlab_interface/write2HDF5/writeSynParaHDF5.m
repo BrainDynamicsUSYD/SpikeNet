@@ -24,8 +24,13 @@ if mod(var_num,1) ~= 0
     disp('wrong SynPara input format!\n')
     disp('var_num: ');disp(var_num);
 else
+
+    para_str = [];
     for i = 1:var_num
-        hdf5write(FID,['/config/syns/PARA002/',varargin{i*2-1}],varargin{i*2},'WriteMode','append');
+        para_str = [para_str, varargin{i*2-1}, ',' , varargin{i*2}, ',']; %#ok<AGROW>
     end
+    hdf5write(FID,'/config/syns/PARA002/para_str_ascii', double(para_str),'WriteMode','append');
 end
+
+
 end

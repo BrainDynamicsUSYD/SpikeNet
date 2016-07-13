@@ -6,8 +6,9 @@ function writeInitVHDF5(FID, p_fire)
 % Note that the membrane potential distributions are uniform and decided by
 % the given p_fire
 
-
-hdf5write(FID,'/config/pops/INIT003/p_fire',p_fire,'WriteMode','append');
-
+for i=1:length(p_fire)
+    hdf5write(FID,['/config/pops/pop',num2str(i),'/INIT003/p_fire'],p_fire(i),'WriteMode','append')
+end
+   
 end
 

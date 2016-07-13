@@ -31,8 +31,6 @@ end
 
 % write
 % fprintf(FID, '%s\n', '# neuronal membrane potential and currents sampling setting // pop_ind;sample_ind');
-% hdf5write(FID,['/config/pop',num2str(pop_ind),'/SAMP001/data_type'],data_type,'WriteMode','append'); 
-%break this down into different things to sample?
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/V'],data_type(1),'WriteMode','append'); 
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_leak'],data_type(2),'WriteMode','append'); 
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_AMPA'],data_type(3),'WriteMode','append'); 
@@ -45,3 +43,4 @@ hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_K'],dat
 
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/sample_ind'],sample_ind,'WriteMode','append');
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/time_index'],time_index,'WriteMode','append');
+end

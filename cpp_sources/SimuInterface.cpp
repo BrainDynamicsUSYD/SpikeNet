@@ -703,13 +703,14 @@ void SimuInterface::simulate(){
 		/*---------------------------------------------------------------------*/
 	}
 	cout << "Simulation done." << endl;
-	
-	// output results into text file
-	output_results();
+
 	
 	// output results into HDF5 file
 #ifdef HDF5
 	output_results_HDF5();
+#else
+	// output results into text file
+	output_results();
 #endif
 	
 }
@@ -800,8 +801,12 @@ bool SimuInterface::import_HDF5(string in_filename){
 	const H5std_string file_name( in_filename );
 	H5File file( file_name, H5F_ACC_RDONLY );
 	
+ 	vector< vector <double> > m_tmp;
+	read_matrix_HDF5(file, string("/config/mat"), m_tmp);
+	
+		
 	// build NeuroNet based on data imported
-	if (true){
+	if (false){
 		vector<int> N_array, step_tot_v;
 		read_vector_HDF5(file, string("/config/Net/INIT001/N"), N_array);
 		int step_tot = read_scalar_HDF5<int>(file, string("/config/Net/INIT002/step_tot"));
@@ -809,43 +814,227 @@ bool SimuInterface::import_HDF5(string in_filename){
 		network = NeuroNet( N_array, dt, step_tot, delim, indicator);
 		cout << "\t Network created." << endl;
 		cout << "\t Initialising neuron populations...";
+		
 		for (unsigned int ind = 0; ind < N_array.size(); ++ind){
 			network.NeuroPopArray.push_back(new NeuroPop(ind, N_array[ind], network.dt, network.step_tot, delim, indicator));
-			//network.NeuroPopArray.back()->set_para(pop_para[ind]);
 			cout << ind+1 << "...";
+
+			string pop_n = "/config/pops/pop" + to_string(ind);
+			
+			// parameter
+			if (group_exist_HDF5(file, pop_n + string("/PARA001"))){
+				vector<int> v_tmp;
+				read_vector_HDF5(file, pop_n + string("/PARA001/para_str_ascii"), v_tmp);
+				// convert ascii to string
+				string para_str;
+				for (unsigned i = 0; i < v_tmp.size(); i++){
+					para_str += char(v_tmp[i]);
+				}
+				network.NeuroPopArray[ind]->set_para(para_str);
+			}
+			
+			// external current setting
+			if (group_exist_HDF5(file, pop_n + string("/INIT004"))){
+				cout << "\t External current settings...";
+				vector<double> mean, std;
+				read_vector_HDF5(file, pop_n + string("/INIT004/mean"), mean);
+				read_vector_HDF5(file, pop_n + string("/INIT004/std"), std);
+				network.NeuroPopArray[ind]->set_gaussian_I_ext(mean, std);
+				cout << "done." << endl;
+			}
+
+			// external conductance setting
+			if (group_exist_HDF5(file, pop_n + string("/INIT012"))){
+				cout << "\t External conductance settings...";
+				vector<double> mean, std;
+				read_vector_HDF5(file, pop_n + string("/INIT012/mean"), mean);
+				read_vector_HDF5(file, pop_n + string("/INIT012/std"), std);
+				network.NeuroPopArray[ind]->set_gaussian_g_ext(mean, std);
+				cout << "done." << endl;
+			}
+
+			// random initial condition settings (double p_fire)
+			if (group_exist_HDF5(file, pop_n + string("/INIT003"))){
+				cout << "\t Random initial condition settings...";
+				double p_fire = read_scalar_HDF5<double>(file, pop_n + string("/INIT003/p_fire"));
+				network.NeuroPopArray[ind]->random_V(p_fire);
+				cout << "done." << endl;
+			}
+			
+
+	
+			// random initial condition settings (double r_V0, double p_fire)
+			if (group_exist_HDF5(file, pop_n + string("/INIT011"))){
+				cout << "\t Random initial condition settings...";
+				double r_V0 = read_scalar_HDF5<double>(file, pop_n + string("/INIT011/r_V0"));
+				double p_fire = read_scalar_HDF5<double>(file, pop_n + string("/INIT011/p_fire"));
+				network.NeuroPopArray[ind]->set_init_condition(r_V0, p_fire);
+				cout << "done." << endl;
+			}
+	
+			// perturbation setting
+			if (group_exist_HDF5(file, pop_n + string("/INIT007"))){
+				cout << "\t Perturbation settings...";
+				int step_perturb = read_scalar_HDF5<int>(file, pop_n + string("/INIT007/step_perturb"));
+				network.NeuroPopArray[ind]->add_perturbation(step_perturb);
+				cout << "done." << endl;
+			}
+			
+			
+			// spike-frequency adaptation setting
+			if (group_exist_HDF5(file, pop_n + string("/INIT010"))){
+				cout << "\t Spike-frequency adaptation settings...";
+				//int spike_freq_adpt = read_scalar_HDF5<int>(file, pop_n + string("/INIT010/spike_freq_adpt"));
+				network.NeuroPopArray[ind]->add_spike_freq_adpt();
+				cout << "done." << endl;
+			}
+			
+	
+			// initialise runaway-killer
+			if (group_exist_HDF5(file, pop_n + string("/KILL001"))){
+				cout << "\t Runaway killer licensing for pop...";
+				double min_ms = read_scalar_HDF5<double>(file, pop_n + string("/KILL001/min_ms"));
+				double runaway_Hz = read_scalar_HDF5<double>(file, pop_n + string("/KILL001/runaway_Hz"));
+				double Hz_ms = read_scalar_HDF5<double>(file, pop_n + string("/KILL001/Hz_ms"));
+				network.NeuroPopArray[ind]->init_runaway_killer(min_ms, runaway_Hz, Hz_ms);
+				cout << "done." << endl;
+			}
+	
+			// neuron stats record settings
+			if (group_exist_HDF5(file, pop_n + string("/SAMP003"))){
+				cout << "\t Neuron stats record settings...";
+				network.NeuroPopArray[ind]->start_stats_record();
+				cout << "done." << endl;
+			}
+			
+			
 		}
 		cout << "done." << endl;
 	}
 
-	// chemical connections
+	
 	if (false){
 		cout << "\t Initialising chemical synapses... ";
 		int n_syns = read_scalar_HDF5<int>(file, string("/config/syns/n_syns"));
 		for (int ind = 0; ind < n_syns; ++ind){
 			string syn_n = "/config/syns/syn" + to_string(ind);
-			int type = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/type"));
-			int i_pre = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/i_pre"));
-			int j_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/j_post"));
-			vector<int> I, J;
-			vector<double> K, D;
-			read_vector_HDF5(file, syn_n + string("/INIT006/I"), I);
-			read_vector_HDF5(file, syn_n + string("/INIT006/J"), J);
-			read_vector_HDF5(file, syn_n + string("/INIT006/K"), K);
-			read_vector_HDF5(file, syn_n + string("/INIT006/D"), D);
-			network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
-			network.ChemSynArray.back()->init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I, J, K, D);
+			// chemical connections
+			if (group_exist_HDF5(file, syn_n + string("/INIT006"))){
+				int type = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/type"));
+				int i_pre = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/i_pre"));
+				int j_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT006/j_post"));
+				vector<int> I, J;
+				vector<double> K, D;
+				read_vector_HDF5(file, syn_n + string("/INIT006/I"), I);
+				read_vector_HDF5(file, syn_n + string("/INIT006/J"), J);
+				read_vector_HDF5(file, syn_n + string("/INIT006/K"), K);
+				read_vector_HDF5(file, syn_n + string("/INIT006/D"), D);
+				network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
+				network.ChemSynArray.back()->init(type, i_pre, j_post, network.N_array[i_pre], network.N_array[j_post], I, J, K, D);
+				
+				// parameters
+				if (group_exist_HDF5(file, string("/config/syns/PARA002"))){
+					vector<int> v_tmp;
+					read_vector_HDF5(file, string("/config/syns/PARA002/para_str_ascii"), v_tmp);
+					// convert ascii to string
+					string para_str;
+					for (unsigned i = 0; i < v_tmp.size(); i++){
+						para_str += char(v_tmp[i]);
+					}
+					network.ChemSynArray.back()->set_para(para_str);
+				}
+					
+				if (group_exist_HDF5(file, string("/config/syns/INIT013"))){
+					int model_choice = read_scalar_HDF5<int>(file, string("/config/syns/INIT013/model_choice"));
+					network.ChemSynArray.back()->set_synapse_model(model_choice);
+				}
+				
+				// STD
+				if (group_exist_HDF5(file, syn_n + string("/INIT008"))){
+					cout << "\t Short-term depression settings...";
+					int STD_on_step = read_scalar_HDF5<int>(file, syn_n + string("/INIT008/STD_on_step"));
+					network.ChemSynArray.back()->add_short_term_depression(STD_on_step);
+					cout << "done." << endl;
+				}
+				
+				
+				// Inhibitory STDP
+				if (group_exist_HDF5(file, syn_n + string("/INIT009"))){
+					cout << "\t Inhibitory STDP settings...";
+					int inh_STDP_on_step = read_scalar_HDF5<int>(file, syn_n + string("/INIT009/inh_STDP_on_step"));
+					network.ChemSynArray.back()->add_inh_STDP(inh_STDP_on_step);
+					cout << "done." << endl;
+				}
+				
+				// syn I mean std record settings
+				if (group_exist_HDF5(file, syn_n + string("/SAMP004"))){
+					cout << "\t Synapse stats record settings...";
+					network.ChemSynArray.back()->start_stats_record();
+					cout << "done." << endl;
+				}	
+				
+				// syn data sampling settings
+				if (group_exist_HDF5(file, syn_n + string("/SAMP002"))){
+					cout << "\t Synapse data sampling settings...";
+					vector<int> neurons;
+					vector<bool> time_points;
+					read_vector_HDF5(file, syn_n + string("/SAMP002/neurons"), neurons);
+					read_vector_HDF5(file, syn_n + string("/SAMP002/time_points"), time_points);
+					network.ChemSynArray.back()->add_sampling(neurons, time_points);
+					cout << "done." << endl;
+				}	
+				
+				cout << ind+1 << "...";
+			}
+			// external spike setting
+			else if (group_exist_HDF5(file, syn_n + string("/INIT005"))){
+				int j_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT005/pop_ind"));
+				int type_ext = read_scalar_HDF5<int>(file, syn_n + string("/INIT005/type_ext"));
+				double K_ext = read_scalar_HDF5<double>(file, syn_n + string("/INIT005/K_ext"));
+				int Num_ext = read_scalar_HDF5<int>(file, syn_n + string("/INIT005/Num_ext"));
+				vector<bool> neurons;
+				read_vector_HDF5(file, syn_n + string("/INIT005/neurons"), neurons);
+				vector<double> rate_ext_t;
+				read_vector_HDF5(file, syn_n + string("/INIT005/rate_ext_t"), rate_ext_t);
+				network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot, delim, indicator));
+				network.ChemSynArray.back()->init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_t, neurons);
+				// network.ChemSynArray.back()->set_para(syn_para);
+				cout << ind+1 << " (ext spike)...";
+			}
+
 			
-			// network.ChemSynArray.back()->set_para(syn_para);
-			//if (synapse_model_choice != 0){
-				//network.ChemSynArray.back()->set_synapse_model(synapse_model_choice);
-			//}
-			cout << ind+1 << "...";
+			
 		}
 		cout << "done." << endl;
 	}
 
+	/*
+	// neuron data sampling settings
+	if (neuron_sample_pop_ind.size() != 0){
+		cout << "\t Neuron data sampling settings...";
+		for (unsigned int ind = 0; ind < neuron_sample_pop_ind.size(); ++ind){
+			int pop_ind = neuron_sample_pop_ind[ind];
+			network.NeuroPopArray[pop_ind]->add_sampling_real_time(neuron_sample_neurons[ind], neuron_sample_type[ind], neuron_sample_time_points[ind], out_filename);
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}	
+	
+	// LFP record settings
+	if (LFP_record_pop_ind.size() != 0){
+		cout << "\t LFP record settings...";
+		for (unsigned int ind = 0; ind < LFP_record_pop_ind.size(); ++ind){
+			int pop_ind = LFP_record_pop_ind[ind];
+			network.NeuroPopArray[pop_ind]->start_LFP_record(LFP_record_setting[ind]);
+			cout << ind+1 << "...";
+		}
+		cout << "done." << endl;
+	}	
+	*/
+	
+	
 	cout << "Importing done." << endl;
-	return true;
+	return 1;
 }
 
 void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_tmp){
@@ -870,6 +1059,68 @@ void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, v
 	
 }
 
+	
+void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<bool> & v_tmp){
+	
+	vector<int> v_tmp_int;
+	read_vector_HDF5(file, name, v_tmp_int);
+	
+	v_tmp.resize(v_tmp_int.size());
+	for (unsigned i = 0; i < v_tmp_int.size(); i++){
+		v_tmp[i] = bool(v_tmp_int[i]);
+	}
+	
+}
+
+void SimuInterface::read_matrix_HDF5(const H5File & file, const string & name, vector< vector <double> > & m_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+	DataSpace dataspace = dataset.getSpace();
+	
+	
+	hsize_t dims_out[2];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+	cout << dims_out[0] << "," <<  dims_out[1] << endl;
+
+    hsize_t fdims[2];            // new data dimensions 
+	fdims[0] = 1;
+	fdims[1] = dims_out[1];
+	
+	m_tmp.resize(dims_out[0]);
+	for (int i = 0; i < int(dims_out[0]); i++ ){
+		hsize_t offset[2];
+		offset[0] = i;
+		offset[1] = 0;
+		
+		/*  selectHyperslab not working properly? */
+		cout << fdims[0]<< "," <<  fdims[1] << endl;
+		cout << offset[0] << "," <<  offset[1] << endl;
+		
+		DataSpace memspace = dataset.getSpace();
+		memspace.selectHyperslab( H5S_SELECT_SET, fdims, offset );
+		
+		hsize_t m_out[2];
+		memspace.getSimpleExtentDims(  m_out, NULL);
+		cout <<  m_out[0] << "," <<   m_out[1] << endl;
+		/*  selectHyperslab not working properly? */
+		
+		m_tmp[i].resize(dims_out[1]);
+		cout << "here3" << endl;
+		
+		dataset.read(  m_tmp[i].data(), PredType::NATIVE_DOUBLE, memspace, dataspace );	
+		cout << "here4" << endl;
+	}
+	
+	cout << "here" << endl;
+	for (int i = 0; i < int(m_tmp.size()); i++ ){
+		for (int j = 0; j < int(m_tmp[i].size()); j++ ){
+			cout << m_tmp[i][j] << ","; cout.flush();
+		}
+		cout << endl;
+	} 
+}
+
+
 void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<double> & v_tmp){
 	const H5std_string dataset_name( name );
 	DataSet dataset = file.openDataSet( dataset_name );
@@ -890,6 +1141,19 @@ void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, v
 	cout << endl;
 	*/
 }
+
+bool SimuInterface::group_exist_HDF5(const H5File & file, const string & name){
+	// how to suppress the error message??
+	bool r = true;
+	try {  // to determine if the group exists in the file
+		file.openGroup( name );
+	}
+	catch( FileIException& not_found_error ) {
+	  r = false;
+	}
+	return r;
+}
+
 
 template < typename Type > Type SimuInterface::read_scalar_HDF5(const H5File & file, const string & name){
 	vector<Type> v_tmp;
