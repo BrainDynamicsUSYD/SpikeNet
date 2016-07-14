@@ -7,22 +7,31 @@ HEADER_FILES = $(SRC_DIR)/*.h
 OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o
 
 
+HDF5 = yes # put anything here to compile with HDF5
+	ifdef HDF5
+	HDF5FLAG = -DHDF5
+	HDF5INCLUDE = -I/usr/local/include 
+	HDF5LIBS = -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
+else
+	HDF5FLAG =
+	HDF5INCLUDE =
+	HDF5LIBS =
+endif
+
 ###########################################################################
 CXX = g++ # must use version that MATLAB supp
 
-CXXHDF5FLAG = -DHDF5
-
-CXXFLAGS = -std=c++11 -Wall -Wextra
+CXXFLAGS = -std=c++11 -Wall -Wextra $(HDF5FLAG)
 
 CXXDEBUGFLAGS = -Wall -g #-pg #-pg for gprof
 
 CXXOPTIMFLAGS = #-O1 #higher level: -O2 or -O3
 
-CXXINCLUDE = -I/usr/local/include 
+CXXINCLUDE = $(HDF5INCLUDE)
 
-CXXLIBS =  -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
+CXXLIBS = $(HDF5LIBS)
 
-COMPILE_THIS_ONE = $(CXX) ${CXXHDF5FLAG} $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
+COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
 ###########################################################################
 #include includes.mk
 all: $(EXEC)
