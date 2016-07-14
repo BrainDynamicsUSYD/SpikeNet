@@ -7,7 +7,7 @@ function writeInitVHDF5(FID, p_fire)
 % the given p_fire
 
 for i=1:length(p_fire)
-    hdf5write(FID,['/config/pops/pop',num2str(i),'/INIT003/p_fire'],p_fire(i),'WriteMode','append')
+    hdf5write(FID,['/config/pops/pop',num2str(i-1),'/INIT003/p_fire'],p_fire(i-1),'WriteMode','append')
 end
    
 end

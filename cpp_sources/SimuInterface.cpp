@@ -723,10 +723,12 @@ void SimuInterface::output_results(){
  	ifstream in_file_attach( in_filename );
     output_file << in_file_attach.rdbuf();
 
-	cout << "done." << endl << "------------------------------------------------------------" << endl;
-	// Write data file name to stdout and use "grep ygout" to extract it!
+	cout << "done." << endl;
 	cout << "Data file name is: " << endl;
 	cout << "	" << out_filename << endl;
+	cout << "------------------------------------------------------------" << endl;
+	// Write data file name to stdout and use "grep ygout" to extract it!
+	
 		
 }
 
@@ -780,18 +782,19 @@ template < typename Type, typename A > void SimuInterface::read_next_line_as_vec
 
 #ifdef HDF5
 void SimuInterface::output_results_HDF5(){
-	// output results into text file
+	// output results into HDF5 file
+	cout << "Outputting results into HDF5 file...";
+	
+	
 	H5File file_HDF5;
 	string file_name_HDF5 = out_filename.append(".h5");
-	cout << "Creating HDF5 output file...";
 	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
 	network.output_results(file_HDF5);
-
-	cout << "done." << endl << "------------------------------------------------------------" << endl;
+	cout << "done." << endl;
 	// Write data file name to stdout and use "grep ygout" to extract it!
 	cout << "Data file name is: " << endl;
 	cout << "	" << out_filename << endl;
-		
+	cout << "------------------------------------------------------------" << endl;	
 }
 
 

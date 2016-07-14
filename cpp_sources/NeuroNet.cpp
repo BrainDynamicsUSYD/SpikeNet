@@ -94,9 +94,6 @@ void NeuroNet::output_results(ofstream& output_file){
 #ifdef HDF5
 void NeuroNet::output_results(H5File & file_HDF5){
 
-	// write data
-	cout << "Outputting results into HDF5 file..." << endl;
-
 	// KILL002 # step at which runaway activity is killed
 	//output_file << indicator << " KILL002" << endl;
 	//output_file << step_killed << delim << endl;
