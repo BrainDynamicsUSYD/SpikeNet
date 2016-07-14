@@ -10,21 +10,25 @@ syn_type = 0;  % AMPA
  
  
 n_syns = h5read(FID,'/config/syns/n_syns');
-n_match = 0;
-for n = 1:n_syns
-    type = hdf5read(FID,['/config/syns/syn',num2str(n),'/INIT006/type']);
-    i_pre = hdf5read(FID,['/config/syns/syn',num2str(n),'/INIT006/i_pre']);
-    j_post = hdf5read(FID,['/config/syns/syn',num2str(n),'/INIT006/j_post']);
-    
-    if pre_pop_ind  == i_pre && post_pop_ind == j_post &&  syn_type == type
-        n_match = n;
+n_match = NaN; 
+for n = (1:n_syns)-1  % c++ index
+    try
+        type = hdf5read(FID,['/config/syns/syn',num2str(n),'/INIT006/type']);
+        i_pre = hdf5read(FID,['/config/syns/syn',num2str(n),'/INIT006/i_pre']);
+        j_post = hdf5read(FID,['/config/syns/syn',num2str(n),'/INIT006/j_post']);
+        
+        if pre_pop_ind == i_pre && post_pop_ind == j_post &&  syn_type == type
+            n_match = n;
+        end
+    catch ME
     end
 end
 
-if n_match == 0
+
+if isnan(n_match)
     error('Cannot find syn with identical pop_ind_pre, pop_ind_post and syn_type == AMPA!')
 else
-    hdf5write(FID,['/config/syns/syn',num2str(n_match),'/INIT008/STD_step'], STD_step);
+    hdf5write(FID,['/config/syns/syn',num2str(n_match),'/INIT008/STD_on_step'], STD_step,'WriteMode','append');
 end
 
 end

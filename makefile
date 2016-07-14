@@ -20,7 +20,7 @@ CXXOPTIMFLAGS = #-O1 #higher level: -O2 or -O3
 
 CXXINCLUDE = -I/usr/local/include 
 
-CXXLIBS =  -L/usr/local/lib/ -lhdf5_cpp -lhdf5
+CXXLIBS =  -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
 
 COMPILE_THIS_ONE = $(CXX) ${CXXHDF5FLAG} $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
 ###########################################################################

@@ -73,7 +73,7 @@ void NeuroNet::update(int step_current){
 void NeuroNet::output_results(ofstream& output_file){
 
 	// write data
-	cout << "Outputting results into text file..." << endl;
+	// cout << "Outputting results into text file..." << endl;
 	
 	// KILL002 # step at which runaway activity is killed
 	output_file << indicator << " KILL002" << endl;

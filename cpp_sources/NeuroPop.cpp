@@ -789,12 +789,13 @@ void NeuroPop::add_sampling_real_time_HDF5(const vector<int>& sample_neurons_inp
 	}
 	sample.N_neurons = sample.neurons.size();
 	
-	sample.file_name = sample_file_name_input.append("_");
+	sample.file_name = sample_file_name_input;
+	sample.file_name.append("_");
 	sample.file_name.append(to_string(pop_ind));
 	
-	sample.file_name.append("_out.h5");
+	sample.file_name.append("_neurosamp.h5");
 	// Create a new file using default properties. 
-	cout << "Creating HDF5 output file...\n";
+	// cout << "Creating HDF5 output file..." << sample.file_name;
 	sample.file_HDF5 = new H5File( sample.file_name.c_str(), H5F_ACC_TRUNC );
 	// dataset dimensions
 	hsize_t dims[2]; 

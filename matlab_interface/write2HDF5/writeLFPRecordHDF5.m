@@ -14,6 +14,8 @@ pop_ind = pop_ind-1;
 if n_LFP > N % if the size is not right
     warning('For multiple LFP measures, use multiple rows.')
 else
+    LFP_neurons = LFP_neurons'; % columns
+    LFP_neurons = LFP_neurons(:); % vectorization
     hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP005/LFP_neurons'],LFP_neurons,'WriteMode','append');
 end
 

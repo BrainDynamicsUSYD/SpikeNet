@@ -1,4 +1,4 @@
-function [FID] = new_ygin_files_and_randseedHDF5(loop_num, syn)
+function [name] = new_ygin_files_and_randseedHDF5(loop_num, syn)
 
 if nargin == 1
     syn = 1;
@@ -23,9 +23,9 @@ rng(rand_seed,alg); %  Note that this effect is global!
 %write strings, need to create the dataset before writing) so for now use
 %the more capable hdf5write function though it may be removed in future
 %versions
-hdf5write(FID,'Original_filename',name);
-hdf5write(FID,'/MATLAB/rng_seed',rand_seed,'WriteMode','append');
-hdf5write(FID,'/MATLAB/rng_alg',alg,'WriteMode','append');
+hdf5write(name,'Original_filename',name);
+hdf5write(name,'/MATLAB/rng_seed',rand_seed,'WriteMode','append');
+hdf5write(name,'/MATLAB/rng_alg',alg,'WriteMode','append');
 % h5create(name,'/MATLAB/rand_alg',1,alg);
 
 fprintf('Random number generator seed is: %f\n', rand_seed );

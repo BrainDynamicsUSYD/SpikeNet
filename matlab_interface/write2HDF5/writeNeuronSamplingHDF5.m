@@ -41,6 +41,6 @@ hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_ext'],d
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_K'],data_type(8),'WriteMode','append'); 
 
 
-hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/sample_ind'],sample_ind,'WriteMode','append');
-hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/time_index'],time_index,'WriteMode','append');
+hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/neurons'],sample_ind,'WriteMode','append');
+hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/time_points'],time_index,'WriteMode','append');
 end

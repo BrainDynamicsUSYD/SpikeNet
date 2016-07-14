@@ -33,5 +33,7 @@ hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/Num_ext'],Num_ext,'WriteM
 hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/neurons'],neurons,'WriteMode','append'); 
 hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT005/rate_ext_t'],rate_ext_t,'WriteMode','append'); 
 
+fprintf('C++ external spikes: n_syn = %d, pop = %d, type = %d\n'  , n, pop_ind, type_ext);
+
 end
 
