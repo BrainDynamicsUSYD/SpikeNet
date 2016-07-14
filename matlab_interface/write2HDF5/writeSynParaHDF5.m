@@ -27,7 +27,7 @@ else
 
     para_str = [];
     for i = 1:var_num
-        para_str = [para_str, varargin{i*2-1}, ',' , varargin{i*2}, ',']; %#ok<AGROW>
+        para_str = [para_str, varargin{i*2-1}, ',' , num2str(varargin{i*2}), ',']; %#ok<AGROW>
     end
     hdf5write(FID,'/config/syns/PARA002/para_str_ascii', double(para_str),'WriteMode','append');
 end

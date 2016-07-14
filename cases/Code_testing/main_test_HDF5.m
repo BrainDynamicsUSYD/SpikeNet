@@ -16,7 +16,7 @@ k = 1*2.4e-3; % miuSiemens
 % Basic parameters
 dt = 0.1;
 step_tot = 1000;
-N = [10; 12; 13; 14;];
+N = [10; 12; ];
 writeBasicParaHDF5(FID, dt, step_tot, N)
 Num_pop = length(N);
 discard_transient = 0; % ms
@@ -28,14 +28,11 @@ writePopParaHDF5(FID, 2,  'tau_ref', 3.2);
 writeSynParaHDF5(FID, 'tau_decay_AMPA', 2.0, 'Dt_trans_AMPA', 0.5);
 
 % external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 0.5; %1.4; % nA
+I_ext_strength = 10; %1.4; % nA
 writeExtCurrentSettingsHDF5(FID, 1, I_ext_strength*ones(1,N(1)), 0*ones(1,N(1)));
 
-
-writeExtCurrentSettingsHDF5(FID, 3, I_ext_strength*ones(1,N(3))*2, 0*ones(1,N(3)));
-
-g_ext_strength = 0.01;
-writeExtConductanceSettingsHDF5(FID, 4, g_ext_strength*ones(1,N(4)), 0*ones(1,N(4)));
+g_ext_strength = 0.5;
+writeExtConductanceSettingsHDF5(FID, 2, g_ext_strength*ones(1,N(2)), 0*ones(1,N(2)));
 
 % external spike settings
 writeExtSpikeSettingsHDF5(FID, 1, 1, k,  20, 10*ones(1,step_tot), ones(1, N(1)) );
@@ -45,15 +42,12 @@ sample_steps = zeros(1,step_tot);
 sample_steps(1:2:step_tot) =  true;
 writeNeuronSamplingHDF5(FID, 1, ones(1,8), 1:2:10 , sample_steps);
 writeNeuronSamplingHDF5(FID, 2, ones(1,8), 1 , sample_steps);
-writeNeuronSamplingHDF5(FID, 3, ones(1,8), 1:2:10 , ones(1,step_tot));
-writeNeuronSamplingHDF5(FID, 4, ones(1,8), 1:2:10 , ones(1,step_tot));
-
 
 
 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
 % type(1:AMAP, 2:GABAa, 3:NMDA)
 
-pop_type = [1 2 1 2];
+pop_type = [1 2];
 for i_pre = 1:Num_pop
     for j_post = 1:Num_pop
         [I, J, ~] = find(MyRandomGraphGenerator('E_R_pre_post','N_pre',N(i_pre),'N_post',N(j_post),'p',rand));
@@ -68,9 +62,9 @@ end
 % synapse data sampling
 writeSynSamplingHDF5(FID, 1,  2, 1,  1, sample_steps)
 
-writeInhSTDPHDF5(FID, 2, 4, 10)
+writeInhSTDPHDF5(FID, 2, 1, 10)
 
-writeSTDHDF5(FID, 1, 2, 10)
+writeSTDHDF5(FID, 1, 1, 10)
 
 % Add LFP sampling
 writeLFPRecordHDF5(FID, 1, ones(3, 10));
