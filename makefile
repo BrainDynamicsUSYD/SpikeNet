@@ -8,7 +8,7 @@ OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o
 
 
 HDF5 = yes # put anything here to compile with HDF5
-	ifdef HDF5
+ifdef HDF5
 	HDF5FLAG = -DHDF5
 	HDF5INCLUDE = -I/usr/local/include 
 	HDF5LIBS = -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
