@@ -46,11 +46,15 @@ SpikeNet is a software developed for simulating spiking neuronal networks, of wh
 
 \item [User-friendly interface] In SpikeNet, although, C\texttt{++}  is used for heavy-duty computation, its user-interface is written in a high-level programming language (Matlab) for user-friendliness. This means SpikeNet does not require non-developer users to be familiar with C\texttt{++}. In practise, the typical work-flow of SpikeNet user is as following.
 \begin{enumerate}
-\item In Matlab, use SpikeNet functions to generate the input files (plain text) that define the simulation case.
+\item In Matlab, use SpikeNet functions to generate the input files that define the simulation case.
 \item Evoke the SpikeNet C\texttt{++} simulator, which reads the input files, runs the simulation and generates the output files.
-\item In Matlab, use SpikeNet functions to parse the output files (plain text) into Matlab data for post-processing.
+\item In Matlab, use SpikeNet functions to parse the output files into Matlab data for post-processing.
 \end{enumerate}
-Please see \nameref{sec:matlab user interface} for more detailed descriptions of the work-flow. Developer users will be interested to know that the data format of the aforementioned input and output files follows pre-defined protocols (see \nameref{sec:Output protocols} and \nameref{sec:Input protocols}). This design essentially makes the SpikeNet C\texttt{++} simulator a stand-alone software. Based on these protocols, the C\texttt{++} simulator can easily interface with any other high-level programming languages if Matlab is not prefered.
+Please see \nameref{sec:matlab user interface} for more detailed descriptions of the work-flow. 
+This design essentially makes the SpikeNet C\texttt{++} simulator a stand-alone software. 
+Based on these protocols, the C\texttt{++} simulator can easily interface with any other high-level programming languages if Matlab is not prefered.
+Developer users will be interested to know that SpikeNet supports two types of input/output file formats: plain text and HDF5.
+Both text-based and HDF5 file formats follow pre-defined protocols (see \nameref{sec:Output protocols} and \nameref{sec:Input protocols}). 
 
 \item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created and simulated in parallel and the amount of message passing among them at each simulation time step is minimal.  
 \end{description}
@@ -59,7 +63,8 @@ Please see \nameref{sec:matlab user interface} for more detailed descriptions of
 \begin{itemize}
 \item C\texttt{++}11 standard is required (GCC 4.2.1 or later; Intel C++ 12.0 or later).
 \item Matlab is optional but highly recommended.
-\item Portable Batch System (PBS) is optional but highly recommended.
+\item HDF5 C\texttt{++} and C API are optional but recommended for data-intensive projects.
+\item Portable Batch System (PBS) is optional.
 \item Message Passing Interface (MPI) implementation is optional.
 \end{itemize}
  
@@ -124,7 +129,7 @@ Here are some basic tips on git.
 \end{minipage}
 
 \section{Workflow}
-The typical workflow of SpikeNet is as shown in the following flowchart.
+The typical workflow of SpikeNet with text-based input/output files is as shown in the following flowchart.
 \vskip 0.5cm
 
 % Define block styles
