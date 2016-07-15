@@ -12,58 +12,33 @@ if nargin == 0
 end
 
 if ~isempty(files)
-    
-    hw = 31;% half width of the grid
-    fw = 2*hw + 1;
-    [Lattice, N] = lattice_nD(2, hw);
     for fi = 1:length(files)
         % OutData{id_out}.file = files{id_out};
         [file_dir, file_name, ~] = fileparts(files{fi});
-        
         fprintf('Current file is: %s\n', files{fi});
-        
-       
-        r = 7;% radius of the local field
-        
-        sum_K_EE_local = zeros(fw);
-        sum_K_EIE_local = zeros(fw);
         tic;
         fprintf('Reading ygin_syn file...');
         R_EE = read_ygin_syn(files{fi},1,1);
+        W_EE = sparse(R_EE{1}.I, R_EE{1}.J, R_EE{1}.K, N(1), N(1));
+        clear R_EE;
         R_IE = read_ygin_syn(files{fi},1,2);
+        W_IE = sparse(R_IE{1}.I, R_IE{1}.J, R_IE{1}.K, N(1), N(2));
+        clear R_IE;
         R_EI = read_ygin_syn(files{fi},2,1);
+        W_EI = sparse(R_EI{1}.I, R_EI{1}.J, R_EI{1}.K, N(2), N(1));
+        clear R_IE;
         fprintf('done.\n');
-        toc;
-        R_EE = R_EE{1};
-        R_IE = R_IE{1};
-        R_EI = R_EI{1};
-        for ind = 1:N
-            dist = lattice_nD_find_dist(Lattice, hw, ind);
-            ind_E_local = (find(dist <= r)); % the indices of the neurons in pop E that are considered as local
-            clear dist;
-            
-            i_EE_local = ismember(R_EE.I, ind_E_local); % true if the connection from pop E to pop E originates locally
-            j_EE_local = ismember(R_EE.J, ind_E_local); % true if the connection from pop E to pop E terminates locally
-            sum_K_EE_local(ind) = sum( R_EE.K(i_EE_local & j_EE_local) ); % the sum of the connection stengths from local neurons to local neurons in pop E
-            clear i_EE_local j_EE_local;
-             
-            i_IE_local = ismember(R_IE.I, ind_E_local);% true if the connection from pop E to pop I originates locally in pop E
-            j_EI_local = ismember(R_EI.J, ind_E_local);% true if the connection from pop I to pop E terminates locally in pop E
-            
-            ind_I_recv_local = unique(R_IE.J(i_IE_local)); % the indices of the neurons in pop I that receive connections from local neurons in pop E  
-            ind_I_send_local = unique(R_EI.I(j_EI_local)); % the indices of the neurons in pop I that send connections to local neurons in pop E  
-            
-            ind_I_local = intersect(ind_I_recv_local, ind_I_send_local); % the indices of the neurons in pop I that are considered as local, which is defined as the intersection of the two above sets  
-            clear ind_I_recv_local ind_I_send_local;
-            
-            sum_K_IE_local_EIE = sum( R_IE.K( i_IE_local & ismember(R_IE.J, ind_I_local) ) ); % the sum of the connection stengths from local neurons in pop E to local neurons in pop I
-            sum_K_EI_local_EIE = sum( R_EI.K( j_EI_local & ismember(R_EI.I, ind_I_local) ) ); % the sum of the connection stengths from local neurons in pop I to local neurons in pop E
-            clear ind_I_local i_IE_local j_EI_local;
-            
-            sum_K_EIE_local(ind) = sum_K_EI_local_EIE*sum_K_IE_local_EIE;
-            
-        end
-        save([file_dir, '\', file_name, '_EE_EIE.mat'], 'sum_K_EE_local', 'sum_K_EIE_local','r');
+        
+        
+        N = [3696, 1000]; % replace this!
+        pbc = 1; % periodic boundary condition
+        EE_dist = GridDM([N(1) N(1) 1], [N(1) N(1) 1], pbc); % a full N1-by-N1 matrix of the distance between each pair of neurons
+        r = 7;% radius of the local field
+        EE_local = EE_dist <= r; % symmetric matrix
+        W_EE_local_sum = EE_local*W_EE*EE_local;
+        W_EIE_local_sum = EE_local*W_EI*W_IE*EE_local;
+
+        save([file_dir, '\', file_name, '_EE_EIE.mat'], 'W_EE_local_sum', 'W_EIE_local_sum','r');
     end
     
 end
