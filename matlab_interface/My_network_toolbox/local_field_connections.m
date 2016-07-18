@@ -30,13 +30,15 @@ if ~isempty(files)
         fprintf('done.\n');
         
         
-        N = [3696, 1000]; % replace this!
+        N = [3969, 1000]; % replace this!
+        hw = 31;
+        fw = hw*2+1;
         pbc = 1; % periodic boundary condition
-        EE_dist = GridDM([N(1) N(1) 1], [N(1) N(1) 1], pbc); % a full N1-by-N1 matrix of the distance between each pair of neurons
+        EE_dist = GridDM([fw fw 1], [fw fw 1], pbc); % a full N1-by-N1 matrix of the distance between each pair of neurons
         r = 7;% radius of the local field
         EE_local = EE_dist <= r; % symmetric matrix
-        W_EE_local_sum = EE_local*W_EE*EE_local;
-        W_EIE_local_sum = EE_local*W_EI*W_IE*EE_local;
+        W_EE_local_sum = diag(EE_local*W_EE*EE_local);
+        W_EIE_local_sum = diag(EE_local*W_EI*W_IE*EE_local);
 
         save([file_dir, '\', file_name, '_EE_EIE.mat'], 'W_EE_local_sum', 'W_EIE_local_sum','r');
     end
