@@ -44,6 +44,7 @@ for iter = 1:iter_num
         end
         % degree_in factor
         degree_in_factor = degree_in_left;
+        degree_in_factor(degree_in_factor <= 4) = degree_in_factor(degree_in_factor <= 4).^6/(4^6); % try to solve the issue: sometimes what's left will be [NaN NaN 1 1 2 1 NaN] and 5
         % joint factor
         %dist_factor = normc(dist_factor);
         %degree_in_factor = normc(degree_in_factor);
