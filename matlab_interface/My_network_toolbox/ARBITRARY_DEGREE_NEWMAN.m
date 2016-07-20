@@ -105,10 +105,8 @@ end
 disp('Equalising done.');
 % Randomly connect nodes according to pairs
 disp('Generating adjacency matrix...');
-stub_in = degree2stub( pairs(:,1) );
-stub_out = degree2stub( pairs(:,2) );
-A = full(sparse(stub_out,stub_in,1,N,N)); % generate adjacency matrix
-A(logical(eye(size(A)))) = 0; % No self-connection
+no_self = 1;
+[A] = generate_graph_given_in_out_degree(pairs(:,1), pairs(:,2), no_self);
 disp('Adjacency matrix generated.');
 % note that A(i,j) = 1 means connection exists from pre-synaptic neuron i to post-synaptic neuron j
 if order_index_wrt_in_degree == 1
