@@ -11,6 +11,10 @@ if nargin == 0
     
 end
 
+N = [3969, 1000] % replace this!
+hw = 31;
+fw = hw*2+1;
+        
 if ~isempty(files)
     for fi = 1:length(files)
         % OutData{id_out}.file = files{id_out};
@@ -30,9 +34,7 @@ if ~isempty(files)
         fprintf('done.\n');
         
         
-        N = [3969, 1000]; % replace this!
-        hw = 31;
-        fw = hw*2+1;
+
         pbc = 1; % periodic boundary condition
         EE_dist = GridDM([fw fw 1], [fw fw 1], pbc); % a full N1-by-N1 matrix of the distance between each pair of neurons
         r = 7;% radius of the local field
