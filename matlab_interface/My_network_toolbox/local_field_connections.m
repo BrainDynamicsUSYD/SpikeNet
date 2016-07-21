@@ -39,10 +39,10 @@ if ~isempty(files)
         EE_dist = GridDM([fw fw 1], [fw fw 1], pbc); % a full N1-by-N1 matrix of the distance between each pair of neurons
         r = 7;% radius of the local field
         EE_local = EE_dist <= r; % symmetric matrix
-        W_EE_local_sum = diag(EE_local*W_EE*EE_local );
-        W_EIE_local_sum = diag(EE_local*W_IE*W_EI*EE_local);
+        W_EE_local_sum = vec2mat(diag(EE_local*W_EE*EE_local), fw);
+        W_EIE_local_sum = vec2mat(diag(EE_local*W_IE*W_EI*EE_local), fw);
 
-        save([file_dir, '\', file_name, '_EE_EIE.mat'], 'W_EE_local_sum', 'W_EIE_local_sum','r');
+        save([file_name, '_EE_EIE.mat'], 'W_EE_local_sum', 'W_EIE_local_sum','r');
     end
     
 end
