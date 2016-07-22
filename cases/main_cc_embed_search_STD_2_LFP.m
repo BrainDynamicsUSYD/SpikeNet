@@ -7,7 +7,7 @@ function main_cc_embed_search_STD_2_LFP(varargin)
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 10*sec; % use 10 second!
+step_tot = 4*sec; % use 10 second!
 
 % Loop number for PBS array job
 loop_num = 0;
@@ -27,7 +27,7 @@ for phi_ind = 1:5
                 for EI_factor = [ 0.8 ]
                     for degree_CV = [0.1 ] % 0.5?
                         for  P0_init = [ 0.08 ] % 0.25 gives P0_actual = 0.2
-                            for I_ext_strength = [ 0.8 0.9 ]% 0.9*ones(1,10)]
+                            for I_ext_strength = [ 0.8 0.8 0.8 0.8 0.9 0.9 0.9 0.9 ]% 0.9*ones(1,10)]
                                 for  tau_c = [10  ]
                                     loop_num = loop_num + 1;
                                     

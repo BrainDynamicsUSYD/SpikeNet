@@ -20,7 +20,7 @@ delay = 4;
 P0_init = 0.05;
 
 P_mat = [P0_init 0.1;
-    0.4  0.2]; % [0.1 0.2]
+    0.5  0.2]; % [0.1 0.2]
 
 % sptially embedded network
 hw = 44; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
@@ -53,7 +53,7 @@ for SpikeFreqAapt = [1]
                 for deg_hybrid = [0.4 ]
                     degree_CV = 0.2; % 0.2 works
                     
-                    for g_mu = [4]*10^-3;
+                    for g_mu = [2 3 4]*10^-3; % 4
                         
                         
                         EPSP_mu = fit_g_2_EPSP_2(g_mu);
@@ -70,13 +70,13 @@ for SpikeFreqAapt = [1]
                             %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                             
                             
-                            for g_EI = [ 12 ]*10^-3
+                            for g_EI = [ 20 22 24 26]*10^-3
                                 for g_IE = [5]*10^-3
-                                    for g_II = [21 23 25 27 29]*10^-3 % 25
+                                    for g_II = [25]*10^-3 % 25
                                         
-                                        for rate_ext = [1.8 1.9 2.0]; %1.9
+                                        for rate_ext = [1.4 1.8 2.2]; %1.9
                                             for  tau_c_E = [8 ]
-                                                for tau_c_EI = [25 30 35 40] % 15
+                                                for tau_c_EI = [ 40] % 15
                                                     for tau_c_II = [15] % 15
                                                         loop_num = loop_num + 1;
                                                         
