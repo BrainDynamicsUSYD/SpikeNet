@@ -54,7 +54,7 @@ Please see \nameref{sec:matlab user interface} for more detailed descriptions of
 This design essentially makes the SpikeNet C\texttt{++} simulator a stand-alone software. 
 Based on these protocols, the C\texttt{++} simulator can easily interface with any other high-level programming languages if Matlab is not prefered.
 Developer users will be interested to know that SpikeNet supports two types of input/output file formats: plain text and HDF5.
-Both text-based and HDF5 file formats follow pre-defined protocols (see \nameref{sec:Output protocols} and \nameref{sec:Input protocols}). 
+Both text-based and HDF5 file formats follow pre-defined protocols (see \nameref{sec:IO protocols}). 
 
 \item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created and simulated in parallel and the amount of message passing among them at each simulation time step is minimal.  
 \end{description}
@@ -77,7 +77,7 @@ Following are the steps to set up the SpikeNet C\texttt{++} simulator.
 \item Go into the directory: \mylstinline{cd SpikeNet}
 \item Build the C\texttt{++} simulator:  \mylstinline{make; make clean; cd ..; ls}
 \end{itemize}
-Now you should see the ``simulator'' in the current directory, with which you can run simulations by creating input files according to \nameref{sec:Input protocols}.
+Now you should see the ``simulator'' in the current directory, with which you can run simulations by creating input files according to \nameref{sec:IO protocols}.
 However, it will be much easier to work with the Matlab user interface.
 If you do not have access to Matlab, try to contact the contributors to request interfaces with other high-level programming languages (Python for example).
 Following are the steps to use the Matlab user interface.
@@ -291,11 +291,10 @@ See main\_demo.m for a list of the basic case-building matlab functions and thei
 
 ++Add  descriptions of CollectVectorYG and CollectCellYG.
 
-\section{Input protocols}
-\label{sec:Input protocols}
-
-The input files are plain text files.
-The default input filename is ``filename.ygin''.
+\section{Input/Output protocols}
+\label{sec:IO protocols}
+\subsection{Text-based input protocols}
+The default filename for text-based input file is ``filename.ygin''.
 It is advised that synapse definitions always be given in a separate file.
 The default synapse definition filename is ``filename.ygin\_syn''.
 Non-default synapse definition file path and name can be specified by ``SYNF001'' protocol.
@@ -404,10 +403,47 @@ Note that the protocols use three special characters, including ``\textgreater''
 	
 \end{lstlisting}
 
-\section{Output protocols}
-\label{sec:Output protocols}
-The output files are plain text files.
-The default output filename is ``filename-X.ygout'', where X is a time-stamp that uniquely marks the output file so that multiple simulations can be run for the same input files.
+\subsection{HDF5-based input protocols}
+HDF5-based input protocols basically follow the text-based protocols (with a few exceptions!).
+
+\hfill\begin{minipage}{\dimexpr\textwidth-1cm}
+\dirtree{%
+.1 /.
+.2 config.
+.3 Net.
+.4 INIT001.
+.5 N.
+.4 INIT002.
+.5 dt, step\_tot.
+.3 pops.
+.4 pop0.
+.5 PARA001.
+.6 para\_str\_ascii.
+.5 INIT004.
+.6 mean, std.
+.5 INIT011.
+.6 r\_V0, p\_fire.
+.5 \dots.
+.4 pop1.
+.5 \dots.
+.4 \dots.
+.3 syns.
+.4 n\_syns.
+.4 syn0.
+.5 INIT006.
+.6 type, i\_pre, j\_post, I, J, K, D.
+.5 INIT005.
+.6 pop\_ind, type\_ext, K\_ext, Num\_ext, neurons, rate\_ext\_t.
+.5 \dots.
+.4 syn1.
+.5 \dots.
+.4 \dots.
+}
+\xdef\tpd{\the\prevdepth}
+\end{minipage}
+
+\subsection{Text-based output protocols}
+The default filename of text-based output file is ``filename-X.ygout'', where X is a time-stamp that uniquely marks the output file so that multiple simulations can be run for the same input files.
 For data completeness, the corresponding input file will be attached to the output file.
 Following is the complete list of the output data protocols.
 \begin{lstlisting}[mathescape]
