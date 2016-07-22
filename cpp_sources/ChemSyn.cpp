@@ -687,14 +687,14 @@ void ChemSyn::write2file(ofstream& output_file, const vector<double>& v){
 
 
 #ifdef HDF5
-void ChemSyn::output_results(H5File& file){
+void ChemSyn::output_results(H5File& file, int syn_ind){
 	// new group
 	stringstream group_name;
-	group_name << "/syn_result_"  << pop_ind_pre << "_" << pop_ind_post  << "_" << syn_type;
+	group_name << "/syn_result_"  << syn_ind;
 	Group group_syn = file.createGroup(group_name.str());
 	
-	write_string_HDF5(group_syn, dump_para(), string("pop_para"));
-	
+	write_string_HDF5(group_syn, dump_para(), string("syn_para"));
+		
 	if (!sample.neurons.empty()){
 		write_matrix_HDF5(group_syn, sample.data, string("sample_data"));
 	}
@@ -704,6 +704,20 @@ void ChemSyn::output_results(H5File& file){
 		write_vector_HDF5(group_syn, stats.I_std, string("stats_I_std"));
 	}
 }
+
+
+void ChemSyn::write_scalar_HDF5(Group & group, int s, const string & v_name){
+	vector<int> v_tmp;
+	v_tmp.push_back(s);
+	write_vector_HDF5(group, v_tmp, v_name);
+}
+
+void ChemSyn::write_scalar_HDF5(Group & group, double s, const string & v_name){
+	vector<double> v_tmp;
+	v_tmp.push_back(s);
+	write_vector_HDF5(group, v_tmp, v_name);
+}
+
 
 
 void ChemSyn::write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){

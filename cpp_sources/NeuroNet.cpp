@@ -95,9 +95,10 @@ void NeuroNet::output_results(ofstream& output_file){
 void NeuroNet::output_results(H5File & file_HDF5){
 
 	// KILL002 # step at which runaway activity is killed
-	//output_file << indicator << " KILL002" << endl;
-	//output_file << step_killed << delim << endl;
-
+	Group group_tmp = file_HDF5.createGroup(string("/run_away_killed"));
+	vector<int> v_tmp; v_tmp.push_back(step_killed);
+	write_vector_HDF5(group_tmp, v_tmp, string("step"));
+		
 	// dump population data
 	for (int i = 0; i < Num_pop; i++){
 		NeuroPopArray[i]->output_results(file_HDF5);
@@ -105,9 +106,17 @@ void NeuroNet::output_results(H5File & file_HDF5){
 
 	// dump synapse data
 	for (unsigned int i = 0; i < ChemSynArray.size(); i++){
-		ChemSynArray[i]->output_results(file_HDF5);
+		ChemSynArray[i]->output_results(file_HDF5, i);
 	}
 	
+}
+
+void NeuroNet::write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
+	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
 }
 #endif
 

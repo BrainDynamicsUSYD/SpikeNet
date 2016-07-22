@@ -39,7 +39,7 @@ public:
 	void start_stats_record(); /// turn on basic statistics recording
 	void output_results(ofstream& output_file); /// write output to file
 #ifdef HDF5
-	void output_results(H5File& file_HDF5);
+	void output_results(H5File& file_HDF5, int syn_ind);
 #endif
 	const int & get_syn_type(); /// get synapse type
 	const int & get_pop_ind_pre(); /// get index of pre-synaptic population
@@ -71,6 +71,8 @@ private:
 	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
 	void write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string & m_name);
 	void write_string_HDF5(Group & group, const string & s, const string & s_name);
+	void write_scalar_HDF5(Group & group, int s, const string & v_name);
+	void write_scalar_HDF5(Group & group, double s, const string & v_name);
 	#endif
 protected:
 	// constants

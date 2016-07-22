@@ -29,6 +29,7 @@ public:
 	void output_results(ofstream& output_file);
 #ifdef HDF5
 	void output_results(H5File& file_HDF5);
+	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 #endif
 	
 
