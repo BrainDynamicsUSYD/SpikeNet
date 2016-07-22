@@ -789,6 +789,10 @@ void SimuInterface::output_results_HDF5(){
 	H5File file_HDF5;
 	string file_name_HDF5 = out_filename.append(".h5");
 	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
+	
+	Group group_tmp = file_HDF5.createGroup(string("/config_filename"));
+	write_string_HDF5(group_tmp, in_filename, string("config_filename"));
+	
 	network.output_results(file_HDF5);
 	cout << "done." << endl;
 	// Write data file name to stdout and use "grep ygout" to extract it!
@@ -1174,6 +1178,21 @@ void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, v
 	}
 	cout << endl;
 	*/
+}
+
+void SimuInterface::write_string_HDF5(Group & group, const string & s, const string &  s_name){
+   // HDF5 only understands vector of char* :-(
+   vector<const char*> arr_c_str;
+   arr_c_str.push_back(s.c_str());
+
+   hsize_t str_dimsf[1] {arr_c_str.size()};
+   DataSpace dataspace(1, str_dimsf);
+
+   // Variable length string
+   StrType datatype(PredType::C_S1, H5T_VARIABLE); 
+   DataSet str_dataset = group.createDataSet(s_name, datatype, dataspace);
+
+   str_dataset.write(arr_c_str.data(), datatype);
 }
 
 bool SimuInterface::group_exist_HDF5(const H5File & file, const string & name){
