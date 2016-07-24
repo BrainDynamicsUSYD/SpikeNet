@@ -6,11 +6,19 @@ int main(int argc, char* argv[]){// arguments should be input file path
 	for (int i = 1; i < argc; ++i){
 		cout << "Processing input file No." << i << " out of " << argc-1 << "..." << endl;
 		SimuInterface simulator;
-		
+		bool success = false;
 #ifdef HDF5
-		bool success = simulator.import_HDF5(argv[i]);
+		string filename = string(argv[i]);
+		if(filename.substr(filename.find_last_of(".") + 1) == "h5") 
+		{
+			success = simulator.import_HDF5(argv[i]);
+		} 
+		else if (filename.substr(filename.find_last_of(".") + 1) == "ygin")
+		{
+			success = simulator.import(argv[i]);
+		}
 #else
-		bool success = simulator.import(argv[i]);
+		success = simulator.import(argv[i]);
 #endif
 		
 		if (success){ // return true if import is successful

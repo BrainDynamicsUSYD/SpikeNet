@@ -705,7 +705,14 @@ void SimuInterface::simulate(){
 
 	// output results into HDF5 file
 #ifdef HDF5
-	output_results_HDF5();
+	if(in_filename.substr(in_filename.find_last_of(".") + 1) == "h5") 
+	{
+		output_results_HDF5();
+	} 
+	else if (in_filename.substr(in_filename.find_last_of(".") + 1) == "ygin")
+	{
+		output_results();
+	}
 #else
 	// output results into text file
 	output_results();
