@@ -6,6 +6,9 @@
 #include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
 #include <fstream> // fstream : Stream class to both read and write from / to files
 
+#include "MyIO.h"
+
+
 #ifdef HDF5
 	#include <H5Cpp.h>
 	#include <hdf5_hl.h>
@@ -70,18 +73,22 @@ public:
 private:
 	void generate_I_ext(const int step_current);
 	void record_stats(const int step_current); 
+	/*
 	void write2file(ofstream& output_file, const vector< vector<int> >& v);
 	void write2file(ofstream& output_file, const vector< vector<double> >& v);
 	void write2file(ofstream& output_file, const vector<int>& v);
 	void write2file(ofstream& output_file, const vector<double>& v);
+	*/
 	void output_sampled_data_real_time(const int step_current);
 	
 #ifdef HDF5
+	/*
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
 	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
 	void write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string & m_name);
 	void write_string_HDF5(Group & group, const string & s, const string & s_name);
+	*/
 	void output_sampled_data_real_time_HDF5(const int step_current);
 #endif
 	string dump_para(); /// dump all the parameter values used
