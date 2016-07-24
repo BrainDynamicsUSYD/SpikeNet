@@ -1,4 +1,4 @@
-function main_heterogeneous_finite_I_search_133(varargin)
+function main_heterogeneous_finite_I_search_133_bigger_I(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
