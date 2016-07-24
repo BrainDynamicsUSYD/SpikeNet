@@ -1,6 +1,6 @@
 #include "MyIO.h"
 
-using namespace std;
+//using namespace std;
 
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
@@ -58,10 +58,10 @@ void write2file(ofstream& output_file, const vector<double>& v){
 
 
 
-
+#ifdef HDF5
 
 /*--------------------------------------- HDF5 --------------------------------------------*/
-#ifdef HDf5
+
 void write_scalar_HDF5(Group & group, int s, const string & v_name){
 	vector<int> v_tmp;
 	v_tmp.push_back(s);
@@ -190,20 +190,6 @@ void read_vector_HDF5(const H5File & file, const string & name, vector<double> &
 	*/
 }
 
-void write_string_HDF5(Group & group, const string & s, const string &  s_name){
-   // HDF5 only understands vector of char* :-(
-   vector<const char*> arr_c_str;
-   arr_c_str.push_back(s.c_str());
-
-   hsize_t str_dimsf[1] {arr_c_str.size()};
-   DataSpace dataspace(1, str_dimsf);
-
-   // Variable length string
-   StrType datatype(PredType::C_S1, H5T_VARIABLE); 
-   DataSet str_dataset = group.createDataSet(s_name, datatype, dataspace);
-
-   str_dataset.write(arr_c_str.data(), datatype);
-}
 
 bool group_exist_HDF5(const H5File & file, const string & name){
 	// how to suppress the error message??
@@ -226,10 +212,65 @@ bool group_exist_HDF5(const string & filename, const string & name){
 	return r;
 }
 
+
+/*
+void SimuInterface::read_matrix_HDF5(const H5File & file, const string & name, vector< vector <double> > & m_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+	DataSpace dataspace = dataset.getSpace();
+	
+	
+	hsize_t dims_out[2];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+	cout << dims_out[0] << "," <<  dims_out[1] << endl;
+
+    hsize_t fdims[2];            // new data dimensions 
+	fdims[0] = 1;
+	fdims[1] = dims_out[1];
+	
+	m_tmp.resize(dims_out[0]);
+	for (int i = 0; i < int(dims_out[0]); i++ ){
+		hsize_t offset[2];
+		offset[0] = i;
+		offset[1] = 0;
+		
+		// selectHyperslab not working properly? 
+		cout << fdims[0]<< "," <<  fdims[1] << endl;
+		cout << offset[0] << "," <<  offset[1] << endl;
+		
+		DataSpace memspace = dataset.getSpace();
+		memspace.selectHyperslab( H5S_SELECT_SET, fdims, offset );
+		
+		hsize_t m_out[2];
+		memspace.getSimpleExtentDims(  m_out, NULL);
+		cout <<  m_out[0] << "," <<   m_out[1] << endl;
+		// selectHyperslab not working properly? 
+		
+		m_tmp[i].resize(dims_out[1]);
+		cout << "here3" << endl;
+		
+		dataset.read(  m_tmp[i].data(), PredType::NATIVE_DOUBLE, memspace, dataspace );	
+		cout << "here4" << endl;
+	}
+	
+	cout << "here" << endl;
+	for (int i = 0; i < int(m_tmp.size()); i++ ){
+		for (int j = 0; j < int(m_tmp[i].size()); j++ ){
+			cout << m_tmp[i][j] << ","; cout.flush();
+		}
+		cout << endl;
+	} 
+}
+*/
+
 template < typename Type > Type read_scalar_HDF5(const H5File & file, const string & name){
 	vector<Type> v_tmp;
 	read_vector_HDF5(file, name, v_tmp);
 	return v_tmp[0];
 }
+template double read_scalar_HDF5<double>(const H5File & file, const string & name);
+template bool read_scalar_HDF5<bool>(const H5File & file, const string & name);
+template int read_scalar_HDF5<int>(const H5File & file, const string & name);
+
 
 #endif
