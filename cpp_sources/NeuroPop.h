@@ -186,6 +186,7 @@ protected:
 		
 	// Data sampling
 	struct Sample {
+		int file_type; /// 0 for no sample, 1 for text-based, 2 for hdf5-based
 		string 
 			file_name; /// the file name for sampled time series
 		ofstream 

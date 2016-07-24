@@ -358,9 +358,8 @@ void NeuroPop::update_V(const int step_current){
 	// sample_data(step_current);  // this is deprecated due to poor memory performance
 #ifdef HDF5
 	output_sampled_data_real_time_HDF5(step_current);
-	// we want to sample the V[] before it's updated!
 #endif
-
+	output_sampled_data_real_time(step_current);
 
 	// update menbrane potentials
 	double Vdot;
@@ -384,10 +383,11 @@ void NeuroPop::update_V(const int step_current){
 
 
 void NeuroPop::add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string sample_file_name_input){
+	sample.file_type = 1;
 	sample.neurons = sample_neurons_input;
 	sample.type = sample_type_input;
 	sample.time_points = sample_time_points_input;
-	
+		
 	sample.file_name = sample_file_name_input.append(to_string(pop_ind)).append(".ygout_samp");
 	sample.file.open(sample.file_name);
 	
@@ -402,8 +402,7 @@ void NeuroPop::add_sampling_real_time(const vector<int>& sample_neurons_input, c
 
 
 void NeuroPop::output_sampled_data_real_time(const int step_current){
-	
-	if (!sample.neurons.empty() && step_current == 0){
+	if (!sample.neurons.empty() && step_current == 0 && sample.file_type == 1){
 		
 		sample.file << indicator << " POPD006" << endl;
 		sample.file << pop_ind << delim << sample.N_neurons << delim << sample.N_steps << delim << endl;
@@ -414,7 +413,7 @@ void NeuroPop::output_sampled_data_real_time(const int step_current){
 		sample.file << endl;
 	}
 	
-	if (!sample.neurons.empty()){
+	if (!sample.neurons.empty() && sample.file_type == 1){
 		if (sample.time_points[step_current]){ // push_back is amazing
 			for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
 				int ind_temp = sample.neurons[i];
@@ -720,6 +719,7 @@ void NeuroPop::output_results(H5File& file){
 
 
 void NeuroPop::add_sampling_real_time_HDF5(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input,  const vector<bool>& sample_time_points_input, string sample_file_name_input){
+	sample.file_type = 2;
 	sample.neurons = sample_neurons_input;
 	sample.type = sample_type_input;
 	sample.time_points = sample_time_points_input;
@@ -772,7 +772,7 @@ void NeuroPop::add_sampling_real_time_HDF5(const vector<int>& sample_neurons_inp
 }
 
 void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current){
-	if (!sample.neurons.empty()){
+	if (!sample.neurons.empty() && sample.file_type == 2){
 		if (sample.time_points[step_current]){ // push_back is amazing
 
 			// use double *temp_data=new double[sample.N_neurons]; and later delete[] tmp_data?

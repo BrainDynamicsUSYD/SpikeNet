@@ -33,7 +33,7 @@ writeSynPara(FID, 'tau_decay_AMPA', 3.3);
 % writeExtCurrentSettings(FID, 1, I_ext_strength, 0);
 
 % external spike settings
-writeExtSpikeSettings(FID, 1, 1, k,  20, 100*ones(1,step_tot), 1, N(1) );
+writeExtSpikeSettings(FID, 1, 1, k,  20, 100*ones(1,step_tot), ones(1, N(1)) );
 
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);

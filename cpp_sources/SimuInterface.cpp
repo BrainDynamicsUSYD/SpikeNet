@@ -684,7 +684,7 @@ void SimuInterface::simulate(){
 	  
 	// simulate
 	for (int step_current = 0; step_current < network.step_tot; ++step_current){
-		network.update(step_current);
+		
 		/*---------------------------------------------------------------------*/
 		// Countdown
 		if (step_current == 0){
@@ -700,6 +700,8 @@ void SimuInterface::simulate(){
 			cout <<  "\t " << steps_left / (network.step_tot / 10) << str_min << flush;
 		}
 		/*---------------------------------------------------------------------*/
+		
+		network.update(step_current);
 	}
 	cout << "Simulation done." << endl;
 
