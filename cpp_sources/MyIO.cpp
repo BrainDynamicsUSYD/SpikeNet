@@ -1,6 +1,6 @@
 #include "MyIO.h"
 
-using namespace std;
+//using namespace std;
 
 // Use function templates when you want to perform the same action on types that can be different.
 // Use function overloading when you want to apply different operations depending on the type.
@@ -58,10 +58,10 @@ void write2file(ofstream& output_file, const vector<double>& v){
 
 
 
-
+#ifdef HDF5
 
 /*--------------------------------------- HDF5 --------------------------------------------*/
-#ifdef HDf5
+
 void write_scalar_HDF5(Group & group, int s, const string & v_name){
 	vector<int> v_tmp;
 	v_tmp.push_back(s);
@@ -190,20 +190,6 @@ void read_vector_HDF5(const H5File & file, const string & name, vector<double> &
 	*/
 }
 
-void write_string_HDF5(Group & group, const string & s, const string &  s_name){
-   // HDF5 only understands vector of char* :-(
-   vector<const char*> arr_c_str;
-   arr_c_str.push_back(s.c_str());
-
-   hsize_t str_dimsf[1] {arr_c_str.size()};
-   DataSpace dataspace(1, str_dimsf);
-
-   // Variable length string
-   StrType datatype(PredType::C_S1, H5T_VARIABLE); 
-   DataSet str_dataset = group.createDataSet(s_name, datatype, dataspace);
-
-   str_dataset.write(arr_c_str.data(), datatype);
-}
 
 bool group_exist_HDF5(const H5File & file, const string & name){
 	// how to suppress the error message??

@@ -18,8 +18,6 @@ using namespace std;
 const double pi = 3.14159;
 const char delim = ',';
 
-
-
 #ifdef HDF5
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
