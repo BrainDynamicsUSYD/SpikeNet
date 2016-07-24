@@ -14,9 +14,7 @@
 #endif
 using namespace std;
 
-
-const double pi = 3.14159;
-const char delim = ',';
+const char delim = ',';  /// Bad practice: this is hard-coded here!
 
 #ifdef HDF5
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
@@ -38,7 +36,5 @@ const char delim = ',';
 	void write2file(ofstream& output_file, const vector< vector<double> >& v); /// write double matrix to output file
 	void write2file(ofstream& output_file, const vector<int>& v); /// write integer vector to output file
 	void write2file(ofstream& output_file, const vector<double>& v); /// write double vector to output file
-	//template < typename Type > Type read_next_entry(istringstream &line_ss);
-	//template < typename T, typename A > void read_next_line_as_vector( vector<T,A> &vec );
 
 #endif
