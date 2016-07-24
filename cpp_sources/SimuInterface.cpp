@@ -756,8 +756,6 @@ string SimuInterface::gen_out_filename(){
 }
 
 
-
-
 template < typename Type > Type SimuInterface::read_next_entry(istringstream &line_ss){
 	string entry_str;
 	Type entry;
@@ -1081,40 +1079,6 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 	return 1;
 }
 
-void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_tmp){
-	const H5std_string dataset_name( name );
-	DataSet dataset = file.openDataSet( dataset_name );
-	
-	DataSpace dataspace = dataset.getSpace();
-	hsize_t dims_out[1];
-	dataspace.getSimpleExtentDims( dims_out, NULL);
-
-	v_tmp.resize((unsigned long)(dims_out[0]));
-	dataset.read( v_tmp.data(), PredType::NATIVE_INT, dataspace, dataspace );
-	
-	/*
-	cout << "The length of the vector (int) is: " << (unsigned long)(dims_out[0]) << endl;
-	cout << "The vector is: ";
-	for (unsigned i = 0; i < v_tmp.size(); i++){
-		cout << v_tmp[i] << ",";
-	}
-	cout << endl;
-	*/
-	
-}
-
-	
-void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<bool> & v_tmp){
-	
-	vector<int> v_tmp_int;
-	read_vector_HDF5(file, name, v_tmp_int);
-	
-	v_tmp.resize(v_tmp_int.size());
-	for (unsigned i = 0; i < v_tmp_int.size(); i++){
-		v_tmp[i] = bool(v_tmp_int[i]);
-	}
-	
-}
 
 /*
 void SimuInterface::read_matrix_HDF5(const H5File & file, const string & name, vector< vector <double> > & m_tmp){
@@ -1166,70 +1130,7 @@ void SimuInterface::read_matrix_HDF5(const H5File & file, const string & name, v
 }
 */
 
-void SimuInterface::read_vector_HDF5(const H5File & file, const string & name, vector<double> & v_tmp){
-	const H5std_string dataset_name( name );
-	DataSet dataset = file.openDataSet( dataset_name );
-	
-	DataSpace dataspace = dataset.getSpace();
-	hsize_t dims_out[1];
-	dataspace.getSimpleExtentDims( dims_out, NULL);
 
-	v_tmp.resize((unsigned long)(dims_out[0]));
-	dataset.read( v_tmp.data(), PredType::NATIVE_DOUBLE, dataspace, dataspace );
-	
-	/*
-	cout << "The length of the vector (double) is: " << (unsigned long)(dims_out[0]) << endl;
-	cout << "The vector is: ";
-	for (unsigned i = 0; i < v_tmp.size(); i++){
-		cout << v_tmp[i] << ",";
-	}
-	cout << endl;
-	*/
-}
-
-void SimuInterface::write_string_HDF5(Group & group, const string & s, const string &  s_name){
-   // HDF5 only understands vector of char* :-(
-   vector<const char*> arr_c_str;
-   arr_c_str.push_back(s.c_str());
-
-   hsize_t str_dimsf[1] {arr_c_str.size()};
-   DataSpace dataspace(1, str_dimsf);
-
-   // Variable length string
-   StrType datatype(PredType::C_S1, H5T_VARIABLE); 
-   DataSet str_dataset = group.createDataSet(s_name, datatype, dataspace);
-
-   str_dataset.write(arr_c_str.data(), datatype);
-}
-
-bool SimuInterface::group_exist_HDF5(const H5File & file, const string & name){
-	// how to suppress the error message??
-	bool r = true;
-	try {  // to determine if the group exists in the file
-		file.openGroup( name );
-	}
-	catch( FileIException& not_found_error ) {
-	  r = false;
-	}
-	return r;
-}
-
-bool SimuInterface::group_exist_HDF5(const string & filename, const string & name){
-	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
-	//hbool_t check_object_valid = true;
-	bool r = H5LTpath_valid(file_id, name.c_str(), true);
-	
-	H5Fclose(file_id);
-	return r;
-}
-
-
-
-template < typename Type > Type SimuInterface::read_scalar_HDF5(const H5File & file, const string & name){
-	vector<Type> v_tmp;
-	read_vector_HDF5(file, name, v_tmp);
-	return v_tmp[0];
-}
 
 #endif
 

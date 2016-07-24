@@ -60,12 +60,14 @@ private:
 	void update_inh_STDP(const int step_current); /// update inhibitory STDP
 	void sample_data(const int step_current); /// sample data
 	void record_stats(); /// record basic statistics
-
+	/*
 	void write2file(ofstream& output_file, const vector< vector<int> >& v); /// write integer matrix to output file
 	void write2file(ofstream& output_file, const vector< vector<double> >& v); /// write double matrix to output file
 	void write2file(ofstream& output_file, const vector<int>& v); /// write integer vector to output file
 	void write2file(ofstream& output_file, const vector<double>& v); /// write double vector to output file
+	*/
 	#ifdef HDF5
+	/*
 	void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name);
 	void write_vector_HDF5(Group & group, const vector<double> & v, const string & v_name);
 	void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum);
@@ -73,6 +75,7 @@ private:
 	void write_string_HDF5(Group & group, const string & s, const string & s_name);
 	void write_scalar_HDF5(Group & group, int s, const string & v_name);
 	void write_scalar_HDF5(Group & group, double s, const string & v_name);
+	*/
 	#endif
 protected:
 	// constants

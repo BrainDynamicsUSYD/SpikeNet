@@ -111,12 +111,5 @@ void NeuroNet::output_results(H5File & file_HDF5){
 	
 }
 
-void NeuroNet::write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
-	hsize_t dims[1]; 
-	dims[0] = v.size();
-	DataSpace fspace(1, dims); 
-	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
-	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
-}
 #endif
 
