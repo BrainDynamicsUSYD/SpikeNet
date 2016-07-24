@@ -787,7 +787,7 @@ void SimuInterface::output_results_HDF5(){
 	
 	
 	H5File file_HDF5;
-	string file_name_HDF5 = out_filename.append(".h5");
+	string file_name_HDF5 = out_filename.append("_out.h5");
 	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
 	
 	Group group_tmp = file_HDF5.createGroup(string("/config_filename"));
