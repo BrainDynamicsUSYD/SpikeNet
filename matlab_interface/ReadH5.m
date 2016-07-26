@@ -72,6 +72,14 @@ if ~isempty(files)
         config_filename = h5read(files{id_out}, '/config_filename/config_filename');
         config_filename = config_filename{1};
         
+        
+        ev_str = try_h5read(config_filename,'/config/explanatory_variables');
+        scan_temp = textscan(ev_str, '%s', 'Delimiter', ',');
+        scan_temp =  scan_temp{1};
+        for s = 1:length(scan_temp)/2
+            eval(strcat('OutData{id_out}.ExplVar.', scan_temp{s*2-1}, '=', scan_temp{s*2},';'));
+        end
+        
         OutData{id_out}.N = try_h5read(config_filename, '/config/Net/INIT001/N');
         OutData{id_out}.dt = try_h5read(config_filename, '/config/Net/INIT002/dt');
         OutData{id_out}.step_tot = try_h5read(config_filename, '/config/Net/INIT002/step_tot');

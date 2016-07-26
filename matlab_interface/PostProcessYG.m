@@ -7,6 +7,13 @@ function PostProcessYG(stdin)
 if nargin == 0
     dir_strut = dir('*.ygout');
     num_files = length(dir_strut);
+    file_type = 1;
+    if num_files == 0
+        dir_strut = dir('*out.h5');
+        num_files = length(dir_strut);
+        file_type = 2;
+    end
+    
     files = cell(1,num_files);
     for id_out = 1:num_files
         files{id_out} = dir_strut(id_out).name;
@@ -18,6 +25,12 @@ else
     for i = 1:num_files
         files{i} = cell2mat(files{i});
     end
+    [~,~,app] = fileparts(files{1});
+    if strcmp(app, '.ygout')
+        file_type = 1;
+    elseif strcmp(app, '.h5')
+        file_type = 2;
+    end
 end
 
 % save figures
@@ -27,7 +40,11 @@ for id_out = 1:num_files
     % start from .ygout  files
     fprintf('Processing output file No.%d out of %d...\n', id_out, num_files);
     fprintf('\t File name: %s\n', files{id_out});
-    R = ReadYG( files(id_out) ); % read .ygout file into matlab data struct
+    if  file_type == 1
+        R = ReadYG( files(id_out) ); % read .ygout file into matlab data struct
+    elseif file_type == 2
+        R = ReadH5( files(id_out) ); % read .ygout file into matlab data struct
+    end
     R = AnalyseYG(R); % do some simple analysis
     SaveRYG(R);
     disp('Done');
