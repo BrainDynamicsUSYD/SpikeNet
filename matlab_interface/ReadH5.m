@@ -74,9 +74,9 @@ if ~isempty(files)
         
         
         ev_str = try_h5read(config_filename,'/config/explanatory_variables');
-        scan_temp = textscan(ev_str, '%s', 'Delimiter', ',');
+        scan_temp = textscan(ev_str{1}, '%s', 'Delimiter', ',');
         scan_temp =  scan_temp{1};
-        for s = 1:length(scan_temp)/2
+        for s = 1:(length(scan_temp)-1)/2
             eval(strcat('OutData{id_out}.ExplVar.', scan_temp{s*2-1}, '=', scan_temp{s*2},';'));
         end
         

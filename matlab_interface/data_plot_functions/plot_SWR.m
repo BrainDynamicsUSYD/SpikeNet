@@ -37,10 +37,12 @@ for i = 1:no
             'visible', figure_visibility, 'Color','w', 'PaperPositionMode', 'default');
         
         t = (seg_ind-1)*dt*1e-3; % second
+        %
         ax1 = subplot(8,1,1);
         LFP_tmp = R.LFP.LFP{1}(i,seg_ind);
         plot(t, LFP_tmp);
         ylabel('Unfiltered LFP')
+        %
         ax2 = subplot(8,1,2);
         rip_tmp = R.LFP.LFP_ripple(i,seg_ind);
         plot(t,  rip_tmp, 'b');
@@ -50,18 +52,16 @@ for i = 1:no
         hil_scaled = hil_tmp/max(hil_tmp)*max(rip_tmp);
         plot(t, hil_scaled,'r--'); %ylabel('Ripple Hilbert')
         
-        
+        %
         ax3 = subplot(8,1,3); % Scaleogram with pseudo-Frquency
-        % x_tmp = LFP_tmp; freqrange = [1 R.LFP.hiFreq];
         x_tmp = rip_tmp; freqrange = [R.LFP.lowFreq R.LFP.hiFreq];
         Fs = 1000/dt;
         fc = centfrq('cmor1.5-1');
-        
         scalerange = fc./(freqrange*(1/Fs));
-        
         scales = scalerange(end):0.5:scalerange(1);
         pseudoFrq = scal2frq(scales,'cmor1.5-1',1/Fs); % pseudo-frequencies
         Coeffs = cwt(x_tmp,scales,'cmor1.5-1');
+        
         imagesc('XData',t,'YData',pseudoFrq,'CData',abs(Coeffs));
         ylim(freqrange)
         ylabel('Hz')
