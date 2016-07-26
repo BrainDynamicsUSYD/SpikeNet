@@ -80,7 +80,7 @@ void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_na
 	dims[0] = v.size();
 	DataSpace fspace(1, dims); 
 	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
-	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
+	v_dataset.write( v.data(), PredType::NATIVE_INT, fspace, fspace );	
 }
 
 void write_vector_HDF5(Group & group, const vector<double> & v, const string &   v_name){
@@ -88,7 +88,7 @@ void write_vector_HDF5(Group & group, const vector<double> & v, const string &  
 	dims[0] = v.size();
 	DataSpace fspace(1, dims); 
 	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_DOUBLE, fspace);
-	v_dataset.write( v.data(), PredType::NATIVE_INT32, fspace, fspace );	
+	v_dataset.write( v.data(), PredType::NATIVE_DOUBLE, fspace, fspace );	
 }
 
 void write_string_HDF5(Group & group, const string & s, const string &  s_name){
