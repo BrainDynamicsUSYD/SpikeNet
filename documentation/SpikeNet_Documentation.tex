@@ -75,14 +75,16 @@ Following are the steps to set up the SpikeNet C\texttt{++} simulator.
 \item Make a new directory: \mylstinline{mkdir tmp; cd tmp}
 \item Clone SpikeNet: \mylstinline{git clone git@github.com:BrainDynamicsUSYD/SpikeNet.git}
 \item Go into the directory: \mylstinline{cd SpikeNet}
-\item Build the C\texttt{++} simulator:  \mylstinline{make; make clean; cd ..; ls}
+\item Make a copy of the makefile: \mylstinline{cp other_scripts/make*bak makefile}
+\item Build the C\texttt{++} simulator:  \mylstinline{make; make clean}
 \end{itemize}
+
 Now you should see the ``simulator'' in the current directory, with which you can run simulations by creating input files according to \nameref{sec:IO protocols}.
 However, it will be much easier to work with the Matlab user interface.
 If you do not have access to Matlab, try to contact the contributors to request interfaces with other high-level programming languages (Python for example).
 Following are the steps to use the Matlab user interface.
 \begin{itemize}
-\item Make a new directory for storing data: \mylstinline{mkdir tmp_data}
+\item Make a new directory for storing data: \mylstinline{cd ..; mkdir tmp_data; ls}
 \item Start Matlab: \mylstinline{matlab -nodisplay}
 \item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
 \item Generate the example input files: \mylstinline{cd ../tmp_data; main_demo;}
@@ -94,10 +96,18 @@ Following are the steps to use the Matlab user interface.
 \newline \mylstinline{cd ../tmp_data; PostProcessYG()}
 \item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
 \end{itemize}
+
+For HDF5, please make relevant changes in the makefile to specify the paths where you have installed your HDF5 API. Each of the matlab interfaces has a corresponding HDF5 version. For a complete list of both types of matlab interfaces,  
+\begin{itemize}
+\item \mylstinline{ls SpikeNet/matlab_interfaces/write2ygin}
+\item \mylstinline{ls SpikeNet/matlab_interfaces/write2HDF5}
+\end{itemize}
+
+
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
 \begin{itemize}
 \item Go to the tmp directory
-\item Make a copy of the script: \mylstinline{cp SpikeNet/PBS_scripts/all*bak all_in_one.sh}
+\item Make a copy of the script: \mylstinline{cp SpikeNet/other_scripts/all*bak all_in_one.sh}
 \item Change it to executable: \mylstinline{chmod +x all_in_one.sh}
 \item Edit the following variables in the bash script accordingly: 
 \begin{itemize}
@@ -107,6 +117,7 @@ For those who have access to a high-performance computing cluster with PBS, Spik
 \item Make a directory for PBS output: \mylstinline{mkdir PBSout}
 \item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
 \end{itemize}
+
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
 Here are some basic tips on git.
@@ -119,6 +130,10 @@ Here are some basic tips on git.
 \dirtree{%
 .1 tmp.
 .2 SpikeNet.
+.3 cpp\_sourses.
+.3 matlab\_interfaces.
+.3 makefile.
+.3 other\_scripts.
 .2 simulator.
 .2 tmp\_data.
 .2 my\_functions.

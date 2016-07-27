@@ -6,7 +6,7 @@ HEADER_FILES = $(SRC_DIR)/*.h
 OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o MyIO.o
 
 
-HDF5 = yes # put anything here to compile with HDF5
+HDF5 = #yes # put anything here to compile with HDF5
 ifdef HDF5
 	HDF5FLAG = -DHDF5
 	HDF5INCLUDE = -I/usr/local/include 
