@@ -60,6 +60,9 @@ ripple_event.no_std = 1.5;% 3 std above the mean
 transient_ms = 200; %ms;
 ripple_event.transient_ms = transient_ms;
 transient_steps = round(transient_ms/dt);
+ripple_event.index1 = cell(1,no);
+ripple_event.index2 = cell(1,no);
+ripple_event.Hz = zeros(1,no);
 for i = 1:no
     hil_mean_tmp = mean(LFP_ripple_hilbert(i,transient_steps:end)); % Discard transient data
     hil_std_tmp = std( LFP_ripple_hilbert(i,transient_steps:end)); % Discard transient data
@@ -68,6 +71,7 @@ for i = 1:no
     ripple_seq_tmp = persistence_requirement( ripple_seq_tmp, ripple_min_steps );
     cutoff = 1;
     [~, ripple_du, flat_du, ripple_start, ~] = seq_postprocess(ripple_seq_tmp, 1, cutoff);
+    ripple_event.Hz(i) = length(ripple_du)/(R.dt*R.step_tot*10^-3);
     ripple_event.ripple_du_steps{i} = ripple_du;
     ripple_event.flat_du_steps{i} = flat_du;
     ripple_event.ripple_start_steps{i} = ripple_start;
@@ -75,14 +79,14 @@ for i = 1:no
     % ref: Preconfigured, skewed distribution of firing rates in the hippocampus and entorhinal cortex
     LFP_nuerons = logical(R.LFP.LFP_neurons{1}(i,:));
     N_events = length(ripple_du);
-    index1 = zeros(1,N_events);
-    index2 = zeros(1,sum(LFP_nuerons));
+    ripple_event.index1{i} = zeros(1,N_events);
+    ripple_event.index2{i} = zeros(1,sum(LFP_nuerons));
     % index3 = zeros(1,N_events);
     for r = 1:N_events
         spike_tmp = spike_hist(LFP_nuerons,ripple_start(r):ripple_start(r)+ripple_du(r)-1);
-        index1(r) =  sum(sum(spike_tmp))/spike_tot;
+        ripple_event.index1{i}(r) =  sum(sum(spike_tmp))/spike_tot; % percentage of spikes in each SWR
         participated = (sum(spike_tmp,2))>0;
-        index2(participated) = index2(participated) + 1/N_events;
+        ripple_event.index2{i}(participated) = ripple_event.index2{i}(participated) + 1/N_events; % number of neurons participated in each SWR
     end 
 end
 
@@ -95,5 +99,7 @@ R.LFP.lowFreq = lowFreq;
 R.LFP.hiFreq = hiFreq;
 R.LFP.gauss_width = width;
 R.LFP.ripple_event = ripple_event;
+
+
 end
 
