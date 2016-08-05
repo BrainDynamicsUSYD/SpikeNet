@@ -52,10 +52,10 @@ for i = 1:num_files
 %     save(files{i},'avalanche', '-append');
     
     
-    R_temp = get_grid_firing_centre(R_temp);
-    
-    grid = R_temp.grid;
-    save(files{i},'grid', '-append');
+%     R_temp = get_grid_firing_centre(R_temp);
+%     
+%     grid = R_temp.grid;
+%     save(files{i},'grid', '-append');
     
 %     R_temp = get_stPR(R_temp);
 %     stPR = R_temp.stPR;

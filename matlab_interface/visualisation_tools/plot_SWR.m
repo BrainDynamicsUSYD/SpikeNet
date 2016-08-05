@@ -41,6 +41,11 @@ for i = 1:no
         ax1 = subplot(8,1,1);
         LFP_tmp = R.LFP.LFP{1}(i,seg_ind);
         plot(t, LFP_tmp);
+        hold on;
+        plot(t, ones(size(t))*mean(LFP_tmp),'r');
+        plot(t, ones(size(t))*(mean(LFP_tmp)+1*std(LFP_tmp)),'r');
+        plot(t, ones(size(t))*(mean(LFP_tmp)+3*std(LFP_tmp)),'r'); 
+        % plot(t, ones(size(t))*(mean(LFP_tmp)+5*std(LFP_tmp)),'r');
         ylabel('Unfiltered LFP')
         %
         ax2 = subplot(8,1,2);
@@ -48,21 +53,23 @@ for i = 1:no
         plot(t,  rip_tmp, 'b');
         ylabel('Rippleband LFP');
         hold on;
+        
+%         rms_tmp = R.LFP.LFP_ripple_rms(i,seg_ind);
+%         rms_scaled = rms_tmp/max(rms_tmp)*max(rip_tmp);
+%         plot(t, rms_scaled,'g'); %ylabel('Ripple Hilbert')
+        
         hil_tmp = R.LFP.LFP_ripple_hilbert(i,seg_ind);
         hil_scaled = hil_tmp/max(hil_tmp)*max(rip_tmp);
-        plot(t, hil_scaled,'r--'); %ylabel('Ripple Hilbert')
+        plot(t, hil_scaled,'r'); %ylabel('Ripple Hilbert')
+        
+        plot(t, ones(size(t))*R.LFP.ripple_event.hil_mean_baseline(i,end)/max(hil_tmp)*max(rip_tmp) );
+        plot(t, ones(size(t))*(R.LFP.ripple_event.hil_mean_baseline(i,end) + R.LFP.ripple_event.no_std*R.LFP.ripple_event.hil_std_baseline(i,end))/max(hil_tmp)*max(rip_tmp) );
+      
         
         %
         ax3 = subplot(8,1,3); % Scaleogram with pseudo-Frquency
-        x_tmp = rip_tmp; freqrange = [R.LFP.lowFreq R.LFP.hiFreq];
-        Fs = 1000/dt;
-        fc = centfrq('cmor1.5-1');
-        scalerange = fc./(freqrange*(1/Fs));
-        scales = scalerange(end):0.5:scalerange(1);
-        pseudoFrq = scal2frq(scales,'cmor1.5-1',1/Fs); % pseudo-frequencies
-        Coeffs = cwt(x_tmp,scales,'cmor1.5-1');
-        
-        imagesc('XData',t,'YData',pseudoFrq,'CData',abs(Coeffs));
+        freqrange = [R.LFP.lowFreq R.LFP.hiFreq];
+        imagesc('XData',t,'YData',R.LFP.wavelet.pseudoFreq,'CData',R.LFP.wavelet.coeffs{i}(seg_ind,:));
         ylim(freqrange)
         ylabel('Hz')
         

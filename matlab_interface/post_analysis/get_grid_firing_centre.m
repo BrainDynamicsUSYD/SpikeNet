@@ -13,12 +13,16 @@ spikes_win_min = win_min_rate_Hz*(R.dt*0.001)*win_len*R.N(1);
 
 [ t_mid_full, ind_ab_full,  num_spikes_win_full ] = window_spike_hist_compressed( R, win_len, win_gap );
 
-if nargin == 2
-     t_seg = t_mid_full > min(seg) &  t_mid_full < max(seg);
-     t_mid = t_mid_full(t_seg);
-     ind_ab = ind_ab_full(:, t_seg);
-     num_spikes_win = num_spikes_win_full(t_seg);
+if nargin < 2
+    seg = 1:R.step_tot;
 end
+
+t_seg = t_mid_full > min(seg) &  t_mid_full < max(seg);
+t_mid = t_mid_full(t_seg);
+ind_ab = ind_ab_full(:, t_seg);
+num_spikes_win = num_spikes_win_full(t_seg);
+
+    
 
 % spikes_win_min
 t_mid = t_mid( num_spikes_win >= spikes_win_min);
@@ -33,7 +37,7 @@ fw = 2*hw+1;
 
 
 if mod(hw, 1) ~= 0
-    warning('Not a square grid')
+    % warning('Not a square grid')
 else
     
     [Lattice, ~] = lattice_nD(2, hw);
