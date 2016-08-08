@@ -15,9 +15,9 @@ fs = 1/(dt*1e-3); % sampling frequency (Hz)
 
 % Butterworth filter
 order = 4; % 4th order
-lowFreq = 1; % broad band (1-1250 ? Hz)
-hiFreq = 1250;
-Wn = [lowFreq hiFreq]/(fs/2);
+lowFreq_br = 1; % broad band (1-1250 ? Hz)
+hiFreq_br = 1250;
+Wn = [lowFreq_br hiFreq_br]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
 
 for i = 1:no
@@ -26,9 +26,9 @@ end
 
 % Butterworth filter
 order = 4; % 4th order
-lowFreq = 1; % broad band (10?250 Hz)
-hiFreq = 50;
-Wn = [lowFreq hiFreq]/(fs/2);
+lowFreq_sp = 1; % broad band (10?250 Hz)
+hiFreq_sp = 50;
+Wn = [lowFreq_sp hiFreq_sp]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
 
 for i = 1:no
@@ -38,9 +38,9 @@ end
 
 % Butterworth filter
 order = 4; % 4th order
-lowFreq = 150; % ripple band (80?180 Hz)
-hiFreq = 250;
-Wn = [lowFreq hiFreq]/(fs/2);
+R.LFP.lowFreq = 150; % ripple band (80?180 Hz)
+R.LFP.hiFreq = 250;
+Wn = [R.LFP.lowFreq R.LFP.hiFreq]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
 for i = 1:no
     LFP_ripple(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
@@ -116,26 +116,27 @@ for i = 1:no
         peak_min = hil_mean_baseline_hist(i,r_iter) + ripple_event.peak_no_std*hil_std_baseline_hist(i,r_iter);
         [ is_SWR_tmp ] = peak_height_requirement( is_SWR_tmp, LFP_ripple_hilbert_tmp, peak_min );
 
-        
-
     end
-    
 
     cutoff = 1;
     [~, ripple_du, flat_du, ripple_start, ~] = seq_postprocess(ripple_event.is_SWR(i,:), 1, cutoff);
-
     ripple_event.Hz(i) = length(ripple_du)/(R.dt*R.step_tot*10^-3);
     ripple_event.ripple_du_steps{i} = ripple_du;
     ripple_event.flat_du_steps{i} = flat_du;
     ripple_event.ripple_start_steps{i} = ripple_start;
+    
+    LFP_nuerons = logical(R.LFP.LFP_neurons{1}(i,:));
+    % firing rate in and out of SWR
+    ripple_event.inside_rate = sum(spike_hist(LFP_nuerons, is_SWR_tmp), 2)/(R.dt*sum(is_SWR_tmp)*10^-3);
+    ripple_event.outside_rate = sum(spike_hist(LFP_nuerons, ~is_SWR_tmp), 2)/(R.dt*sum(~is_SWR_tmp)*10^-3);
+    
+    
     % three indexes for population synchrony
     % ref: Preconfigured, skewed distribution of firing rates in the hippocampus and entorhinal cortex
-    LFP_nuerons = logical(R.LFP.LFP_neurons{1}(i,:));
     N_events = length(ripple_du);
     ripple_event.index1{i} = zeros(1,N_events);
     ripple_event.index2{i} = zeros(1,sum(LFP_nuerons));
     ripple_event.index3{i} = zeros(1,sum(LFP_nuerons));
-    % index3 = zeros(1,N_events);
     for r = 1:N_events
         spike_tmp = spike_hist(LFP_nuerons,ripple_start(r):ripple_start(r)+ripple_du(r)-1);
         ripple_event.index1{i}(r) =  sum(sum(spike_tmp))/spike_tot; % percentage of spikes in each SWR
@@ -159,7 +160,7 @@ pseudoFreq = scal2frq(scales,'cmor1.5-1',1/Fs); % pseudo-frequencies
 coeffs = cell(no,1);
 peak = cell(no,1);
 for i = 1:no
-    x_tmp = R.LFP.LFP_ripple(i,:);
+    x_tmp = LFP_ripple(i,:);
     coeffs_tmp = abs(cwt(x_tmp,scales,'cmor1.5-1'))';
     peak{i}.freq = [];
     peak{i}.step = [];
@@ -190,8 +191,6 @@ R.LFP.LFP_sharpwave = LFP_sharpwave;
 R.LFP.LFP_ripple_hilbert = LFP_ripple_hilbert;
 % R.LFP.LFP_ripple_rms = LFP_ripple_rms;
 % R.LFP.rms_window_ms = rms_window_ms;
-R.LFP.lowFreq = lowFreq;
-R.LFP.hiFreq = hiFreq;
 R.LFP.gauss_width = width;
 R.LFP.ripple_event = ripple_event;
 

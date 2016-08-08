@@ -69,9 +69,10 @@ for i = 1:no
         %
         ax3 = subplot(8,1,3); % Scaleogram with pseudo-Frquency
         freqrange = [R.LFP.lowFreq R.LFP.hiFreq];
-        imagesc('XData',t,'YData',R.LFP.wavelet.pseudoFreq,'CData',R.LFP.wavelet.coeffs{i}(seg_ind,:));
+        imagesc('XData',t,'YData',R.LFP.wavelet.pseudoFreq,'CData',transpose(R.LFP.wavelet.coeffs{i}(seg_ind,:)));
         ylim(freqrange)
         ylabel('Hz')
+        
         
         % raster plot
         ax4 = subplot(8,1,4:7);
