@@ -7,7 +7,7 @@ function [ R ] = get_SWR( R )
 LFP = R.LFP.LFP{1};
 [no, steps] = size(LFP);
 
-no = 1;
+% no = 1; % for testing
 
 dt = R.dt;
 fs = 1/(dt*1e-3); % sampling frequency (Hz)
@@ -81,6 +81,9 @@ ripple_event.transient_ms = transient_ms;
 transient_steps = round(transient_ms/dt);
 ripple_event.index1 = cell(1,no);
 ripple_event.index2 = cell(1,no);
+ripple_event.index3 = cell(1,no);
+ripple_event.inside_rate = cell(1,no);
+ripple_event.outside_rate = cell(1,no);
 ripple_event.Hz = zeros(1,no);
 ripple_event.is_SWR = zeros(size(LFP_ripple_hilbert));
 
@@ -127,8 +130,8 @@ for i = 1:no
     
     LFP_nuerons = logical(R.LFP.LFP_neurons{1}(i,:));
     % firing rate in and out of SWR
-    ripple_event.inside_rate = sum(spike_hist(LFP_nuerons, is_SWR_tmp), 2)/(R.dt*sum(is_SWR_tmp)*10^-3);
-    ripple_event.outside_rate = sum(spike_hist(LFP_nuerons, ~is_SWR_tmp), 2)/(R.dt*sum(~is_SWR_tmp)*10^-3);
+    ripple_event.inside_rate{no} = sum(spike_hist(LFP_nuerons, is_SWR_tmp), 2)/(R.dt*sum(is_SWR_tmp)*10^-3);
+    ripple_event.outside_rate{no} = sum(spike_hist(LFP_nuerons, ~is_SWR_tmp), 2)/(R.dt*sum(~is_SWR_tmp)*10^-3);
     
     
     % three indexes for population synchrony
@@ -159,25 +162,49 @@ scales = scalerange(end):0.5:scalerange(1);
 pseudoFreq = scal2frq(scales,'cmor1.5-1',1/Fs); % pseudo-frequencies
 coeffs = cell(no,1);
 peak = cell(no,1);
+sw_average = cell(no,1);
+rp_average = cell(no,1);
 for i = 1:no
     x_tmp = LFP_ripple(i,:);
     coeffs_tmp = abs(cwt(x_tmp,scales,'cmor1.5-1'))';
-    peak{i}.freq = [];
-    peak{i}.step = [];
-    peak{i}.coeff = [];
-    
+    coeffs{i} = coeffs_tmp;
+    peak{i}.rp_freq = [];
+    peak{i}.rp_freq_step = [];
+    peak{i}.rp_mag = [];
+    peak{i}.rp_mag_step = [];
+    peak{i}.sw_mag = [];
     for j =  1:length(ripple_event.ripple_du_steps{i})
         a_tmp = ripple_event.ripple_start_steps{i}(j);
         l_tmp = ripple_event.ripple_du_steps{i}(j);
         
         [max_coffs_tmp, freq_ind_tmp] = max(coeffs_tmp(a_tmp:a_tmp+l_tmp-1, :), [], 2);
-        [max_max_coffs_tmp, ind_tmp] = max(max_coffs_tmp);
-        peak{i}.freq = [peak{i}.freq pseudoFreq(freq_ind_tmp(ind_tmp))];
-        peak{i}.step = [peak{i}.step a_tmp+ind_tmp-1];
-        peak{i}.coeff = [peak{i}.coeff max_max_coffs_tmp];
+        [~, ind_tmp] = max(max_coffs_tmp);
+        peak{i}.rp_freq = [peak{i}.rp_freq pseudoFreq(freq_ind_tmp(ind_tmp))];
+        peak{i}.rp_freq_step = [peak{i}.rp_freq_step a_tmp+ind_tmp-1];
+        
+        [rp_mag, rp_mag_step] = max(LFP_ripple_hilbert(i, a_tmp:a_tmp+l_tmp-1));
+        peak{i}.rp_mag = [peak{i}.rp_mag rp_mag];
+        peak{i}.rp_mag_step = [peak{i}.rp_mag_step a_tmp+rp_mag_step-1];
     end
-     
-    coeffs{no} = coeffs_tmp;
+    
+    % sharp-wave and ripple correlation
+    swr_hw = 75; % ms
+    swr_hw_steps = round(swr_hw/dt);
+    sw_average{i} = zeros(1,swr_hw_steps*2+1);
+    rp_average{i} = zeros(1,swr_hw_steps*2+1);
+    for j = 1:length(peak{i}.rp_mag_step)
+        peak_t = peak{i}.rp_mag_step(j);
+        if swr_hw_steps + peak_t < R.step_tot && -swr_hw_steps + peak_t > 0
+            peak{i}.sw_mag = [peak{i}.sw_mag max(LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t))];
+            sw_average{i} = sw_average{i} + LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
+            rp_average{i} = rp_average{i} + LFP_ripple(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
+        else
+            peak{i}.sw_mag = [peak{i}.sw_mag NaN];
+        end
+    end
+    
+    
+    
 end
 
 R.LFP.wavelet.pseudoFreq = pseudoFreq;

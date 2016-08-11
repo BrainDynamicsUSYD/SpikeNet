@@ -8,7 +8,7 @@ fprintf('\t Getting stPR (may take several minute)...\n');
 pop = 1;
 
 % sample a sub-set of neurons from the entire population
-sample_num = min(R.N, 100);
+sample_num = min(R.N(pop), 100);
 sample_ind = sort(randperm(R.N(pop), sample_num));
 
 % spikes detected with 1ms resolution
