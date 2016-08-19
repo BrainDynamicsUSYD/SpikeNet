@@ -38,7 +38,7 @@ end
 
 % Butterworth filter
 order = 4; % 4th order
-R.LFP.lowFreq = 150; % ripple band (80?180 Hz)
+R.LFP.lowFreq = 100; % ripple band (default values for this function are 150-250 Hz)
 R.LFP.hiFreq = 250;
 Wn = [R.LFP.lowFreq R.LFP.hiFreq]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
@@ -130,8 +130,8 @@ for i = 1:no
     
     LFP_nuerons = logical(R.LFP.LFP_neurons{1}(i,:));
     % firing rate in and out of SWR
-    ripple_event.inside_rate{no} = sum(spike_hist(LFP_nuerons, is_SWR_tmp), 2)/(R.dt*sum(is_SWR_tmp)*10^-3);
-    ripple_event.outside_rate{no} = sum(spike_hist(LFP_nuerons, ~is_SWR_tmp), 2)/(R.dt*sum(~is_SWR_tmp)*10^-3);
+    ripple_event.inside_rate{i} = sum(spike_hist(LFP_nuerons, is_SWR_tmp), 2)/(R.dt*sum(is_SWR_tmp)*10^-3);
+    ripple_event.outside_rate{i} = sum(spike_hist(LFP_nuerons, ~is_SWR_tmp), 2)/(R.dt*sum(~is_SWR_tmp)*10^-3);
     
     
     % three indexes for population synchrony
@@ -160,31 +160,35 @@ fc = centfrq('cmor1.5-1');
 scalerange = fc./(freqrange*(1/Fs));
 scales = scalerange(end):0.5:scalerange(1);
 pseudoFreq = scal2frq(scales,'cmor1.5-1',1/Fs); % pseudo-frequencies
-coeffs = cell(no,1);
-peak = cell(no,1);
-sw_average = cell(no,1);
-rp_average = cell(no,1);
+coeffs = cell(1,no);
+peak.rp_freq = cell(1,no);
+peak.rp_freq_step = cell(1,no);
+peak.rp_mag = cell(1,no);
+peak.rp_mag_step = cell(1,no);
+peak.sw_mag = cell(1,no);
+sw_average = cell(1,no);
+rp_average = cell(1,no);
 for i = 1:no
     x_tmp = LFP_ripple(i,:);
     coeffs_tmp = abs(cwt(x_tmp,scales,'cmor1.5-1'))';
     coeffs{i} = coeffs_tmp;
-    peak{i}.rp_freq = [];
-    peak{i}.rp_freq_step = [];
-    peak{i}.rp_mag = [];
-    peak{i}.rp_mag_step = [];
-    peak{i}.sw_mag = [];
+    peak.rp_freq{i} = [];
+    peak.rp_freq_step{i} = [];
+    peak.rp_mag{i} = [];
+    peak.rp_mag_step{i} = [];
+    peak.sw_mag{i} = [];
     for j =  1:length(ripple_event.ripple_du_steps{i})
         a_tmp = ripple_event.ripple_start_steps{i}(j);
         l_tmp = ripple_event.ripple_du_steps{i}(j);
         
         [max_coffs_tmp, freq_ind_tmp] = max(coeffs_tmp(a_tmp:a_tmp+l_tmp-1, :), [], 2);
         [~, ind_tmp] = max(max_coffs_tmp);
-        peak{i}.rp_freq = [peak{i}.rp_freq pseudoFreq(freq_ind_tmp(ind_tmp))];
-        peak{i}.rp_freq_step = [peak{i}.rp_freq_step a_tmp+ind_tmp-1];
+        peak.rp_freq{i} = [peak.rp_freq{i} pseudoFreq(freq_ind_tmp(ind_tmp))];
+        peak.rp_freq_step{i} = [peak.rp_freq_step{i} a_tmp+ind_tmp-1];
         
         [rp_mag, rp_mag_step] = max(LFP_ripple_hilbert(i, a_tmp:a_tmp+l_tmp-1));
-        peak{i}.rp_mag = [peak{i}.rp_mag rp_mag];
-        peak{i}.rp_mag_step = [peak{i}.rp_mag_step a_tmp+rp_mag_step-1];
+        peak.rp_mag{i} = [peak.rp_mag{i} rp_mag];
+        peak.rp_mag_step{i} = [peak.rp_mag_step{i} a_tmp+rp_mag_step-1];
     end
     
     % sharp-wave and ripple correlation
@@ -192,14 +196,14 @@ for i = 1:no
     swr_hw_steps = round(swr_hw/dt);
     sw_average{i} = zeros(1,swr_hw_steps*2+1);
     rp_average{i} = zeros(1,swr_hw_steps*2+1);
-    for j = 1:length(peak{i}.rp_mag_step)
-        peak_t = peak{i}.rp_mag_step(j);
+    for j = 1:length(peak.rp_mag_step{i})
+        peak_t = peak.rp_mag_step{i}(j);
         if swr_hw_steps + peak_t < R.step_tot && -swr_hw_steps + peak_t > 0
-            peak{i}.sw_mag = [peak{i}.sw_mag max(LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t))];
+            peak.sw_mag{i} = [peak.sw_mag{i} max(LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t))];
             sw_average{i} = sw_average{i} + LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
             rp_average{i} = rp_average{i} + LFP_ripple(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
         else
-            peak{i}.sw_mag = [peak{i}.sw_mag NaN];
+            peak.sw_mag{i} = [peak.sw_mag{i} NaN];
         end
     end
     
@@ -210,7 +214,8 @@ end
 R.LFP.wavelet.pseudoFreq = pseudoFreq;
 R.LFP.wavelet.coeffs = coeffs;
 R.LFP.wavelet.peak = peak;
-
+R.LFP.wavelet.sw_average = sw_average;
+R.LFP.wavelet.rp_average = rp_average;
 % Output results
 R.LFP.LFP_broad = LFP_broad;
 R.LFP.LFP_ripple = LFP_ripple;

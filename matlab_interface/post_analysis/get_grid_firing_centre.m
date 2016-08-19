@@ -11,7 +11,7 @@ win_min_rate_Hz = 0.5;
 
 spikes_win_min = win_min_rate_Hz*(R.dt*0.001)*win_len*R.N(1);
 
-[ t_mid_full, ind_ab_full,  num_spikes_win_full ] = window_spike_hist_compressed( R, win_len, win_gap );
+[ t_mid_full, ind_ab_full,  num_spikes_win_full, ~ ] = window_spike_hist_compressed( R, win_len, win_gap );
 
 if nargin < 2
     seg = 1:R.step_tot;
@@ -96,7 +96,7 @@ R.grid.raw.win_min_rate_Hz = win_min_rate_Hz;
 R.grid.raw.num_spikes_win = num_spikes_win_full;
 R.grid.raw.t_mid = t_mid_full;
 R.grid.raw.ind_ab = ind_ab_full;
-
+% R.grid.raw.t_ab = t_ab_vec_full; 
 
 R.grid.t_mid = t_mid_chosen;
 R.grid.radius = width_chosen;
