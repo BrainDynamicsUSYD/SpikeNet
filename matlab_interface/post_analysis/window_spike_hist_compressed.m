@@ -1,4 +1,4 @@
-function [ t_mid, ind_ab,  num_spikes_win ] = window_spike_hist_compressed( R, win_len, win_gap, pop_ind )
+function [ t_mid, ind_ab,  num_spikes_win, t_ab_vec ] = window_spike_hist_compressed( R, win_len, win_gap, pop_ind )
 % [ t_mid, ind_ab,  num_spikes_win ] = window_spike_hist_compressed( R, win_len, win_gap, pop_ind )
 %This function returns ind_ab = [ind_a; ind_b] so that
 %spike_hist_compressed{pop_ind}(ind_a(i):ind_b(i)) gives the indices of the
@@ -38,7 +38,7 @@ while t_b  < R.step_tot
     t_a = t_a + win_gap;
     t_b = t_b + win_gap;
 end
-
+t_ab_vec = [t_a_vec(:) t_b_vec(:)];
 t_mid = round( (t_a_vec+t_b_vec)/2 );
 ind_ab = [ind_a_vec; ind_b_vec];
 
