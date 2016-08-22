@@ -63,7 +63,7 @@ bool SimuInterface::import(string in_filename_input){
 	vector<int> spike_freq_adpt_setting; //
 	
 	vector<int> LFP_record_pop_ind; //
-	vector< vector < vector<bool> > > LFP_record_setting; //
+	vector< vector < vector<double> > > LFP_record_setting; //
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
@@ -922,11 +922,11 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 			// LFP record settings
 			if (group_exist_HDF5(in_filename, pop_n + string("/SAMP005"))){
 				cout << "\t\t LFP record settings...";
-				vector<bool> v_tmp;
+				vector<double> v_tmp;
 				read_vector_HDF5(file, pop_n + string("/SAMP005/LFP_neurons"), v_tmp);
 				// reshape
 				int n_LFP = int(v_tmp.size()) / network.N_array[ind];
-				vector< vector<bool> > LFP_neurons;
+				vector< vector<double> > LFP_neurons;
 				LFP_neurons.resize(n_LFP);
 				int ctr = 0;
 				for (int n = 0; n < n_LFP; n++){

@@ -142,9 +142,9 @@ void NeuroPop::start_stats_record()
 	stats.IE_ratio.assign(N, 0.0);
 }
 
-void NeuroPop::start_LFP_record(const vector <vector<bool> >& LFP_neurons_input){
+void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_input){
 	if (int(LFP_neurons_input[0].size()) != N){
-		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
+		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N double vector!" << endl;
 	}
 	else{
 		LFP.record = true;
@@ -630,8 +630,8 @@ void NeuroPop::record_LFP(){
 		for (unsigned int ind = 0; ind < LFP.neurons.size(); ++ind){
 			LFP.data[ind].push_back(0.0);
 			for (int i = 0; i < N; ++i){
-				if (LFP.neurons[ind][i]){
-					LFP.data[ind].back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
+				if (LFP.neurons[ind][i] > 0){
+					LFP.data[ind].back() += LFP.neurons[ind][i] * (abs(I_AMPA[i]) + abs(I_GABA[i]));
 				}
 			} 
 		}
