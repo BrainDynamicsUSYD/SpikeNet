@@ -46,6 +46,9 @@ for id_out = 1:num_files
         R = ReadH5( files(id_out) ); % read .ygout file into matlab data struct
     end
     R = AnalyseYG(R); % do some simple analysis
+    
+    R = get_SWR(R{1});R = {R};
+    
     SaveRYG(R);
     disp('Done');
     for ind = 1:length(R)
@@ -54,6 +57,7 @@ for id_out = 1:num_files
         end
     end
     RasterYG(R, save_fig); % generate raster plot for spiking history
+
 end
 
 

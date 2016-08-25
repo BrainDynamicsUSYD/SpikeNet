@@ -56,15 +56,17 @@ for i = 1:num_files
 %    save(files{i},'stPR', '-append');
 %     
 
-%     R_temp = get_grid_firing_centre(R_temp);
-%     grid = R_temp.grid;
-%     save(files{i},'grid', '-append');
-
     
 
      R_temp = get_SWR(R_temp);
      LFP = R_temp.LFP;
      save(files{i},'LFP', '-append');
+     
+%     R_temp = get_grid_firing_centre(R_temp);
+%     grid = R_temp.grid;
+%     save(files{i},'grid', '-append');
+
+
      % plot_SWR(R_temp, save_fig);
 %     
     
