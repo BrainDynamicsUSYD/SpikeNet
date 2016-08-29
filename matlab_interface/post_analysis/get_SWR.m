@@ -131,8 +131,8 @@ for i = 1:no
     
     % LFP_neurons = logical(R.LFP.LFP_neurons{1}(i,:));
     s_tmp = R.ExplVar.LFP_range_sigma;
-    spike_sort_range = s_tmp;
-    spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(spike_sort_range/s_tmp)^2);
+    ripple_event.spike_sort_range = s_tmp;
+    spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(ripple_event.spike_sort_range/s_tmp)^2);
     
     % firing rate in and out of SWR
     ripple_event.inside_rate{i} = transpose(sum(spike_hist(spike_sort_neurons, is_SWR_tmp), 2)/(R.dt*sum(is_SWR_tmp)*10^-3));

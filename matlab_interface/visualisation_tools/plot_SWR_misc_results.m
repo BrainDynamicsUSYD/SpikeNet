@@ -1,3 +1,4 @@
+function plot_SWR_misc_results(R)
 % clc; clear; close all;
 % R=load('0009-201608161645-31296_in_1471330157928_out_RYG.mat');
 clc;close all;
@@ -23,8 +24,8 @@ prn = cell2mat( R.LFP.wavelet.peak.prn(~cellfun(@isempty,R.LFP.wavelet.peak.prn)
 figure(6)
 title('Ripple and sharp waves')
 set(gcf, 'color', 'w');
-data1 = []
-data2 = []
+data1 = [];
+data2 = [];
 c = 0;
 for ii = 1:4
     for jj = 1:4
@@ -54,7 +55,7 @@ rp_amp_no_std = [];
 for i = 1:16
     [~,~,sw_amp_mean_base] = find(R.LFP.ripple_event.hil_mean_baseline(i,:), 1, 'last');
     [~,~,sw_amp_std_base] = find(R.LFP.ripple_event.hil_std_baseline(i,:), 1, 'last');
-    rp_amp_no_std = [rp_amp_no_std (R.LFP.wavelet.peak.rp_raw_amp{i} - sw_amp_mean_base)/sw_amp_std_base];
+    rp_amp_no_std = [rp_amp_no_std (R.LFP.wavelet.peak.rp_raw_amp{i} - sw_amp_mean_base)/sw_amp_std_base]; %#ok<*AGROW>
 end
 nostd = 1:15;
 c = histc(rp_amp_no_std,nostd );
@@ -149,4 +150,6 @@ hist(R.Analysis.rate{1}, 25);
 xlabel('Firing rate (Hz) ')
 set(gcf,'color','w')
 title(['mean(Hz) = ' num2str(mean(R.Analysis.rate{1}))])
+
+end
 

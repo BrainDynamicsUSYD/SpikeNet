@@ -1,21 +1,29 @@
-function [ R ] = get_grid_firing_centre( R, seg )
+function [ R ] = get_grid_firing_centre( R, varargin )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
 
-
 % parameters
-win_len = 200; % window length in time steps
-win_gap = 100; % window gap
+win_len = 100; % window length in time steps
+win_gap = 50; % window gap
 win_min_rate_Hz = 0.5;
 
-spikes_win_min = win_min_rate_Hz*(R.dt*0.001)*win_len*R.N(1);
+seg = 1:R.step_tot;
+mode = 'quick'; % quick or bayesian
+for i = 1:length(varargin)/2
+    var_name = varargin{2*i-1};
+    var_value = varargin{2*i};
+     if isnumeric(var_value)
+        eval([var_name, '=', num2str(var_value), ';']);
+     else
+         eval([var_name, '=''', var_value, ''';']);
+     end
+end
+mode
 
+spikes_win_min = win_min_rate_Hz*(R.dt*0.001)*win_len*R.N(1);
 [ t_mid_full, ind_ab_full,  num_spikes_win_full, ~ ] = window_spike_hist_compressed( R, win_len, win_gap );
 
-if nargin < 2
-    seg = 1:R.step_tot;
-end
 
 t_seg = t_mid_full > min(seg) &  t_mid_full < max(seg);
 t_mid = t_mid_full(t_seg);
@@ -50,6 +58,9 @@ else
     mlh =  [];
     
     for j = 1:length(ind_a_vec)
+        if mod(j*10,round(length(ind_a_vec)/10)*10) == 0
+            fprintf('%d...', 10 - j*10 / (round(length(ind_a_vec)/10)*10));
+        end
         % j/length(ind_a_vec)
         ind_range_tmp = ind_a_vec(j):ind_b_vec(j);
         x_pos_tmp = x_pos(ind_range_tmp);
@@ -57,7 +68,7 @@ else
         
         
         % add bayesian stuff here
-        [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw);
+        [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
         x_mean =  [x_mean x_mean_tmp]; %#ok<AGROW>
         y_mean =  [y_mean y_mean_tmp];%#ok<AGROW>
         width =  [width width_tmp];%#ok<AGROW>
@@ -96,8 +107,10 @@ R.grid.raw.win_min_rate_Hz = win_min_rate_Hz;
 R.grid.raw.num_spikes_win = num_spikes_win_full;
 R.grid.raw.t_mid = t_mid_full;
 R.grid.raw.ind_ab = ind_ab_full;
+
 % R.grid.raw.t_ab = t_ab_vec_full; 
 
+R.grid.mode = mode;
 R.grid.t_mid = t_mid_chosen;
 R.grid.radius = width_chosen;
 R.grid.centre = [x_mean_chosen; y_mean_chosen];
