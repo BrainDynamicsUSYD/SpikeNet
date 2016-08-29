@@ -107,14 +107,15 @@ R.grid.raw.win_min_rate_Hz = win_min_rate_Hz;
 R.grid.raw.num_spikes_win = num_spikes_win_full;
 R.grid.raw.t_mid = t_mid_full;
 R.grid.raw.ind_ab = ind_ab_full;
-
+R.grid.raw.radius = width;
+R.grid.raw.centre = [x_mean; y_mean];
+R.grid.raw.mlh = mlh;
 % R.grid.raw.t_ab = t_ab_vec_full; 
 
 R.grid.mode = mode;
 R.grid.t_mid = t_mid_chosen;
 R.grid.radius = width_chosen;
 R.grid.centre = [x_mean_chosen; y_mean_chosen];
-R.grid.mlh = mlh;
 R.grid.jump_dist = jump_dist;
 R.grid.jump_du = jump_duration;
 
