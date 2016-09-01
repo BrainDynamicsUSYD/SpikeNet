@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <iomanip>
 #include <cmath>
-#include <algorithm> // for transform
+#include <algorithm>
+ // for transform
 #include <stdio.h> // for printf
 #include <time.h>       /* time */
 #include <sstream>  // stringstream is input and output
@@ -219,7 +220,7 @@ void NeuroPop::random_V(const double p){
 void NeuroPop::set_init_condition(const double r_V0, const double p_fire){
 	// Set V to be uniformly distributed between [V_rt, V_rt + (V_th - V_rt)*r_V0]
 	// And then randomly set some of them above firing threshold according to p_fire
-	gen.seed(my_seed);// reseed random engine!
+	gen.seed(my_seed+pop_ind);// reseed random engine!
 	uniform_real_distribution<double> uniform_dis(0.0, 1.0);
 	auto ZeroOne = bind(uniform_dis,gen);
 	for (int i = 0; i < N; ++i){
@@ -689,6 +690,234 @@ void NeuroPop::record_stats(const int step_current){
 }
 
 #ifdef HDF5
+
+
+void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename){
+	string str;
+	string pop_n = "/pops/pop" + to_string(pop_ind)+"/";
+
+	pop_ind=read_scalar_HDF5<double>(file,pop_n+string("pop_ind"));
+	N=read_scalar_HDF5<double>(file,pop_n+string("N"));
+	dt=read_scalar_HDF5<double>(file,pop_n+string("dt"));
+	step_tot=read_scalar_HDF5<double>(file,pop_n+string("step_tot"));
+	tau_ref=read_scalar_HDF5<double>(file,pop_n+string("tau_ref"));
+	Cm=read_scalar_HDF5<double>(file,pop_n+string("Cm"));
+	V_rt=read_scalar_HDF5<double>(file,pop_n+string("V_rt"));
+	V_lk=read_scalar_HDF5<double>(file,pop_n+string("V_lk"));
+	V_th=read_scalar_HDF5<double>(file,pop_n+string("V_th"));
+	g_lk=read_scalar_HDF5<double>(file,pop_n+string("g_lk"));
+
+	read_vector_HDF5(file,pop_n+"V",V);
+	read_vector_HDF5(file,pop_n+"I_leak",I_leak);
+	read_vector_HDF5(file,pop_n+"I_input",I_input);
+	read_vector_HDF5(file,pop_n+"I_AMPA",I_AMPA);
+	read_vector_HDF5(file,pop_n+"I_GABA",I_GABA);
+	read_vector_HDF5(file,pop_n+"I_NMDA",I_NMDA);
+	read_vector_HDF5(file,pop_n+"I_GJ",I_GJ);
+	read_vector_HDF5(file,pop_n+"I_ext",I_ext);
+
+	read_vector_HDF5(file,pop_n+string("I_ext_mean"),I_ext_mean);
+
+	if(dataset_exist_HDF5(file,pop_n+string("I_ext_std"))){
+
+		read_vector_HDF5(file,pop_n+string("I_ext_std"),I_ext_std);
+	}
+
+	read_vector_HDF5(file,pop_n+string("g_ext_mean"),g_ext_mean);
+
+	if(dataset_exist_HDF5(file,pop_n+string("g_ext_std"))){
+
+		read_vector_HDF5(file,pop_n+"g_ext_std",g_ext_std);
+	}
+
+	ref_steps=read_scalar_HDF5<int>(file,pop_n+string("ref_steps"));
+
+	read_vector_HDF5(file,pop_n+"ref_step_left",ref_step_left);
+	if(dataset_exist_HDF5(file,pop_n+string("spikes_current"))){
+		read_vector_HDF5(file,pop_n+"spikes_current",spikes_current);
+	}
+	// read_vector_HDF5(file,pop_n+"spike_hist_tot",spike_hist_tot);
+	// read_vector_HDF5(file,pop_n+"num_spikes_pop",num_spikes_pop);
+	// read_vector_HDF5(file,pop_n+"num_ref_pop",num_ref_pop);
+
+	str = pop_n+"/Stats/";
+	if(group_exist_HDF5(file,str)){
+		stats.record=read_scalar_HDF5<bool>(file,str+"record");
+		start_stats_record();	
+		// read_vector_HDF5(file,str+"V_mean",stats.V_mean);
+		// read_vector_HDF5(file,str+"V_std",stats.V_std);
+		// read_vector_HDF5(file,str+"I_input_mean",stats.I_input_mean);
+		// read_vector_HDF5(file,str+"I_input_std",stats.I_input_std);
+		// read_vector_HDF5(file,str+"I_AMPA_acc",stats.I_AMPA_acc);
+		// read_vector_HDF5(file,str+"I_AMPA_time_avg",stats.I_AMPA_time_avg);
+		// read_vector_HDF5(file,str+"I_NMDA_acc",stats.I_NMDA_acc);
+		// read_vector_HDF5(file,str+"I_NMDA_time_avg",stats.I_NMDA_time_avg);
+		// read_vector_HDF5(file,str+"I_GABA_acc",stats.I_GABA_acc);
+		// read_vector_HDF5(file,str+"I_GABA_time_avg",stats.I_GABA_time_avg);
+		// read_vector_HDF5(file,str+"IE_ratio",stats.IE_ratio);
+	}
+
+	str = pop_n+"/LFP/";
+	if(group_exist_HDF5(file,str)){
+		LFP.record=read_scalar_HDF5<bool>(file,str+"record");	
+		read_matrix_HDF5(file,str+"neurons",LFP.neurons);
+		start_LFP_record(LFP.neurons);
+		// read_matrix_HDF5(file,str+"data",LFP.data);
+	}
+
+
+
+	V_ext=read_scalar_HDF5<double>(file,pop_n+string("V_ext"));
+	spike_freq_adpt=read_scalar_HDF5<bool>(file,pop_n+string("spike_freq_adpt"));
+	if(dataset_exist_HDF5(file,pop_n+string("g_K"))){
+		read_vector_HDF5(file,pop_n+string("g_K"),g_K);
+	}
+	read_vector_HDF5(file,pop_n+"I_K",I_K);
+
+	V_K=read_scalar_HDF5<double>(file,pop_n+string("V_K"));
+	dg_K=read_scalar_HDF5<double>(file,pop_n+string("dg_K"));
+	tau_K=read_scalar_HDF5<double>(file,pop_n+string("tau_K"));
+	exp_K_step=read_scalar_HDF5<double>(file,pop_n+string("exp_K_step"));
+
+	str = pop_n+"/sample/";
+	if(group_exist_HDF5(file,str)){
+		sample.file_type=read_scalar_HDF5<int>(file,str+string("file_type"));	
+		// read_string_HDF5(file, str+string("file_name"), sample.file_name);
+		// sample.ctr=read_scalar_HDF5<int>(file,str+string("ctr"));	
+		read_vector_HDF5(file,str+"neurons",sample.neurons);
+		read_vector_HDF5(file,str+"type",sample.type);
+		read_vector_HDF5(file,str+"time_points",sample.time_points);
+		sample.N_steps=read_scalar_HDF5<int>(file,str+string("N_steps"));	
+		sample.N_neurons=read_scalar_HDF5<int>(file,str+string("N_neurons"));
+		add_sampling_real_time_HDF5(sample.neurons, sample.type, sample.time_points, out_filename);
+		// read_3Dmatrix_HDF5(file,str+"data",sample.data);
+
+	}
+
+	step_perturb=read_scalar_HDF5<int>(file,pop_n+string("step_perturb"));
+	spike_removed=read_scalar_HDF5<int>(file,pop_n+string("spike_removed"));
+	my_seed=read_scalar_HDF5<int>(file,pop_n+string("my_seed"));
+
+	str = pop_n+"/killer/";
+	if(group_exist_HDF5(file,str)){
+		killer.license=read_scalar_HDF5<bool>(file,str+string("license"));	
+		killer.runaway_killed=read_scalar_HDF5<bool>(file,str+string("runaway_killed"));	
+		killer.step_killed=read_scalar_HDF5<int>(file,str+string("step_killed"));	
+		killer.Hz_steps=read_scalar_HDF5<int>(file,str+string("Hz_steps"));	
+		killer.runaway_Hz=read_scalar_HDF5<double>(file,str+string("runaway_Hz"));	
+		killer.min_steps=read_scalar_HDF5<int>(file,str+string("min_steps"));	
+		killer.min_pop_size=read_scalar_HDF5<int>(file,str+string("min_pop_size"));	
+	}
+}
+void NeuroPop::export_restart(Group& group){
+
+	string pop_n = "/pops/pop" + to_string(pop_ind)+"/";
+	Group group_pop = group.createGroup(pop_n);
+
+	write_scalar_HDF5(group_pop,pop_ind,string("pop_ind"));
+	write_scalar_HDF5(group_pop,N,string("N"));
+	write_scalar_HDF5(group_pop,dt,string("dt"));
+	write_scalar_HDF5(group_pop,step_tot,string("step_tot"));
+	write_scalar_HDF5(group_pop,tau_ref,string("tau_ref"));
+	write_scalar_HDF5(group_pop,Cm,string("Cm"));
+	write_scalar_HDF5(group_pop,V_rt,string("V_rt"));
+	write_scalar_HDF5(group_pop,V_lk,string("V_lk"));
+	write_scalar_HDF5(group_pop,V_th,string("V_th"));
+	write_scalar_HDF5(group_pop,g_lk,string("g_lk"));
+
+	write_vector_HDF5(group_pop,V,"V");
+	write_vector_HDF5(group_pop,I_leak,"I_leak");
+	write_vector_HDF5(group_pop,I_input,"I_input");
+	write_vector_HDF5(group_pop,I_AMPA,"I_AMPA");
+	write_vector_HDF5(group_pop,I_GABA,"I_GABA");
+	write_vector_HDF5(group_pop,I_NMDA,"I_NMDA");
+	write_vector_HDF5(group_pop,I_GJ,"I_GJ");
+	write_vector_HDF5(group_pop,I_ext,"I_ext");
+	write_scalar_HDF5(group_pop,ref_steps,string("ref_steps"));
+	write_vector_HDF5(group_pop,ref_step_left,"ref_step_left");
+	if(spikes_current.size()!=0){
+		write_vector_HDF5(group_pop,spikes_current,"spikes_current");
+	}
+	write_vector_HDF5(group_pop,spike_hist_tot,"spike_hist_tot");
+	write_vector_HDF5(group_pop,num_spikes_pop,"num_spikes_pop");
+	write_vector_HDF5(group_pop,num_ref_pop,"num_ref_pop");
+
+	if(stats.record){
+		string str = pop_n+"/Stats/";
+		Group group_stats = group_pop.createGroup(str);
+		write_scalar_HDF5(group_stats,stats.record,string("record"));	
+		write_vector_HDF5(group_stats,stats.V_mean,"V_mean");
+		write_vector_HDF5(group_stats,stats.V_std,"V_std");
+		write_vector_HDF5(group_stats,stats.I_input_mean,"I_input_mean");
+		write_vector_HDF5(group_stats,stats.I_input_std,"I_input_std");
+		write_vector_HDF5(group_stats,stats.I_AMPA_acc,"I_AMPA_acc");
+		write_vector_HDF5(group_stats,stats.I_AMPA_time_avg,"I_AMPA_time_avg");
+		write_vector_HDF5(group_stats,stats.I_NMDA_acc,"I_NMDA_acc");
+		write_vector_HDF5(group_stats,stats.I_NMDA_time_avg,"I_NMDA_time_avg");
+		write_vector_HDF5(group_stats,stats.I_GABA_acc,"I_GABA_acc");
+		write_vector_HDF5(group_stats,stats.I_GABA_time_avg,"I_GABA_time_avg");
+		write_vector_HDF5(group_stats,stats.IE_ratio,"IE_ratio");
+	}
+
+	if(LFP.record){
+		string str = pop_n+"/LFP/";
+		Group group_LFP = group_pop.createGroup(str);
+		write_scalar_HDF5(group_LFP,LFP.record,string("record"));	
+		write_matrix_HDF5(group_LFP,LFP.neurons,"neurons");
+		write_matrix_HDF5(group_LFP,LFP.data,"data");
+	}
+
+	write_vector_HDF5(group_pop,I_ext_mean,string("I_ext_mean"));
+	if(I_ext_std.size()!=0){
+		write_vector_HDF5(group_pop,I_ext_std,string("I_ext_std"));
+	}
+	write_vector_HDF5(group_pop,g_ext_mean,string("g_ext_mean"));
+	if(g_ext_std.size()!=0){
+		write_vector_HDF5(group_pop,g_ext_std,"g_ext_std");
+	}
+			
+	write_scalar_HDF5(group_pop,V_ext,string("V_ext"));
+
+	write_scalar_HDF5(group_pop,spike_freq_adpt,string("spike_freq_adpt"));
+	write_vector_HDF5(group_pop,g_K,string("g_K"));
+	write_vector_HDF5(group_pop,I_K,"I_K");
+
+	write_scalar_HDF5(group_pop,V_K,string("V_K"));
+	write_scalar_HDF5(group_pop,dg_K,string("dg_K"));
+	write_scalar_HDF5(group_pop,tau_K,string("tau_K"));
+	write_scalar_HDF5(group_pop,exp_K_step,string("exp_K_step"));
+
+	if(sample.file_type==2){
+		string str = pop_n+"/sample/";
+		Group group_sample = group_pop.createGroup(str);
+		write_scalar_HDF5(group_sample,sample.file_type,string("file_type"));	
+		write_string_HDF5(group_sample, sample.file_name, string("file_name"));
+		write_scalar_HDF5(group_sample,sample.ctr,string("ctr"));	
+		write_vector_HDF5(group_sample,sample.neurons,"neurons");
+		write_vector_HDF5(group_sample,sample.type,"type");
+		write_vector_HDF5(group_sample,sample.time_points,"time_points");
+
+		write_scalar_HDF5(group_sample,sample.N_steps,string("N_steps"));	
+		write_scalar_HDF5(group_sample,sample.N_neurons,string("N_neurons"));	
+		// write_3Dmatrix_HDF5(group_sample,data,"data");
+	}
+
+	write_scalar_HDF5(group_pop,step_perturb,string("step_perturb"));
+	write_scalar_HDF5(group_pop,spike_removed,string("spike_removed"));
+	write_scalar_HDF5(group_pop,my_seed,string("my_seed"));
+
+	if(killer.license){
+		string str = pop_n+"/killer/";
+		Group group_killer = group_pop.createGroup(str);
+		write_scalar_HDF5(group_killer,killer.license,string("license"));	
+		write_scalar_HDF5(group_killer,killer.runaway_killed,string("runaway_killed"));	
+		write_scalar_HDF5(group_killer,killer.step_killed,string("step_killed"));	
+		write_scalar_HDF5(group_killer,killer.Hz_steps,string("Hz_steps"));	
+		write_scalar_HDF5(group_killer,killer.runaway_Hz,string("runaway_Hz"));	
+		write_scalar_HDF5(group_killer,killer.min_steps,string("min_steps"));	
+		write_scalar_HDF5(group_killer,killer.min_pop_size,string("min_pop_size"));	
+	}
+}
 
 void NeuroPop::output_results(H5File& file){
 

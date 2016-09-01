@@ -74,6 +74,15 @@ void write_scalar_HDF5(Group & group, double s, const string & v_name){
 	write_vector_HDF5(group, v_tmp, v_name);
 }
 
+void write_vector_HDF5(Group & group, const vector<bool> & v, const string & v_name){
+	vector<int> tempintvec(v.begin(),v.end());
+	
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
+	v_dataset.write( tempintvec.data(), PredType::NATIVE_INT, fspace, fspace );	
+}
 
 void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
 	hsize_t dims[1]; 
@@ -106,10 +115,48 @@ void write_string_HDF5(Group & group, const string & s, const string &  s_name){
    str_dataset.write(arr_c_str.data(), datatype);
 }
 
+void write_matrix_HDF5(Group & group, const vector< vector<bool> > & m, const string &  m_name){
+	hsize_t dims[2]; 
+	dims[0] = m.size();
+	dims[1] = m[0].size();
+	for(unsigned int i=0;i<m.size();i++){
+		if(m[i].size()>dims[1]){
+			dims[1]=m[i].size();
+		}
+	}
+	DataSpace fspace(2, dims); 
+	DataSet m_dataset = group.createDataSet(m_name, PredType::NATIVE_INT32, fspace);
+	for (int i = 0; i < int(m.size()); i++){
+		vector<int> tempintvec(m[i].begin(),m[i].end());
+		append_vector_to_matrix_HDF5(m_dataset, tempintvec,  i);
+	}
+}
+
+void write_matrix_HDF5(Group & group, const vector< vector<int> > & m, const string &  m_name){
+	hsize_t dims[2]; 
+	dims[0] = m.size();
+	dims[1] = m[0].size();
+	for(unsigned int i=0;i<m.size();i++){
+		if(m[i].size()>dims[1]){
+			dims[1]=m[i].size();
+		}
+	}
+	DataSpace fspace(2, dims); 
+	DataSet m_dataset = group.createDataSet(m_name, PredType::NATIVE_INT32, fspace);
+	for (int i = 0; i < int(m.size()); i++){
+		append_vector_to_matrix_HDF5(m_dataset, m[i],  i);
+	}
+}
+
 void write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const string &  m_name){
 	hsize_t dims[2]; 
 	dims[0] = m.size();
 	dims[1] = m[0].size();
+	for( unsigned int i=0;i<m.size();i++){
+		if(m[i].size()>dims[1]){
+			dims[1]=m[i].size();
+		}
+	}
 	DataSpace fspace(2, dims); 
 	DataSet m_dataset = group.createDataSet(m_name, PredType::NATIVE_DOUBLE, fspace);
 	for (int i = 0; i < int(m.size()); i++){
@@ -117,6 +164,21 @@ void write_matrix_HDF5(Group & group, const vector< vector<double> > & m, const 
 	}
 }
 
+
+void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<int> & v, const int colNum){
+   	hsize_t offset[2];
+    offset[1] = 0;
+    offset[0] = colNum;
+	
+    hsize_t fdims[2];            // new data dimensions 
+	fdims[0] = 1;
+	fdims[1] = v.size();
+	DataSpace mspace( 2, fdims );
+
+	DataSpace fspace = dataset_tmp.getSpace();
+    fspace.selectHyperslab( H5S_SELECT_SET, fdims, offset );
+    dataset_tmp.write(  v.data(), PredType::NATIVE_INT32, mspace, fspace );	
+}
 
 void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & v, const int colNum){
    	hsize_t offset[2];
@@ -133,6 +195,120 @@ void append_vector_to_matrix_HDF5(DataSet & dataset_tmp, const vector<double> & 
     dataset_tmp.write(  v.data(), PredType::NATIVE_DOUBLE, mspace, fspace );	
 }
 
+void read_string_HDF5(const H5File & file, const string &  s_name, string & s){
+	   // HDF5 only understands vector of char* :-(
+   	vector< char> arr_c_str;
+
+	const H5std_string dataset_name( s_name );
+	DataSet dataset = file.openDataSet( dataset_name );
+	
+StrType datatype(0, H5T_VARIABLE);
+DataSpace dataspace(H5S_SCALAR);
+	dataset.read(s, datatype, dataspace);
+	// DataSpace dataspace = dataset.getSpace();
+	// hsize_t dims_out[1];
+	// dataspace.getSimpleExtentDims( dims_out, NULL);
+
+	// arr_c_str.resize((unsigned long)(dims_out[0]));
+	// dataset.read( arr_c_str(), PredType::C_S1, dataspace, dataspace );
+	// string tmp_str(arr_c_str.begin(),arr_c_str.end());
+	// for(unsigned int i=0;i<tmp_str.size();i++){
+	// 	s.push_back(tmp_str[i]);
+	// }
+ 
+}
+
+void read_matrix_HDF5(const H5File & file, const string & name, vector< vector<bool> > & m_tmp){
+	vector<int> v_tmp;
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+		
+	DataSpace dataspace = dataset.getSpace();
+	hsize_t dims_out[2];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+	v_tmp.resize((unsigned long)(dims_out[1]));
+	
+	hsize_t dims_vec[2];
+	dims_vec[0]=1;
+	dims_vec[1]=dims_out[1];
+
+	hsize_t m_dims[1];
+	m_dims[0]=dims_out[1];
+	DataSpace memspace( 1, m_dims );
+
+	hsize_t offset[2];
+	offset[0]=0;
+	offset[1]=0;
+	
+	m_tmp.resize((unsigned long)(dims_out[0]));
+	for(unsigned int i=0;i<dims_out[0];i++){
+		offset[0]=i;
+		dataspace.selectHyperslab( H5S_SELECT_SET, dims_vec, offset );
+
+		m_tmp[i].resize((unsigned long)(dims_out[1]));
+		dataset.read( v_tmp.data(), PredType::NATIVE_INT, memspace, dataspace );
+		vector< bool> b_tmp(v_tmp.begin(),v_tmp.end());
+		m_tmp[i]=b_tmp;
+	}
+}
+void read_matrix_HDF5(const H5File & file, const string & name, vector< vector<int> > & m_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+		
+	DataSpace dataspace = dataset.getSpace();
+	hsize_t dims_out[2];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+	
+	hsize_t dims_vec[2];
+	dims_vec[0]=1;
+	dims_vec[1]=dims_out[1];
+
+	hsize_t m_dims[1];
+	m_dims[0]=dims_out[1];
+	DataSpace memspace( 1, m_dims );
+
+	hsize_t offset[2];
+	offset[0]=0;
+	offset[1]=0;
+	
+	m_tmp.resize((unsigned long)(dims_out[0]));
+	for(unsigned int i=0;i<dims_out[0];i++){
+		offset[0]=i;
+		dataspace.selectHyperslab( H5S_SELECT_SET, dims_vec, offset );
+
+		m_tmp[i].resize((unsigned long)(dims_out[1]));
+		dataset.read( m_tmp[i].data(), PredType::NATIVE_INT, memspace, dataspace );	
+	}
+}
+void read_matrix_HDF5(const H5File & file, const string & name, vector< vector<double> > & m_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+		
+	DataSpace dataspace = dataset.getSpace();
+	hsize_t dims_out[2];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
+	
+	hsize_t dims_vec[2];
+	dims_vec[0]=1;
+	dims_vec[1]=dims_out[1];
+
+	hsize_t m_dims[1];
+	m_dims[0]=dims_out[1];
+	DataSpace memspace( 1, m_dims );
+
+	hsize_t offset[2];
+	offset[0]=0;
+	offset[1]=0;
+	
+	m_tmp.resize((unsigned long)(dims_out[0]));
+	for(unsigned int i=0;i<dims_out[0];i++){
+		offset[0]=i;
+		dataspace.selectHyperslab( H5S_SELECT_SET, dims_vec, offset );
+
+		m_tmp[i].resize((unsigned long)(dims_out[1]));
+		dataset.read( m_tmp[i].data(), PredType::NATIVE_DOUBLE, memspace, dataspace );	
+	}
+}
 
 void read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_tmp){
 	const H5std_string dataset_name( name );
@@ -190,9 +366,20 @@ void read_vector_HDF5(const H5File & file, const string & name, vector<double> &
 	*/
 }
 
+bool dataset_exist_HDF5(const H5File & file, const string & name){
+	Exception::dontPrint();
+	bool r = true;
+	try {  // to determine if the group exists in the file
+		file.openDataSet( name );
+	}
+	catch( FileIException& not_found_error ) {
+	  r = false;
+	}
+	return r;
+}
 
 bool group_exist_HDF5(const H5File & file, const string & name){
-	// how to suppress the error message??
+	Exception::dontPrint();
 	bool r = true;
 	try {  // to determine if the group exists in the file
 		file.openGroup( name );

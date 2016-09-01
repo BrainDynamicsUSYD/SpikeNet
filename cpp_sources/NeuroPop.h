@@ -61,6 +61,8 @@ public:
 	void add_sampling(const vector<int>& sample_neurons, const vector<bool>& sample_type, const vector<bool>& sample_time_points); 
 	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
 #ifdef HDF5
+	void import_restart(H5File & file, int pop_ind, string out_filename);
+	void export_restart(Group & group);
 	void output_results(H5File& file_HDF5);
 	void add_sampling_real_time_HDF5(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
 #endif

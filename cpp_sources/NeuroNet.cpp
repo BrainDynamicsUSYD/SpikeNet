@@ -70,6 +70,8 @@ void NeuroNet::update(int step_current){
 
 }
 
+
+
 void NeuroNet::output_results(ofstream& output_file){
 
 	// write data
@@ -92,6 +94,50 @@ void NeuroNet::output_results(ofstream& output_file){
 }
 
 #ifdef HDF5
+void NeuroNet::import_restart(H5File & file,string out_filename){
+
+	Num_pop=read_scalar_HDF5<int>(file,string("/Net/Num_pop"));
+	for (unsigned int ind = 0; ind < N_array.size(); ++ind){
+		NeuroPopArray.push_back(new NeuroPop(ind, N_array[ind], dt, step_tot, delim, indicator));
+		cout << "\t Initialising neuron pop " << ind+1 << "..." << endl;
+
+		NeuroPopArray[ind]->import_restart(file,ind,out_filename);
+	}
+	string syn_str = "/syns/";
+	int n_syns=read_scalar_HDF5<int>(file,syn_str+"n_syns");
+	for (int ind = 0; ind < n_syns; ++ind){
+
+		ChemSynArray.push_back(new ChemSyn(dt, step_tot, delim, indicator));
+		// network.ChemSynArray.back()->init(type, i_pre, j_post, N_array[i_pre], N_array[j_post], I, J, K, D);
+
+		ChemSynArray[ind]->import_restart(file,ind);
+	}
+
+}
+
+void NeuroNet::export_restart(H5File & file){
+
+	Group group_Net = file.createGroup(string("/Net"));
+	write_vector_HDF5(group_Net,N_array,string("N_array"));
+	write_scalar_HDF5(group_Net,step_tot,string("step_tot")); 
+	write_scalar_HDF5(group_Net,dt,string("dt")); 
+	write_scalar_HDF5(group_Net,Num_pop,string("Num_pop")); 
+		
+	string pops_str = "/pops/";
+	Group group_pops = file.createGroup(pops_str);
+	for (int ind = 0; ind < Num_pop; ++ind){
+		NeuroPopArray[ind]->export_restart(group_pops);
+	}
+	string syn_str = "/syns/";
+	Group group_syns = file.createGroup(syn_str);
+	int n_syns=static_cast<int>(ChemSynArray.size());
+	write_scalar_HDF5(group_syns,n_syns,"n_syns");
+	for (int ind = 0; ind < n_syns; ++ind){
+		ChemSynArray[ind]->export_restart(group_syns,ind);
+	}
+
+}
+
 void NeuroNet::output_results(H5File & file_HDF5){
 
 	// KILL002 # step at which runaway activity is killed

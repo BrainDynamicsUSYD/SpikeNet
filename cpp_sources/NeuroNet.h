@@ -18,16 +18,20 @@ public:
 	int Num_pop; // number of populations
 
 	vector<NeuroPop*> NeuroPopArray; // array of neuron populations
-	vector<ChemSyn*> ChemSynArray; // array of chemical synapses: inter-/intra-population connections
+	vector<ChemSyn*> ChemSynArray; // array of chemical synapses: inter-/intra-population connections
+
 	bool runaway_killed;
 	int step_killed; // initialised as -1
 	
-	void update(int step_current); // update the network to current time step, use "virtual" if want override by derived class
+	void update(int step_current); // update the network to current time step, use "virtual" if want override by derived class
+
 	
 	char delim;
 	char indicator;
 	void output_results(ofstream& output_file);
 #ifdef HDF5
+	void import_restart(H5File & file, string out_filename);
+	void export_restart(H5File& file_HDF5);
 	void output_results(H5File& file_HDF5);
 #endif
 	
