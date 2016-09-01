@@ -46,7 +46,7 @@ public:
 	
 	void start_stats_record();
 
-	void start_LFP_record(const vector< vector<bool> >& LFP_neurons);
+	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
 
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
@@ -156,7 +156,7 @@ protected:
 	struct Lfp {
 		bool
 			record; /// whether LFP should be recorded (false by default)
-		vector< vector<bool> >
+		vector< vector<double> >
 			neurons; /// each component vector defines a LFP measure by specifying which neurons should be included
 		vector< vector<double> >
 			data; /// each component vector is a LFP time series

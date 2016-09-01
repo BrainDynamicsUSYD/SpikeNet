@@ -1,4 +1,4 @@
-function [ x, y, width, mlh ] = fit_bayesian_bump_2_spikes( spike_x_pos_o,spike_y_pos_o, fw)
+function [ x, y, width, mlh ] = fit_bayesian_bump_2_spikes( spike_x_pos_o,spike_y_pos_o, fw, mode)
 %UNTITLED2 Summary of this function goes her
 %   Detailed explanation goes here
 
@@ -51,8 +51,14 @@ for i = i_pbc
     
     func_handle = @(v) -get_lh_log_ad_hoc(x_grid, y_grid, spike_count, v(1), v(2), v(3), v(4) );
     
-    [v, fval] = fminsearch(func_handle, x0);
-    mlh = -fval;
+    switch lower(mode)
+        case 'bayesian'
+            [v, fval] = fminsearch(func_handle, x0);
+            mlh = -fval;
+        case 'quick'
+            v = x0;
+            mlh = 0;
+    end
     
     % shift the position back to normal
     xx_o = unique(spike_x_pos_o);

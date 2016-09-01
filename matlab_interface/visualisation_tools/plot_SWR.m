@@ -39,7 +39,7 @@ for i = 1:no
         t = (seg_ind-1)*dt*1e-3; % second
         %
         ax1 = subplot(8,1,1);
-        LFP_tmp = R.LFP.LFP{1}(i,seg_ind);
+        LFP_tmp = R.LFP.LFP_broad(i,seg_ind);
         plot(t, LFP_tmp);
         hold on;
         plot(t, ones(size(t))*mean(LFP_tmp),'r');
@@ -67,17 +67,25 @@ for i = 1:no
       
         
         %
+        scales = R.LFP.wavelet.scales;
+        x_tmp = R.LFP.LFP_ripple(i,seg_ind);
+        coeffs_tmp = abs(cwt(x_tmp,scales,'cmor1.5-1'))';
         ax3 = subplot(8,1,3); % Scaleogram with pseudo-Frquency
         freqrange = [R.LFP.lowFreq R.LFP.hiFreq];
-        imagesc('XData',t,'YData',R.LFP.wavelet.pseudoFreq,'CData',R.LFP.wavelet.coeffs{i}(seg_ind,:));
+        imagesc('XData',t,'YData',R.LFP.wavelet.pseudoFreq,'CData',transpose(coeffs_tmp));
         ylim(freqrange)
         ylabel('Hz')
+        
         
         % raster plot
         ax4 = subplot(8,1,4:7);
         reduced = R.reduced;
-        R_LFP.N(1) = sum(R.LFP.LFP_neurons{1}(i,:));
-        reduced.spike_hist{1} = reduced.spike_hist{1}(logical((R.LFP.LFP_neurons{1}(i,:))), :);
+        
+        s_tmp = R.ExplVar.LFP_range_sigma;
+        spike_sort_range = s_tmp
+        spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(spike_sort_range/s_tmp)^2);
+        reduced.spike_hist{1} = reduced.spike_hist{1}(spike_sort_neurons, :);
+        R_LFP.N(1) = sum(spike_sort_neurons);
         R_LFP.reduced = reduced; clear reduced;
         raster_plot(R_LFP, 1, seg, [], 'seg_size', seg_size*(R.dt/R.reduced.dt))
         xlabel('t (sec)');
@@ -94,7 +102,7 @@ for i = 1:no
                 plot([tB*dt tB*dt]*1e-3,y_lim,'r');
             end
         end
-        
+
         
         % Link axes to synchronise them when zooming
         linkaxes([ax1 ax2 ax3 ax4],'x');

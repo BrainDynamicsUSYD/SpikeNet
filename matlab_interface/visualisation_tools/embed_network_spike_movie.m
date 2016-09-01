@@ -1,6 +1,6 @@
 % vivvvsual the spiking pattern of the spatially embedded network
-
-N = R.N(1);
+function embed_network_spike_movie(R)
+   N = R.N(1);
 hw = (sqrt(N)-1)/2;
 [Lattice, ~] = lattice_nD(2, hw);
 
@@ -31,4 +31,6 @@ for t = 1:t_bin:(step_tot-t_bin)
     xlabel([num2str(t*dt/1000),' sec']);
     
     % M(t) = getframe(gcf);
+end
+
 end

@@ -62,7 +62,7 @@ Both text-based and HDF5 file formats follow pre-defined protocols (see \nameref
 \section{Tech Stack}
 \begin{itemize}
 \item C\texttt{++}11 standard is required (GCC 4.2.1 or later; Intel C++ 12.0 or later).
-\item Matlab is optional but highly recommended.
+\item Matlab (2013a or later) is optional but highly recommended.
 \item HDF5 C\texttt{++} and C API are optional but recommended for data-intensive projects.
 \item Portable Batch System (PBS) is optional.
 \item Message Passing Interface (MPI) implementation is optional.
@@ -74,6 +74,8 @@ Following are the steps to set up the SpikeNet C\texttt{++} simulator.
 \item Ask for read permission from one of the contributors with admin rights.
 \item Make a new directory: \mylstinline{mkdir tmp; cd tmp}
 \item Clone SpikeNet: \mylstinline{git clone git@github.com:BrainDynamicsUSYD/SpikeNet.git}
+\newline (Method 2: \mylstinline{git clone https://github.com/BrainDynamicsUSYD/SpikeNet})
+
 \item Go into the directory: \mylstinline{cd SpikeNet}
 \item Make a copy of the makefile: \mylstinline{cp other_scripts/make*bak makefile}
 \item Build the C\texttt{++} simulator:  \mylstinline{make; make clean}
