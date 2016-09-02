@@ -38,6 +38,16 @@ public:
 
 	void start_stats_record(); /// turn on basic statistics recording
 	void output_results(ofstream& output_file); /// write output to file
+
+	void add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscaleE, double iscaleI,double lrate_E,double lrateall_E,double lrate_I,double lrateall_I,int intau, double innoise, int type_pre, int type_post);
+	void update_post_spike_hist_JH_Learn();
+	void update_Vint_JH_Learn();
+	void new_post_spikes_JH_Learn();
+	void new_pre_spikes_JH_Learn();
+	void old_pre_spikes_Q_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
+	void old_pre_spikes_K_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
+	void record_V_post_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
+
 #ifdef HDF5
 	void import_restart(H5File& file, int syn_ind);
 	void export_restart(Group& Group, int syn_ind);
@@ -243,6 +253,42 @@ protected:
 		base_generator_type; // A typedef is used so that base generator type can be changed
 	base_generator_type 
 		gen;
+
+
+
+	struct JH_Learn_Syn{
+		bool on=0; //indicates if this learning is to be used
+		vector<vector <int> > post_t_hist; //1st index neuron, 2nd index list
+		vector <int> ind_post_new; // indexes timestep in post_spike_hist and post_V_hist
+		vector<int> ind_post_old;
+		vector<vector<int> >pre_t_hist; 
+		vector<int> ind_pre_new; // indexes timestep in post_spike_hist and post_V_hist
+		vector<int> ind_pre_old;
+		vector<int> old_pre;
+		int post_hist_len;
+		int pre_hist_len;
+		int ntype_pre;
+		int ntype_post;
+		vector<double> Vint;
+		vector<int> Vint_ctr;
+		vector<double> Q_pre;
+		vector< vector<double>> post_V_hist; //1st ind time, 2nd index neuron  NEED TO STORE ALL VOLTAGES AT ALL TIMES
+		vector<vector <int> > post_R_hist; //1st index neuron, 2nd index list
+		int t_ind;
+		int inf_steps; // the number of timesteps over which inference is performed
+		double inf_scaleI, inf_scaleE;
+		double learn_rate_E;
+		double learn_rate_all_E;
+		double learn_rate_I;
+		double learn_rate_all_I;
+		double tau;
+		double C;
+		double noise;
+		vector< vector<int> >
+			j_2_i, // j_2_i[j_post] gives all the i_pre's (indices of pre-synaptic neurons)
+			j_2_syn_ind; // j_2_syn_ind[j_post] gives all the syn_ind's so that K[i_pre][syn_ind] is a synapse onto j_post
+	
+	} jh_learn_syn;
 
 };
 

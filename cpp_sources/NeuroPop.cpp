@@ -9,6 +9,21 @@
 #include "NeuroPop.h"
 #include <functional> // for bind(), plus
 
+void NeuroPop::add_JH_Learn(){
+	jh_learn_pop.on=true;
+	jh_learn_pop.QE.resize(N,0);
+	jh_learn_pop.QI.resize(N,0);
+}
+
+void NeuroPop::reset_Q(){
+	if(jh_learn_pop.on){
+		for(unsigned int i=0;i<spikes_current.size();i++){
+			jh_learn_pop.QI[spikes_current[i]]=0.0;
+			jh_learn_pop.QE[spikes_current[i]]=0.0;
+		}
+	}
+}
+
 NeuroPop::NeuroPop(const int pop_ind_input, const int N_input, const double dt_input, const int step_tot_input, const char delim_input, const char indicator_input)
 {
 	pop_ind = pop_ind_input;
@@ -143,9 +158,9 @@ void NeuroPop::start_stats_record()
 	stats.IE_ratio.assign(N, 0.0);
 }
 
-void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_input){
+void NeuroPop::start_LFP_record(const vector <vector<bool> >& LFP_neurons_input){
 	if (int(LFP_neurons_input[0].size()) != N){
-		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N double vector!" << endl;
+		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
 	}
 	else{
 		LFP.record = true;
@@ -631,8 +646,8 @@ void NeuroPop::record_LFP(){
 		for (unsigned int ind = 0; ind < LFP.neurons.size(); ++ind){
 			LFP.data[ind].push_back(0.0);
 			for (int i = 0; i < N; ++i){
-				if (LFP.neurons[ind][i] > 0){
-					LFP.data[ind].back() += LFP.neurons[ind][i] * (abs(I_AMPA[i]) + abs(I_GABA[i]));
+				if (LFP.neurons[ind][i]){
+					LFP.data[ind].back() += abs(I_AMPA[i]) + abs(I_GABA[i]);
 				}
 			} 
 		}
@@ -808,6 +823,13 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename){
 		killer.min_steps=read_scalar_HDF5<int>(file,str+string("min_steps"));	
 		killer.min_pop_size=read_scalar_HDF5<int>(file,str+string("min_pop_size"));	
 	}
+
+	str = pop_n+"/jh_learn_pop/";
+	if(group_exist_HDF5(file,str)){
+		jh_learn_pop.on=read_scalar_HDF5<bool>(file,str+string("on"));
+		read_vector_HDF5(file,str+string("QI"),jh_learn_pop.QI);	
+		read_vector_HDF5(file,str+string("QE"),jh_learn_pop.QE);	
+	}
 }
 void NeuroPop::export_restart(Group& group){
 
@@ -916,6 +938,14 @@ void NeuroPop::export_restart(Group& group){
 		write_scalar_HDF5(group_killer,killer.runaway_Hz,string("runaway_Hz"));	
 		write_scalar_HDF5(group_killer,killer.min_steps,string("min_steps"));	
 		write_scalar_HDF5(group_killer,killer.min_pop_size,string("min_pop_size"));	
+	}
+
+	if(jh_learn_pop.on){
+		string str = pop_n+"/jh_learn_pop/";
+		Group group_jh_learn_pop = group_pop.createGroup(str);
+		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.on,string("on"));
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.QI,string("QI"));	
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.QE,string("QE"));	
 	}
 }
 

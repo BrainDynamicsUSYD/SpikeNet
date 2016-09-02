@@ -57,7 +57,25 @@ void NeuroNet::update(int step_current){
 		
 		// Electrical coupling
 		
+		/*------------------------------------------------------------------------------------------------------*/
+		// JH Learning Scheme
+		for (int pop_ind = 0; pop_ind < Num_pop; ++pop_ind){
+			NeuroPopArray[pop_ind]->reset_Q();
+		}
 
+		for (unsigned int syn_ind = 0; syn_ind < ChemSynArray.size(); ++syn_ind){	
+			ChemSynArray[syn_ind]->record_V_post_JH_Learn(NeuroPopArray);
+			ChemSynArray[syn_ind]->update_post_spike_hist_JH_Learn(); 
+			ChemSynArray[syn_ind]->new_post_spikes_JH_Learn();
+			ChemSynArray[syn_ind]->old_pre_spikes_Q_JH_Learn(NeuroPopArray);
+			ChemSynArray[syn_ind]->update_Vint_JH_Learn();//goes at end	
+		}
+
+		for (unsigned int syn_ind = 0; syn_ind < ChemSynArray.size(); ++syn_ind){
+			ChemSynArray[syn_ind]->old_pre_spikes_K_JH_Learn(NeuroPopArray); 
+			ChemSynArray[syn_ind]->new_pre_spikes_JH_Learn(); // goes after old_pre_spikes which increments t_hist	
+		}
+		
 		/*------------------------------------------------------------------------------------------------------*/
 		// Update membrane potential
 		// Post-coupling update
@@ -103,6 +121,7 @@ void NeuroNet::import_restart(H5File & file,string out_filename){
 
 		NeuroPopArray[ind]->import_restart(file,ind,out_filename);
 	}
+
 	string syn_str = "/syns/";
 	int n_syns=read_scalar_HDF5<int>(file,syn_str+"n_syns");
 	for (int ind = 0; ind < n_syns; ++ind){
@@ -115,7 +134,10 @@ void NeuroNet::import_restart(H5File & file,string out_filename){
 
 }
 
-void NeuroNet::export_restart(H5File & file){
+void NeuroNet::export_restart(H5File & file, int restart_no){
+	Group group_restart = file.createGroup(string("/Restart/"));
+	write_scalar_HDF5(group_restart,restart_no,string("child_no_of_parent")); 
+	write_scalar_HDF5(group_restart,0,string("no_children")); 
 
 	Group group_Net = file.createGroup(string("/Net"));
 	write_vector_HDF5(group_Net,N_array,string("N_array"));

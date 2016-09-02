@@ -46,7 +46,7 @@ public:
 	
 	void start_stats_record();
 
-	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
+	void start_LFP_record(const vector< vector<bool> >& LFP_neurons);
 
 
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
@@ -60,6 +60,9 @@ public:
 	
 	void add_sampling(const vector<int>& sample_neurons, const vector<bool>& sample_type, const vector<bool>& sample_time_points); 
 	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
+
+	void add_JH_Learn();
+	void reset_Q();
 #ifdef HDF5
 	void import_restart(H5File & file, int pop_ind, string out_filename);
 	void export_restart(Group & group);
@@ -72,6 +75,13 @@ public:
 	void add_perturbation(const int step_perturb);
 	void add_spike_freq_adpt(); /// add spike-frequency adaptation
 	
+	struct JH_Learn_Pop{
+		bool on=false; //indicates if this learning is to be used
+		vector<double> QI;		
+		vector<double> QE;	
+	} jh_learn_pop;
+	double Cm; /// membrane capacitance (uF=1000nF)
+	vector<int> ref_step_left; /// current number of refractory steps left for the neurons
 private:
 	void generate_I_ext(const int step_current);
 	void record_stats(const int step_current); 
@@ -89,7 +99,6 @@ private:
 		
 protected:
 	
-	
 	// Space and time
 	int // actually we can use "unsigned int" here
 		pop_ind, /// population index
@@ -103,7 +112,6 @@ protected:
 	double
 		tau_ref;  /// absolute refractory time (ms)
 	double
-		Cm, /// membrane capacitance (uF=1000nF)
 		// Potential constants (mV)
 		V_rt, /// reset potential
 		V_lk, /// leaky reversal
@@ -125,8 +133,7 @@ protected:
 		I_ext; /// external input current (usually noise)
 	int
 		ref_steps; /// number of simulation steps that a neuron remains refractory after firing
-	vector<int>
-		ref_step_left; /// current number of refractory steps left for the neurons
+
 		// ref_left = 0 for non-refractory, ref_left > 0 for time steps left in refraction 
 	vector<int>
 		spikes_current; /// index vector of current spiking neurons
@@ -156,7 +163,7 @@ protected:
 	struct Lfp {
 		bool
 			record; /// whether LFP should be recorded (false by default)
-		vector< vector<double> >
+		vector< vector<bool> >
 			neurons; /// each component vector defines a LFP measure by specifying which neurons should be included
 		vector< vector<double> >
 			data; /// each component vector is a LFP time series
