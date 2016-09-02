@@ -202,8 +202,8 @@ void read_string_HDF5(const H5File & file, const string &  s_name, string & s){
 	const H5std_string dataset_name( s_name );
 	DataSet dataset = file.openDataSet( dataset_name );
 	
-StrType datatype(0, H5T_VARIABLE);
-DataSpace dataspace(H5S_SCALAR);
+	StrType datatype(0, H5T_VARIABLE);
+	DataSpace dataspace(H5S_SCALAR);
 	dataset.read(s, datatype, dataspace);
 	// DataSpace dataspace = dataset.getSpace();
 	// hsize_t dims_out[1];

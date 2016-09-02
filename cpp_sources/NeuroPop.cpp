@@ -9,21 +9,6 @@
 #include "NeuroPop.h"
 #include <functional> // for bind(), plus
 
-void NeuroPop::add_JH_Learn(){
-	jh_learn_pop.on=true;
-	jh_learn_pop.QE.resize(N,0);
-	jh_learn_pop.QI.resize(N,0);
-}
-
-void NeuroPop::reset_Q(){
-	if(jh_learn_pop.on){
-		for(unsigned int i=0;i<spikes_current.size();i++){
-			jh_learn_pop.QI[spikes_current[i]]=0.0;
-			jh_learn_pop.QE[spikes_current[i]]=0.0;
-		}
-	}
-}
-
 NeuroPop::NeuroPop(const int pop_ind_input, const int N_input, const double dt_input, const int step_tot_input, const char delim_input, const char indicator_input)
 {
 	pop_ind = pop_ind_input;
@@ -106,10 +91,21 @@ const vector< double > & NeuroPop::get_V()
 	return V;
 }
 
+
+const vector< int > & NeuroPop::get_ref_step_left(){
+	return ref_step_left;
+}
+
 const bool & NeuroPop::get_runaway_killed()
 {
 	return killer.runaway_killed;
-};
+}
+
+
+const double & NeuroPop::get_Cm()
+{
+	return Cm;
+}
 
 void NeuroPop::recv_I(vector<double>& I, const int pop_ind_pre, const int syn_type)
 {
@@ -564,6 +560,21 @@ void NeuroPop::runaway_check(const int step_current)
 }
 
 
+void NeuroPop::add_JH_Learn(){
+	jh_learn_pop.on=true;
+	jh_learn_pop.QE.resize(N,0);
+	jh_learn_pop.QI.resize(N,0);
+}
+
+void NeuroPop::reset_Q(){
+	if(jh_learn_pop.on){
+		for(unsigned int i=0;i<spikes_current.size();i++){
+			jh_learn_pop.QI[spikes_current[i]]=0.0;
+			jh_learn_pop.QE[spikes_current[i]]=0.0;
+		}
+	}
+}
+
 
 void NeuroPop::output_results(ofstream& output_file){
 
@@ -831,6 +842,7 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename){
 		read_vector_HDF5(file,str+string("QE"),jh_learn_pop.QE);	
 	}
 }
+
 void NeuroPop::export_restart(Group& group){
 
 	string pop_n = "/pops/pop" + to_string(pop_ind)+"/";

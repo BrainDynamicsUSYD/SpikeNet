@@ -42,8 +42,10 @@ public:
 	void recv_I(vector<double>& I_add, const int pop_ind_pre, const int syn_type);
 	const vector< int >& get_spikes_current();
 	const vector< double >& get_V();
+	const vector< int >& get_ref_step_left();
 	const bool & get_runaway_killed();
-	
+	const double & get_Cm();
+		
 	void start_stats_record();
 
 	void start_LFP_record(const vector< vector<bool> >& LFP_neurons);
@@ -63,6 +65,16 @@ public:
 
 	void add_JH_Learn();
 	void reset_Q();
+	
+	struct JH_Learn_Pop{
+		bool on=false; //indicates if this learning is to be used
+		vector<double> QI;		
+		vector<double> QE;	
+	} jh_learn_pop;
+	// Making the above struct public is a bad practice, breaking the encapsulation.
+	// However it is tolerable in development.
+	// Once the JH learning algorithm is published, consider fix it.
+	
 #ifdef HDF5
 	void import_restart(H5File & file, int pop_ind, string out_filename);
 	void export_restart(Group & group);
@@ -74,14 +86,8 @@ public:
 	
 	void add_perturbation(const int step_perturb);
 	void add_spike_freq_adpt(); /// add spike-frequency adaptation
+
 	
-	struct JH_Learn_Pop{
-		bool on=false; //indicates if this learning is to be used
-		vector<double> QI;		
-		vector<double> QE;	
-	} jh_learn_pop;
-	double Cm; /// membrane capacitance (uF=1000nF)
-	vector<int> ref_step_left; /// current number of refractory steps left for the neurons
 private:
 	void generate_I_ext(const int step_current);
 	void record_stats(const int step_current); 
@@ -109,6 +115,8 @@ protected:
 		step_tot; /// total number of simulation steps
 
 	// Intrinsic neuron properties of the population
+	double 
+		Cm; /// membrane capacitance (uF=1000nF)
 	double
 		tau_ref;  /// absolute refractory time (ms)
 	double
@@ -133,8 +141,9 @@ protected:
 		I_ext; /// external input current (usually noise)
 	int
 		ref_steps; /// number of simulation steps that a neuron remains refractory after firing
-
-		// ref_left = 0 for non-refractory, ref_left > 0 for time steps left in refraction 
+	
+	vector<int> ref_step_left; /// current number of refractory steps left for the neurons
+		/// ref_left = 0 for non-refractory, ref_left > 0 for time steps left in refraction 
 	vector<int>
 		spikes_current; /// index vector of current spiking neurons
 	vector<int>
@@ -248,6 +257,7 @@ protected:
 		int min_steps; /// minimum number of steps the simulation should run before being killed
 		int min_pop_size; /// No women, no kids;
 	} killer;
+	
 
 }; //class declaration must end with a semi-colon.
 
