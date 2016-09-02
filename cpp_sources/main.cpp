@@ -12,8 +12,8 @@ int main(int argc, char* argv[]){// arguments should be input file path
 		string filename = string(argv[i]);
 		if(filename.substr(filename.find_last_of(".") + 1) == "h5") 
 		{
-			if(count(filename.begin(),filename.end(),'_')>1){
-				success = simulator.import_restart_HDF5(argv[i]);
+			if(filename.find("restart") != string::npos){
+				success = simulator.import_restart_HDF5(argv[i]); 
 			}
 			else{
 				success = simulator.import_HDF5(argv[i]);

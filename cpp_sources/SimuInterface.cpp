@@ -843,9 +843,15 @@ void SimuInterface::export_restart_HDF5(){
 		group_restart = file.createGroup(string("/Restart/"));
 		write_scalar_HDF5(group_restart,restart_no,string("no_children")); 
 	}
-	convert_temp<<restart_filename_trim.substr(0,restart_filename_trim.find_last_of('_'))<< "_"<<restart_no;
-
+	
+	if (out_filename.find("restart") != string::npos){
+		convert_temp<<restart_filename_trim.substr(0,restart_filename_trim.find_last_of('_'))<< "_"<<restart_no;
+	}
+	else{
+		convert_temp<<restart_filename_trim.substr(0,restart_filename_trim.find_last_of('_'))<< "_restart_"<<restart_no;
+	}
 	convert_temp<<".h5";
+	
 	file_HDF5 = H5File( convert_temp.str(), H5F_ACC_TRUNC );
 
 	Group group_SimuInterface = file_HDF5.createGroup(string("/SimuInterface/"));
