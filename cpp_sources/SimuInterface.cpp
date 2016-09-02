@@ -709,6 +709,7 @@ void SimuInterface::simulate(){
 #ifdef HDF5
 	if(in_filename.substr(in_filename.find_last_of(".") + 1) == "h5") 
 	{
+		export_restart_HDF5();
 		output_results_HDF5();
 	} 
 	else if (in_filename.substr(in_filename.find_last_of(".") + 1) == "ygin")
@@ -788,6 +789,40 @@ template < typename Type, typename A > void SimuInterface::read_next_line_as_vec
 
 
 #ifdef HDF5
+bool SimuInterface::import_restart_HDF5(string in_filename_input){
+
+	out_filename = gen_out_filename();
+	in_filename = in_filename_input;
+	
+	const H5std_string file_name( in_filename );
+	H5File file( file_name, H5F_ACC_RDONLY );
+	
+	out_filename = gen_out_filename();
+	cout<<"Importing Restart Config File\n";
+
+	vector<int> N_array;
+	read_vector_HDF5(file,string("/Net/N_array"),N_array);
+	int step_tot=read_scalar_HDF5<int>(file,string("/Net/step_tot")); 
+	double dt=read_scalar_HDF5<double>(file,string("/Net/dt")); 
+
+	network = NeuroNet( N_array, dt, step_tot, delim, indicator);
+	cout << "\t Network created." << endl;
+	network.import_restart(file, out_filename);
+	return 1;
+			
+}
+
+void SimuInterface::export_restart_HDF5(){
+	H5File file_HDF5;
+	string restart_filename;
+	cout<<"Creating Restart Config File\n";
+	string file_name_HDF5 = out_filename+"_restart.h5";
+	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
+
+	network.export_restart(file_HDF5);
+
+			
+}
 void SimuInterface::output_results_HDF5(){
 	// output results into HDF5 file
 	cout << "Outputting results into HDF5 file...";
@@ -806,6 +841,7 @@ void SimuInterface::output_results_HDF5(){
 	cout << "Data file name is: " << endl;
 	cout << "	" << out_filename << endl;
 	cout << "------------------------------------------------------------" << endl;	
+
 }
 
 
@@ -1079,6 +1115,23 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 	
 	cout << "Importing done." << endl;
 	return 1;
+}
+
+
+
+
+
+string SimuInterface::gen_restart_filename(){
+	// creat output file name using some pre-defined format
+	ostringstream convert_temp;   // stream used for the conversion
+	// Make use of the input file path and name
+	string in_filename_trim;
+	istringstream in_filename_ss(in_filename);
+	getline(in_filename_ss, in_filename_trim, '.');
+
+	// Combine all the parts of the output file path and name
+	convert_temp << in_filename_trim << "_restart"; // insert the textual representation of 'Number' in the characters in the stream
+	return convert_temp.str(); // set 'Result' to the contents of the stream
 }
 
 #endif

@@ -632,6 +632,311 @@ void ChemSyn::record_stats(){
 
 
 #ifdef HDF5
+
+void ChemSyn::import_restart(H5File& file, int syn_ind){
+
+	string str;
+
+	string syn_str = "/syns/syn" + to_string(syn_ind)+"/";
+
+	dt=read_scalar_HDF5<double>(file, syn_str+"dt");
+	step_tot=read_scalar_HDF5<int>(file,syn_str+"step_tot");
+	pop_ind_pre=read_scalar_HDF5<int>(file,syn_str+"pop_ind_pre");
+	pop_ind_post=read_scalar_HDF5<int>(file,syn_str+"pop_ind_post");
+	N_pre=read_scalar_HDF5<int>(file, syn_str+"N_pre");
+	N_post=read_scalar_HDF5<int>(file, syn_str+"N_post");
+	syn_type=read_scalar_HDF5<int>(file, syn_str+"syn_type");
+	V_ex=read_scalar_HDF5<double>(file, syn_str+"V_ex");
+	V_in=read_scalar_HDF5<double>(file, syn_str+"V_in");
+	max_delay_steps=read_scalar_HDF5<int>(file, syn_str+"max_delay_steps");
+	read_vector_HDF5(file, syn_str+"V_post",V_post);
+	read_vector_HDF5(file, syn_str+"spikes_pre",spikes_pre);
+	read_vector_HDF5(file,syn_str+"spikes_post",spikes_post);
+	read_vector_HDF5(file, syn_str+"I",I);
+
+		
+
+	str = syn_str+"/Stats/";
+	if(group_exist_HDF5(file,str)){
+		stats.record=read_scalar_HDF5<bool>(file, str+"record");
+		read_vector_HDF5(file, str+"I_mean",stats.I_mean);
+		read_vector_HDF5(file, str+"I_std",stats.I_std);
+		start_stats_record();
+	}
+
+	str =syn_str+"/Sample/";
+	if(group_exist_HDF5(file,str)){
+		read_vector_HDF5(file, str+"neurons", sample.neurons);
+		read_vector_HDF5(file,str+ "time_points", sample.time_points);
+		add_sampling(sample.neurons, sample.time_points);
+		// read_matrix_HDF5(file, str+ "data",sample.data);
+	}
+
+	Dt_trans_AMPA=read_scalar_HDF5<double>(file, syn_str+"Dt_trans_AMPA");
+	Dt_trans_GABA=read_scalar_HDF5<double>(file, syn_str+"Dt_trans_GABA");
+	Dt_trans_NMDA=read_scalar_HDF5<double>(file, syn_str+"Dt_trans_NMDA");
+	tau_decay_AMPA=read_scalar_HDF5<double>(file, syn_str+"tau_decay_AMPA");
+	tau_decay_GABA=read_scalar_HDF5<double>(file, syn_str+"tau_decay_GABA");
+	tau_decay_NMDA=read_scalar_HDF5<double>(file,syn_str+ "tau_decay_NMDA");
+	tau_rise=read_scalar_HDF5<double>(file, syn_str+"tau_rise");
+	tau_decay=read_scalar_HDF5<double>(file,syn_str+ "tau_decay");
+	steps_trans=read_scalar_HDF5<double>(file,syn_str+ "steps_trans");
+	read_vector_HDF5(file, syn_str+"K_trans",K_trans);
+	exp_step_decay=read_scalar_HDF5<double>(file, syn_str+"exp_step_decay");
+	exp_step_rise=read_scalar_HDF5<double>(file,syn_str+ "exp_step_rise");
+	miuMg_NMDA=read_scalar_HDF5<double>(file, syn_str+"miuMg_NMDA");
+	gamma_NMDA=read_scalar_HDF5<double>(file, syn_str+"gamma_NMDA");
+	B_V_min=read_scalar_HDF5<double>(file, syn_str+"B_V_min");
+	B_V_max=read_scalar_HDF5<double>(file, syn_str+"B_V_max");
+	B_dV=read_scalar_HDF5<double>(file,syn_str+ "B_dV");
+	read_vector_HDF5(file, syn_str+"B",B);
+
+	str =syn_str+"/Inh_STDP/";
+	if(group_exist_HDF5(file,str)){
+		inh_STDP.on=read_scalar_HDF5<bool>(file, str+ "on");
+		read_vector_HDF5(file, str+ "x_trace_pre",inh_STDP.x_trace_pre);
+		read_vector_HDF5(file,  str+"x_trace_post",inh_STDP.x_trace_post);
+		inh_STDP.tau=read_scalar_HDF5<double>(file,  str+"tau");
+		inh_STDP.exp_step=read_scalar_HDF5<double>(file, str+ "exp_step");
+		inh_STDP.eta=read_scalar_HDF5<double>(file, str+ "eta");
+		inh_STDP.rho_0=read_scalar_HDF5<double>(file, str+ "rho_0");
+		inh_STDP.alpha=read_scalar_HDF5<double>(file,  str+"alpha");
+		inh_STDP.on_step=read_scalar_HDF5<int>(file,  str+"on_step");
+		read_matrix_HDF5(file,  str+"j_2_i",inh_STDP.j_2_i);
+		read_matrix_HDF5(file, str+ "j_2_syn_ind",inh_STDP.j_2_syn_ind);
+	}
+
+	str =syn_str+"/Std/";
+	if(group_exist_HDF5(file,str)){
+		STD.on=read_scalar_HDF5<bool>(file, str+ "on");
+		STD.p_ves=read_scalar_HDF5<double>(file,  str+"p_ves");
+		STD.tau_ves=read_scalar_HDF5<double>(file,  str+"tau_ves");
+		STD.exp_ves=read_scalar_HDF5<double>(file,  str+"exp_ves");
+		STD.on_step=read_scalar_HDF5<bool>(file,  str+"on_step");
+		read_vector_HDF5(file, str+ "f_ves",STD.f_ves);
+	}
+
+	synapse_model=read_scalar_HDF5<int>(file,syn_str+ "synapse_model");
+	read_vector_HDF5(file, syn_str+"gs_sum",gs_sum);
+
+	str =syn_str+"/Gsm_0/";		
+	if(group_exist_HDF5(file,str)){
+		gsm_0.buffer_steps=read_scalar_HDF5<int>(file,  str+"buffer_steps");
+		read_vector_HDF5(file,  str+"s",gsm_0.s);
+		read_vector_HDF5(file,  str+"trans_left",gsm_0.trans_left);
+		read_matrix_HDF5(file,  str+"d_gs_sum_buffer",gsm_0.d_gs_sum_buffer);
+	}
+
+	str =syn_str+"/Gsm_1/";
+	if(group_exist_HDF5(file,str)){
+		gsm_1.buffer_steps=read_scalar_HDF5<int>(file,  str+"buffer_steps");
+		read_vector_HDF5(file, str+ "gs_rise_sum",gsm_1.gs_rise_sum);
+		read_vector_HDF5(file,  str+"gs_decay_sum",gsm_1.gs_decay_sum);
+		read_matrix_HDF5(file,  str+"d_gs_rd_sum_buffer",gsm_1.d_gs_rd_sum_buffer);
+	}
+
+	read_matrix_HDF5(file,syn_str+ "C",C);
+	read_matrix_HDF5(file, syn_str+"D",D);
+	read_matrix_HDF5(file,syn_str+"K",K);
+
+	str =syn_str+"/Ext_noise/";
+	if(group_exist_HDF5(file,str)){
+		ext_noise.K_ext=read_scalar_HDF5<double>(file, str+ "K_ext");
+		ext_noise.Num_ext=read_scalar_HDF5<int>(file,  str+"Num_ext");
+		read_vector_HDF5(file,  str+"neurons", ext_noise.neurons);
+		read_vector_HDF5(file,  str+"rate_ext_t", ext_noise.rate_ext_t);
+	}
+	my_seed=read_scalar_HDF5<int>(file, syn_str+"my_seed");
+	// +++ TODO BASE_GENERATOR_TYP
+
+	// JH Learning
+	// if (jh_learn_syn.on){
+	// 	string str = syn_str+"/JH_Learn/";
+	// 	Group group_JH_Learn = file.createGroup(str);
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.on, "on");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.post_t_hist, "post_t_hist");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_post_new, "ind_post_new");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_post_old, "ind_post_old");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.pre_t_hist, "pre_t_hist");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_pre_new, "ind_pre_new");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_pre_old, "ind_pre_old");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.old_pre, "old_pre");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.post_hist_len, "post_hist_len");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.pre_hist_len, "pre_hist_len");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.ntype_pre, "ntype_pre");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.ntype_post, "ntype_post");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.Vint, "Vint");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.Vint_ctr, "Vint_ctr");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.Q_pre, "Q_pre");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.post_V_hist, "post_V_hist");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.post_R_hist, "post_R_hist");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.t_ind, "t_ind");
+
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.inf_steps, "inf_steps");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.inf_scale, "inf_scale");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate, "learn_rate");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate_all, "learn_rate_all");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.tau, "tau");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.C, "C");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise, "noise");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_i,"j_2_i");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_syn_ind ,"j_2_syn_ind");
+	// }
+}
+
+void ChemSyn::export_restart(Group& group, int syn_ind){
+	string syn_str = "/syns/syn" + to_string(syn_ind);
+	Group group_syn = group.createGroup(syn_str);
+
+	write_scalar_HDF5(group_syn,dt, "dt");
+	write_scalar_HDF5(group_syn,step_tot, "step_tot");
+	write_scalar_HDF5(group_syn,pop_ind_pre,"pop_ind_pre");
+	write_scalar_HDF5(group_syn,pop_ind_post,"pop_ind_post");
+	write_scalar_HDF5(group_syn,N_pre, "N_pre");
+	write_scalar_HDF5(group_syn,N_post, "N_post");
+	write_scalar_HDF5(group_syn,syn_type, "syn_type");
+	write_scalar_HDF5(group_syn,V_ex, "V_ex");
+	write_scalar_HDF5(group_syn,V_in, "V_in");
+	write_scalar_HDF5(group_syn,max_delay_steps, "max_delay_steps");
+	write_vector_HDF5(group_syn,V_post, "V_post");
+	write_vector_HDF5(group_syn,spikes_pre, "spikes_pre");
+	write_vector_HDF5(group_syn,spikes_post, "spikes_post");
+	write_vector_HDF5(group_syn,I, "I");
+
+		
+	if(stats.record){
+		string str = syn_str+"/Stats";
+		Group group_stats = group_syn.createGroup(str);
+		write_scalar_HDF5(group_stats,stats.record, "record");
+		write_vector_HDF5(group_stats,stats.I_mean, "I_mean");
+		write_vector_HDF5(group_stats,stats.I_std, "I_std");
+	}
+
+	if(!sample.time_points.empty()){
+		string str =syn_str+"/Sample";
+		Group group_sample = group_syn.createGroup(str);
+		write_vector_HDF5(group_sample, sample.neurons, "neurons");
+		write_vector_HDF5(group_sample, sample.time_points, "time_points");
+		write_matrix_HDF5(group_sample, sample.data, "data");
+	}
+
+	write_scalar_HDF5(group_syn,Dt_trans_AMPA, "Dt_trans_AMPA");
+	write_scalar_HDF5(group_syn,Dt_trans_GABA, "Dt_trans_GABA");
+	write_scalar_HDF5(group_syn,Dt_trans_NMDA, "Dt_trans_NMDA");
+	write_scalar_HDF5(group_syn,tau_decay_AMPA, "tau_decay_AMPA");
+	write_scalar_HDF5(group_syn,tau_decay_GABA, "tau_decay_GABA");
+	write_scalar_HDF5(group_syn,tau_decay_NMDA, "tau_decay_NMDA");
+	write_scalar_HDF5(group_syn,tau_rise, "tau_rise");
+	write_scalar_HDF5(group_syn,tau_decay, "tau_decay");
+	write_scalar_HDF5(group_syn,steps_trans, "steps_trans");
+	write_vector_HDF5(group_syn,K_trans, "K_trans");
+	write_scalar_HDF5(group_syn,exp_step_decay, "exp_step_decay");
+	write_scalar_HDF5(group_syn,exp_step_rise, "exp_step_rise");
+	write_scalar_HDF5(group_syn,miuMg_NMDA, "miuMg_NMDA");
+	write_scalar_HDF5(group_syn,gamma_NMDA, "gamma_NMDA");
+	write_scalar_HDF5(group_syn,B_V_min, "B_V_min");
+	write_scalar_HDF5(group_syn,B_V_max, "B_V_max");
+	write_scalar_HDF5(group_syn,B_dV, "B_dV");
+	write_vector_HDF5(group_syn,B, "B");
+
+	if(inh_STDP.on){
+		string str =syn_str+"/Inh_STDP";
+		Group group_Inh_STDP = group_syn.createGroup(str);
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.on, "on");
+		write_vector_HDF5(group_Inh_STDP,inh_STDP.x_trace_pre, "x_trace_pre");
+		write_vector_HDF5(group_Inh_STDP,inh_STDP.x_trace_post, "x_trace_post");
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.tau, "tau");
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.exp_step, "exp_step");
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.eta, "eta");
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.rho_0, "rho_0");
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.alpha, "alpha");
+		write_scalar_HDF5(group_Inh_STDP,inh_STDP.on_step, "on_step");
+		write_matrix_HDF5(group_Inh_STDP,inh_STDP.j_2_i, "j_2_i");
+		write_matrix_HDF5(group_Inh_STDP,inh_STDP.j_2_syn_ind, "j_2_syn_ind");
+	}
+
+	if(STD.on){
+		string str =syn_str+"/Std";
+		Group group_STD = group_syn.createGroup(str);
+		write_scalar_HDF5(group_STD,STD.on, "on");
+		write_scalar_HDF5(group_STD,STD.p_ves, "p_ves");
+		write_scalar_HDF5(group_STD,STD.tau_ves, "tau_ves");
+		write_scalar_HDF5(group_STD,STD.exp_ves, "exp_ves");
+		write_scalar_HDF5(group_STD,STD.on_step, "on_step");
+		write_vector_HDF5(group_STD,STD.f_ves, "f_ves");
+	}
+
+	write_scalar_HDF5(group_syn,synapse_model, "synapse_model");
+	write_vector_HDF5(group_syn,gs_sum, "gs_sum");
+		
+	if(synapse_model==0){
+		string str =syn_str+"/Gsm_0";
+		Group group_Gsm_0 = group_syn.createGroup(str);
+		write_scalar_HDF5(group_Gsm_0,gsm_0.buffer_steps, "buffer_steps");
+		write_vector_HDF5(group_Gsm_0,gsm_0.s, "s");
+		write_vector_HDF5(group_Gsm_0,gsm_0.trans_left, "trans_left");
+		write_matrix_HDF5(group_Gsm_0,gsm_0.d_gs_sum_buffer, "d_gs_sum_buffer");
+	}
+	
+	if(synapse_model==1){
+		string str =syn_str+"/Gsm_1";
+		Group group_Gsm_1 = group_syn.createGroup(str);
+		write_scalar_HDF5(group_Gsm_1,gsm_1.buffer_steps, "buffer_steps");
+		write_vector_HDF5(group_Gsm_1,gsm_1.gs_rise_sum, "gs_rise_sum");
+		write_vector_HDF5(group_Gsm_1,gsm_1.gs_decay_sum, "gs_decay_sum");
+		write_matrix_HDF5(group_Gsm_1,gsm_1.d_gs_rd_sum_buffer, "d_gs_rd_sum_buffer");
+	}
+
+	write_matrix_HDF5(group_syn,C, "C");
+	write_matrix_HDF5(group_syn,D, "D");
+	write_matrix_HDF5(group_syn,K, "K");
+
+	if(!ext_noise.neurons.empty()){
+		string str =syn_str+"/Ext_noise";
+		Group group_Ext_noise = group_syn.createGroup(str);
+		write_scalar_HDF5(group_Ext_noise, ext_noise.K_ext, "K_ext");
+		write_scalar_HDF5(group_Ext_noise, ext_noise.Num_ext, "Num_ext");
+		write_vector_HDF5(group_Ext_noise, ext_noise.neurons, "neurons");
+		
+		write_vector_HDF5(group_Ext_noise, ext_noise.rate_ext_t, "rate_ext_t");
+	}
+	write_scalar_HDF5(group_syn, my_seed, "my_seed");
+	// +++ TODO BASE_GENERATOR_TYP
+
+	// JH Learning
+	// if (jh_learn_syn.on){
+	// 	string str = syn_str+"/JH_Learn/";
+	// 	Group group_JH_Learn = file.createGroup(str);
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.on, "on");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.post_t_hist, "post_t_hist");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_post_new, "ind_post_new");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_post_old, "ind_post_old");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.pre_t_hist, "pre_t_hist");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_pre_new, "ind_pre_new");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.ind_pre_old, "ind_pre_old");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.old_pre, "old_pre");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.post_hist_len, "post_hist_len");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.pre_hist_len, "pre_hist_len");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.ntype_pre, "ntype_pre");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.ntype_post, "ntype_post");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.Vint, "Vint");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.Vint_ctr, "Vint_ctr");
+	// 	write_vector_HDF5(group_JH_Learn,jh_learn_syn.Q_pre, "Q_pre");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.post_V_hist, "post_V_hist");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.post_R_hist, "post_R_hist");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.t_ind, "t_ind");
+
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.inf_steps, "inf_steps");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.inf_scale, "inf_scale");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate, "learn_rate");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate_all, "learn_rate_all");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.tau, "tau");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.C, "C");
+	// 	write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise, "noise");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_i,"j_2_i");
+	// 	write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_syn_ind ,"j_2_syn_ind");
+	// }
+}
 void ChemSyn::output_results(H5File& file, int syn_ind){
 	// new group
 	stringstream group_name;

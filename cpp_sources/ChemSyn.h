@@ -39,6 +39,8 @@ public:
 	void start_stats_record(); /// turn on basic statistics recording
 	void output_results(ofstream& output_file); /// write output to file
 #ifdef HDF5
+	void import_restart(H5File& file, int syn_ind);
+	void export_restart(Group& Group, int syn_ind);
 	void output_results(H5File& file_HDF5, int syn_ind);
 #endif
 	const int & get_syn_type(); /// get synapse type
