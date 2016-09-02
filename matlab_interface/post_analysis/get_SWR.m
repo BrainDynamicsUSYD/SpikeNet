@@ -3,8 +3,10 @@ function [ R ] = get_SWR( R )
 %   Detailed explanation goes here
 % ref: Hippocampal place-cell sequences depict future paths to remembered goals.
 
+ripple_event.spike_sort_range = 6;
 ripple_event.no_std = 1.5; % 2 std above the mean
 ripple_event.peak_no_std = 3; % 4 std above the mean
+ripple_event.ripple_min_ms = 15;
 
 LFP = R.LFP.LFP{1};
 [no, steps] = size(LFP);
@@ -17,7 +19,7 @@ fs = 1/(dt*1e-3); % sampling frequency (Hz)
 
 % Butterworth filter
 order = 4; % 4th order
-lowFreq_br = 1; % broad band (1-1250 ? Hz)
+lowFreq_br = 0.1; % broad band (1-1250 ? Hz)
 hiFreq_br = 1250;
 Wn = [lowFreq_br hiFreq_br]/(fs/2);
 [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
@@ -73,7 +75,7 @@ end
 % Ripple event detection
 spike_hist = R.spike_hist{1};
 spike_tot = sum(sum(spike_hist));
-ripple_event.ripple_min_ms = 15;
+
 ripple_min_steps = round(ripple_event.ripple_min_ms/dt);
 
 % Discard transient data
@@ -130,8 +132,7 @@ for i = 1:no
     ripple_event.ripple_start_steps{i} = ripple_start;
     
     % LFP_neurons = logical(R.LFP.LFP_neurons{1}(i,:));
-    s_tmp = R.ExplVar.LFP_range_sigma;
-    ripple_event.spike_sort_range = s_tmp;
+    % s_tmp = R.ExplVar.LFP_range_sigma;
     spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(ripple_event.spike_sort_range/s_tmp)^2);
     
     % firing rate in and out of SWR
@@ -235,7 +236,7 @@ R.LFP.LFP_ripple_hilbert = LFP_ripple_hilbert;
 % R.LFP.rms_window_ms = rms_window_ms;
 R.LFP.gauss_width = width;
 R.LFP.ripple_event = ripple_event;
-R.LFP = rmfield(R.LFP, 'LFP');
+% R.LFP = rmfield(R.LFP, 'LFP');
 
 end
 

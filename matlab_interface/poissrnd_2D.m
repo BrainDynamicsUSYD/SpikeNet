@@ -4,6 +4,9 @@ function pois = poissrnd_2D(lambda, N, r)
 % "On generating multivariate Poisson data 
 % in management science applications." 
 % Applied Stochastic Models in Business and Industry 28.1 (2012): 91-102. APA	
+%
+% Yifan Gu, School of Physics, USYD, Aug 2016.
+% yigu8115@gmail.com
 
 D = 2;
 if min(lambda) <= 5
