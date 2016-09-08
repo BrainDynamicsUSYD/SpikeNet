@@ -132,7 +132,7 @@ for i = 1:no
     ripple_event.ripple_start_steps{i} = ripple_start;
     
     % LFP_neurons = logical(R.LFP.LFP_neurons{1}(i,:));
-    % s_tmp = R.ExplVar.LFP_range_sigma;
+    s_tmp = R.ExplVar.LFP_range_sigma;
     spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(ripple_event.spike_sort_range/s_tmp)^2);
     
     % firing rate in and out of SWR
