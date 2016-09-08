@@ -79,7 +79,7 @@ ripple_min_steps = round(ripple_event.ripple_min_ms/dt);
 % Discard transient data
 transient_ms = 200; %ms;
 ripple_event.transient_ms = transient_ms;
-transient_steps = round(transient_ms/dt);
+transient_steps = min(round(transient_ms/dt), steps);
 ripple_event.index1 = cell(1,no);
 ripple_event.index2 = cell(1,no);
 ripple_event.index3 = cell(1,no);
