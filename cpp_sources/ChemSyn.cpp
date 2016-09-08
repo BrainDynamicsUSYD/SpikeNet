@@ -1174,13 +1174,15 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 		write_vector_HDF5(group_Gsm_1,gsm_1.gs_decay_sum, "gs_decay_sum");
 		write_matrix_HDF5(group_Gsm_1,gsm_1.d_gs_rd_sum_buffer, "d_gs_rd_sum_buffer");
 	}
-
-	write_matrix_HDF5(group_syn,C, "C");
-	write_matrix_HDF5(group_syn,D, "D");
-	write_matrix_HDF5(group_syn,K, "K");
+	
+	if (pop_ind_pre >= 0){
+		write_matrix_HDF5(group_syn, C, "C");
+		write_matrix_HDF5(group_syn, D, "D");
+		write_matrix_HDF5(group_syn, K, "K");
+	}
 
 	if(!ext_noise.neurons.empty()){
-		string str =syn_str+"/Ext_noise";
+		string str = syn_str+"/Ext_noise";
 		Group group_Ext_noise = group_syn.createGroup(str);
 		write_scalar_HDF5(group_Ext_noise, ext_noise.K_ext, "K_ext");
 		write_scalar_HDF5(group_Ext_noise, ext_noise.Num_ext, "Num_ext");
