@@ -2,7 +2,7 @@
 #PBS -N all_in_one
 ##PBS -q yossarian
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=1:59:59
+#PBS -l walltime=11:59:59
 #PBS -l mem=1500MB
 #PBS -V
 #PBS -e PBSout/one_err_av
@@ -16,7 +16,7 @@ OUTPUT_APPENDIX="out.h5" #"ygout" #"out.h5"
 DATA_DIR="tmp_data"
 MATLAB_SOURCE_PATH='SpikeNet'
 MATLAB_SOURCE_PATH_2='SpikeNet'
-MATLAB_PRE_PROCESS_FUNC="main_LFP_133_smaller_grid_HDF5"
+MATLAB_PRE_PROCESS_FUNC="main_SWR_reference_gaus_rmcn"
 MATLAB_POST_PROCESS_FUNC="PostProcessYG"
 CPP_MAIN_FUNC="simulator"
 
@@ -57,7 +57,7 @@ if [ "${matdone}" == "1" ]; then
 	echo ${ID} has been processed till RYG.mat;
 
 elif [ "${outdone}" == "1" ]; then
-	echo ${ID} has been processed till${OUTPUT_APPENDIX};
+	echo ${ID} has been processed till ${OUTPUT_APPENDIX};
 	cd ${DATA_DIR};
 	OUTPUTFILE=$(echo ${ID}-*${OUTPUT_APPENDIX}); # Simulate and output ${OUTPUT_APPENDIX} file
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
@@ -66,7 +66,7 @@ elif [ "${outdone}" == "1" ]; then
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 elif [ "${indone}" == "1" ]; then
-	echo ${ID} has been processed till${INPUT_APPENDIX};
+	echo ${ID} has been processed till ${INPUT_APPENDIX};
 	cd ${DATA_DIR};
 	${PBS_O_WORKDIR}/${CPP_MAIN_FUNC} ${ID}-*${INPUT_APPENDIX}; # Simulate and output ${OUTPUT_APPENDIX} file
 	OUTPUTFILE=$(echo ${ID}-*${OUTPUT_APPENDIX}) # why here bash is different from c-shell?? 
