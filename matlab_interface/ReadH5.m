@@ -74,10 +74,12 @@ if ~isempty(files)
         
         
         ev_str = try_h5read(config_filename,'/config/explanatory_variables');
-        scan_temp = textscan(ev_str{1}, '%s', 'Delimiter', ',');
-        scan_temp =  scan_temp{1};
-        for s = 1:(length(scan_temp)-1)/2
-            eval(strcat('OutData{id_out}.ExplVar.', scan_temp{s*2-1}, '=', scan_temp{s*2},';'));
+        if ~isempty(ev_str)
+            scan_temp = textscan(ev_str{1}, '%s', 'Delimiter', ',');
+            scan_temp =  scan_temp{1};
+            for s = 1:(length(scan_temp)-1)/2
+                eval(strcat('OutData{id_out}.ExplVar.', scan_temp{s*2-1}, '=', scan_temp{s*2},';'));
+            end
         end
         
         OutData{id_out}.N = try_h5read(config_filename, '/config/Net/INIT001/N');
@@ -104,10 +106,10 @@ if ~isempty(files)
             OutData{id_out}.neuron_stats.IE_ratio{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_IE_ratio']));
             %
             OutData{id_out}.LFP.LFP{pop_ind,1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/LFP_data']));
-            OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} = transpose(try_h5read(config_filename, ['/config/pops/pop',num2str(pop_ind-1), '/SAMP005/LFP_neurons']));
-            l_tmp = length(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1});
-            N_tmp = OutData{id_out}.N(pop_ind);
-            OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} =  reshape(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} , [N_tmp l_tmp/N_tmp])';
+            OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} = try_h5read(config_filename, ['/config/pops/pop',num2str(pop_ind-1), '/SAMP005/LFP_neurons']);
+            %l_tmp = length(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1});
+            %N_tmp = OutData{id_out}.N(pop_ind);
+            % OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} =  reshape(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} , [N_tmp l_tmp/N_tmp])';
             
         end
         

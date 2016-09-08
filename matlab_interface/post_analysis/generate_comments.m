@@ -19,13 +19,15 @@ comments = sprintf('Runaway killed at step %g, ', step_killed);
 end
 comments = [comments 'Mean firing rate (Hz) ', sprintf('%.4g, ', Hz)];
 % Expl variables
-fname_cell = fieldnames(ExplVar);
-for f = 1:length(fname_cell)
-    fn = fname_cell{f};
-    if isnumeric(ExplVar.(fn))
-        comments = [comments sprintf('%s = %.4g, ', fn, ExplVar.(fn)) ];
-    else
-        comments = [comments sprintf('%s = %s, ', fn, ExplVar.(fn)) ];
+if ~isempty(ExplVar)
+    fname_cell = fieldnames(ExplVar);
+    for f = 1:length(fname_cell)
+        fn = fname_cell{f};
+        if isnumeric(ExplVar.(fn))
+            comments = [comments sprintf('%s = %.4g, ', fn, ExplVar.(fn)) ];
+        else
+            comments = [comments sprintf('%s = %s, ', fn, ExplVar.(fn)) ];
+        end
     end
 end
 % break comments into multiple lines if too long

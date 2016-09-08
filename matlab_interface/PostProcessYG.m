@@ -47,7 +47,11 @@ for id_out = 1:num_files
     end
     R = AnalyseYG(R); % do some simple analysis
     
-    R = get_SWR(R{1});R = {R};
+    try
+        R = get_SWR(R{1});R = {R};
+    catch
+    end
+    
     
     SaveRYG(R);
     disp('Done');
