@@ -63,7 +63,7 @@ bool SimuInterface::import(string in_filename_input){
 	vector<int> spike_freq_adpt_setting; //
 	
 	vector<int> LFP_record_pop_ind; //
-	vector< vector < vector<double> > > LFP_record_setting; //
+	vector< vector < vector<bool> > > LFP_record_setting; //
 	
 	string syn_filename; // name of file that defines synaptic connection
 	vector< vector<double> > runaway_killer_setting; // [pop_ind, min_ms, runaway_Hz, Hz_ms]
@@ -814,15 +814,55 @@ bool SimuInterface::import_restart_HDF5(string in_filename_input){
 
 void SimuInterface::export_restart_HDF5(){
 	H5File file_HDF5;
-	string restart_filename;
+	int restart_no=1;
+	ostringstream convert_temp; 
+	string restart_filename_trim;
+
 	cout<<"Creating Restart Config File\n";
-	string file_name_HDF5 = out_filename+"_restart.h5";
-	file_HDF5 = H5File( file_name_HDF5.c_str(), H5F_ACC_TRUNC );
 
-	network.export_restart(file_HDF5);
+	istringstream restart_filename_ss(out_filename);
+	getline(restart_filename_ss, restart_filename_trim, '.');
+	
+	const H5std_string file_name( in_filename );
+	H5File file( file_name, H5F_ACC_RDWR );
 
-			
+	Group group_restart;
+	string str = "/Restart/";
+	if(group_exist_HDF5(file,str)){
+		restart_no=read_scalar_HDF5<int>(file, str+string("no_children"));
+		restart_no++;
+		//+++TODO POSSIBEL PROBLEM HERE FOR SCRIPTS DOING LOTS OF JOBS THIS NEEDS TO BE LOCKED
+		hsize_t dims[1]; 
+		dims[0] = 1;
+		DataSpace fspace(1, dims); 
+		DataSet dataset = file.openDataSet("/Restart/no_children");
+		dataset.write( &restart_no, PredType::NATIVE_INT, fspace, fspace );
+		// convert_temp<< restart_filename_trim<<"_restart_1"; 
+	}
+	else{
+		group_restart = file.createGroup(string("/Restart/"));
+		write_scalar_HDF5(group_restart,restart_no,string("no_children")); 
+	}
+	
+	if (out_filename.find("restart") != string::npos){
+		convert_temp<<restart_filename_trim.substr(0,restart_filename_trim.find_last_of('_'))<< "_"<<restart_no;
+	}
+	else{
+		convert_temp<<restart_filename_trim.substr(0,restart_filename_trim.find_last_of('_'))<< "_restart_"<<restart_no;
+	}
+	convert_temp<<".h5";
+	
+	file_HDF5 = H5File( convert_temp.str(), H5F_ACC_TRUNC );
+
+	Group group_SimuInterface = file_HDF5.createGroup(string("/SimuInterface/"));
+	write_string_HDF5(group_SimuInterface,in_filename,string("in_filename")); 
+	write_string_HDF5(group_SimuInterface,out_filename,string("out_filename")); 
+
+	network.export_restart(file_HDF5,restart_no);
+	
+		
 }
+
 void SimuInterface::output_results_HDF5(){
 	// output results into HDF5 file
 	cout << "Outputting results into HDF5 file...";
@@ -958,11 +998,11 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 			// LFP record settings
 			if (group_exist_HDF5(in_filename, pop_n + string("/SAMP005"))){
 				cout << "\t\t LFP record settings...";
-				vector<double> v_tmp;
+				vector<bool> v_tmp;
 				read_vector_HDF5(file, pop_n + string("/SAMP005/LFP_neurons"), v_tmp);
 				// reshape
 				int n_LFP = int(v_tmp.size()) / network.N_array[ind];
-				vector< vector<double> > LFP_neurons;
+				vector< vector<bool> > LFP_neurons;
 				LFP_neurons.resize(n_LFP);
 				int ctr = 0;
 				for (int n = 0; n < n_LFP; n++){
@@ -1066,7 +1106,27 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 					network.ChemSynArray.back()->add_inh_STDP(inh_STDP_on_step);
 					cout << "done." << endl;
 				}
-				
+
+				// JH Learning
+				if (group_exist_HDF5(in_filename, syn_n + string("/INIT016"))){
+					cout << "\t\t JH Learning settings...";
+					int infsteps = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/infsteps"));
+					double infscaleE = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/infscaleE"));
+					double infscaleI = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/infscaleI"));
+					double learnrate_E = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrate_E"));
+					double learnrateall_E = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateall_E"));
+					double learnrate_I = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrate_I"));
+					double learnrateall_I = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateall_I"));
+					double noise = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/noise"));
+					int tau = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/tau"));
+					int ntype_pre = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/ntype_pre"));
+					int ntype_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/ntype_post"));
+					network.ChemSynArray.back()->add_JH_Learning(network.NeuroPopArray,infsteps,infscaleE, infscaleI,learnrate_E,learnrateall_E,learnrate_I,learnrateall_I,tau,noise,ntype_pre,ntype_post);
+					network.NeuroPopArray[i_pre]->add_JH_Learn();
+					cout << "done." << endl;
+				}
+
+
 				// syn I mean std record settings
 				if (group_exist_HDF5(in_filename, syn_n + string("/SAMP004"))){
 					cout << "\t\t Synapse stats record settings...";
@@ -1121,18 +1181,25 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 
 
 
-string SimuInterface::gen_restart_filename(){
-	// creat output file name using some pre-defined format
-	ostringstream convert_temp;   // stream used for the conversion
-	// Make use of the input file path and name
-	string in_filename_trim;
-	istringstream in_filename_ss(in_filename);
-	getline(in_filename_ss, in_filename_trim, '.');
+// string SimuInterface::gen_restart_filename(int child_no){
+// 	// creat output file name using some pre-defined format
+// 	ostringstream convert_temp;   // stream used for the conversion
+// 	// Make use of the input file path and name
+// 	string in_filename_trim;
+// 	istringstream in_filename_ss(in_filename);
+// 	getline(in_filename_ss, in_filename_trim, '.');
 
-	// Combine all the parts of the output file path and name
-	convert_temp << in_filename_trim << "_restart"; // insert the textual representation of 'Number' in the characters in the stream
-	return convert_temp.str(); // set 'Result' to the contents of the stream
-}
+// 	// Combine all the parts of the output file path and name
+// 	if(filename.find("restart")=std::string::npos){
+// 		convert_temp << in_filename_trim << "_restart_0"; // insert the textual representation of 'Number' in the characters in the stream
+// 	}
+// 	else
+// 	{
+// 		in_filename_trim.pop_back();
+// 		convert_temp << in_filename_trim << "_"<<child_no;
+// 	}
+// 	return convert_temp.str(); // set 'Result' to the contents of the stream
+// }
 
 #endif
 

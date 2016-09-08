@@ -29,9 +29,11 @@ public:
 	char delim;
 	char indicator;
 	void output_results(ofstream& output_file);
+
+
 #ifdef HDF5
 	void import_restart(H5File & file, string out_filename);
-	void export_restart(H5File& file_HDF5);
+	void export_restart(H5File& file_HDF5, int restart_no);
 	void output_results(H5File& file_HDF5);
 #endif
 	

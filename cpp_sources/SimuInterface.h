@@ -36,7 +36,7 @@ public:
 	
 	bool import_restart_HDF5(string in_filename_input);
 	void export_restart_HDF5();
-	string gen_restart_filename();
+	// string gen_restart_filename();
 	
 	void output_results_HDF5();
 	bool import_HDF5(string in_filename);
