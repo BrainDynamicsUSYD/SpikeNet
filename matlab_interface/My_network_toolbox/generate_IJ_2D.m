@@ -55,6 +55,11 @@ for iter = 1:iter_num
         % establish connections
         [~, ind] = sort( rand(N,1)./joint_factor, 'ascend' );
         chosen_j = ind(1: degree_out_0(i) );
+        
+        % The following way is wrong!!
+%         [~, ind] = sort( rand(N,1).*joint_factor, 'descend' );
+%         chosen_j = ind(1: degree_out_0(i) );
+        
         %         Issue: sometimes what's left will be [NaN NaN 1 1 2 1 NaN] and 5
         %         connections are needed. Try to fix this?
         %         if sum(isnan(degree_in_left(chosen_j))) ~= 0
@@ -86,16 +91,23 @@ for iter = 1:iter_num
     edges =  0:max(cn_dist);
     Y = histc(cn_dist, edges);
     cn_minmax = minmax(cn_dist);
+    cn_std = std(cn_dist);
+    ccoef = full(clustering_coef_wd(A));
+    
     clear cn_dist;
     % store iteration history
     if iter == 1
         iter_hist.edges = {edges};
         iter_hist.Y = {Y};
         iter_hist.cn_minmax = {cn_minmax};
+        iter_hist.cn_std = {cn_std};
+        iter_hist.ccoef = {ccoef};
     else
         iter_hist.edges{end+1} = edges;
         iter_hist.Y{end+1} = Y;
         iter_hist.cn_minmax{end+1} = cn_minmax;
+        iter_hist.cn_std{end+1} = cn_std;
+        iter_hist.ccoef{end+1} = ccoef;
     end
     
 end

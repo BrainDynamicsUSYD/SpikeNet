@@ -8,7 +8,7 @@ function main_SWR_reference_gaus(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 40*sec; % use 10 second!
+step_tot = 100*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -36,7 +36,7 @@ for P0_init = 0.08*ones(1,repeats)
     % parameter
     for SpikeFreqAapt = [ 1]
         
-        for LFP_range_sigma = [8 12]; % 8
+        for LFP_range_sigma = [8]; % 8
             for cn_scale_wire = [2 ];
                 for cn_scale_weight = [2 ];
                     iter_num = 5;

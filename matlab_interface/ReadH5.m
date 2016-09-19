@@ -106,7 +106,7 @@ if ~isempty(files)
             OutData{id_out}.neuron_stats.IE_ratio{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_IE_ratio']));
             %
             OutData{id_out}.LFP.LFP{pop_ind,1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/LFP_data']));
-            OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} = try_h5read(config_filename, ['/config/pops/pop',num2str(pop_ind-1), '/SAMP005/LFP_neurons']);
+            OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} = transpose(try_h5read(config_filename, ['/config/pops/pop',num2str(pop_ind-1), '/SAMP005/LFP_neurons']));
             %l_tmp = length(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1});
             %N_tmp = OutData{id_out}.N(pop_ind);
             % OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} =  reshape(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} , [N_tmp l_tmp/N_tmp])';

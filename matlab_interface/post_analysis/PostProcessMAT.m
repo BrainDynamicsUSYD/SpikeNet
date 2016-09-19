@@ -58,9 +58,13 @@ for i = 1:num_files
 
     
 
-     R_temp = get_SWR(R_temp);
-     LFP = R_temp.LFP;
-     save(files{i},'LFP', '-append');
+%      R_temp = get_SWR(R_temp);
+%      LFP = R_temp.LFP;
+%      save(files{i},'LFP', '-append');
+     
+     [R_temp] = get_CC_pop(R_temp, 1);
+     Analysis = R_temp.Analysis;
+     save(files{i},'Analysis', '-append');
      
 %     R_temp = get_grid_firing_centre(R_temp);
 %     grid = R_temp.grid;

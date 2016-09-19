@@ -1,4 +1,4 @@
-
+clear;
 %   Detailed explanation goes here
 disp('CollectMetaData...');
 tic;

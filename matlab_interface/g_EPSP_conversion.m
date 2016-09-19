@@ -3,6 +3,7 @@ function [ fit_g_2_EPSP, fit_EPSP_2_g ] = g_EPSP_conversion( varargin )
 %   This function finds the EPSP amplitude given the coupling strength
 %   (conductance)
 
+% visualisze_trace = 1;
 
 % default parameters
 dt = 0.1; %ms
@@ -19,6 +20,13 @@ V_th = -50; % threshold;
 
 g_min = 0.001;
 g_max = 0.010;
+
+% I_K_on = 1;
+% V_K = -85; % mV
+% dg_K = 0.010; % muS
+% g_K = dg_K;
+% tau_K = 80; %ms
+
 % read parameters
 for i = 1:(length(varargin)/2)
     eval([varargin{i*2-1}, '=', num2str(varargin{i*2}), ';' ]);
@@ -34,7 +42,7 @@ for i = 1:length(g)
     V_old = V_lk; % resting potential
     peaked = false;
     tau_r_step = round(tau_r/dt);
-    tau_r_step_left = tau_r_step;
+    tau_r_step_left = tau_r_step; % spike at time zero
     s = 0;
     while ~peaked && V_old < V_th
         if tau_r_step_left > 0
@@ -44,7 +52,15 @@ for i = 1:length(g)
         I = -g(i)*s*(V_old-V_rev);
         I_lk = -g_lk*(V_old-V_lk);
         
-        V_dot = (I + I_lk)/Cm;
+%         if I_K_on == 1 % This is not right because I_K is based on
+%         % post-synaptic firing!!!s
+%             I_K = -g_K*(V_old - V_K);
+%             g_K = g_K * exp(-dt/tau_K);
+%         else
+%             I_K = 0;
+%         end
+        
+        V_dot = (I + I_lk )/Cm;
         V_new = V_old+V_dot*dt;
         
         peaked = V_new < V_old;

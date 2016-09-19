@@ -1,6 +1,6 @@
 function [R] = get_CC_pop(R, pops)
 
-fprintf('\t Getting correlation coefficient distribution for each population...\n');
+fprintf('\t Getting correlation coefficient distribution for specified population(s)...\n');
 
 corrcoef_sample_num = 10^4; % number of sampling pairs
 CC_kernel_width = 40; % ms, kernel length
