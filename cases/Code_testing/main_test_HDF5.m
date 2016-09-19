@@ -85,6 +85,8 @@ writeInitCondHDF5(FID, r_V0, p_fire)
 
 writeSpikeFreqAdptHDF5(FID, 1);
 
+
+writeLFPRecordHDF5(FID, 1, 0.5*ones(1,N(1)));
 % %%%%%%% write runaway killer
 min_ms = 10*1000; % 10 sec
 runaway_Hz = 20; % ??
