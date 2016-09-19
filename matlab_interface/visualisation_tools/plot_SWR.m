@@ -1,4 +1,4 @@
-function plot_SWR( R, save_figure )
+function plot_SWR( R, save_figure, no_given, seg_given )
 %   -1 for no figure, 0 for displaying figure, 1 for saving figure
 %
 %   If the firing history is too long, data will be segmented into several
@@ -26,11 +26,19 @@ comments = R.comments;
 seg_size = 2*10^4; % 2*10^4 for 2-pop, segmentation size for each plot
 seg_num = ceil(step_tot/seg_size);
 [no, ~] = size(R.LFP.LFP_broad);
-for i = 1:no
+nos = 1:no;
+
+if nargin >= 3
+    nos = no_given;
+end
+
+for i = nos
     for seg = 1:seg_num
         
         seg_ind = get_seg(step_tot, seg_size, seg);
-        
+        if nargin == 4
+             seg_ind = seg_given;
+        end
         
         
         h_SWR = figure('NumberTitle','Off','Name',strcat('Raster plot:', R.stamp),'units','normalized','position',[0 0 1 1], ...
@@ -82,7 +90,7 @@ for i = 1:no
         reduced = R.reduced;
         
         s_tmp = R.ExplVar.LFP_range_sigma;
-        spike_sort_range = s_tmp
+        spike_sort_range = R.LFP.ripple_event.spike_sort_range;
         spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(spike_sort_range/s_tmp)^2);
         reduced.spike_hist{1} = reduced.spike_hist{1}(spike_sort_neurons, :);
         R_LFP.N(1) = sum(spike_sort_neurons);
