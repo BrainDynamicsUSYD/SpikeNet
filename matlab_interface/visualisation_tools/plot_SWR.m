@@ -33,6 +33,9 @@ if nargin >= 3
 end
 
 for i = nos
+    if nargin == 4
+        seg_num = 1;
+    end
     for seg = 1:seg_num
         
         seg_ind = get_seg(step_tot, seg_size, seg);
@@ -114,7 +117,7 @@ for i = nos
         
         % Link axes to synchronise them when zooming
         linkaxes([ax1 ax2 ax3 ax4],'x');
-        
+        set(ax1, 'xlim', minmax(t));
         
         
         
