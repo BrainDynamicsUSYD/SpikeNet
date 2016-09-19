@@ -98,7 +98,13 @@ for i = nos
         reduced.spike_hist{1} = reduced.spike_hist{1}(spike_sort_neurons, :);
         R_LFP.N(1) = sum(spike_sort_neurons);
         R_LFP.reduced = reduced; clear reduced;
-        raster_plot(R_LFP, 1, seg, [], 'seg_size', seg_size*(R.dt/R.reduced.dt))
+        dt_conv = R.dt/R.reduced.dt;
+        if nargin == 4
+            seg_ind_conv = [num2str(ceil(seg_ind(1)*dt_conv)),':1:' num2str(ceil(seg_ind(end)*dt_conv))];
+            raster_plot(R_LFP, 1, seg, [], 'seg_ind', seg_ind_conv);
+        else
+            raster_plot(R_LFP, 1, seg, [], 'seg_size', round(seg_size* dt_conv))
+        end
         xlabel('t (sec)');
         % highlight detected ripple events
         if ~isempty(R.LFP.ripple_event.ripple_du_steps{i});

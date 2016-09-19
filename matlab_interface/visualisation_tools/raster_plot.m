@@ -18,7 +18,11 @@ sample_color_unit_range = 0;
 
 text_fontsize = 12;
 for i = 1:(length(varargin)/2)
-    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}), ';' ]);
+    if isnumeric(varargin{i*2})
+        eval([varargin{i*2-1}, '=', num2str(varargin{i*2}), ';' ]);
+    else
+        eval([varargin{i*2-1}, '=', varargin{i*2}, ';' ]);
+    end
 end
 
 
@@ -33,7 +37,9 @@ N = R.N;
 dt = dt/1000;
 
 % Segmetation
-seg_ind = get_seg(step_tot, seg_size, seg);
+if ~exist('seg_ind','var')
+    seg_ind = get_seg(step_tot, seg_size, seg);
+end
 
 % Dump fields
 num_spikes = R.reduced.num_spikes{pop_ind}(seg_ind);
