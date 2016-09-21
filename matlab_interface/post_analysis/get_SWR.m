@@ -8,58 +8,70 @@ ripple_event.no_std = 1.5; % 2 std above the mean
 ripple_event.peak_no_std = 3; % 4 std above the mean
 ripple_event.ripple_min_ms = 15;
 
-LFP = R.LFP.LFP{1};
-[no, steps] = size(LFP);
-
-% no = 1; % for testing
-
 dt = R.dt;
 fs = 1/(dt*1e-3); % sampling frequency (Hz)
 
-
-% Butterworth filter
-order = 4; % 4th order
-lowFreq_br = 0.1; % broad band (1-1250 ? Hz)
-hiFreq_br = 1250;
-Wn = [lowFreq_br hiFreq_br]/(fs/2);
-[b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
-
-for i = 1:no
-    LFP_broad(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
-end
-
-% Butterworth filter
-order = 4; % 4th order
-lowFreq_sp = 1; % broad band (10?250 Hz)
-hiFreq_sp = 50;
-Wn = [lowFreq_sp hiFreq_sp]/(fs/2);
-[b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
-
-for i = 1:no
-    LFP_sharpwave(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
-end
-
-
-% Butterworth filter
-order = 4; % 4th order
-R.LFP.lowFreq = 100; % ripple band (default values for this function are 150-250 Hz)
-R.LFP.hiFreq = 250;
-Wn = [R.LFP.lowFreq R.LFP.hiFreq]/(fs/2);
-[b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
-for i = 1:no
-    LFP_ripple(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
-    % hilbert transformation & gaussian smoothing
-    width = 5; %ms
-    [ Kernel ] = spike_train_kernel_YG( width, dt, 'gaussian_unit' );
-    LFP_ripple_hilbert(i,:) = conv(abs(hilbert(LFP_ripple(i,:))), Kernel,'same'); %#ok<AGROW>
+try
+    LFP = R.LFP.LFP{1};
+    [no, steps] = size(LFP);
+    % no = 1; % for testing
     
-%     rms_window_ms = 17; %ms
-%     window_steps = round(rms_window_ms/dt);
-%     Kernel_rms = ones(1,window_steps)/window_steps;
-%     LFP_ripple_rms(i,:) = sqrt(conv(LFP_ripple(i,:).^2, Kernel_rms,'same')); %#ok<AGROW>
+    
+    
+    
+    % Butterworth filter
+    order = 4; % 4th order
+    lowFreq_br = 4; % broad band (1-1000 Hz)
+    hiFreq_br = 1000;
+    Wn = [lowFreq_br hiFreq_br]/(fs/2);
+    [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
+    
+    for i = 1:no
+        LFP_broad(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
+    end
+    
+    % Butterworth filter
+    order = 4; % 4th order
+    lowFreq_sp = 1; % broad band (10?250 Hz)
+    hiFreq_sp = 50;
+    Wn = [lowFreq_sp hiFreq_sp]/(fs/2);
+    [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
+    
+    for i = 1:no
+        LFP_sharpwave(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
+    end
+    
+    
+    % Butterworth filter
+    order = 4; % 4th order
+    R.LFP.lowFreq = 100; % ripple band (default values for this function are 150-250 Hz)
+    R.LFP.hiFreq = 250;
+    Wn = [R.LFP.lowFreq R.LFP.hiFreq]/(fs/2);
+    [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
+    for i = 1:no
+        LFP_ripple(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
+        % hilbert transformation & gaussian smoothing
+        gaus_width = 5; %ms
+        [ Kernel ] = spike_train_kernel_YG( gaus_width, dt, 'gaussian_unit' );
+        LFP_ripple_hilbert(i,:) = conv(abs(hilbert(LFP_ripple(i,:))), Kernel,'same'); %#ok<AGROW>
+        
+        %     rms_window_ms = 17; %ms
+        %     window_steps = round(rms_window_ms/dt);
+        %     Kernel_rms = ones(1,window_steps)/window_steps;
+        %     LFP_ripple_rms(i,:) = sqrt(conv(LFP_ripple(i,:).^2, Kernel_rms,'same')); %#ok<AGROW>
+    end
+    
+    
+    % Output results
+    R.LFP.LFP_broad = LFP_broad;
+    R.LFP.LFP_ripple = LFP_ripple;
+    R.LFP.LFP_sharpwave = LFP_sharpwave;
+    R.LFP.LFP_ripple_hilbert = LFP_ripple_hilbert;
+    R.LFP.gauss_width = gaus_width;
+    clear LFP_broad LFP_ripple  LFP_sharpwave LFP_ripple_hilbert;
+catch EM
+    EM
 end
-
-
 % % Discard transient data
 % transient_ms = 0; %ms;
 % R.LFP.transient_steps = transient_steps;
@@ -73,6 +85,7 @@ end
 
 
 % Ripple event detection
+[no, steps] = size(R.LFP.LFP_broad);
 spike_hist = R.spike_hist{1};
 spike_tot = sum(sum(spike_hist));
 
@@ -88,13 +101,13 @@ ripple_event.index3 = cell(1,no);
 ripple_event.inside_rate = cell(1,no);
 ripple_event.outside_rate = cell(1,no);
 ripple_event.Hz = zeros(1,no);
-ripple_event.is_SWR = zeros(size(LFP_ripple_hilbert));
+ripple_event.is_SWR = zeros(size(R.LFP.LFP_ripple_hilbert));
 
 iter_num = 100;
 hil_mean_baseline_hist = zeros(no,iter_num);
 hil_std_baseline_hist = zeros(no,iter_num);
 for i = 1:no
-    LFP_ripple_hilbert_tmp = LFP_ripple_hilbert(i,:); 
+    LFP_ripple_hilbert_tmp = R.LFP.LFP_ripple_hilbert(i,:);
     is_SWR_tmp = zeros(size(LFP_ripple_hilbert_tmp));
     for r_iter = 1:iter_num
         hil_mean_baseline_hist(i,r_iter) =  mean(LFP_ripple_hilbert_tmp(~is_SWR_tmp));
@@ -111,19 +124,19 @@ for i = 1:no
         
         % thresholding
         is_SWR_tmp = LFP_ripple_hilbert_tmp - hil_mean_baseline_hist(i,r_iter) > ripple_event.no_std*hil_std_baseline_hist(i,r_iter);
-
+        
         % Discard transient data
-        is_SWR_tmp(1:transient_steps) = 0; 
-
+        is_SWR_tmp(1:transient_steps) = 0;
+        
         % persistence_requirement
         is_SWR_tmp = persistence_requirement( is_SWR_tmp, ripple_min_steps );
-
+        
         % peak height requirement
         peak_min = hil_mean_baseline_hist(i,r_iter) + ripple_event.peak_no_std*hil_std_baseline_hist(i,r_iter);
         [ is_SWR_tmp ] = peak_height_requirement( is_SWR_tmp, LFP_ripple_hilbert_tmp, peak_min );
-
+        
     end
-
+    
     cutoff = 1;
     [~, ripple_du, flat_du, ripple_start, ~] = seq_postprocess(ripple_event.is_SWR(i,:), 1, cutoff);
     ripple_event.Hz(i) = length(ripple_du)/(R.dt*R.step_tot*10^-3);
@@ -177,10 +190,10 @@ peak.prn = cell(1,no);
 sw_average = cell(1,no);
 rp_average = cell(1,no);
 for i = 1:no
-    x_tmp = LFP_ripple(i,:);
+    x_tmp = R.LFP.LFP_ripple(i,:);
     coeffs_tmp = abs(cwt(x_tmp,scales,'cmor1.5-1'))';
     % coeffs{i} = coeffs_tmp;
-
+    
     
     peak.sw_amp{i} = [];
     for j =  1:length(ripple_event.ripple_du_steps{i})
@@ -193,7 +206,7 @@ for i = 1:no
         peak.rp_freq_step{i} = [peak.rp_freq_step{i} a_tmp+ind_tmp-1];
         peak.rp_wl_amp{i} = [peak.rp_wl_amp{i} rp_wl_amp];
         
-        [rp_raw_amp, rp_raw_amp_step] = max(LFP_ripple(i, a_tmp:a_tmp+l_tmp-1));
+        [rp_raw_amp, rp_raw_amp_step] = max(R.LFP.LFP_ripple(i, a_tmp:a_tmp+l_tmp-1));
         peak.rp_raw_amp{i} = [peak.rp_raw_amp{i} rp_raw_amp];
         peak.rp_raw_amp_step{i} = [peak.rp_raw_amp_step{i} a_tmp+rp_raw_amp_step-1];
         
@@ -207,10 +220,10 @@ for i = 1:no
     for j = 1:length(peak.rp_raw_amp_step{i})
         peak_t = peak.rp_raw_amp_step{i}(j);
         if swr_hw_steps + peak_t < R.step_tot && -swr_hw_steps + peak_t > 0
-            peak.sw_amp{i} = [peak.sw_amp{i} max(LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t))];
-            peak.prn{i} = [ peak.prn{i} min(LFP_broad(i, peak_t: swr_hw_steps + peak_t))];
-            sw_average{i} = sw_average{i} + LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
-            rp_average{i} = rp_average{i} + LFP_ripple(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
+            peak.sw_amp{i} = [peak.sw_amp{i} max(R.LFP.LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t))];
+            peak.prn{i} = [ peak.prn{i} min(R.LFP.LFP_broad(i, peak_t: swr_hw_steps + peak_t))];
+            sw_average{i} = sw_average{i} + R.LFP.LFP_sharpwave(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
+            rp_average{i} = rp_average{i} + R.LFP.LFP_ripple(i, -swr_hw_steps + peak_t: swr_hw_steps + peak_t);
         else
             peak.sw_amp{i} = [peak.sw_amp{i} NaN];
             peak.prn{i} = [ peak.prn{i} NaN];
@@ -227,14 +240,10 @@ R.LFP.wavelet.scales = scales;
 R.LFP.wavelet.peak = peak;
 R.LFP.wavelet.sw_average = sw_average;
 R.LFP.wavelet.rp_average = rp_average;
-% Output results
-R.LFP.LFP_broad = LFP_broad;
-R.LFP.LFP_ripple = LFP_ripple;
-R.LFP.LFP_sharpwave = LFP_sharpwave;
-R.LFP.LFP_ripple_hilbert = LFP_ripple_hilbert;
+
 % R.LFP.LFP_ripple_rms = LFP_ripple_rms;
 % R.LFP.rms_window_ms = rms_window_ms;
-R.LFP.gauss_width = width;
+
 R.LFP.ripple_event = ripple_event;
 % R.LFP = rmfield(R.LFP, 'LFP');
 
