@@ -16,7 +16,7 @@ OUTPUT_APPENDIX="out.h5" #"ygout" #"out.h5"
 DATA_DIR="tmp_data"
 MATLAB_SOURCE_PATH='SpikeNet'
 MATLAB_SOURCE_PATH_2='SpikeNet'
-MATLAB_PRE_PROCESS_FUNC="main_SWR_reference_gaus_rmcn"
+MATLAB_PRE_PROCESS_FUNC="main_SWR_reference_gaus_redo"
 MATLAB_POST_PROCESS_FUNC="PostProcessYG"
 CPP_MAIN_FUNC="simulator"
 
@@ -47,9 +47,9 @@ fi
 
 
 cd ${DATA_DIR};
-matdone=`ls *RYG.mat | sed -n '/^'${ID}'-.*mat$/p'| wc -l`;
-outdone=`ls *${OUTPUT_APPENDIX} | sed -n '/^'${ID}'-.*'${OUTPUT_APPENDIX}'$/p'| wc -l`;
-indone=`ls *${INPUT_APPENDIX} | sed -n '/^'${ID}'-.*'${INPUT_APPENDIX}'$/p'| wc -l`;
+matdone=`ls *RYG.mat | sed -n '/^'${ID}'-.*$/p'| wc -l`;
+outdone=`ls *${OUTPUT_APPENDIX} | sed -n '/^'${ID}'-.*$/p'| wc -l`;
+indone=`ls *${INPUT_APPENDIX} | sed -n '/^'${ID}'-.*$/p'| wc -l`;
 cd ${PBS_O_WORKDIR};
 
 
