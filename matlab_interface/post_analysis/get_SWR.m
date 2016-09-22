@@ -21,7 +21,7 @@ try
     
     % Butterworth filter
     order = 4; % 4th order
-    lowFreq_br = 4; % broad band (1-1000 Hz)
+    lowFreq_br = 1; % broad band (1-1000 Hz)
     hiFreq_br = 1000;
     Wn = [lowFreq_br hiFreq_br]/(fs/2);
     [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
