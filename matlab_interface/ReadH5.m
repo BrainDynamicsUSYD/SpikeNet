@@ -47,6 +47,8 @@ if ~isempty(files)
         end
         fprintf('Current ReadYG file is: %s\n', files{id_out});
         
+                
+
         % prepare containers
         OutData{id_out}.step_killed = [];
         OutData{id_out}.Num_pop = [];
@@ -89,6 +91,8 @@ if ~isempty(files)
         
         OutData{id_out}.step_killed = double(try_h5read(files{id_out}, '/run_away_killed/step'));
         
+
+        
         % population results
         for pop_ind = 1:OutData{id_out}.Num_pop
             %
@@ -126,6 +130,21 @@ if ~isempty(files)
                 OutData{id_out}.SynPara{syn_ind, 1} = try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/syn_para']);
             end
         end
+        
+        % neuron sample file
+        stamps = file_name(1:end-3);
+        for pop_ind = 1:OutData{id_out}.Num_pop
+            samp_file = [stamps num2str(pop_ind-1) '_neurosamp.h5'];
+            I_AMPA = try_h5read( samp_file,  '/I_AMPA' );
+            I_GABA = try_h5read( samp_file,  '/I_GABA' );
+            I_K = try_h5read( samp_file,  '/I_K' );
+            I_ext = try_h5read( samp_file,  '/I_ext' );
+            V = try_h5read( samp_file,  '/V' );
+            I_leak = try_h5read( samp_file,  '/I_leak' );
+            save([samp_file(1:end-2) 'mat'], 'I_AMPA', 'I_GABA','I_K','I_ext' ,'V', 'I_leak');
+            clear 'I_AMPA'  'I_GABA' 'I_K' 'I_ext' 'V''I_leak';
+        end
+        
         
     end
     %                 elseif strfind(tline,'POPD004')
