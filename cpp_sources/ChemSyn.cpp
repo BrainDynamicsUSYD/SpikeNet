@@ -40,6 +40,15 @@ ChemSyn::ChemSyn(const double dt_input, const int step_tot_input, const char del
 
 void ChemSyn::init(const int syn_type_input, const int i_pre, const int j_post, const int N_pre_input, const int N_post_input, const vector<int> &C_i, const vector<int> &C_j, const vector<double> &K_ij, const vector<double> &D_ij){
 
+	// input check
+	if (*max_element(C_i.begin(), C_i.end()) >= N_pre_input){
+	cout << "Wrong Input!In the chemical synapses " << syn_type_input + 1 <<" connection from pop "<< i_pre + 1 << " to pop " << j_post + 1 << ",the index of pre_population synapses exceed the number of pre-population neurons." << endl;
+	}
+				 
+	if (*max_element(C_j.begin(), C_j.end()) >= N_post_input){
+	cout << "Wrong Input!In the chemical synapses " << syn_type_input + 1 <<" connection from pop "<< i_pre + 1 << " to pop " << j_post + 1 << ",the index of post_population synapses exceed the number of post-population neurons." << endl;
+	}
+
 	// read parameter
 	syn_type = syn_type_input;
 	pop_ind_pre = i_pre;
