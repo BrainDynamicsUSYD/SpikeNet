@@ -167,9 +167,17 @@ for i = 1:no
         ripple_event.index3{i} = ripple_event.index3{i} + (sum(spike_tmp,2)/N_events)'; % mean number of spikes per SWR
     end
 end
-ripple_event.hil_mean_baseline = hil_mean_baseline_hist;
-ripple_event.hil_std_baseline = hil_std_baseline_hist;
 
+ripple_event.hil_mean_baseline_hist = hil_mean_baseline_hist;
+ripple_event.hil_std_baseline_hist = hil_std_baseline_hist;
+ripple_event.hil_mean_baseline = zeros(no,1);
+ripple_event.hil_std_baseline = zeros(no,1);
+for i = 1:no
+    [~,~,sw_amp_mean_base_tmp] = find(ripple_event.hil_mean_baseline_hist(i,:), 1, 'last');
+    [~,~,sw_amp_std_base_tmp] = find(ripple_event.hil_std_baseline_hist(i,:), 1, 'last');
+    ripple_event.hil_mean_baseline(i) = sw_amp_mean_base_tmp;
+    ripple_event.hil_std_baseline(i) = sw_amp_std_base_tmp;
+end
 
 
 %
@@ -185,6 +193,7 @@ peak.rp_freq_step = cell(1,no);
 peak.rp_wl_amp = cell(1,no);
 peak.rp_raw_amp = cell(1,no);
 peak.rp_raw_amp_step = cell(1,no);
+peak.rp_amp_no_std = cell(1,no);
 peak.sw_amp = cell(1,no);
 peak.prn = cell(1,no);
 sw_average = cell(1,no);
@@ -209,9 +218,10 @@ for i = 1:no
         [rp_raw_amp, rp_raw_amp_step] = max(R.LFP.LFP_ripple(i, a_tmp:a_tmp+l_tmp-1));
         peak.rp_raw_amp{i} = [peak.rp_raw_amp{i} rp_raw_amp];
         peak.rp_raw_amp_step{i} = [peak.rp_raw_amp_step{i} a_tmp+rp_raw_amp_step-1];
-        
+
     end
-    
+    peak.rp_amp_no_std{i} =  (peak.rp_raw_amp{i} - ripple_event.hil_mean_baseline(i)) / ripple_event.hil_std_baseline(i);
+      
     % sharp-wave and ripple correlation
     swr_hw = 75; % ms
     swr_hw_steps = round(swr_hw/dt);
@@ -229,8 +239,9 @@ for i = 1:no
             peak.prn{i} = [ peak.prn{i} NaN];
         end
     end
-    
-    
+    sw_average{i} = sw_average{i}/length(peak.rp_raw_amp_step{i});
+    rp_average{i} = rp_average{i}/length(peak.rp_raw_amp_step{i});
+
     
 end
 

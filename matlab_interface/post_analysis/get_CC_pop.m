@@ -34,12 +34,12 @@ for pop_ind = pops
             CC_pop{pop_ind}(1,i) = CorrCoefYG(spike_hist{pop_ind}(pairs(1,i),:), spike_hist{pop_ind}(pairs(2,i),:), CC_kernel);
             % display progress
             
-            if i > 1
-                fprintf(repmat('\b',1,10));
-            end
-            if i < corrcoef_sample_num
-                fprintf('%10g',i);
-            end
+%             if i > 1
+%                 fprintf(repmat('\b',1,10));
+%             end
+%             if i < corrcoef_sample_num
+%                 fprintf('%10g',i);
+%             end
         end
         % Record results
         R.Analysis.CC_pop_kernel_type = kernel_type;

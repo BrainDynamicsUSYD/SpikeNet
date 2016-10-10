@@ -78,7 +78,41 @@ else
     
 end
 
-%thre
+% deal with periodic boundary
+dd = pi*10^-6;
+x_s = linspace(-hw, hw, 7) + dd;
+y_s = linspace(-hw, hw, 7) + dd;
+[x_s_grid, y_s_grid] = meshgrid(x_s, y_s);
+x_shift = x_s_grid(:);
+y_shift = y_s_grid(:);
+no_shifts = length(y_shift);
+
+% raw jump_dir
+x_diff_full = repmat(x_mean(2:end), no_shifts, 1);
+y_diff_full = repmat(y_mean(2:end), no_shifts, 1);
+for s = 1:no_shifts;
+    x_diff_full(s,:) =  x_diff_full(s,:) - x_shift(s) - x_mean(1:end-1);
+    y_diff_full(s,:) =  y_diff_full(s,:) - y_shift(s) - y_mean(1:end-1) ;
+end
+[jump_dist_raw, min_J] = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
+jump_dir_raw = zeros(size(jump_dist_raw));
+for i = 1:length(min_J)
+    jump_dir_raw(i) = atan2(y_diff_full(min_J(i),i),  x_diff_full(min_J(i),i));
+end
+
+% calculate mean jerk
+dt_mid = t_mid_full(2) - t_mid_full(1);
+x_tmp = cos(jump_dir_raw).*jump_dist_raw;
+y_tmp = sin(jump_dir_raw).*jump_dist_raw;
+x1 = diff(x_tmp)/dt_mid;
+x2 = diff(x1)/dt_mid;
+x3 = diff(x2)/dt_mid;
+y1 = diff(y_tmp)/dt_mid;
+y2 = diff(y1)/dt_mid;
+y3 = diff(y2)/dt_mid;
+jerk_mean = mean(sqrt(x3.^2 + y3.^2));
+
+%threholding on MLH
 c_legit = (mlh >= mean(mlh) - 2*std(mlh)); % this is a bit arbitarys!!!
 
 t_mid_chosen = t_mid(c_legit);
@@ -87,15 +121,19 @@ x_mean_chosen = x_mean(c_legit);
 y_mean_chosen = y_mean(c_legit);
 
 % jump_size (take care of the periodic boundary condition)
-x_diff_full = repmat(x_mean_chosen(2:end), 9, 1);
-y_diff_full = repmat(y_mean_chosen(2:end), 9, 1);
-x_mean_shift2 = [-fw 0  fw -fw 0 fw -fw  0   fw];
-y_mean_shift2 = [ fw fw fw   0 0  0 -fw -fw -fw];
-for s = 1:9
-    x_diff_full(s,:) =  x_diff_full(s,:) - x_mean_shift2(s) - x_mean_chosen(1:end-1);
-    y_diff_full(s,:) =  y_diff_full(s,:) - y_mean_shift2(s) - y_mean_chosen(1:end-1) ;
+x_diff_full = repmat(x_mean_chosen(2:end), no_shifts, 1);
+y_diff_full = repmat(y_mean_chosen(2:end), no_shifts, 1);
+
+for s = 1:no_shifts;
+    x_diff_full(s,:) =  x_diff_full(s,:) - x_shift(s) - x_mean_chosen(1:end-1);
+    y_diff_full(s,:) =  y_diff_full(s,:) - y_shift(s) - y_mean_chosen(1:end-1) ;
 end
-jump_dist = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
+[jump_dist, min_J] = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
+jump_dir = zeros(size(jump_dist));
+for i = 1:length(min_J)
+    jump_dir(i) = atan2(y_diff_full(min_J(i),i),  x_diff_full(min_J(i),i));
+end
+
 % jump_duration
 jump_duration = diff(t_mid_chosen);
 
@@ -109,8 +147,10 @@ R.grid.raw.t_mid = t_mid_full;
 R.grid.raw.ind_ab = ind_ab_full;
 R.grid.raw.radius = width;
 R.grid.raw.centre = [x_mean; y_mean];
+R.grid.raw.jump_dist = jump_dist_raw;
+R.grid.raw.jump_dir = jump_dir_raw;
 R.grid.raw.mlh = mlh;
-% R.grid.raw.t_ab = t_ab_vec_full; 
+R.grid.raw.jerk_mean = jerk_mean;
 
 R.grid.mode = mode;
 R.grid.t_mid = t_mid_chosen;
@@ -118,6 +158,7 @@ R.grid.radius = width_chosen;
 R.grid.centre = [x_mean_chosen; y_mean_chosen];
 R.grid.jump_dist = jump_dist;
 R.grid.jump_du = jump_duration;
+R.grid.jump_dir = jump_dir;
 
 end
 

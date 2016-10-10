@@ -5,7 +5,7 @@ function PostProcessMAT(stdin)
 
 % Prepare files
 if nargin == 0
-    dir_strut = dir('*.mat');
+    dir_strut = dir('*RYG.mat');
     num_files = length(dir_strut);
     files = cell(1,num_files);
     for i = 1:num_files
@@ -30,51 +30,36 @@ for i = 1:num_files
     R_temp = load(files{i}); % for performance, only load the necessary stuff
     disp('done.');
     %%%%%%% do something here
+
+
     
     
-    
-    %     R_temp = rmfield(R_temp,'cluster');
-    %     R_temp = cluster_sorted_rate(R_temp);
-    %     cluster = R_temp.cluster;
-    %     save(files{i},'cluster', '-append');
-    
-    
-    % R_temp = get_CC_network(R_temp);
-    % R_temp = get_CC_pop(R_temp, 1);
-    % R_temp = get_CV2_ISI(R_temp);
-    %     R_temp = get_ISI_low_high(R_temp);
-    %     Analysis = R_temp.Analysis;
-    %     save(files{i},'Analysis', '-append');
-    
-    
-%     R_temp = avalanche_detect(R_temp);
-%     avalanche = R_temp.avalanche;
-%     save(files{i},'avalanche', '-append');
+    R_temp = avalanche_detect(R_temp);
+    avalanche = R_temp.avalanche;
+    save(files{i},'avalanche', '-append');
         
-%     R_temp = get_stPR(R_temp);
-%     stPR = R_temp.stPR;
-%    save(files{i},'stPR', '-append');
+    R_temp = get_stPR(R_temp);
+    stPR = R_temp.stPR;
+    save(files{i},'stPR', '-append');
 %     
 
     
 
-     R_temp = get_SWR(R_temp);
-     LFP = R_temp.LFP;
-     save(files{i},'LFP', '-append');
+%      R_temp = get_SWR(R_temp);
+%      LFP = R_temp.LFP;
+%      save(files{i},'LFP', '-append');
 %      
-%      [R_temp] = get_CC_pop(R_temp, 1);
-%      Analysis = R_temp.Analysis;
-%      save(files{i},'Analysis', '-append');
+     [R_temp] = get_CC_pop(R_temp, 1);
+     Analysis = R_temp.Analysis;
+     save(files{i},'Analysis', '-append');
 %      
-%     R_temp = get_grid_firing_centre(R_temp);
-%     grid = R_temp.grid;
-%     save(files{i},'grid', '-append');
+    R_temp = get_grid_firing_centre(R_temp,'win_len ',50,'win_gap', 10);
+    grid = R_temp.grid;
+    save(files{i},'grid', '-append');
 
 
      % plot_SWR(R_temp, save_fig);
 %     
-    
-    % R_temp = rmfield(R_temp,{'C_rate','C_label','up_down_analysis'});
     
     
     %     R_temp = get_CC_pop(R_temp);
@@ -83,11 +68,7 @@ for i = 1:num_files
     %     Analysis = R_temp.Analysis;
     %     save(files{i},'Balance', 'Analysis', '-append');
     
-    %     R_temp = cluster_sorted_rate(R_temp);
-    %     cluster = R_temp.cluster;
-    %     save(files{i},'cluster', '-append');
-    %     ClusterRasterYG({R_temp}, save_fig);
-    %     RasterYG({R_temp}, save_fig);
+
     
     %save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
     

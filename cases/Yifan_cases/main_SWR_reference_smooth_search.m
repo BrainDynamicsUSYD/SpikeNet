@@ -1,4 +1,4 @@
-function main_SWR_reference_gaus_samp(varargin)
+function main_SWR_reference_smooth_search(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -8,7 +8,7 @@ function main_SWR_reference_gaus_samp(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 100*sec; % use 10 second!
+step_tot = 20*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -16,7 +16,7 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 10;
+repeats = 1;
 for P0_init = 0.08*ones(1,repeats)
     
     P_mat = [P0_init 0.1;
@@ -75,9 +75,9 @@ for P0_init = 0.08*ones(1,repeats)
                                     for g_IE = [5 ]*10^-3
                                         for g_II = [25]*10^-3
                                             
-                                            for rate_ext_I = [1];
-                                                for rate_ext_E = [0.85 ];
-                                                for  tau_c_EE = [8]
+                                            for rate_ext_I = [ 0.8:0.05:1.2 ];
+                                                for rate_ext_E = [ 0.6:0.05:1.2];
+                                                for  tau_c_EE = [8  ]
                                                     tau_c_IE = 10;
                                                     for tau_c_I = [20]
                                                         loop_num = loop_num + 1;
@@ -177,8 +177,8 @@ for P0_init = 0.08*ones(1,repeats)
                                                         writeChemicalConnectionHDF5(FID, Type_mat(1, 1),  1, 1,   I_ee,J_ee,K_ee,D);
                                                         clear I J K D;
                                                         
-%                                                         [~,ind_sorted] = sort(in_degree);
-%                                                         sample_neuron = ind_sorted(1:500:end);
+                                                        [~,ind_sorted] = sort(in_degree);
+                                                        sample_neuron = ind_sorted(1:500:end);
                                                         
                                                         %%%%%%%%%%%%%%%%%%%%%%
                                                         [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );
@@ -220,7 +220,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                             %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                                                             writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                         end
-                                                       
+                                                        writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
                                                         writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
                                                         
                                                         % Add LFP sampling
@@ -243,9 +243,6 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 
                                                         writeLFPRecordHDF5(FID, 1, LFP_neurons);
                                                         
-                                                        [~, sample_neuron] = max(LFP_neurons,[],2);
-                                                        writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1,1], sample_neuron, ones(1, step_tot) )
-                                                         
                                                         % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                         % Record explanatory variables, also called "controlled variables"
                                                         

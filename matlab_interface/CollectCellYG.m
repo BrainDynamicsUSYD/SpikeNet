@@ -1,4 +1,4 @@
-function [V, loop_num] = CollectCellYG(var, data, filenames)
+function [V_tmp, loop_num] = CollectCellYG(var, data, filenames)
 % [result, loop_num] = CollectCellYG(var, data)
 %
 % Collect data into a cell. The function automatically loops through any
@@ -28,18 +28,22 @@ for id_out = 1:num_files
     files{id_out} = dir_strut(id_out).name;
 end
 
-V = cell(1,num_files);
+V_tmp = cell(1,num_files);
 loop_num = [];
 fprintf('Collecting data %s from %d files: \n', data, num_files);
 for i = 1:num_files
     % fprintf('\t Loading data %s from file %s...', data, files{i});
-    load(files{i}, var, 'ExplVar');
+    load(files{i}, var)
+    try 
+        load(files{i},  ExplVar')
+    catch
+    end
     
     
     
     eval(sprintf('data_tmp = %s;', data));
     
-    V{i} = data_tmp;
+    V_tmp{i} = data_tmp;
     
     if exist('ExplVar','var')
         loop_num = [loop_num, ExplVar.loop_num]; %#ok<AGROW>
