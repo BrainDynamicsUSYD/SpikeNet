@@ -1,4 +1,4 @@
-function main_SWR_reference_gaus(varargin)
+function main_SWR_reference_gaus_LFP_field(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -8,7 +8,7 @@ function main_SWR_reference_gaus(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 6*sec; % use 10 second!
+step_tot = 3*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -16,7 +16,7 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 10;
+repeats = 4;
 for P0_init = 0.08*ones(1,repeats)
     
     P_mat = [P0_init 0.1;
@@ -220,8 +220,14 @@ for P0_init = 0.08*ones(1,repeats)
                                                             %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                                                             writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                         end
-                                                        writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
+                                                        
                                                         writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
+                                                        
+                                                        %
+                                                        sample_steps = zeros(1,step_tot);
+                                                        sample_steps(2*sec:step_tot) = 1;
+                                                        writeNeuronSamplingHDF5(FID, 1, [0,0,1,1,0,0,0,0], 1:N(1), sample_steps )
+                                                        
                                                         
                                                         % Add LFP sampling
                                                         [Lattice, ~] = lattice_nD(2, hw);
@@ -241,7 +247,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                             LFP_neurons = [LFP_neurons; transpose(gaus_tmp(:))]; %#ok<AGROW>
                                                         end
                                                                 
-                                                        writeLFPRecordHDF5(FID, 1, LFP_neurons);
+                                                        % writeLFPRecordHDF5(FID, 1, LFP_neurons);
                                                         
                                                         % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                         % Record explanatory variables, also called "controlled variables"
