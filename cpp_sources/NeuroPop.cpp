@@ -107,6 +107,15 @@ const double & NeuroPop::get_Cm()
 	return Cm;
 }
 
+void NeuroPop::set_neuron_model(int n_mod){
+	neuron_model=n_mod;
+}
+
+void NeuroPop::set_ELIF_Params(double elif_delT,double elif_VT){
+	elif.delT=elif_delT;
+	elif.V_T=elif_VT;
+}
+
 void NeuroPop::recv_I(vector<double>& I, const int pop_ind_pre, const int syn_type)
 {
 	if (pop_ind_pre == -1){ // if noisy external currents, always send to I_ext regardless of the synapse type
@@ -379,7 +388,14 @@ void NeuroPop::update_V(const int step_current){
 		I_input[i] = I_AMPA[i] + I_GABA[i] + I_NMDA[i] + I_GJ[i] + I_ext[i] + I_K[i];
 		if (ref_step_left[i] == 0){ // Only update the non-refractory neurons
 			// leaky current
-			I_leak[i] = -g_lk * (V[i] - V_lk); 
+			if(neuron_model==0){ 
+				//LIF
+				I_leak[i] = -g_lk * (V[i] - V_lk); 
+			}
+			else if(neuron_model==1){ 
+				//exponential LIF
+				I_leak[i] = -g_lk * (V[i] - V_lk) +g_lk * elif.delT * exp( ( V[i]-elif.V_T ) / elif.delT ); 
+			}
 			// using simple Euler method
 			Vdot = (I_leak[i] + I_input[i])/Cm;
 			V[i] += Vdot * dt;
@@ -722,6 +738,12 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename){
 	string str;
 	string pop_n = "/pops/pop" + to_string(pop_ind)+"/";
 
+	neuron_model=read_scalar_HDF5<int>(file,pop_n+string("neuron_model"));
+	if(neuron_model==1){
+		elif.delT=read_scalar_HDF5<double>(file,pop_n+string("/ELIF/delT"));	
+		elif.V_T=read_scalar_HDF5<double>(file,pop_n+string("/ELIF/V_T"));	
+	}
+
 	pop_ind=read_scalar_HDF5<double>(file,pop_n+string("pop_ind"));
 	N=read_scalar_HDF5<double>(file,pop_n+string("N"));
 	dt=read_scalar_HDF5<double>(file,pop_n+string("dt"));
@@ -847,6 +869,14 @@ void NeuroPop::export_restart(Group& group){
 
 	string pop_n = "/pops/pop" + to_string(pop_ind)+"/";
 	Group group_pop = group.createGroup(pop_n);
+
+	write_scalar_HDF5(group_pop,neuron_model,string("neuron_model"));
+	if(neuron_model==1){
+		string str = pop_n+"/ELIF/";
+		Group group_ELIF = group_pop.createGroup(str);
+		write_scalar_HDF5(group_ELIF,elif.delT,string("delT"));	
+		write_scalar_HDF5(group_ELIF,elif.delT,string("V_T"));	
+	}
 
 	write_scalar_HDF5(group_pop,pop_ind,string("pop_ind"));
 	write_scalar_HDF5(group_pop,N,string("N"));

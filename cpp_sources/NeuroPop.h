@@ -50,9 +50,11 @@ public:
 
 	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
-
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
 	void set_init_condition(const double r_V0, const double p_fire); /// Uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
+
+	void set_neuron_model(int n_mod);
+	void set_ELIF_Params(double elif_delT,double elif_VT);
 
 	void update_spikes(const int step_current); /// Find the firing neurons, record them, reset their potential and update nonref
 	// Following member(s) should not be inherited
@@ -126,8 +128,15 @@ protected:
 		V_th, ///  firing threshold
 		// Leak conductance 
 		g_lk; /// leaky conductance (nS)
+	int
+		neuron_model=0; // 0 for LIF, 1 for Exp LIF
+	
+	//Exponential Leaky Integrate and Fire neuron model parameters
+	struct ELIF{
+		double delT=0;
+		double V_T;
 
-
+	} elif;
 
 	// Bookkeeping
 	vector<double>

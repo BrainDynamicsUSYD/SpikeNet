@@ -692,12 +692,17 @@ void SimuInterface::simulate(){
 			// if not "flush", output will be delayed in buffer
 		}
 		int steps_left = network.step_tot - step_current - 1;
-		if ( (steps_left % (network.step_tot / 10)) == 0 ){
+		if ( (steps_left % (network.step_tot / 100)) == 0 ){
 			clock_t end = clock();
 			char str_min[80];
 			double elapsed_mins = double(end - begin) / CLOCKS_PER_SEC / 60.0;
 			sprintf(str_min, " (%0.1f min)...\n", elapsed_mins);
-			cout <<  "\t " << steps_left / (network.step_tot / 10) << str_min << flush;
+			cout <<  "\t " << steps_left / (network.step_tot / 100) << str_min << flush;
+			time_t rawtime;
+			struct tm * timeinfo;
+			time (&rawtime);
+			timeinfo = localtime (&rawtime);
+			cout<<"Current local time and date: "<< asctime(timeinfo)<<"\n";
 		}
 		/*---------------------------------------------------------------------*/
 		
@@ -1027,6 +1032,21 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 				cout << "done." << endl;
 			}	
 
+			// choose neuron model
+			if (dataset_exist_HDF5(file, pop_n + string("/neuron_model"))){
+				int n_mod;
+			 	n_mod= read_scalar_HDF5<int>(file, pop_n + string("/neuron_model"));
+			 	network.NeuroPopArray[ind]->set_neuron_model(n_mod);
+			}
+			if (group_exist_HDF5(in_filename, pop_n + string("/ELIF"))){
+				cout << "\t\t Exponential LIF settings...";
+				double V_T, delT;
+				V_T = read_scalar_HDF5<double>(file, pop_n + string("/ELIF/ELIF_VT"));
+				delT= read_scalar_HDF5<double>(file, pop_n + string("/ELIF/ELIF_delT"));
+				network.NeuroPopArray[ind]->set_ELIF_Params(delT,V_T);
+
+				cout << "done." << endl;
+			}
 			
 			// cout << "\t done." << endl;
 		}
