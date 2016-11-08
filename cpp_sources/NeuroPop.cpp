@@ -264,12 +264,22 @@ void NeuroPop::update_spikes(const int step_current){
 	// Find the firing neurons, record them, reset their potential and set them to be refractory
 	spikes_current.clear(); // empty vector
 	int spike_counter = 0;
-	for (int i = 0; i < N; ++i){
-		if (ref_step_left[i] == 0 && V[i] >= V_th){
-			spikes_current.push_back(i); // record firing neurons
-			V[i] = V_rt; // reset potential
-			ref_step_left[i] = ref_steps; // steps left for being refractory
-			spike_counter += 1;
+	if(spike_file.on==0){
+		for (int i = 0; i < N; ++i){
+			if (ref_step_left[i] == 0 && V[i] >= V_th){
+				spikes_current.push_back(i); // record firing neurons
+				V[i] = V_rt; // reset potential
+				ref_step_left[i] = ref_steps; // steps left for being refractory
+				spike_counter += 1;
+			}
+		}
+	}
+	else{
+		spikes_current=spike_file.spikes[spike_file.spike_ind];
+		spike_counter=spikes_current.size();
+		spike_file.spike_ind++;
+		if(spike_file.spike_ind>spike_file.spikes.size()){
+			spike_file.spike_ind=0; //go back to start of list
 		}
 	}
 	
@@ -354,11 +364,31 @@ void NeuroPop::generate_I_ext(const int step_current){
 		}
 	}
 }
+
+void NeuroPop::get_current_from_file(){
+
+	for(int i=0;i<N;i++){
+		I_ext[i]+=current_file.mean_curr*current_file.current[current_file.current_ind][i];
+	}
+	current_file.framestep++;
+	if(current_file.framestep>=current_file.steps_per_frame){
+		current_file.framestep=0;
+		current_file.current_ind++;
+		if(current_file.current_ind>current_file.current.size()){
+			current_file.current_ind=0; //go back to start of list
+		}
+	}
+}
+
 void NeuroPop::update_V(const int step_current){
 	// This function updates menbrane potentials for non-refractory neurons
 
 	// Generate external currents
 	generate_I_ext(step_current);
+	if(current_file.on){
+		get_current_from_file();
+	}
+		
 	
 	// potassium conductance for spike-frequency adaptation
 	if (spike_freq_adpt == true){
@@ -575,6 +605,51 @@ void NeuroPop::runaway_check(const int step_current)
 	}
 }
 
+void NeuroPop::load_file_current_input(string fname){
+	cout<<"\t\tLoading currents from file... "<<fname;
+	H5File file(  fname, H5F_ACC_RDONLY );
+	vector< int> neurons,t,I;
+	double fps;
+	read_matrix_HDF5(file, string("neurons"),current_file.neurons);
+	read_matrix_HDF5(file, string("current"), current_file.current);
+	fps=read_scalar_HDF5<double>(file,string("frame_rate"));
+	current_file.mean_curr=read_scalar_HDF5<double>(file,string("mean_curr"));
+	current_file.steps_per_frame=1000/(double(fps)*dt);
+	current_file.file_name=fname;
+	current_file.current_ind=0;
+	current_file.on=1;
+	cout<<"done.\n";
+}
+
+void NeuroPop::load_file_spike_input(string fname){
+	cout<<"\t\tLoading spikes from file..."<<fname;
+	H5File file(  fname, H5F_ACC_RDONLY );
+	vector< int> x,y,t,pol;
+	int max_x=1;
+	read_vector_HDF5(file, string("x"), x);
+	read_vector_HDF5(file, string("y"), y);
+	read_vector_HDF5(file, string("t"), t);
+	read_vector_HDF5(file, string("pol"), pol);
+	max_x=read_scalar_HDF5<int>(file,string("max_x"));
+	// Now convert list of events into sets of spikes for each timestep dt
+	unsigned long int  i=0;
+	int tmax;
+	tmax=t[1]+int(1000*dt); // convert from units of microseconds to milliseconds
+	vector< int> tmp_spikes;
+	while(i<t.size()){
+		while((t[i]<tmax)&(i<t.size())){
+			tmp_spikes.push_back(x[i]+max_x*y[i]);
+			i++;
+		}
+		spike_file.spikes.push_back(tmp_spikes);
+		tmp_spikes.clear();
+		tmax+=int(1000*dt);
+	}
+	spike_file.file_name=fname;
+	spike_file.spike_ind=0;
+	spike_file.on=1;
+	cout<<"done.\n";
+}
 
 void NeuroPop::add_JH_Learn(){
 	jh_learn_pop.on=true;
@@ -863,6 +938,22 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename){
 		read_vector_HDF5(file,str+string("QI"),jh_learn_pop.QI);	
 		read_vector_HDF5(file,str+string("QE"),jh_learn_pop.QE);	
 	}
+	str = pop_n+"/spike_file/";
+	if(group_exist_HDF5(file,str)){
+		spike_file.on=1;
+		read_string_HDF5(file, str+string("file_name"), spike_file.file_name);
+		load_file_spike_input(spike_file.file_name);
+		spike_file.spike_ind=read_scalar_HDF5<unsigned int>(file, str+string("spike_ind")); //must go after load_file_spike_input
+	}
+	str = pop_n+"/current_file/";
+	if(group_exist_HDF5(file,str)){
+		current_file.on=1;
+		read_string_HDF5(file, str+string("file_name"), current_file.file_name);
+		load_file_current_input(current_file.file_name);
+		current_file.current_ind=read_scalar_HDF5<unsigned int>(file, str+string("current_ind")); //must go after load_file_current_input
+		current_file.framestep=read_scalar_HDF5<unsigned int>(file, str+string("framestep")); //must go after load_file_current_input
+	}
+
 }
 
 void NeuroPop::export_restart(Group& group){
@@ -989,6 +1080,20 @@ void NeuroPop::export_restart(Group& group){
 		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.QI,string("QI"));	
 		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.QE,string("QE"));	
 	}
+	if(spike_file.on){
+		string str = pop_n+"/spike_file/";
+		Group group_spike_file= group_pop.createGroup(str);
+		write_scalar_HDF5(group_spike_file,spike_file.spike_ind,string("spike_ind"));
+		write_string_HDF5(group_spike_file, spike_file.file_name, string("file_name"));
+	}
+	if(current_file.on){
+		string str = pop_n+"/current_file/";
+		Group group_current_file= group_pop.createGroup(str);
+		write_scalar_HDF5(group_current_file, current_file.current_ind,string("current_ind"));
+		write_scalar_HDF5(group_current_file, current_file.framestep,string("framestep"));
+		write_string_HDF5(group_current_file, current_file.file_name, string("file_name"));
+	}
+
 }
 
 void NeuroPop::output_results(H5File& file){

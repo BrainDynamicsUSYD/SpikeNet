@@ -65,6 +65,11 @@ public:
 	void add_sampling(const vector<int>& sample_neurons, const vector<bool>& sample_type, const vector<bool>& sample_time_points); 
 	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
 
+	void load_file_spike_input(string fname);
+	void load_file_current_input(string fname);
+	void get_current_from_file();
+
+
 	void add_JH_Learn();
 	void reset_Q();
 	
@@ -267,7 +272,25 @@ protected:
 		int min_pop_size; /// No women, no kids;
 	} killer;
 	
+	struct Spike_File{
+		int on=0;
+		unsigned int spike_ind=0;
+		vector< vector < int > > spikes;
+		string file_name;
 
+	}spike_file;
+
+	struct Current_file{
+		int on=0;
+		unsigned int current_ind=0;
+		vector< vector < int > > neurons;
+		vector< vector < double > > current;
+		string file_name;
+		unsigned int steps_per_frame;
+		unsigned int framestep=0;
+		double mean_curr;
+
+	}current_file;
 }; //class declaration must end with a semi-colon.
 
 

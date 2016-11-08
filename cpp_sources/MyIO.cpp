@@ -61,6 +61,11 @@ void write2file(ofstream& output_file, const vector<double>& v){
 #ifdef HDF5
 
 /*--------------------------------------- HDF5 --------------------------------------------*/
+void write_scalar_HDF5(Group & group, unsigned int s, const string & v_name){
+	vector<unsigned int> v_tmp;
+	v_tmp.push_back(s);
+	write_vector_HDF5(group, v_tmp, v_name);
+}
 
 void write_scalar_HDF5(Group & group, int s, const string & v_name){
 	vector<int> v_tmp;
@@ -82,6 +87,14 @@ void write_vector_HDF5(Group & group, const vector<bool> & v, const string & v_n
 	DataSpace fspace(1, dims); 
 	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
 	v_dataset.write( tempintvec.data(), PredType::NATIVE_INT, fspace, fspace );	
+}
+
+void write_vector_HDF5(Group & group, const vector<unsigned int> & v, const string & v_name){
+	hsize_t dims[1]; 
+	dims[0] = v.size();
+	DataSpace fspace(1, dims); 
+	DataSet v_dataset = group.createDataSet(v_name, PredType::NATIVE_INT32, fspace);
+	v_dataset.write( v.data(), PredType::NATIVE_INT, fspace, fspace );	
 }
 
 void write_vector_HDF5(Group & group, const vector<int> & v, const string & v_name){
@@ -331,7 +344,18 @@ void read_vector_HDF5(const H5File & file, const string & name, vector<int> & v_
 	*/
 	
 }
+void read_vector_HDF5(const H5File & file, const string & name, vector<unsigned int> & v_tmp){
+	const H5std_string dataset_name( name );
+	DataSet dataset = file.openDataSet( dataset_name );
+	
+	DataSpace dataspace = dataset.getSpace();
+	hsize_t dims_out[1];
+	dataspace.getSimpleExtentDims( dims_out, NULL);
 
+	v_tmp.resize((unsigned long)(dims_out[0]));
+	dataset.read( v_tmp.data(), PredType::NATIVE_UINT32, dataspace, dataspace );
+	
+}
 	
 void read_vector_HDF5(const H5File & file, const string & name, vector<bool> & v_tmp){
 	
@@ -458,6 +482,7 @@ template < typename Type > Type read_scalar_HDF5(const H5File & file, const stri
 template double read_scalar_HDF5<double>(const H5File & file, const string & name);
 template bool read_scalar_HDF5<bool>(const H5File & file, const string & name);
 template int read_scalar_HDF5<int>(const H5File & file, const string & name);
+template unsigned int read_scalar_HDF5<unsigned int>(const H5File & file, const string & name);
 
 
 #endif

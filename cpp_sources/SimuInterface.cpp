@@ -1048,6 +1048,24 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 				cout << "done." << endl;
 			}
 			
+			//ext_spike_input from HDF5 file
+			if (group_exist_HDF5(in_filename, pop_n + string("/file_spike_input"))){
+				cout << "\t\t File spike input settings...";
+				string fname;
+				read_string_HDF5(file,  pop_n+ string("/file_spike_input/fname"),fname);
+				network.NeuroPopArray[ind]->load_file_spike_input(fname);
+				cout << "done." << endl;
+			}
+
+			//ext_current_input from HDF5 file
+			if (group_exist_HDF5(in_filename, pop_n + string("/file_current_input"))){
+				cout << "\t\t File current input settings...";
+				string fname;
+				read_string_HDF5(file,  pop_n+ string("/file_current_input/fname"),fname);
+				network.NeuroPopArray[ind]->load_file_current_input(fname);
+				cout << "done." << endl;
+			}
+
 			// cout << "\t done." << endl;
 		}
 		
