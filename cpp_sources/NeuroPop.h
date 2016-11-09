@@ -50,9 +50,11 @@ public:
 
 	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
-
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
 	void set_init_condition(const double r_V0, const double p_fire); /// Uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
+
+	void set_neuron_model(int n_mod);
+	void set_ELIF_Params(double elif_delT,double elif_VT);
 
 	void update_spikes(const int step_current); /// Find the firing neurons, record them, reset their potential and update nonref
 	// Following member(s) should not be inherited
@@ -62,6 +64,11 @@ public:
 	
 	void add_sampling(const vector<int>& sample_neurons, const vector<bool>& sample_type, const vector<bool>& sample_time_points); 
 	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
+
+	void load_file_spike_input(string fname);
+	void load_file_current_input(string fname);
+	void get_current_from_file();
+
 
 	void add_JH_Learn();
 	void reset_Q();
@@ -126,8 +133,15 @@ protected:
 		V_th, ///  firing threshold
 		// Leak conductance 
 		g_lk; /// leaky conductance (nS)
+	int
+		neuron_model=0; // 0 for LIF, 1 for Exp LIF
+	
+	//Exponential Leaky Integrate and Fire neuron model parameters
+	struct ELIF{
+		double delT=0;
+		double V_T;
 
-
+	} elif;
 
 	// Bookkeeping
 	vector<double>
@@ -258,7 +272,25 @@ protected:
 		int min_pop_size; /// No women, no kids;
 	} killer;
 	
+	struct Spike_File{
+		int on=0;
+		unsigned int spike_ind=0;
+		vector< vector < int > > spikes;
+		string file_name;
 
+	}spike_file;
+
+	struct Current_file{
+		int on=0;
+		unsigned int current_ind=0;
+		vector< vector < int > > neurons;
+		vector< vector < double > > current;
+		string file_name;
+		unsigned int steps_per_frame;
+		unsigned int framestep=0;
+		double mean_curr;
+
+	}current_file;
 }; //class declaration must end with a semi-colon.
 
 
