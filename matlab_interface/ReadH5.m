@@ -91,6 +91,11 @@ if ~isempty(files)
         
         OutData{id_out}.step_killed = double(try_h5read(files{id_out}, '/run_away_killed/step'));
         
+        % need debugging!
+        for pop_ind = 1:OutData{id_out}.Num_pop
+            OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(try_h5read(config_filename, ['/config/pops/pop',num2str(pop_ind-1),'/SAMP001/neurons']));
+            OutData{id_out}.neuron_sample.t_ind{pop_ind,1} = transpose(try_h5read(config_filename, ['/config/pops/pop',num2str(pop_ind-1),'/SAMP001/time_points']));
+        end
 
         
         % population results
@@ -114,6 +119,7 @@ if ~isempty(files)
             %l_tmp = length(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1});
             %N_tmp = OutData{id_out}.N(pop_ind);
             % OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} =  reshape(OutData{id_out}.LFP.LFP_neurons{pop_ind, 1} , [N_tmp l_tmp/N_tmp])';
+            
             
         end
         
@@ -186,17 +192,7 @@ if ~isempty(files)
     %                     end
     %
     %
-    %                 elseif strfind(tline,'SAMP001')
-    %                     tline = fgetl(FID);
-    %                     scan_temp = textscan(tline,'%f','Delimiter',',');
-    %                     pop_ind = scan_temp{1}(1)+1; % be careful here!
-    %                     fgetl(FID); % skip line: data type
-    %                     tline = fgetl(FID);
-    %                     scan_temp = textscan(tline,'%f','Delimiter',',');
-    %                     OutData{id_out}.neuron_sample.neuron_ind{pop_ind,1} = transpose(scan_temp{1} + 1); % Be careful here! C/C++ index convection!
-    %                     tline = fgetl(FID);
-    %                     scan_temp = textscan(tline,'%f','Delimiter',',');
-    %                     OutData{id_out}.neuron_sample.t_ind{pop_ind,1} = find(scan_temp{1}); % extract t_ind for pop_sample
+
     %
     
     %
