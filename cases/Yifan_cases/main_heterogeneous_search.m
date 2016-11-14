@@ -137,8 +137,8 @@ for SpikeFreqAapt = [0 1]
                                                 end
                                                 
                                                 % write external currents
-                                                writeExtSpikeSettings(FID, 1, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot),  1, N(1) );
-                                                writeExtSpikeSettings(FID, 2, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot),  1, N(2) );
+                                                writeExtSpikeSettings(FID, 1, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot),  ones(1, N(1)) );
+                                                writeExtSpikeSettings(FID, 2, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot),  ones(1, N(2)) );
                                                 
                                                 % write synapse para
                                                 writeSynPara(FID, 'tau_decay_GABA', 3);

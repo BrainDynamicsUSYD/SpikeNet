@@ -80,7 +80,11 @@ if ~isempty(files)
             scan_temp = textscan(ev_str{1}, '%s', 'Delimiter', ',');
             scan_temp =  scan_temp{1};
             for s = 1:(length(scan_temp)-1)/2
-                eval(strcat('OutData{id_out}.ExplVar.', scan_temp{s*2-1}, '=', scan_temp{s*2},';'));
+                str_tmp = strcat('OutData{id_out}.ExplVar.', scan_temp{s*2-1}, '=', scan_temp{s*2},';');
+                try
+                    eval(str_tmp);
+                catch
+                end
             end
         end
         

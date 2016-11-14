@@ -25,7 +25,7 @@ for SpikeFreqAapt = [0 1]
     for in_out_r = [0.2 ];
         for cn_scale_wire = [2 ];
             for cn_scale_weight = [2 ];
-                iter_num = 5;
+                iter_num = 4;
                 
                 
                 STD_on = 0;
@@ -48,7 +48,7 @@ for SpikeFreqAapt = [0 1]
                         
                         
                         
-                        for inh_STDP = [0 ];
+                        for inh_STDP = [1];
                             
                             
                             %  K_ee_mean is about 0.5, need 1000 in-coming connections.
@@ -57,11 +57,11 @@ for SpikeFreqAapt = [0 1]
                             %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                             
                             
-                            for g_EI = [ 14 18]*10^-3
+                            for g_EI = [ 14  ]*10^-3
                                 for g_IE = [5]*10^-3
                                     for g_II = [25]*10^-3
                                         
-                                        for rate_ext = [0.2 0.2 0.4 0.4 0.6 0.6 0.8 0.8 ];
+                                        for rate_ext = [ 0.8 ];
                                             for  tau_c = [10]
                                                 loop_num = loop_num + 1;
                                                 
@@ -74,7 +74,7 @@ for SpikeFreqAapt = [0 1]
                                                 end
                                                 
                                                 % seed the matlab rand function! The seed is global.
-                                                [FID, FID_syn] = new_ygin_files_and_randseed(loop_num);
+                                                [FID] = new_ygin_files_and_randseedHDF5(loop_num);
                                                 
                                                 K_mat = [NaN  g_IE;
                                                     g_EI  g_II]; % miuSiemens
@@ -91,9 +91,7 @@ for SpikeFreqAapt = [0 1]
                                                 Type_mat = ones(Num_pop);
                                                 Type_mat(end, :) = 2;
                                                 
-                                                if SpikeFreqAapt == 1
-                                                    writeSpikeFreqAdpt(FID, 1);
-                                                end
+
                                                 
                                                 % generate in- and out-degree accroding to (1) distance-dependent rule
                                                 % (2) degree distributios and (3) common neighbour rule
@@ -128,53 +126,41 @@ for SpikeFreqAapt = [0 1]
                                                 sample_neuron = ind_sorted(1:250:end);
                                                 
                                                 % write basic parameters
-                                                writeBasicPara(FID, dt, step_tot, N);
+                                                writeBasicParaHDF5(FID, dt, step_tot, N);
                                                 
                                                 
                                                 % write pop para
                                                 for pop_ind = 1:Num_pop
-                                                    writePopPara(FID, pop_ind,  'tau_ref', tau_ref);
+                                                    writePopParaHDF5(FID, pop_ind,  'tau_ref', tau_ref);
                                                 end
                                                 
                                                 % write external currents
-                                                writeExtSpikeSettings(FID, 1, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot),  1, N(1) );
-                                                writeExtSpikeSettings(FID, 2, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot),  1, N(2) );
+                                                writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot), ones(1,N(1)) );
+                                                writeExtSpikeSettingsHDF5(FID, 2, 1, g_ext,  N_ext, rate_ext*ones(1, step_tot), ones(1,N(2)) );
                                                 
                                                 % write synapse para
-                                                writeSynPara(FID, 'tau_decay_GABA', 3);
+                                                writeSynParaHDF5(FID, 'tau_decay_GABA', 3);
                                                 
-                                                % inhibitory STDP
-                                                if inh_STDP == 1
-                                                    writeInhSTDP(FID, 2, 1, 1*sec);
-                                                end
+
                                                 
                                                 %%%%%%% write runaway killer
                                                 min_ms = 500; % 5 sec
                                                 runaway_Hz = 100; % ??
                                                 Hz_ms = 200; % ms
-                                                writeRunawayKiller(FID, 1, min_ms, runaway_Hz, Hz_ms);
+                                                writeRunawayKillerHDF5(FID, 1, min_ms, runaway_Hz, Hz_ms);
                                                 %%%%%%%%%%%%%%%%%%%%%%%
                                                 
                                                 %%%%%%% data sampling
                                                 sample_pop = 1;
-                                                writePopStatsRecord(FID, sample_pop);
-                                                for pop_ind_pre = 1:Num_pop
-                                                    pop_ind_post = sample_pop;
-                                                    if pop_ind_pre == Num_pop
-                                                        syn_type = 2;
-                                                    else
-                                                        syn_type = 1;
-                                                    end
-                                                    %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
-                                                    writeSynStatsRecord(FID, pop_ind_pre, pop_ind_post, syn_type)
-                                                end
-                                                writeNeuronSampling(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
+                                                writePopStatsRecordHDF5(FID, sample_pop);
+
+                                                writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
                                                 
-                                                writeNeuronSampling(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
+                                                writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
                                                 
                                                 %%%%%%% random initial condition settings (int pop_ind, double p_fire)
                                                 p_fire = [0.1 0.00]; % between [0,1], 0.05
-                                                writeInitV(FID, p_fire);
+                                                writeInitVHDF5(FID, p_fire);
                                                 
                                                 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
                                                 % type(1:AMAP, 2:GABAa, 3:NMDA)
@@ -208,18 +194,41 @@ for SpikeFreqAapt = [0 1]
                                                             K = ones(size(I))*K_mat(i_pre,j_post);
                                                         end
                                                         D = rand(size(I))*delay;
-                                                        writeChemicalConnection(FID_syn, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
+                                                        writeChemicalConnectionHDF5(FID, Type_mat(i_pre, j_post),  i_pre, j_post,   I,J,K,D);
                                                         clear I J K D;
                                                     end
                                                 end
                                                 if STD_on == 1
                                                     % writeSTD(FID, 1, 1, 5*sec);
-                                                    writeSTD(FID, 1, 1, 1);
+                                                    writeSTDHDF5(FID, 1, 1, 1);
                                                 end
+                                                
+                                                for pop_ind_pre = 1:Num_pop
+                                                    pop_ind_post = sample_pop;
+                                                    if pop_ind_pre == Num_pop
+                                                        syn_type = 2;
+                                                    else
+                                                        syn_type = 1;
+                                                    end
+                                                    %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
+                                                    writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
+                                                end
+                                                
+                                                % inhibitory STDP
+                                                if inh_STDP == 1
+                                                    writeInhSTDPHDF5(FID, 2, 1, 1*sec);
+                                                end
+                                                
+                                                if SpikeFreqAapt == 1
+                                                    writeSpikeFreqAdptHDF5(FID, 1);
+                                                end
+                                                
                                                 % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                 % Record explanatory variables, also called "controlled variables"
+                                                 comment1 = ' '; %'p=[p0_init 0.3 0.3 0.3], k = ?, tau_decay_GABA=3';
+                                                comment2 = datestr(now,'dd-mmm-yyyy-HH:MM');
                                                 
-                                                writeExplVar(FID, 'discard_transient', discard_transient, ...
+                                                writeExplVarHDF5(FID, 'discard_transient', discard_transient, ...
                                                     'loop_num', loop_num, ...
                                                     'delay', delay, ...
                                                     'g_mu', g_mu, ...
@@ -239,13 +248,10 @@ for SpikeFreqAapt = [0 1]
                                                     'mu_p', mu_p,...
                                                     's_p', s_p, ...
                                                     'inh_STDP', inh_STDP, ...
-                                                    'deg_hybrid', deg_hybrid);
+                                                    'deg_hybrid', deg_hybrid, ...
+                                                    'comment1', comment1, 'comment2', comment2);
                                                 
-                                                
-                                                % Adding comments in raster plot
-                                                comment1 = ' '; %'p=[p0_init 0.3 0.3 0.3], k = ?, tau_decay_GABA=3';
-                                                comment2 = datestr(now,'dd-mmm-yyyy-HH:MM');
-                                                writeExplVar(FID, 'comment1', comment1, 'comment2', comment2);
+
                                                 
                                                 % save in_degree and sample neuron data based on in_degree
                                                 save([sprintf('%04g-', loop_num), datestr(now,'yyyymmddHHMM-SSFFF'),...

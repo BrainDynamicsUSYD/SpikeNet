@@ -48,13 +48,12 @@ try
     R.LFP.hiFreq = 250;
     Wn = [R.LFP.lowFreq R.LFP.hiFreq]/(fs/2);
     [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
+    gaus_width = 5; %ms
+    [ Kernel ] = spike_train_kernel_YG( gaus_width, dt, 'gaussian_unit' );
     for i = 1:no
         LFP_ripple(i,:) = filter(b,a,LFP(i,:)); %#ok<AGROW>
         % hilbert transformation & gaussian smoothing
-        gaus_width = 5; %ms
-        [ Kernel ] = spike_train_kernel_YG( gaus_width, dt, 'gaussian_unit' );
         LFP_ripple_hilbert(i,:) = conv(abs(hilbert(LFP_ripple(i,:))), Kernel,'same'); %#ok<AGROW>
-        
         %     rms_window_ms = 17; %ms
         %     window_steps = round(rms_window_ms/dt);
         %     Kernel_rms = ones(1,window_steps)/window_steps;
