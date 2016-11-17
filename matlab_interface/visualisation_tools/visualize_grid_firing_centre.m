@@ -11,7 +11,7 @@ fw = 2*hw+1;
 x_mean_chosen = R.grid.centre(1,:);
 y_mean_chosen = R.grid.centre(2,:);
 dist_std_chosen = R.grid.radius;
-t_mid = R.grid.raw.t_mid;
+t_mid_full = R.grid.raw.t_mid;
 t_mid_chosen = R.grid.t_mid;
 jump_dist = R.grid.jump_dist;
 
@@ -35,13 +35,13 @@ ang=0:0.01:2*pi;
 x_shift_vs = [0 fw fw -fw -fw fw -fw 0 0 ];
 y_shift_vs = [0 fw -fw fw -fw 0  0   fw -fw];
 
-for t = 1:length(t_mid);
+for t = 1:length(t_mid_full);
     h2 = plot(100,0);
     h3 = plot(100,0);
     
     ind_range_tmp = ind_a_vec(t):ind_b_vec(t);
     h1 = plot(x_pos_o(ind_range_tmp), y_pos_o(ind_range_tmp), 'bo');
-    if sum(t_mid_chosen == t_mid(t)) == 1
+    if sum(t_mid_chosen == t_mid_full(t)) == 1
         
         x_tmp = x_mean_chosen(j);
         y_tmp = y_mean_chosen(j);
@@ -70,10 +70,12 @@ for t = 1:length(t_mid);
         j = j + 1;
     end
     pause(0.05);
+%     j
+%     pause();
     delete(h1);
     delete(h2);
     delete(h3);
-    ts = sprintf('time = %8.1f ms', t_mid(t)*0.1);
+    ts = sprintf('time = %8.1f ms', t_mid_full(t)*0.1);
     title(ts);
     
     

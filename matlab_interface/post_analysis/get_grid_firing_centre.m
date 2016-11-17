@@ -4,8 +4,8 @@ function [ R ] = get_grid_firing_centre( R, varargin )
 
 
 % parameters
-win_len = 100; % window length in time steps
-win_gap = 50; % window gap
+win_len = 50; % window length in time steps
+win_gap = 10; % window gap
 win_min_rate_Hz = 0.5;
 
 seg = 1:R.step_tot;
@@ -25,7 +25,7 @@ spikes_win_min = win_min_rate_Hz*(R.dt*0.001)*win_len*R.N(1);
 [ t_mid_full, ind_ab_full,  num_spikes_win_full, ~ ] = window_spike_hist_compressed( R, win_len, win_gap );
 
 
-t_seg = t_mid_full > min(seg) &  t_mid_full < max(seg);
+t_seg = t_mid_full > min(seg) &  t_mid_full <= max(seg);
 t_mid = t_mid_full(t_seg);
 ind_ab = ind_ab_full(:, t_seg);
 num_spikes_win = num_spikes_win_full(t_seg);
@@ -33,9 +33,10 @@ num_spikes_win = num_spikes_win_full(t_seg);
     
 
 % spikes_win_min
-t_mid = t_mid( num_spikes_win >= spikes_win_min);
-ind_a_vec = ind_ab(1,num_spikes_win >= spikes_win_min);
-ind_b_vec = ind_ab(2,num_spikes_win >= spikes_win_min);
+min_spike_requiremnt = num_spikes_win >= spikes_win_min;
+t_mid = t_mid( min_spike_requiremnt );
+ind_a_vec = ind_ab(1,min_spike_requiremnt);
+ind_b_vec = ind_ab(2,min_spike_requiremnt);
 % num_spikes_win = num_spikes_win( num_spikes_win >= spikes_win_min);
 
 
@@ -66,7 +67,9 @@ else
         x_pos_tmp = x_pos(ind_range_tmp);
         y_pos_tmp = y_pos(ind_range_tmp);
         
-        
+%         if j> 298
+%             j
+%         end
         % add bayesian stuff here
         [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
         x_mean =  [x_mean x_mean_tmp]; %#ok<AGROW>
@@ -79,9 +82,8 @@ else
 end
 
 % deal with periodic boundary
-dd = pi*10^-6;
-x_s = linspace(-hw, hw, 7) + dd;
-y_s = linspace(-hw, hw, 7) + dd;
+x_s = [-fw 0 fw];
+y_s = [-fw 0 fw];
 [x_s_grid, y_s_grid] = meshgrid(x_s, y_s);
 x_shift = x_s_grid(:);
 y_shift = y_s_grid(:);
@@ -141,6 +143,7 @@ jump_duration = diff(t_mid_chosen);
 
 R.grid.raw.win_len = win_len;
 R.grid.raw.win_gap = win_gap; % window gap
+R.grid.raw.min_spike_requiremnt = min_spike_requiremnt;
 R.grid.raw.win_min_rate_Hz = win_min_rate_Hz;
 R.grid.raw.num_spikes_win = num_spikes_win_full;
 R.grid.raw.t_mid = t_mid_full;

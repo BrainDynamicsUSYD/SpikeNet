@@ -3,7 +3,7 @@ function [ x, y, width, mlh ] = fit_bayesian_bump_2_spikes( spike_x_pos_o,spike_
 %   Detailed explanation goes here
 
 hw = fw/2;
-dd = pi*10^-6;
+dd = pi*10^-1;
 spike_x_pos_o = spike_x_pos_o(:);
 spike_y_pos_o = spike_y_pos_o(:);
 
@@ -60,16 +60,18 @@ for i = i_pbc
             mlh = 0;
     end
     
-    % shift the position back to normal
-    xx_o = unique(spike_x_pos_o);
-    xx_shifted = mod(xx_o - x_shift(i)+hw, fw) - hw;
-    [xx_shifted_sorted, ind_tmp] = sort(xx_shifted);
-    v(1) = interp1(xx_shifted_sorted,  xx_o(ind_tmp), v(1));
-    
-    yy_o = unique(spike_y_pos_o);
-    yy_shifted = mod(yy_o - y_shift(i)+hw, fw) - hw;
-    [yy_shifted_sorted, ind_tmp] = sort(yy_shifted);
-    v(2) = interp1(yy_shifted_sorted,  yy_o(ind_tmp), v(2));
+%     % shift the position back to normal
+%     xx_o = unique(spike_x_pos_o);
+%     xx_shifted = mod(xx_o - x_shift(i)+hw, fw) - hw;
+%     [xx_shifted_sorted, ind_tmp] = sort(xx_shifted);
+%     v(1) = interp1(xx_shifted_sorted,  xx_o(ind_tmp), v(1));
+%     
+%     yy_o = unique(spike_y_pos_o);
+%     yy_shifted = mod(yy_o - y_shift(i)+hw, fw) - hw;
+%     [yy_shifted_sorted, ind_tmp] = sort(yy_shifted);
+%     v(2) = interp1(yy_shifted_sorted,  yy_o(ind_tmp), v(2));
+    v(1) = v(1) + x_shift(i);
+    v(2) = v(2) + y_shift(i);
     
     v_final = v;
 end

@@ -18,4 +18,5 @@ disp('CollectMetaData Done.');
 save('meta_data_tmp.mat');
 
 
-
+ripple_Hz = CollectVectorYG('LFP', 'mean(LFP.ripple_event.Hz(:))');
+rp_freq = CollectVectorYG('LFP', 'mean(cell2mat( LFP.wavelet.peak.rp_freq(~cellfun(@isempty,LFP.wavelet.peak.rp_freq)) ))');

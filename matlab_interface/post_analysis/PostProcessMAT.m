@@ -53,7 +53,7 @@ for i = 1:num_files
      Analysis = R_temp.Analysis;
      save(files{i},'Analysis', '-append');
 %      
-    R_temp = get_grid_firing_centre(R_temp,'win_len ',50,'win_gap', 10);
+    R_temp = get_grid_firing_centre(R_temp);
     grid = R_temp.grid;
     save(files{i},'grid', '-append');
 
