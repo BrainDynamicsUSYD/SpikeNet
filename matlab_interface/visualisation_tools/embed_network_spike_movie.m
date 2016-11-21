@@ -26,7 +26,7 @@ for t = 1:t_bin:(step_tot-t_bin)
     
     delete(h1);
     h1 = plot(Lattice(spikes_t,1), Lattice(spikes_t,2), 'rx');
-    pause();
+    pause(0.05);
     
     xlabel([num2str(t*dt/1000),' sec']);
     
