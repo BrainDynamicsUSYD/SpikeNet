@@ -605,51 +605,6 @@ void NeuroPop::runaway_check(const int step_current)
 	}
 }
 
-void NeuroPop::load_file_current_input(string fname){
-	cout<<"\t\tLoading currents from file... "<<fname;
-	H5File file(  fname, H5F_ACC_RDONLY );
-	vector< int> neurons,t,I;
-	double fps;
-	read_matrix_HDF5(file, string("neurons"),current_file.neurons);
-	read_matrix_HDF5(file, string("current"), current_file.current);
-	fps=read_scalar_HDF5<double>(file,string("frame_rate"));
-	current_file.mean_curr=read_scalar_HDF5<double>(file,string("mean_curr"));
-	current_file.steps_per_frame=1000/(double(fps)*dt);
-	current_file.file_name=fname;
-	current_file.current_ind=0;
-	current_file.on=1;
-	cout<<"done.\n";
-}
-
-void NeuroPop::load_file_spike_input(string fname){
-	cout<<"\t\tLoading spikes from file..."<<fname;
-	H5File file(  fname, H5F_ACC_RDONLY );
-	vector< int> x,y,t,pol;
-	int max_x=1;
-	read_vector_HDF5(file, string("x"), x);
-	read_vector_HDF5(file, string("y"), y);
-	read_vector_HDF5(file, string("t"), t);
-	read_vector_HDF5(file, string("pol"), pol);
-	max_x=read_scalar_HDF5<int>(file,string("max_x"));
-	// Now convert list of events into sets of spikes for each timestep dt
-	unsigned long int  i=0;
-	int tmax;
-	tmax=t[1]+int(1000*dt); // convert from units of microseconds to milliseconds
-	vector< int> tmp_spikes;
-	while(i<t.size()){
-		while((t[i]<tmax)&(i<t.size())){
-			tmp_spikes.push_back(x[i]+max_x*y[i]);
-			i++;
-		}
-		spike_file.spikes.push_back(tmp_spikes);
-		tmp_spikes.clear();
-		tmax+=int(1000*dt);
-	}
-	spike_file.file_name=fname;
-	spike_file.spike_ind=0;
-	spike_file.on=1;
-	cout<<"done.\n";
-}
 
 void NeuroPop::add_JH_Learn(){
 	jh_learn_pop.on=true;
@@ -807,6 +762,52 @@ void NeuroPop::record_stats(const int step_current){
 }
 
 #ifdef HDF5
+
+void NeuroPop::load_file_current_input(string fname){
+	cout<<"\t\tLoading currents from file... "<<fname;
+	H5File file(  fname, H5F_ACC_RDONLY );
+	vector< int> neurons,t,I;
+	double fps;
+	read_matrix_HDF5(file, string("neurons"),current_file.neurons);
+	read_matrix_HDF5(file, string("current"), current_file.current);
+	fps=read_scalar_HDF5<double>(file,string("frame_rate"));
+	current_file.mean_curr=read_scalar_HDF5<double>(file,string("mean_curr"));
+	current_file.steps_per_frame=1000/(double(fps)*dt);
+	current_file.file_name=fname;
+	current_file.current_ind=0;
+	current_file.on=1;
+	cout<<"done.\n";
+}
+
+void NeuroPop::load_file_spike_input(string fname){
+	cout<<"\t\tLoading spikes from file..."<<fname;
+	H5File file(  fname, H5F_ACC_RDONLY );
+	vector< int> x,y,t,pol;
+	int max_x=1;
+	read_vector_HDF5(file, string("x"), x);
+	read_vector_HDF5(file, string("y"), y);
+	read_vector_HDF5(file, string("t"), t);
+	read_vector_HDF5(file, string("pol"), pol);
+	max_x=read_scalar_HDF5<int>(file,string("max_x"));
+	// Now convert list of events into sets of spikes for each timestep dt
+	unsigned long int  i=0;
+	int tmax;
+	tmax=t[1]+int(1000*dt); // convert from units of microseconds to milliseconds
+	vector< int> tmp_spikes;
+	while(i<t.size()){
+		while((t[i]<tmax)&(i<t.size())){
+			tmp_spikes.push_back(x[i]+max_x*y[i]);
+			i++;
+		}
+		spike_file.spikes.push_back(tmp_spikes);
+		tmp_spikes.clear();
+		tmax+=int(1000*dt);
+	}
+	spike_file.file_name=fname;
+	spike_file.spike_ind=0;
+	spike_file.on=1;
+	cout<<"done.\n";
+}
 
 
 void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename){
