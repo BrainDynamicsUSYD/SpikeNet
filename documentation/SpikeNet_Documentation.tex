@@ -56,7 +56,7 @@ Based on these protocols, the C\texttt{++} simulator can easily interface with a
 Developer users will be interested to know that SpikeNet supports two types of input/output file formats: plain text and HDF5.
 Both text-based and HDF5 file formats follow pre-defined protocols (see \nameref{sec:IO protocols}). 
 
-\item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created and simulated in parallel and the amount of message passing among them at each simulation time step is minimal.  
+\item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created and simulated in parallel and the amount of message passing among them at each simulation time step is minimal.  Additionally, HDF5 is supported for handling large input/output data files.
 \end{description}
  
 \section{Tech Stack}
@@ -223,6 +223,7 @@ To view the documentation
 \section{Neuron and synapse models}
 \label{sec:model}
 
+\subsection{Default model}
 \numberwithin{equation}{section}
 A description of the neuron and synapse models can also be found in a publication that used SpikeNet \cite{Gu2016}.
 The default neuron model in SpikeNet is leaky integrate-and-fire neuron. 
@@ -272,7 +273,14 @@ h(t) =
 All numerical values are in consistant units unless mentioned otherwise (ms for time, mV for voltage, nA for current, nF for capacitance and ${\mu}$S for conductance). 
 Default numerical integration is performed using Euler method and the suggested time-step is 0.1 ms\cite{litwin2012slow}.
 
+\subsection{Currently available models}
+\begin{enumerate}
+\item Exponential leaky integrate-and-fire neuron model
+\item Double-exponential synapse model: see \cite{keane2015propagating}
+\item Inhibitory plasticity: see \cite{vogels2011inhibitory}
+\item Spike frequency adaptation: see \cite{madison1984control}
 
+\end{enumerate}
 
 %\begin{table}
 %\begin{center}
