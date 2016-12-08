@@ -1,4 +1,4 @@
-function main_SWR_reference_gaus_balance(varargin)
+function main_SWR_reference_degree(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -51,7 +51,7 @@ for P0_init = 0.08*ones(1,repeats)
                     [ fit_g_2_EPSP_2, ~ ] = g_EPSP_conversion( );
                     
                     
-                    for deg_hybrid = [0.4 ]
+                    for deg_hybrid = 0:0.1:1
                         degree_CV = 0.2; % 0.2 works
                         
                         for g_mu = [4]*10^-3;
@@ -70,7 +70,7 @@ for P0_init = 0.08*ones(1,repeats)
                                 %  what can I do???
                                 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                                 
-                                for g_balance = 0.7:0.05:1.3
+                                for g_balance = 1
                                     for g_EI = [ 13.5 ]*10^-3 %11 12
                                         for g_IE = [5 ]*10^-3
                                             for g_II = [25]*10^-3

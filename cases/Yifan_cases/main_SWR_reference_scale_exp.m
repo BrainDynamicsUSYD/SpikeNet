@@ -1,4 +1,4 @@
-function main_SWR_reference_gaus_balance(varargin)
+function main_SWR_reference_scale_exp(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -34,7 +34,8 @@ for P0_init = 0.08*ones(1,repeats)
     in_out_r = [0.13 ];
     
     % parameter
-    for SpikeFreqAapt = [ 1]
+    for scale_exp = 0.5:0.1:1
+     SpikeFreqAapt = [ 1];
         
         for LFP_range_sigma = [8]; % 8
             for cn_scale_wire = [2 ];
@@ -51,14 +52,14 @@ for P0_init = 0.08*ones(1,repeats)
                     [ fit_g_2_EPSP_2, ~ ] = g_EPSP_conversion( );
                     
                     
-                    for deg_hybrid = [0.4 ]
-                        degree_CV = 0.2; % 0.2 works
+                    deg_hybrid = 0.4;
+                    degree_CV = 0.2; % 0.2 works
+                    
+                    for g_mu = [4]*10^-3;
                         
-                        for g_mu = [4]*10^-3;
-                            
-                            
-                            EPSP_mu = fit_g_2_EPSP_2(g_mu);
-                            EPSP_sigma = 1;
+                        
+                        EPSP_mu = fit_g_2_EPSP_2(g_mu);
+                        for EPSP_sigma = 1
                             
                             
                             
@@ -70,7 +71,7 @@ for P0_init = 0.08*ones(1,repeats)
                                 %  what can I do???
                                 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                                 
-                                for g_balance = 0.7:0.05:1.3
+                                for g_balance = 1
                                     for g_EI = [ 13.5 ]*10^-3 %11 12
                                         for g_IE = [5 ]*10^-3
                                             for g_II = [25]*10^-3
@@ -160,7 +161,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 s_p = sqrt(log(EPSP_sigma^2/(EPSP_mu^2)+1));
                                                                 mu_p = mu_p + s_p^2;
                                                                 g_pool_generator_hld = @(N)g_pool_generator(N, mu_p, s_p);
-                                                                K_scale = sqrt(in_degree);
+                                                                K_scale = in_degree.^scale_exp;
                                                                 K_cell = inverse_pool( in_degree, K_scale, g_pool_generator_hld);
                                                                 K_ee = NaN;
                                                                 if ~isnan(K_cell{1})
@@ -271,7 +272,8 @@ for P0_init = 0.08*ones(1,repeats)
                                                                     'inh_STDP', inh_STDP, ...
                                                                     'deg_hybrid', deg_hybrid,...
                                                                     'LFP_range_sigma', LFP_range_sigma,...
-                                                                    'g_balance',g_balance);
+                                                                    'g_balance',g_balance, ...
+                                                                    'scale_exp',scale_exp);
                                                                 
                                                                 
                                                                 %                                                     % Adding comments in raster plot
