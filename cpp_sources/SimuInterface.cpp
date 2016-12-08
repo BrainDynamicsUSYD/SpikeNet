@@ -696,13 +696,13 @@ void SimuInterface::simulate(){
 			clock_t end = clock();
 			char str_min[80];
 			double elapsed_mins = double(end - begin) / CLOCKS_PER_SEC / 60.0;
-			sprintf(str_min, " (%0.1f min)...\n", elapsed_mins);
+			sprintf(str_min, " (CPU time elasped: %0.1f min; ", elapsed_mins);
 			cout <<  "\t " << steps_left / (network.step_tot / 100) << str_min << flush;
 			time_t rawtime;
 			struct tm * timeinfo;
 			time (&rawtime);
 			timeinfo = localtime (&rawtime);
-			cout<<"Current local time and date: "<< asctime(timeinfo)<<"\n";
+			cout << "Current local time: " << asctime(timeinfo)<< ")..." << endl;
 		}
 		/*---------------------------------------------------------------------*/
 		
