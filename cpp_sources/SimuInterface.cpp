@@ -699,10 +699,11 @@ void SimuInterface::simulate(){
 			sprintf(str_min, " (CPU time elasped: %0.1f min; ", elapsed_mins);
 			cout <<  "\t " << steps_left / (network.step_tot / 100) << str_min << flush;
 			time_t rawtime;
-			struct tm * timeinfo;
 			time (&rawtime);
-			timeinfo = localtime (&rawtime);
-			cout << "Current local time: " << asctime(timeinfo)<< ")..." << endl;
+			char * timeinfo;
+			timeinfo = asctime(localtime(&rawtime));
+			timeinfo[strlen(timeinfo) - 1] = '\0'; // get rid of endline
+			cout << "Current local time: " << timeinfo << ")..." << endl;
 		}
 		/*---------------------------------------------------------------------*/
 		
