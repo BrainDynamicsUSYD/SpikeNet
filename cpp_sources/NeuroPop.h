@@ -2,7 +2,8 @@
 #define NEUROPOP_H
 #include <vector>
 #include <random> // <boost/random.hpp>
-#include <string.h> // "" for string, '' for char
+#include <string.h> // 
+#include <string> //
 #include <iostream> // cout/cin, ofstream: Stream class to write on files, ifstream : Stream class to read from files, istringstream is for input, ostringstream for output
 #include <fstream> // fstream : Stream class to both read and write from / to files
 
