@@ -71,8 +71,17 @@ for i = i_pbc
 %     [yy_shifted_sorted, ind_tmp] = sort(yy_shifted);
 %     v(2) = interp1(yy_shifted_sorted,  yy_o(ind_tmp), v(2));
     v(1) = v(1) + x_shift(i);
+    if v(1) < -hw
+        v(1) = v(1) + fw;
+    elseif v(1) > hw
+        v(1) = v(1) - fw;
+    end
     v(2) = v(2) + y_shift(i);
-    
+    if v(2) < -hw
+        v(2) = v(2) + fw;
+    elseif v(2) > hw
+        v(2) = v(2) - fw;
+    end
     v_final = v;
 end
 
