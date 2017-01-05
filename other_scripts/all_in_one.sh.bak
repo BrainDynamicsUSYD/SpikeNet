@@ -62,7 +62,7 @@ elif [ "${outdone}" == "1" ]; then
 	OUTPUTFILE=$(echo ${ID}-*${OUTPUT_APPENDIX}); # Simulate and output ${OUTPUT_APPENDIX} file
 	echo "BASH OUTPUTFILE=${OUTPUTFILE}" # Note that echo actually does some processing!
 	cd ${PBS_O_WORKDIR};
-	matlab -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
+	matlab -singleCompThread -nodisplay  -r "cd('${MATLAB_SOURCE_PATH}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${MATLAB_SOURCE_PATH_2}'), addpath(genpath(cd)), cd('${PBS_O_WORKDIR}'), \
 						   cd('${DATA_DIR}'), ${MATLAB_POST_PROCESS_FUNC}('${OUTPUTFILE}'), exit"
 elif [ "${indone}" == "1" ]; then
