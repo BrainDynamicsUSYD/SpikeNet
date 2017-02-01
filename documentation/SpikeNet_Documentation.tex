@@ -108,6 +108,7 @@ For HDF5, please make relevant changes in the makefile to specify the paths wher
 
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
 \begin{itemize}
+\item Make sure you have set up your PBS environment correctly (e.g., modelue load HDF5-1.10.0). This can be done by editing shell config file.
 \item Go to the tmp directory
 \item Make a copy of the script: \mylstinline{cp SpikeNet/other_scripts/all*bak all_in_one.sh}
 \item Change it to executable: \mylstinline{chmod +x all_in_one.sh}

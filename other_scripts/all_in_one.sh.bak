@@ -9,6 +9,8 @@
 #PBS -o PBSout/one_out_av
 ##PBS -t 1-3
 
+# module load HDF5-1.10.0 # add this (and other modules you may need) to your shell config!
+
 set -x
 cd "$PBS_O_WORKDIR"
 INPUT_APPENDIX="in.h5" #"ygin" #"in.h5"
