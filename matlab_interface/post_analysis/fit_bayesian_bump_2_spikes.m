@@ -8,7 +8,7 @@ if isempty(spike_x_pos_o)
     y = NaN;
     width = NaN;
     mlh = NaN;
-    heigh = NaN;
+    height = NaN;
 else
     
     hw = fw/2;
@@ -47,11 +47,6 @@ else
         x_c_guess = mean(spike_x_pos_shifted);
         y_c_guess = mean(spike_y_pos_shifted);
         width_guess = max( std(spike_x_pos_shifted), std(spike_y_pos_shifted) );
-        
-        
-        %     n_std = 4;
-        %     x_r = ((-n_std*(ceil(width_guess))):(n_std*(ceil(width_guess)))) + round(mean(spike_x_pos_shifted));
-        %     y_r = ((-n_std*(ceil(width_guess))):(n_std*(ceil(width_guess)))) + round(mean(spike_y_pos_shifted));
         
         x_r = (-hw:hw) + round(mean(spike_x_pos_shifted));
         y_r = (-hw:hw) + round(mean(spike_y_pos_shifted));

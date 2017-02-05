@@ -40,14 +40,14 @@ ripple_h = zeros(1,length(fit_common));
 ripple_w = zeros(1,length(fit_common));
 ripple_g = zeros(1,length(fit_common));
 for i = 1:length(fit_common)
-    ripple_x(1,i) = fit_common{i}.x_c - (round(fw/2) - peak_common(1,i)); %#ok<*SAGROW>
+    ripple_x(1,i) = fit_common{i}.x_c - (round(fw/2) - peak_common(1,i)) - hw; %#ok<*SAGROW>
     if  ripple_x(1,i) < -hw
         ripple_x(1,i) =  ripple_x(1,i) + fw;
     elseif ripple_x(1,i) > hw
         ripple_x(1,i) = ripple_x(1,i) - fw;
     end
     
-    ripple_y(1,i) = fit_common{i}.y_c - (round(fw/2) - peak_common(2,i));
+    ripple_y(1,i) = fit_common{i}.y_c - (round(fw/2) - peak_common(2,i)) - hw;
     if  ripple_y(1,i) < -hw
         ripple_y(1,i) =  ripple_y(1,i) + fw;
     elseif ripple_y(1,i) > hw
@@ -57,6 +57,21 @@ for i = 1:length(fit_common)
     ripple_w(1,i) = fit_common{i}.sigma;
     ripple_g(1, i) = fit_goodness_common{i}.adjrsquare;
 end
+
+% discard bad fits
+spike_bad = spike_mlh < (nanmean(spike_mlh) - 2*nanstd(spike_mlh));
+spike_x(spike_bad) = NaN;
+spike_y(spike_bad) = NaN;
+spike_h(spike_bad) = NaN;
+spike_w(spike_bad) = NaN;
+
+ripple_bad = ripple_g < (nanmean(ripple_g) - 2*nanstd(ripple_g));
+ripple_x(ripple_bad) = NaN;
+ripple_y(ripple_bad) = NaN;
+ripple_h(ripple_bad) = NaN;
+ripple_w(ripple_bad) = NaN;
+
+
 
 % do position difference vs time lag analysis
 mean_pos_diff_lag = [];
@@ -95,30 +110,33 @@ pos_diff_opt = sqrt(x_diff.^2 + y_diff.^2);
 
 
 % collect spike image according to ripple_h_bin
+n_bins = 6;
 ripple_h_tmp = ripple_h(indB);
 [Lattice, ~] = lattice_nD(2, (fw-1)/2);
 t_tmp = t_common(indA);
 spike_x_tmp = round(spike_x(indA)+fw/2);
 spike_y_tmp = round(spike_y(indA)+fw/2);
 spike_img_t_range = -25:25; % steps
-ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
+spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
 spike_img_acc_c = zeros(1,n_bins);
 spike_img_acc = zeros(fw, fw, n_bins);
 for i = 1:length(t_tmp)
-    t = t_tmp(i);
-    t_range_tmp = t+spike_img_t_range;
-    if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
-        [ind_neu, ind_t] = find(R.spike_hist{1}(:, t_range_tmp));
-        ind_neu_unique = unique(ind_neu);
-        i_tmp = Lattice(ind_neu_unique,1)+32;
-        j_tmp = Lattice(ind_neu_unique,2)+32;
-        ind_neu_occ = histc(ind_neu, ind_neu_unique);
-        img_tmp = full(sparse(i_tmp, j_tmp, ind_neu_occ, fw,fw));
-        % shift to the center
-        img_tmp = circshift(img_tmp, [round(fw/2)-spike_x_tmp(i)  round(fw/2)-spike_y_tmp(i)]);
-        bin_ind_tmp = find(ripple_h_tmp(i) >= ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= ripple_h_bin(2:end));
-        spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
-        spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
+    if ~isnan( spike_x_tmp(i) )
+        t = t_tmp(i);
+        t_range_tmp = t+spike_img_t_range;
+        if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
+            [ind_neu, ind_t] = find(R.spike_hist{1}(:, t_range_tmp));
+            ind_neu_unique = unique(ind_neu);
+            i_tmp = Lattice(ind_neu_unique,1)+32;
+            j_tmp = Lattice(ind_neu_unique,2)+32;
+            ind_neu_occ = histc(ind_neu, ind_neu_unique);
+            img_tmp = full(sparse(i_tmp, j_tmp, ind_neu_occ, fw,fw));
+            % shift to the center
+            img_tmp = circshift(img_tmp, [round(fw/2)-spike_x_tmp(i)  round(fw/2)-spike_y_tmp(i)]);
+            bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
+            spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
+            spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
+        end
     end
 end
 
@@ -129,12 +147,14 @@ R.grid_SWR.spike_y = spike_y;
 R.grid_SWR.spike_h = spike_h;
 R.grid_SWR.spike_mlh = spike_mlh;
 R.grid_SWR.spike_w = spike_w;
+R.grid_SWR.spike_ind = indA;
 
 R.grid_SWR.ripple_x = ripple_x;
 R.grid_SWR.ripple_y = ripple_y;
 R.grid_SWR.ripple_h = ripple_h;
 R.grid_SWR.ripple_g = ripple_g;
 R.grid_SWR.ripple_w = ripple_w;
+R.grid_SWR.ripple_ind = indB;
 
 R.grid_SWR.lag_ms = lag_ms;
 R.grid_SWR.mean_pos_diff_lag = mean_pos_diff_lag;
