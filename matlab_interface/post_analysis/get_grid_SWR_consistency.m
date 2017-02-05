@@ -40,14 +40,14 @@ ripple_h = zeros(1,length(fit_common));
 ripple_w = zeros(1,length(fit_common));
 ripple_g = zeros(1,length(fit_common));
 for i = 1:length(fit_common)
-    ripple_x(1,i) = fit_common{i}.x_c - (round(fw/2) - peak_common(1,i)); %#ok<*SAGROW>
+    ripple_x(1,i) = fit_common{i}.x_c - (round(fw/2) - peak_common(1,i)) - hw; %#ok<*SAGROW>
     if  ripple_x(1,i) < -hw
         ripple_x(1,i) =  ripple_x(1,i) + fw;
     elseif ripple_x(1,i) > hw
         ripple_x(1,i) = ripple_x(1,i) - fw;
     end
     
-    ripple_y(1,i) = fit_common{i}.y_c - (round(fw/2) - peak_common(2,i));
+    ripple_y(1,i) = fit_common{i}.y_c - (round(fw/2) - peak_common(2,i)) - hw;
     if  ripple_y(1,i) < -hw
         ripple_y(1,i) =  ripple_y(1,i) + fw;
     elseif ripple_y(1,i) > hw
@@ -57,6 +57,21 @@ for i = 1:length(fit_common)
     ripple_w(1,i) = fit_common{i}.sigma;
     ripple_g(1, i) = fit_goodness_common{i}.adjrsquare;
 end
+
+% discard bad fits
+spike_bad = spike_mlh < (nanmean(spike_mlh) - 2*nanstd(spike_mlh));
+spike_x(spike_bad) = NaN;
+spike_y(spike_bad) = NaN;
+spike_h(spike_bad) = NaN;
+spike_w(spike_bad) = NaN;
+
+ripple_bad = ripple_g < (nanmean(ripple_g) - 2*nanstd(ripple_g));
+ripple_x(ripple_bad) = NaN;
+ripple_y(ripple_bad) = NaN;
+ripple_h(ripple_bad) = NaN;
+ripple_w(ripple_bad) = NaN;
+
+
 
 % do position difference vs time lag analysis
 mean_pos_diff_lag = [];

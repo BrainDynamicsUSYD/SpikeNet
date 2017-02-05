@@ -36,7 +36,7 @@ num_spikes_win = num_spikes_win_full(t_seg);
 % min_spike_requiremnt = num_spikes_win >= spikes_win_min;
 % t_mid = t_mid( min_spike_requiremnt );
 ind_a_vec = ind_ab(1,:);
-ind_b_vec = ind_ab(2,:s);
+ind_b_vec = ind_ab(2,:);
 % % num_spikes_win = num_spikes_win( num_spikes_win >= spikes_win_min);
 
 
@@ -129,6 +129,7 @@ R.grid.spikes_win_min =  spikes_win_min;
 R.grid.win_min_rate_Hz = win_min_rate_Hz;
 R.grid.num_spikes_win = num_spikes_win_full;
 R.grid.t_mid = t_mid_full;
+R.grid.ind_ab = ind_ab;
 switch lower(mode)
     case 'quick'
         R.grid.quick.radius = width;
