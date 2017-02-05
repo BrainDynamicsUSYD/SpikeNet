@@ -72,6 +72,7 @@ circ_gauss = fittype( @(h, sigma, x_c, y_c,  x, y) h*exp(-((x-x_c).^2 + (y-y_c).
     'dependent', 'z');
 peak = [];
 ripple_fit = cell(1,steps);
+ripple_fit_goodness = cell(1,steps);
 for i = 1:steps
     A =  ripple_power_grid(:,:,i);
     [peak_mag,I] = max(A(:));
@@ -79,19 +80,20 @@ for i = 1:steps
     [I_row, I_col] = ind2sub([A_row, A_col],I);
     
     A_c = circshift(A, [round(A_row/2)-I_row  round(A_col/2)-I_col]);
-    A_fit = fit([x_grid(:), y_grid(:)], A_c(:), circ_gauss, ...
+    [A_fit, G_fit] = fit([x_grid(:), y_grid(:)], A_c(:), circ_gauss, ...
         'StartPoint', [peak_mag 5 A_row/2 A_col/2 ], ...
-        'Lower', [0 0 1 1 ], ...
+        'Lower', [0 0 0 0 ], ...
         'Upper', [Inf 10*max(I_row, I_col) A_row A_col]);
     peak = [peak; I_row, I_col, peak_mag]; %#ok<AGROW>
     ripple_fit{i} = A_fit;
+    ripple_fit_goodness{i} = G_fit;
     % plot(A_fit, [x_grid(:), y_grid(:)], A_c(:))
     %             i/steps
     %             A_fit.sigma
 end
 
 save(samp_file,  'peak', '-append')
-save(samp_file,  'ripple_fit', '-append')
+save(samp_file,  'ripple_fit', 'ripple_fit_goodness', '-append')
 
 
 end
