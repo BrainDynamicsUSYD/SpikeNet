@@ -6,12 +6,14 @@ HEADER_FILES = $(SRC_DIR)/*.h
 OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o MyIO.o
 
 
-HDF5 = #yes # put anything here to compile with HDF5
+HDF5 = yes # put anything here to compile with HDF5
 ifdef HDF5
 	HDF5FLAG = -DHDF5
-	HDF5INCLUDE = -I/usr/local/include 
+	HDF5INCLUDE = -I/usr/local/include # for typical iOS
+	#HDF5INCLUDE = -I/usr/include/hdf5/serial/ # for typical ubuntu
 	#HDF5INCLUDE = -I/usr/physics/hdf5/include
-	HDF5LIBS = -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
+	HDF5LIBS = -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl # for typical iOS
+	#HDF5LIBS = -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5_cpp -lhdf5 -lhdf5_hl # for typical ubuntu
 	#HDF5LIBS = -L/usr/physics/hdf5/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
 else
 	HDF5FLAG =
