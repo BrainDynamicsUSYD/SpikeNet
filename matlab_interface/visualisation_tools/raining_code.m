@@ -10,7 +10,7 @@ seed = 20170218;
 rng(seed);
 
 % generate video file
-gen_video = 0;
+gen_video = input('Generate video file? (1/0): ');
 if gen_video == 1
     vidObj = VideoWriter('test_raining_code.avi');
     open(vidObj);
@@ -25,15 +25,17 @@ t = 1000;
 
 % define the character library
 slCharacterEncoding('UTF-8')
-% c_lib1 = 'SJTUSJTUSJTUSJTUSJTU';
-% c_lib2 contains Chinese characters that needs to be defined in command window
-c_lib = [c_lib1,c_lib2];
+c_lib = input('Please input the character arary: ');
 c_length = length(c_lib);
 c_map = randi([1, c_length], 1, h*w); % the map between characters and h-w positions; a vector (use vec2ind)
 c_change_rate = 0.005; % the charactor-hw map random update rate
 
 % define the message
-msg = 'MAY YOUR LOVE LAST FOREVER';
+msg = input('Please input the message: ');
+if length(msg) > 0.7*w
+    error('The message is too long!');
+end
+msg = upper(msg);
 msg = fliplr(msg); % remember to flip the video file horizontally later on
 msg_len_tmp = length(msg);
 msg_pos = round((w-msg_len_tmp)/2)+(1:msg_len_tmp);
@@ -210,7 +212,7 @@ for i = 1:t
         end
     end
     
-    % the messaage fades
+    % the message fades
     if isempty(h_pos) && nnz(msg_drawn-1) == 0
         for m = 1:length(msg_drawn)
             msg_color(m,:) = msg_color(m,:).*exp(-1/msg_fade_steps(m));
