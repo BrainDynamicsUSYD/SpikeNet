@@ -58,6 +58,7 @@ else
     width =  [];
     mlh =  [];
     height = [];
+    bayes_factor = [];
     
     for j = 1:length(ind_a_vec)
         if mod(j*10,round(length(ind_a_vec)/10)*10) == 0
@@ -74,15 +75,17 @@ else
             width_tmp = NaN;
             mlh_tmp = NaN;
             height_tmp = NaN;
+            bayes_factor = NaN;
         else
-            [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp, height_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
+            [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp, height_tmp, bayes_factor_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
         end
         
         x_mean =  [x_mean x_mean_tmp]; %#ok<AGROW>
         y_mean =  [y_mean y_mean_tmp];%#ok<AGROW>
         width =  [width width_tmp];%#ok<AGROW>
         mlh =  [mlh mlh_tmp];%#ok<AGROW>
-        height = [height height_tmp];
+        height = [height height_tmp]; %#ok<AGROW>
+        bayes_factor = [bayes_factor bayes_factor_tmp]; %#ok<AGROW>
     end
     
 end
@@ -147,6 +150,7 @@ switch lower(mode)
         R.grid.bayes.mlh = mlh;
         R.grid.bayes.height = height;
         R.grid.bayes.jerk_mean = jerk_mean;
+        R.grid.bayes.bayes_factor = bayes_factor;
 end
 
 end
