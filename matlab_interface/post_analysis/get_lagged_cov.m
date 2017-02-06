@@ -6,7 +6,9 @@ function R = get_lagged_cov(R)
 
 lagged_cov_win_ms = 10; % ms
 len = round(lagged_cov_win_ms/R.reduced.dt);
-r = movmean(transpose(R.reduced.spike_hist{1}), len, 'Endpoints','discard');
+% r = movmean(transpose(R.reduced.spike_hist{1}), len, 'Endpoints','discard');
+r = movingmean_glen(transpose(R.reduced.spike_hist{1}), len, 1, 1);
+r = r(ceil(len/2):end-ceil(len/2),:);
 
 lags_ms = linspace(0, 200, 10);
 lagged_cov = [];
