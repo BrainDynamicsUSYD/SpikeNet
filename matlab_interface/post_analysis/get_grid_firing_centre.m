@@ -32,12 +32,12 @@ num_spikes_win = num_spikes_win_full(t_seg);
 
     
 
-% spikes_win_min
-min_spike_requiremnt = num_spikes_win >= spikes_win_min;
-t_mid = t_mid( min_spike_requiremnt );
-ind_a_vec = ind_ab(1,min_spike_requiremnt);
-ind_b_vec = ind_ab(2,min_spike_requiremnt);
-% num_spikes_win = num_spikes_win( num_spikes_win >= spikes_win_min);
+% % spikes_win_min
+% min_spike_requiremnt = num_spikes_win >= spikes_win_min;
+% t_mid = t_mid( min_spike_requiremnt );
+ind_a_vec = ind_ab(1,:);
+ind_b_vec = ind_ab(2,:);
+% % num_spikes_win = num_spikes_win( num_spikes_win >= spikes_win_min);
 
 
 %%%% get window-ed mean and std for x/y position of firing neurons
@@ -57,6 +57,7 @@ else
     y_mean =  [];
     width =  [];
     mlh =  [];
+    height = [];
     
     for j = 1:length(ind_a_vec)
         if mod(j*10,round(length(ind_a_vec)/10)*10) == 0
@@ -67,16 +68,21 @@ else
         x_pos_tmp = x_pos(ind_range_tmp);
         y_pos_tmp = y_pos(ind_range_tmp);
         
-%         if j> 298
-%             j
-%         end
-        % add bayesian stuff here
-        [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
+        if length(x_pos_tmp) < spikes_win_min
+            x_mean_tmp = NaN;
+            y_mean_tmp = NaN;
+            width_tmp = NaN;
+            mlh_tmp = NaN;
+            height_tmp = NaN;
+        else
+            [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp, height_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
+        end
+        
         x_mean =  [x_mean x_mean_tmp]; %#ok<AGROW>
         y_mean =  [y_mean y_mean_tmp];%#ok<AGROW>
         width =  [width width_tmp];%#ok<AGROW>
         mlh =  [mlh mlh_tmp];%#ok<AGROW>
-        
+        height = [height height_tmp];
     end
     
 end
@@ -92,7 +98,7 @@ no_shifts = length(y_shift);
 % raw jump_dir
 x_diff_full = repmat(x_mean(2:end), no_shifts, 1);
 y_diff_full = repmat(y_mean(2:end), no_shifts, 1);
-for s = 1:no_shifts;
+for s = 1:no_shifts
     x_diff_full(s,:) =  x_diff_full(s,:) - x_shift(s) - x_mean(1:end-1);
     y_diff_full(s,:) =  y_diff_full(s,:) - y_shift(s) - y_mean(1:end-1) ;
 end
@@ -112,56 +118,36 @@ x3 = diff(x2)/dt_mid;
 y1 = diff(y_tmp)/dt_mid;
 y2 = diff(y1)/dt_mid;
 y3 = diff(y2)/dt_mid;
-jerk_mean = mean(sqrt(x3.^2 + y3.^2));
+jerk_mean = nanmean(sqrt(x3.^2 + y3.^2));
 
-%threholding on MLH
-c_legit = (mlh >= mean(mlh) - 2*std(mlh)); % this is a bit arbitarys!!!
 
-t_mid_chosen = t_mid(c_legit);
-width_chosen = width(c_legit);
-x_mean_chosen = x_mean(c_legit);
-y_mean_chosen = y_mean(c_legit);
-
-% jump_size (take care of the periodic boundary condition)
-x_diff_full = repmat(x_mean_chosen(2:end), no_shifts, 1);
-y_diff_full = repmat(y_mean_chosen(2:end), no_shifts, 1);
-
-for s = 1:no_shifts;
-    x_diff_full(s,:) =  x_diff_full(s,:) - x_shift(s) - x_mean_chosen(1:end-1);
-    y_diff_full(s,:) =  y_diff_full(s,:) - y_shift(s) - y_mean_chosen(1:end-1) ;
-end
-[jump_dist, min_J] = min(sqrt(x_diff_full.^2 + y_diff_full.^2));
-jump_dir = zeros(size(jump_dist));
-for i = 1:length(min_J)
-    jump_dir(i) = atan2(y_diff_full(min_J(i),i),  x_diff_full(min_J(i),i));
-end
-
-% jump_duration
-jump_duration = diff(t_mid_chosen);
 
 % output results
-
-R.grid.raw.win_len = win_len;
-R.grid.raw.win_gap = win_gap; % window gap
-R.grid.raw.min_spike_requiremnt = min_spike_requiremnt;
-R.grid.raw.win_min_rate_Hz = win_min_rate_Hz;
-R.grid.raw.num_spikes_win = num_spikes_win_full;
-R.grid.raw.t_mid = t_mid_full;
-R.grid.raw.ind_ab = ind_ab_full;
-R.grid.raw.radius = width;
-R.grid.raw.centre = [x_mean; y_mean];
-R.grid.raw.jump_dist = jump_dist_raw;
-R.grid.raw.jump_dir = jump_dir_raw;
-R.grid.raw.mlh = mlh;
-R.grid.raw.jerk_mean = jerk_mean;
-
-R.grid.mode = mode;
-R.grid.t_mid = t_mid_chosen;
-R.grid.radius = width_chosen;
-R.grid.centre = [x_mean_chosen; y_mean_chosen];
-R.grid.jump_dist = jump_dist;
-R.grid.jump_du = jump_duration;
-R.grid.jump_dir = jump_dir;
+R.grid.win_len = win_len;
+R.grid.win_gap = win_gap; % window gap
+R.grid.spikes_win_min =  spikes_win_min;
+R.grid.win_min_rate_Hz = win_min_rate_Hz;
+R.grid.num_spikes_win = num_spikes_win_full;
+R.grid.t_mid = t_mid_full;
+R.grid.ind_ab = ind_ab;
+switch lower(mode)
+    case 'quick'
+        R.grid.quick.radius = width;
+        R.grid.quick.centre = [x_mean; y_mean];
+        R.grid.quick.jump_dist = jump_dist_raw;
+        R.grid.quick.jump_dir = jump_dir_raw;
+        R.grid.quick.mlh = mlh;
+        R.grid.quick.height = height;
+        R.grid.quick.jerk_mean = jerk_mean;
+    case 'bayesian'
+        R.grid.bayes.radius = width;
+        R.grid.bayes.centre = [x_mean; y_mean];
+        R.grid.bayes.jump_dist = jump_dist_raw;
+        R.grid.bayes.jump_dir = jump_dir_raw;
+        R.grid.bayes.mlh = mlh;
+        R.grid.bayes.height = height;
+        R.grid.bayes.jerk_mean = jerk_mean;
+end
 
 end
 

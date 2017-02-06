@@ -107,7 +107,16 @@ For HDF5, please make relevant changes in the makefile to specify the paths wher
 
 
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
+The script all\_in\_one.sh has the following features:
 \begin{itemize}
+\item It automatically detects which stage each array job (with a unique 4-digit integer array ID) has reached: pre-processing done, simulation done or post-simulation data parsing done. The script will start each array job from the last unfinished stage instead of the first stage. This feature comes in handy when hundreds of array jobs end prematurely at different stages, say, due to the HPC being shut down unexpectedly, in which case simply a re-submission of the script will clean up the mess.
+\item It passes the array ID as an input argument to the matlab pre-processing script.
+\item It automatically saves a copy of the pre-processing Matlab script to the data directory when starting the array job with ID 0001.
+\end{itemize}
+
+Following are the steps to use the PBS script.
+\begin{itemize}
+\item Make sure you have set up your PBS environment correctly (e.g., modelue load HDF5-1.10.0). This can be done by editing shell config file.
 \item Go to the tmp directory
 \item Make a copy of the script: \mylstinline{cp SpikeNet/other_scripts/all*bak all_in_one.sh}
 \item Change it to executable: \mylstinline{chmod +x all_in_one.sh}
@@ -119,6 +128,7 @@ For those who have access to a high-performance computing cluster with PBS, Spik
 \item Make a directory for PBS output: \mylstinline{mkdir PBSout}
 \item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
 \end{itemize}
+
 
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
@@ -270,7 +280,7 @@ h(t) =
 
 
 % The default parameters are summarized in Table \ref{table:model constants}. 
-All numerical values are in consistant units unless mentioned otherwise (ms for time, mV for voltage, nA for current, nF for capacitance and ${\mu}$S for conductance). 
+All numerical values are in consistent units unless mentioned otherwise (ms for time, mV for voltage, nA for current, nF for capacitance and ${\mu}$S for conductance). 
 Default numerical integration is performed using Euler method and the suggested time-step is 0.1 ms\cite{litwin2012slow}.
 
 \subsection{Currently available models}

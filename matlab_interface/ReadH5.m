@@ -146,7 +146,7 @@ if ~isempty(files)
         for pop_ind = 1:OutData{id_out}.Num_pop
             samp_file = [stamps num2str(pop_ind-1) '_neurosamp.h5'];
             samp_file_mat = [samp_file(1:end-2) 'mat'];
-            if exist(samp_file_mat,'file') ~= 2
+            if exist(samp_file_mat,'file') ~= 0
                 I_AMPA = try_h5read( samp_file,  '/I_AMPA' );
                 I_GABA = try_h5read( samp_file,  '/I_GABA' );
                 I_K = try_h5read( samp_file,  '/I_K' );
@@ -342,19 +342,6 @@ end
 end % if ~isempty(name)
 
 
-function r = try_h5read(file, dataset_name)
-r = [];
-try
-    r = h5read(file, dataset_name);
-catch ME
-    switch ME.identifier
-        case 'MATLAB:imagesci:h5read:libraryError'
-        otherwise
-            rethrow(ME)
-    end
-    
-end
-end
 
 
 % function Data = ReformatVI_sample(Data)
