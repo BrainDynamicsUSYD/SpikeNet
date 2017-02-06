@@ -26,6 +26,7 @@ t = 1000;
 % define the character library
 slCharacterEncoding('UTF-8')
 c_lib = input('Please input the character arary: ');
+c_lib(isspace(c_lib)) = []; % delete space
 c_length = length(c_lib);
 c_map = randi([1, c_length], 1, h*w); % the map between characters and h-w positions; a vector (use vec2ind)
 c_change_rate = 0.005; % the charactor-hw map random update rate
@@ -43,9 +44,10 @@ msg_del = isspace(msg); % delete space from msg so that rains can fall through
 msg(msg_del) = [];
 msg_pos(msg_del) = [];
 msg_len = length(msg);
+msg = mat2cell(msg(:),ones(1,msg_len),1); %#ok<MMTC>
 msg_t = 300; % when message start to fall
 other_rain_stop_t = 365; % when other new rains stop to fall
-msg_drawn = zeros(1, msg_len);
+msg_drawn = false(1, msg_len);
 msg_h = floor(h/2-1);
 msg_fade_steps = unifrnd(3,25,1,msg_len);
 msg_rain_stop = false(1, msg_len);
@@ -61,7 +63,8 @@ v_range = [0.3 0.6]; % random falling speed range, should be less than 1
 if life_range(1) < head_len + max(tail_len_range) % check definition consistency
 	error('life_range(1) < head_len + tail_len!')
 end
-			
+rain_gap = h/2; % the minimum gap between the previous rain and the new rain
+
 % initialize the rain state vectors
 rain_pos = [];
 rain_pos_rev = [];
@@ -85,18 +88,24 @@ hold on;
 set(gcf,'Units','normal')
 set(gca,'Position',[0 0 1 1])
 
+% pre-generate the text objects
+[i_grid, j_grid] = meshgrid(1:w, 1:h);
+text_obj = text( i_grid(:), j_grid(:), '0', 'color', 'k', ...
+            'FontWeight', 'bold', 'HorizontalAlignment','center','VerticalAlignment','top',...
+            'FontName','Courier');
+
 % start the simulation
-tic
 for i = 1:t
     % generate new rains
+    
     if i < msg_t
-        new_rain = setdiff(1:w, unique(w_pos(h_pos < h/3)));
+        new_rain = setdiff(1:w, unique(w_pos(h_pos < rain_gap)));
     elseif i < other_rain_stop_t
-        other = setdiff(1:w, msg_pos);
-        new_rain = setdiff(msg_pos(~msg_rain_stop), unique(w_pos(h_pos < h/3)));
+        other = setdiff(1:w, [msg_pos unique(w_pos(h_pos < rain_gap))]);
+        new_rain = setdiff(msg_pos(~msg_rain_stop), unique(w_pos(h_pos < rain_gap)));
         new_rain = [new_rain other];
     else
-        new_rain = setdiff(msg_pos(~msg_rain_stop), unique(w_pos(h_pos < h/3)));
+        new_rain = setdiff(msg_pos(~msg_rain_stop), unique(w_pos(h_pos < rain_gap)));
     end
     new_rain(rand(1,length(new_rain)) > new_rate) = [];
     
@@ -109,7 +118,6 @@ for i = 1:t
     rain_pos = [rain_pos new_rain_length]; % counting from N to 1 (from head to tail)
     rain_pos_rev = [rain_pos_rev ones(1,length(new_rain))];% counting from 1 to N (from head to tail)
     rain_tail_len = [rain_tail_len randi(tail_len_range, 1,length(new_rain))]; % random tail length
-    
     
     % falling down
     f_fall =  h_pos == 1 & (rain_pos > 1) & ((floor(v_tick+v_pos)-floor(v_tick)) == 1);
@@ -152,49 +160,43 @@ for i = 1:t
     % head effect
     head_effect = linspace(0, 0.5, head_len);
     hsv_s_pos_head = ones(size(rain_pos_rev));
-    is_rain_head = rain_pos_rev <= head_len;
-    hsv_s_pos_head(is_rain_head) =  head_effect(rain_pos_rev(is_rain_head));
+    is_head = rain_pos_rev <= head_len;
+    hsv_s_pos_head(is_head) =  head_effect(rain_pos_rev(is_head));
     % tail effect
     hsv_v_pos_tail = ones(size(rain_pos_rev));
-    is_rain_tail = rain_pos <= rain_tail_len;
-    hsv_v_pos_tail(is_rain_tail) = (rain_pos(is_rain_tail)-1)./rain_tail_len(is_rain_tail);
+    is_tail = rain_pos <= rain_tail_len;
+    hsv_v_pos_tail(is_tail) = (rain_pos(is_tail)-1)./rain_tail_len(is_tail);
 
-    % draw
-    cla;
+    % apply the head and tail effect
+    color_tmp = repmat(matrix_green, length(w_pos), 1);
+    is_head = rain_pos_rev <= head_len;
+    color_tmp(is_head, 2) = hsv_s_pos_head(is_head); % head effect
+    color_tmp(~is_head, 3) = color_tmp(~is_head, 3).*hsv_v_pos(~is_head)'.*hsv_v_pos_tail(~is_head)'; % tail effect
+    color_tmp = hsv2rgb(color_tmp); % convert color space to RGB
+    color_tmp_cell = num2cell(color_tmp, 2);
+
+    % embed the message
     msg_j_del = [];
-    for j = 1:length(w_pos)
-        % embed the message
-        if i >= msg_t && h_pos(j) == msg_h && sum(w_pos(j) == msg_pos) == 1 % hitting massage positions
-            msg_pos_ind = find(w_pos(j) == msg_pos);
-            if msg_drawn(msg_pos_ind) == 1 % if the message has been drawn
-                msg_j_del = [msg_j_del, j];
-                continue; % skipping the draw loop
-            elseif rain_pos_rev(j) == 1 % if not drawn yet
-                msg_drawn(msg_pos_ind) = 1;
-                msg_rain_stop(msg_pos_ind) = true;
-                msg_j_del = [msg_j_del, j];
-                continue; % skipping the draw loop
-            end
-        end
-        
-        % draw the rains
-        color_tmp = matrix_green;
-        if rain_pos_rev(j) <= head_len % head effect
-            color_tmp(2) = hsv_s_pos_head(j);
-            color_tmp = hsv2rgb(color_tmp);
-            text( w_pos(j), h_pos(j), c_pos(j), 'color', color_tmp , ...
-                'FontWeight', 'bold', 'HorizontalAlignment','center','VerticalAlignment','top',...
-                'FontName','Courier')
-        else
-            color_tmp(3) = color_tmp(3)*hsv_v_pos(j)*hsv_v_pos_tail(j);
-            color_tmp = hsv2rgb(color_tmp);
-            text( w_pos(j), h_pos(j), c_pos(j), 'color', color_tmp , ...
-                'FontWeight', 'bold', 'HorizontalAlignment','center','VerticalAlignment','top',...
-                'FontName','Courier')
-        end
+    if i >= msg_t
+        is_at = ismember(w_pos, msg_pos) & (h_pos == msg_h); % if the rain is at massage positions
+        has_just_arrived = is_at & rain_pos_rev == 1; % if the rain head has just arrived
+        w_arrived = w_pos(has_just_arrived); % the w-positions of those that have just arrived
+        [~, msg_arrived_ind] = ismember(w_arrived, msg_pos);
+        msg_drawn(msg_arrived_ind) = true; % draw the newly arrived message
+        msg_rain_stop(msg_arrived_ind) = true; % stop new rains from coming since the message has arrived
+        has_fallen_beyond = ismember(w_pos, msg_pos(msg_drawn)) & is_at;
+        msg_j_del = find(has_just_arrived | has_fallen_beyond); % delete those rains just arrived or fallen beyond the drawn message
     end
+
+    % update the text objects
+    set(text_obj(:), 'color', 'k'); % set all the colors to black. This line takes 0.05 sec to run.
+    set(text_obj(sub2ind([h w], h_pos, w_pos)), {'String'}, mat2cell(c_pos(:),ones(1,length(c_pos(:))),1)); %#ok<MMTC>
+    set(text_obj(sub2ind([h w], h_pos, w_pos)), {'Color'}, color_tmp_cell)
+    set(text_obj(sub2ind([h w], msg_h*ones(1,sum(msg_drawn == 1)), msg_pos(msg_drawn == 1))), {'String'}, msg(msg_drawn == 1))
+    set(text_obj(sub2ind([h w], msg_h*ones(1,sum(msg_drawn == 1)), msg_pos(msg_drawn == 1))), {'Color'},  num2cell(msg_color(msg_drawn == 1,:), 2));
+    toc;
     
-    % delete those falling beyond the message
+    % delete those rains just arrived or fallen beyond the drawn message
     w_pos(msg_j_del) = [];
     rain_pos(msg_j_del) = [];
     v_pos(msg_j_del) = [];
@@ -202,29 +204,21 @@ for i = 1:t
     rain_pos_rev(msg_j_del) = [];
     rain_tail_len(msg_j_del) = [];
     h_pos(msg_j_del) = [];
+    c_pos(msg_j_del) = [];
 
-    % draw the message
-    for m = 1:length(msg_drawn)
-        if msg_drawn(m) == 1
-            text( msg_pos(m), msg_h, msg(m), 'color',  msg_color(m,:), ...
-                'FontWeight', 'bold', 'HorizontalAlignment','center','VerticalAlignment','top',...
-                'FontName','Courier')
-        end
-    end
-    
     % the message fades
     if isempty(h_pos) && nnz(msg_drawn-1) == 0
-        for m = 1:length(msg_drawn)
-            msg_color(m,:) = msg_color(m,:).*exp(-1/msg_fade_steps(m));
-        end
+        msg_color = msg_color.*repmat(exp(-1./msg_fade_steps(:)), 1, 3);
     end
+    
+    % Check duplicated entries. There should be none.
+    % dup = length(h_pos) - length(unique(sub2ind([h w], h_pos, w_pos)))
     
     % save to the video file
     drawnow;
     if gen_video == 1
         writeVideo(vidObj, getframe(gcf));
     end
-    
     % show progress
     i/t %#ok<NOPTS>
 end
