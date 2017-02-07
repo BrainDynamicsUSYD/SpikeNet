@@ -63,9 +63,9 @@ else
                 mlh = -fval;
                 % get bayes factor
                 func_handle_unif = @(rate) -get_unif_lh_log_ad_hoc( spike_count, rate );
-                [~, fval] = fminsearchbnd(func_handle_unif, peak_rate_guess/2, 0 , peak_rate_guess);
+                [rate_unif, fval] = fminsearchbnd(func_handle_unif, peak_rate_guess/2, 0 , peak_rate_guess);
                 mlh_unif = -fval;
-                bayes_factor = exp(mlh - mlh_unif - 0.5*(4-1)*log(sum(sum(spike_count))));
+                bayes_factor = mlh - mlh_unif - 0.5*(4-1)*log(sum(sum(spike_count)));
                 % See Gu and Gong, 2016, The dynamics of memory retrieval in hierarchical networks: a modeling study
                 
             case 'quick'
@@ -108,7 +108,7 @@ end
 
 end
 
-function lh_log = get_lh_log_ad_hoc(x_grid, y_grid, spike_count, x_c, y_c, peak_rate, width )
+function lh_log = get_gaus_lh_log_ad_hoc(x_grid, y_grid, spike_count, x_c, y_c, peak_rate, width )
 
 peak_rate = abs(peak_rate); % should always be positive
 gauss_rate =  exp( -((x_grid - x_c).^2 + (y_grid - y_c).^2)/(2*width^2) );
