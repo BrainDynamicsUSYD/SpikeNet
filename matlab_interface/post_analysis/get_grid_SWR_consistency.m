@@ -27,7 +27,7 @@ end
 spike_x = strut_tmp.centre(1, grid_is_common );
 spike_y = strut_tmp.centre(2, grid_is_common );
 spike_w = strut_tmp.radius(:, grid_is_common );
-spike_mlh = strut_tmp.mlh(:, grid_is_common );
+spike_bf_log10 = strut_tmp.bayes_factor_ln(:, grid_is_common)/log(10); % change base
 spike_h = strut_tmp.height(:, grid_is_common );
         
 % reformat ripple data
@@ -59,7 +59,7 @@ for i = 1:length(fit_common)
 end
 
 % discard bad fits
-spike_bad = spike_mlh < (nanmean(spike_mlh) - 2*nanstd(spike_mlh));
+spike_bad = spike_bf_log10 < 2;
 spike_x(spike_bad) = NaN;
 spike_y(spike_bad) = NaN;
 spike_h(spike_bad) = NaN;
@@ -121,7 +121,7 @@ spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1
 spike_img_acc_c = zeros(1,n_bins);
 spike_img_acc = zeros(fw, fw, n_bins);
 for i = 1:length(t_tmp)
-    if ~isnan( spike_x_tmp(i) )
+    if ~isnan( spike_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
         t = t_tmp(i);
         t_range_tmp = t+spike_img_t_range;
         if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
@@ -145,7 +145,7 @@ end
 R.grid_SWR.spike_x = spike_x;
 R.grid_SWR.spike_y = spike_y;
 R.grid_SWR.spike_h = spike_h;
-R.grid_SWR.spike_mlh = spike_mlh;
+R.grid_SWR.spike_bf_log10 = spike_bf_log10;
 R.grid_SWR.spike_w = spike_w;
 R.grid_SWR.spike_ind = indA;
 
