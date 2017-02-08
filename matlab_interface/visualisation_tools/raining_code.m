@@ -95,6 +95,7 @@ text_obj = text( i_grid(:), j_grid(:), '0', 'color', 'k', ...
             'FontName','Courier');
 
 % start the simulation
+tic;
 for i = 1:t
     % generate new rains
     
@@ -194,7 +195,6 @@ for i = 1:t
     set(text_obj(sub2ind([h w], h_pos, w_pos)), {'Color'}, color_tmp_cell)
     set(text_obj(sub2ind([h w], msg_h*ones(1,sum(msg_drawn == 1)), msg_pos(msg_drawn == 1))), {'String'}, msg(msg_drawn == 1))
     set(text_obj(sub2ind([h w], msg_h*ones(1,sum(msg_drawn == 1)), msg_pos(msg_drawn == 1))), {'Color'},  num2cell(msg_color(msg_drawn == 1,:), 2));
-    toc;
     
     % delete those rains just arrived or fallen beyond the drawn message
     w_pos(msg_j_del) = [];
