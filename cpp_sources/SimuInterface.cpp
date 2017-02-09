@@ -927,6 +927,14 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 				network.NeuroPopArray[ind]->set_para(para_str);
 			}
 			
+			// seed
+			if (group_exist_HDF5(in_filename, pop_n + string("/SEED001"))){
+				cout << "\t\t RNG seed setting...";
+				int seed = read_scalar_HDF5<int>(file, pop_n + string("/SEED001/seed"));
+				network.NeuroPopArray[ind]->set_seed(seed);
+				cout << "done." << endl;
+			}
+			
 			// external current setting
 			if (group_exist_HDF5(in_filename, pop_n + string("/INIT004"))){
 				cout << "\t\t External current settings...";
@@ -1115,6 +1123,14 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 					cout << "\t\t Synaptic dynamics model choice...";
 					int model_choice = read_scalar_HDF5<int>(file, string("/config/syns/INIT013/model_choice"));
 					network.ChemSynArray.back()->set_synapse_model(model_choice);
+					cout << "done." << endl;
+				}
+				
+				// seed
+				if (group_exist_HDF5(in_filename, syn_n + string("/SEED002"))){
+					cout << "\t\t RNG seed setting...";
+					int seed = read_scalar_HDF5<int>(file, syn_n + string("/SEED002/seed"));
+					network.ChemSynArray.back()->set_seed(seed);
 					cout << "done." << endl;
 				}
 				

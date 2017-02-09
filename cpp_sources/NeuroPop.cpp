@@ -81,6 +81,10 @@ void NeuroPop::init()
 
 }
 
+void NeuroPop::set_seed(int seed_input){
+	my_seed = seed_input; // This will overwrite the auto generated seed.
+}
+
 const vector< int > & NeuroPop::get_spikes_current() 
 {
 	return spikes_current;

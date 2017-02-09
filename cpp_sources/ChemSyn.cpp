@@ -42,11 +42,11 @@ void ChemSyn::init(const int syn_type_input, const int i_pre, const int j_post, 
 
 	// input check
 	if (*max_element(C_i.begin(), C_i.end()) >= N_pre_input){
-	cout << "Wrong Input!In the chemical synapses " << syn_type_input + 1 <<" connection from pop "<< i_pre + 1 << " to pop " << j_post + 1 << ",the index of pre_population synapses exceed the number of pre-population neurons." << endl;
+		cout << "Wrong Input!In the chemical synapses " << syn_type_input + 1 <<" connection from pop "<< i_pre + 1 << " to pop " << j_post + 1 << ",the index of pre_population synapses exceed the number of pre-population neurons." << endl;
 	}
 				 
 	if (*max_element(C_j.begin(), C_j.end()) >= N_post_input){
-	cout << "Wrong Input!In the chemical synapses " << syn_type_input + 1 <<" connection from pop "<< i_pre + 1 << " to pop " << j_post + 1 << ",the index of post_population synapses exceed the number of post-population neurons." << endl;
+		cout << "Wrong Input!In the chemical synapses " << syn_type_input + 1 <<" connection from pop "<< i_pre + 1 << " to pop " << j_post + 1 << ",the index of post_population synapses exceed the number of post-population neurons." << endl;
 	}
 
 	// read parameter
@@ -115,7 +115,14 @@ void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_
 	init();
 }
 
-
+void ChemSyn::set_seed(int seed_input){
+	if (pop_ind_pre != -1){
+		cout << "Cannot set RNG seed to the synapses with type " << syn_type + 1 <<" from pop "<< pop_ind_pre + 1 << " to pop " << pop_ind_post + 1 << " since this object does not have RNG." << endl;
+	}
+	else{
+		my_seed = seed_input; // This will overwrite the auto generated seed.
+	}
+}
 
 void ChemSyn::init(){
 	// parameter-dependent initialisation

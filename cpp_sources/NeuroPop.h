@@ -35,7 +35,8 @@ public:
 
 	void init(); // initialise neurons, called by constructor after parameter assignment
 	void set_para(string para); /// set parameters if not using default ones
-
+	void set_seed(int seed); /// manually set RNG seed 
+		
 	void output_results(ofstream& output_file);
 
 

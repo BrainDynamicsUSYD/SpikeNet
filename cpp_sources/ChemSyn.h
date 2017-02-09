@@ -22,7 +22,8 @@ public:
 	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_t, const vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population;
 
 	void set_para(string para_str); /// set parameter values
-
+	void set_seed(int seed); /// manually set RNG seed 
+	
 	void recv_pop_data(vector<NeuroPop*> &NeuronPopArray); /// receive data from neuron populations
 	void update(const int step_current); /// update by one step
 	
