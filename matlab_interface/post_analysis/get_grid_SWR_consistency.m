@@ -114,7 +114,7 @@ n_bins = 5;
 [Lattice, ~] = lattice_nD(2, (fw-1)/2);
 t_tmp = t_common(indA);
 % ripple_h_tmp = ripple_h(indB);
-raw_h = round(peak_common(3,indB));
+raw_h = peak_common(3,indB);
 % ripple_x_tmp = round(ripple_x(indA)+fw/2); % be careful here!!
 % ripple_y_tmp = round(ripple_y(indA)+fw/2); % be careful here!!
 raw_x = round(peak_common(1,indB));
@@ -143,7 +143,7 @@ for i = 1:length(t_tmp)
                 % img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
                 %bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
                 img_tmp = circshift(img_tmp, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
-                bin_ind_tmp = find(raw_h(i) >= spike_img_ripple_h_bin(1:end-1) & raw_h(i) <= spike_img_ripple_h_bin(2:end));
+                bin_ind_tmp = find(raw_h(i) > spike_img_ripple_h_bin(1:end-1) & raw_h(i) <= spike_img_ripple_h_bin(2:end));
                 spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
                 spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
             end
