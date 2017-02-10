@@ -138,13 +138,15 @@ for i = 1:length(t_tmp)
             j_tmp = Lattice(ind_neu_unique,2)+32;
             ind_neu_occ = histc(ind_neu, ind_neu_unique);
             img_tmp = full(sparse(i_tmp, j_tmp, ind_neu_occ, fw,fw));
-            % shift to the center
-            % img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
-            %bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
-            img_tmp = circshift(img_tmp, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
-            bin_ind_tmp = find(raw_h(i) >= spike_img_ripple_h_bin(1:end-1) & raw_h(i) <= spike_img_ripple_h_bin(2:end));
-            spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
-            spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
+            if ~isempty(img_tmp)
+                % shift to the center
+                % img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
+                %bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
+                img_tmp = circshift(img_tmp, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+                bin_ind_tmp = find(raw_h(i) >= spike_img_ripple_h_bin(1:end-1) & raw_h(i) <= spike_img_ripple_h_bin(2:end));
+                spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
+                spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
+            end
         end
     end
 end
