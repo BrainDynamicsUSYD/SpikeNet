@@ -120,7 +120,7 @@ raw_h = round(peak_common(3,indB));
 raw_x = round(peak_common(1,indB));
 raw_y = round(peak_common(2,indB));
 
-spike_img_t_range = -25:25; % steps
+spike_img_t_range = 0; %-25:25; % steps
 % spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
 spike_img_ripple_h_bin = linspace(min(raw_h), max(raw_h), n_bins+1);
 
