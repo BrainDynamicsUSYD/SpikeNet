@@ -65,7 +65,7 @@ spike_y(spike_bad) = NaN;
 spike_h(spike_bad) = NaN;
 spike_w(spike_bad) = NaN;
 
-ripple_bad = ripple_g < (nanmean(ripple_g) - 2*nanstd(ripple_g));
+ripple_bad = ripple_g < 0.8; %(nanmean(ripple_g) - 2*nanstd(ripple_g));
 ripple_x(ripple_bad) = NaN;
 ripple_y(ripple_bad) = NaN;
 ripple_h(ripple_bad) = NaN;
@@ -109,19 +109,26 @@ y_diff = min([abs(spike_y(indA)- ripple_y(indB)); 63-abs(spike_y(indA)- ripple_y
 pos_diff_opt = sqrt(x_diff.^2 + y_diff.^2);
 
 
-% collect spike image according to ripple_h_bin
+% collect spike image according to raw ripple peak position
 n_bins = 5;
-ripple_h_tmp = ripple_h(indB);
 [Lattice, ~] = lattice_nD(2, (fw-1)/2);
 t_tmp = t_common(indA);
-ripple_x_tmp = round(ripple_x(indA)+fw/2); % be careful here!!
-ripple_y_tmp = round(ripple_y(indA)+fw/2); % be careful here!!
+% ripple_h_tmp = ripple_h(indB);
+raw_h = round(peak_common(3,indB));
+% ripple_x_tmp = round(ripple_x(indA)+fw/2); % be careful here!!
+% ripple_y_tmp = round(ripple_y(indA)+fw/2); % be careful here!!
+raw_x = round(peak_common(1,indB));
+raw_y = round(peak_common(2,indB));
+
 spike_img_t_range = -25:25; % steps
-spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
+% spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
+spike_img_ripple_h_bin = linspace(min(raw_h), max(raw_h), n_bins+1);
+
 spike_img_acc_c = zeros(1,n_bins);
 spike_img_acc = zeros(fw, fw, n_bins);
 for i = 1:length(t_tmp)
-    if ~isnan( ripple_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
+    % if ~isnan( ripple_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
+    if ~isnan( raw_x(i) )
         t = t_tmp(i);
         t_range_tmp = t+spike_img_t_range;
         if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
@@ -132,8 +139,10 @@ for i = 1:length(t_tmp)
             ind_neu_occ = histc(ind_neu, ind_neu_unique);
             img_tmp = full(sparse(i_tmp, j_tmp, ind_neu_occ, fw,fw));
             % shift to the center
-            img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
-            bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
+            % img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
+            %bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
+            img_tmp = circshift(img_tmp, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+            bin_ind_tmp = find(raw_h(i) >= spike_img_ripple_h_bin(1:end-1) & raw_h(i) <= spike_img_ripple_h_bin(2:end));
             spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
             spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
         end
