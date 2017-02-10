@@ -128,7 +128,7 @@ spike_img_acc_c = zeros(1,n_bins);
 spike_img_acc = zeros(fw, fw, n_bins);
 for i = 1:length(t_tmp)
     % if ~isnan( ripple_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
-    if ~isnan( raw_x(i) )
+    if ~isnan( raw_x(i) ) && ~isnan( raw_h(i) )
         t = t_tmp(i);
         t_range_tmp = t+spike_img_t_range;
         if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
