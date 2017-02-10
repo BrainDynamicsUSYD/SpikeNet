@@ -114,14 +114,14 @@ n_bins = 5;
 ripple_h_tmp = ripple_h(indB);
 [Lattice, ~] = lattice_nD(2, (fw-1)/2);
 t_tmp = t_common(indA);
-spike_x_tmp = round(spike_x(indA)+fw/2);
-spike_y_tmp = round(spike_y(indA)+fw/2);
+ripple_x_tmp = round(ripple_x(indA)+fw/2); % be careful here!!
+ripple_y_tmp = round(ripple_y(indA)+fw/2); % be careful here!!
 spike_img_t_range = -25:25; % steps
 spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
 spike_img_acc_c = zeros(1,n_bins);
 spike_img_acc = zeros(fw, fw, n_bins);
 for i = 1:length(t_tmp)
-    if ~isnan( spike_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
+    if ~isnan( ripple_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
         t = t_tmp(i);
         t_range_tmp = t+spike_img_t_range;
         if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
@@ -132,7 +132,7 @@ for i = 1:length(t_tmp)
             ind_neu_occ = histc(ind_neu, ind_neu_unique);
             img_tmp = full(sparse(i_tmp, j_tmp, ind_neu_occ, fw,fw));
             % shift to the center
-            img_tmp = circshift(img_tmp, [round(fw/2)-spike_x_tmp(i)  round(fw/2)-spike_y_tmp(i)]);
+            img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
             bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
             spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
             spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
