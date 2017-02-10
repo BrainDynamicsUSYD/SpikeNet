@@ -147,6 +147,7 @@ if ~isempty(files)
             samp_file = [stamps num2str(pop_ind-1) '_neurosamp.h5'];
             samp_file_mat = [samp_file(1:end-2) 'mat'];
             if exist(samp_file_mat,'file') ~= 2 % 2 for .mat file
+                fprintf('   Generating %s...', samp_file_mat);
                 I_AMPA = try_h5read( samp_file,  '/I_AMPA' );
                 I_GABA = try_h5read( samp_file,  '/I_GABA' );
                 I_K = try_h5read( samp_file,  '/I_K' );
@@ -155,6 +156,7 @@ if ~isempty(files)
                 I_leak = try_h5read( samp_file,  '/I_leak' );
                 save(samp_file_mat, 'I_AMPA', 'I_GABA','I_K','I_ext' ,'V', 'I_leak');
                 clear 'I_AMPA'  'I_GABA' 'I_K' 'I_ext' 'V''I_leak';
+                fprintf('done\n');
             end
         end
         

@@ -110,7 +110,7 @@ pos_diff_opt = sqrt(x_diff.^2 + y_diff.^2);
 
 
 % collect spike image according to ripple_h_bin
-n_bins = 6;
+n_bins = 5;
 ripple_h_tmp = ripple_h(indB);
 [Lattice, ~] = lattice_nD(2, (fw-1)/2);
 t_tmp = t_common(indA);

@@ -34,13 +34,13 @@ for i = 1:num_files
 
     
     
-    R_temp = avalanche_detect(R_temp);
-    avalanche = R_temp.avalanche;
-    save(files{i},'avalanche', '-append');
-        
-    R_temp = get_stPR(R_temp);
-    stPR = R_temp.stPR;
-    save(files{i},'stPR', '-append');
+%     R_temp = avalanche_detect(R_temp);
+%     avalanche = R_temp.avalanche;
+%     save(files{i},'avalanche', '-append');
+%         
+%     R_temp = get_stPR(R_temp);
+%     stPR = R_temp.stPR;
+%     save(files{i},'stPR', '-append');
 %     
 
     
@@ -49,15 +49,26 @@ for i = 1:num_files
 %      LFP = R_temp.LFP;
 %      save(files{i},'LFP', '-append');
 %      
-     [R_temp] = get_CC_pop(R_temp, 1);
-     Analysis = R_temp.Analysis;
-     save(files{i},'Analysis', '-append');
+%      [R_temp] = get_CC_pop(R_temp, 1);
+%      Analysis = R_temp.Analysis;
+%      save(files{i},'Analysis', '-append');
 %      
-    R_temp = get_grid_firing_centre(R_temp);
-    grid = R_temp.grid;
-    save(files{i},'grid', '-append');
+
+%      [R_temp] = get_lagged_cov(R_temp);
+%      Analysis = R_temp.Analysis;
+%      save(files{i},'Analysis', '-append');
+
+%     get_LFP_continous(R_temp);
 
 
+%     R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+%     grid = R_temp.grid; %#ok<NASGU>
+%     save(files{i},'grid', '-append');
+%
+    R_temp = get_grid_SWR_consistency(R_temp);
+    grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
+    save(files{i},'grid_SWR', '-append');
+    
      % plot_SWR(R_temp, save_fig);
 %     
     
