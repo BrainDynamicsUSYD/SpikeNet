@@ -4,7 +4,7 @@ function R = get_grid_SWR_consistency(R)
 dt = R.dt;
 stamp = R.stamp;
 samp_file = [stamp(1:end-3) '0_neurosamp'];
-load(['./', samp_file], 'peak','ripple_fit', 'ripple_fit_goodness');
+load(['./', samp_file], 'peak','ripple_fit', 'ripple_fit_goodness', 'peak_LFP','RPI', 'ripple_power_tot','LFP_power_tot');
 
 % find common data
 fw = sqrt(R.N(1)); %63;
@@ -29,10 +29,15 @@ spike_y = strut_tmp.centre(2, grid_is_common );
 spike_w = strut_tmp.radius(:, grid_is_common );
 spike_bf_log10 = strut_tmp.bayes_factor_ln(:, grid_is_common)/log(10); % change base
 spike_h = strut_tmp.height(:, grid_is_common );
-        
+spike_tot = R.grid.num_spikes_win( grid_is_common );
+
 % reformat ripple data
-peak_common = peak( t_common - t_p(1) + 1, :  )';
+peak_common = peak( t_common - t_p(1) + 1, :  )'; %#ok<NODEF>
 fit_common = ripple_fit( t_common - t_p(1) + 1  );
+RPI_common = RPI(t_common - t_p(1) + 1);
+ripple_power_tot_common = ripple_power_tot(t_common - t_p(1) + 1);
+LFP_power_tot_common = LFP_power_tot(t_common - t_p(1) + 1);
+peak_LFP_common = peak_LFP(t_common - t_p(1) + 1, :)'; %#ok<NODEF>
 fit_goodness_common = ripple_fit_goodness( t_common - t_p(1) + 1  );
 ripple_x = zeros(1,length(fit_common));
 ripple_y = zeros(1,length(fit_common));
@@ -109,43 +114,32 @@ y_diff = min([abs(spike_y(indA)- ripple_y(indB)); 63-abs(spike_y(indA)- ripple_y
 pos_diff_opt = sqrt(x_diff.^2 + y_diff.^2);
 
 
-% collect spike image according to raw ripple peak position
+% collect spike hist according to raw ripple peak position
 n_bins = 5;
-[Lattice, ~] = lattice_nD(2, (fw-1)/2);
 t_tmp = t_common(indA);
-% ripple_h_tmp = ripple_h(indB);
 raw_h = peak_common(3,indB);
-% ripple_x_tmp = round(ripple_x(indA)+fw/2); % be careful here!!
-% ripple_y_tmp = round(ripple_y(indA)+fw/2); % be careful here!!
 raw_x = round(peak_common(1,indB));
 raw_y = round(peak_common(2,indB));
+spike_hist_t_range = -25:25; % steps
+spike_ripple_h_bin = linspace(min(raw_h), max(raw_h), n_bins+1);
+[x_grid_0, y_grid_0] = meshgrid(1:fw, 1:fw);
+spike_hist_acc_c = zeros(1,n_bins);
+spike_hist_acc = zeros(fw^2, length(spike_hist_t_range), n_bins);
 
-spike_img_t_range = 0; %-25:25; % steps
-% spike_img_ripple_h_bin = linspace(min(ripple_h_tmp), max(ripple_h_tmp), n_bins+1);
-spike_img_ripple_h_bin = linspace(min(raw_h), max(raw_h), n_bins+1);
-
-spike_img_acc_c = zeros(1,n_bins);
-spike_img_acc = zeros(fw, fw, n_bins);
 for i = 1:length(t_tmp)
-    % if ~isnan( ripple_x_tmp(i) ) && ~isnan(ripple_h_tmp(i))
     if ~isnan( raw_x(i) ) && ~isnan( raw_h(i) )
         t = t_tmp(i);
-        t_range_tmp = t+spike_img_t_range;
+        t_range_tmp = t+spike_hist_t_range;
         if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
             [ind_neu, ind_t] = find(R.spike_hist{1}(:, t_range_tmp));
-            ind_neu_unique = unique(ind_neu);
-            i_tmp = Lattice(ind_neu_unique,1)+32;
-            j_tmp = Lattice(ind_neu_unique,2)+32;
-            ind_neu_occ = histc(ind_neu, ind_neu_unique);
-            img_tmp = full(sparse(i_tmp, j_tmp, ind_neu_occ, fw,fw));
-            if ~isempty(img_tmp)
-                % shift to the center
-                % img_tmp = circshift(img_tmp, [round(fw/2)-ripple_x_tmp(i)  round(fw/2)-ripple_y_tmp(i)]);
-                %bin_ind_tmp = find(ripple_h_tmp(i) >= spike_img_ripple_h_bin(1:end-1) & ripple_h_tmp(i) <= spike_img_ripple_h_bin(2:end));
-                img_tmp = circshift(img_tmp, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
-                bin_ind_tmp = find(raw_h(i) > spike_img_ripple_h_bin(1:end-1) & raw_h(i) <= spike_img_ripple_h_bin(2:end));
-                spike_img_acc(:,:,bin_ind_tmp) = spike_img_acc(:,:,bin_ind_tmp) + img_tmp;
-                spike_img_acc_c(bin_ind_tmp) = spike_img_acc_c(bin_ind_tmp) + 1;
+            if ~isempty(ind_neu)
+                x_grid = circshift(x_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+                y_grid = circshift(y_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+                ind_neu_shifted = sub2ind([fw fw], x_grid(ind_neu), y_grid(ind_neu));
+                bin_ind_tmp = find(raw_h(i) >= spike_ripple_h_bin(1:end-1) & raw_h(i) <= spike_ripple_h_bin(2:end), 1);
+                spike_hist_tmp = full(sparse(ind_neu_shifted, ind_t, ones(size(ind_t)), fw^2, length(spike_hist_t_range)));
+                spike_hist_acc(:,:,bin_ind_tmp) = spike_hist_acc(:,:,bin_ind_tmp) + spike_hist_tmp;
+                spike_hist_acc_c(bin_ind_tmp) = spike_hist_acc_c(bin_ind_tmp) + 1;
             end
         end
     end
@@ -158,6 +152,7 @@ R.grid_SWR.spike_y = spike_y;
 R.grid_SWR.spike_h = spike_h;
 R.grid_SWR.spike_bf_log10 = spike_bf_log10;
 R.grid_SWR.spike_w = spike_w;
+R.grid_SWR.spike_tot = spike_tot;
 R.grid_SWR.spike_ind = indA;
 
 R.grid_SWR.ripple_x = ripple_x;
@@ -167,15 +162,22 @@ R.grid_SWR.ripple_g = ripple_g;
 R.grid_SWR.ripple_w = ripple_w;
 R.grid_SWR.ripple_ind = indB;
 
+R.grid_SWR.ripple_power_index = RPI_common;
+R.grid_SWR.ripple_power_tot = ripple_power_tot_common;
+R.grid_SWR.LFP_power_tot = LFP_power_tot_common;
+R.grid_SWR.LFP_h = peak_LFP_common(3,:);
+
 R.grid_SWR.lag_ms = lag_ms;
 R.grid_SWR.mean_pos_diff_lag = mean_pos_diff_lag;
 R.grid_SWR.lag_ms_opt = lag_ms_opt;
 R.grid_SWR.pos_diff_opt = pos_diff_opt;
 
-R.grid_SWR.spike_img_acc = spike_img_acc;
-R.grid_SWR.spike_img_acc_c = spike_img_acc_c;
-R.grid_SWR.spike_img_t_range = spike_img_t_range; % steps
-R.grid_SWR.spike_img_ripple_h_bin = spike_img_ripple_h_bin;
+% R.grid_SWR.spike_img_acc = spike_img_acc;
+% R.grid_SWR.spike_img_acc_c = spike_img_acc_c;
+R.grid_SWR.spike_hist_acc = spike_hist_acc;
+R.grid_SWR.spike_hist_acc_c = spike_hist_acc_c; 
+R.grid_SWR.spike_hist_t_range = spike_hist_t_range;
+R.grid_SWR.spike_ripple_h_bin = spike_ripple_h_bin;
 end
 
 
