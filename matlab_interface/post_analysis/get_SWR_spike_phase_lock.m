@@ -7,27 +7,37 @@ spike_count = [];
 spike_sort_range = R.LFP.ripple_event.spike_sort_range;
 % spike_sort_range = 12;
 
-
-for i = 1:length(R.LFP.LFP_ripple(:,1))
+dt_conv = R.dt/R.reduced.dt;
+for i = 2 %1:length(R.LFP.LFP_ripple(:,1))
     no_std = R.LFP.wavelet.peak.rp_amp_no_std{i};
     s_tmp = R.ExplVar.LFP_range_sigma;
     spike_sort_neurons = R.LFP.LFP_neurons{1}(i,:) >= 1/(s_tmp*sqrt(2*pi))*exp(-0.5*(spike_sort_range/s_tmp)^2);
-    spike_count_sort = full(sum(R.spike_hist{1}(spike_sort_neurons,:)));
+    spike_count_sort = full(sum(R.reduced.spike_hist{1}(spike_sort_neurons,:)));
     
     hil = hilbert(R.LFP.LFP_ripple(i,:));
-    hil_phase0 = atan2(imag(hil), real(hil));
+    hil_phase0 = atan2(imag(hil),real(hil));
     
     a = R.LFP.ripple_event.ripple_start_steps{i};
     b = R.LFP.ripple_event.ripple_start_steps{i} + R.LFP.ripple_event.ripple_du_steps{i} - 1;
-
+    
     
     for j = 1:length(a)
-        if no_std(j) > 7
-            hil_phase = [hil_phase hil_phase0(a(j):b(j))]; %#ok<AGROW>
-            spike_count = [spike_count spike_count_sort(a(j):b(j))]; %#ok<AGROW>
-        end
+        s_ab = round(a(j)*dt_conv):round(b(j)*dt_conv);
+        xx = hil_phase0( round(s_ab/dt_conv));
+        yy = spike_count_sort(s_ab-10);
+        zz = R.LFP.LFP_ripple(i, round(s_ab/dt_conv));
+        %             figure(1);
+        %             plot(zz,'b')
+        %             hold on;
+        %             plot(yy,'r')
+        %             plot(xx,'g')
+        %             pause;
+        %             close all
+        hil_phase = [hil_phase xx]; %#ok<AGROW>
+        spike_count = [spike_count yy]; %#ok<AGROW>
     end
-
+    
+    
 end
 
 R.SWR_spike_phase_lock.hil_phase = hil_phase;
