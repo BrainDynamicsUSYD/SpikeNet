@@ -58,7 +58,7 @@ for i = 1:num_files
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
 
-     get_LFP_continous(R_temp);
+     % get_LFP_continous(R_temp);
 
 
 %     R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
