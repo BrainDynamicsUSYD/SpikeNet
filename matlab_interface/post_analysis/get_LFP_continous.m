@@ -3,48 +3,93 @@ stamp = R.stamp;
 samp_file = [stamp(1:end-3) '0_neurosamp'];
 fw = sqrt(R.N);
 
+
+try
+    load(samp_file, 'ripple_power_grid');
+    [N_s, ~, steps] = size(ripple_power_grid);
+    N = N_s^2;
+    if N ~= R.N(1)
+        error('Not all of the excitatory neurons are sampled!')
+    end
+    fw = sqrt(N);
+    hw = (fw-1)/2;
+catch
+end
+
+load(samp_file, 'LFP_grid');
+if ~exist('LFP_grid','var')
+    disp('Creating LFP_grid...')
+    load(samp_file,'I_AMPA','I_GABA');
+    [N, steps] = size(I_AMPA);
+    if N ~= R.N(1)
+        error('Not all of the excitatory neurons are sampled!')
+    end
+    [Lattice, ~] = lattice_nD(2, hw);
+    
+    dist = lattice_nD_find_dist(Lattice, hw,  0, 0);
+    LFP_range_sigma = R.ExplVar.LFP_range_sigma;
+    gaus_tmp = 1/(LFP_range_sigma*sqrt(2*pi))*exp(-0.5*(dist/LFP_range_sigma).^2) .* double(dist <= LFP_range_sigma*2.5);
+    m = reshape(gaus_tmp, fw, fw);
+    LFP_grid = zeros(fw,fw,steps);
+    for i = 1:steps
+        x = reshape(abs(I_AMPA(:,i)) + abs(I_GABA(:,i)), fw, fw);
+        y = convolve2(x, m, 'wrap');
+        
+        LFP_grid(:,:,i) = y;
+        %i
+    end
+    clear I_AMPA I_GABA;
+    save(samp_file, 'LFP_grid', '-append')
+    clear LFP_grid;
+end
+
+
+load(samp_file, 'ripple_grid');
+if ~exist('ripple_grid','var')
+    disp('Creating ripple_grid...')
+    load(samp_file,'LFP_grid');
+    
+    %%%% Ripple power
+    fs = 1/(R.dt*1e-3); % sampling frequency (Hz)
+    % Butterworth filter
+    order = 4; % 4th order
+    lowFreq = 100; % ripple band (default values for this function are 150-250 Hz)
+    hiFreq = 250;
+    Wn = [ lowFreq  hiFreq]/(fs/2);
+    [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
+    ripple_grid = zeros(size(LFP_grid));
+    for i = 1:fw
+        for j= 1:fw
+            ripple_tmp = filter(b,a,LFP_grid(i,j,:));
+            ripple_tmp = ripple_tmp(:);
+            ripple_grid(i,j,:) = ripple_tmp;
+        end
+        %w*(i-1)+j
+    end
+    save(samp_file, 'ripple_grid', '-append')
+end
+
+
+load(samp_file, 'ripple_power_grid');
+if ~exist('ripple_power_grid','var')
+    disp('Creating ripple_power_grid...')
+    load(samp_file,'ripple_grid');
+    
+    gaus_width = 5; %ms
+    [ Kernel ] = spike_train_kernel_YG( gaus_width, R.dt, 'gaussian_unit' );
+    ripple_power_grid = zeros(size(ripple_grid));
+    for i = 1:fw
+        for j= 1:fw
+            ripple_tmp = ripple_grid(i,j,:);
+            hil_tmp = abs(hilbert( ripple_tmp));
+            ripple_power_grid(i,j,:) = conv(hil_tmp, Kernel,'same');
+        end
+    end
+    save(samp_file, 'ripple_power_grid', '-append')
+end
+
 load(samp_file, 'ripple_fit');
 if ~exist('ripple_fit','var')
-    try
-        load(samp_file, 'ripple_power_grid');
-        [N_s, ~, steps] = size(ripple_power_grid);
-        N = N_s^2;
-        if N ~= R.N(1)
-            error('Not all of the excitatory neurons are sampled!')
-        end
-        fw = sqrt(N);
-        hw = (fw-1)/2;
-    catch
-    end
-   
-    
-    load(samp_file, 'ripple_power_grid');
-    if ~exist('ripple_power_grid','var')
-        disp('Creating ripple_power_grid...')
-        load(samp_file,'LFP_grid');
-        
-        %%%% Ripple power
-        fs = 1/(R.dt*1e-3); % sampling frequency (Hz)
-        % Butterworth filter
-        order = 4; % 4th order
-        lowFreq = 100; % ripple band (default values for this function are 150-250 Hz)
-        hiFreq = 250;
-        Wn = [ lowFreq  hiFreq]/(fs/2);
-        [b,a] = butter(order/2,Wn,'bandpass'); %The resulting bandpass and bandstop designs are of order 2n.
-        gaus_width = 5; %ms
-        [ Kernel ] = spike_train_kernel_YG( gaus_width, R.dt, 'gaussian_unit' );
-        ripple_power_grid = zeros(size(LFP_grid));
-        for i = 1:fw
-            for j= 1:fw
-                ripple_tmp = filter(b,a,LFP_grid(i,j,:));
-                ripple_tmp = ripple_tmp(:);
-                hil_tmp = abs(hilbert( ripple_tmp));
-                ripple_power_grid(i,j,:) = conv(hil_tmp, Kernel,'same');
-            end
-            %w*(i-1)+j
-        end
-        save(samp_file, 'ripple_power_grid', '-append')
-    end
     
     % get peak and ripple fit
     disp('Fitting ripple power...')
@@ -79,33 +124,6 @@ if ~exist('ripple_fit','var')
     save(samp_file,  'ripple_fit', 'ripple_fit_goodness', '-append')
 end
 
-load(samp_file, 'LFP_grid');
-if ~exist('LFP_grid','var')
-    disp('Creating LFP_grid...')
-    load(samp_file,'I_AMPA','I_GABA');
-    [N, steps] = size(I_AMPA);
-    if N ~= R.N(1)
-        error('Not all of the excitatory neurons are sampled!')
-    end
-    hw = (fw-1)/2;
-    [Lattice, ~] = lattice_nD(2, hw);
-    
-    dist = lattice_nD_find_dist(Lattice, hw,  0, 0);
-    LFP_range_sigma = R.ExplVar.LFP_range_sigma;
-    gaus_tmp = 1/(LFP_range_sigma*sqrt(2*pi))*exp(-0.5*(dist/LFP_range_sigma).^2) .* double(dist <= LFP_range_sigma*2.5);
-    m = reshape(gaus_tmp, fw, fw);
-    LFP_grid = zeros(fw,fw,steps);
-    for i = 1:steps
-        x = reshape(abs(I_AMPA(:,i)) + abs(I_GABA(:,i)), fw, fw);
-        y = convolve2(x, m, 'wrap');
-        
-        LFP_grid(:,:,i) = y;
-        %i
-    end
-    clear I_AMPA I_GABA;
-    save(samp_file, 'LFP_grid', '-append')
-    clear LFP_grid;
-end
 
 load(samp_file, 'LFP_power_grid');
 if ~exist('LFP_power_grid','var')
@@ -136,10 +154,9 @@ if ~exist('LFP_power_grid','var')
     clear LFP_power_grid LFP_grid;
 end
 
-
 load(samp_file, 'peak_LFP');
 if ~exist('peak_LFP','var')
-     disp('Creating RPI and peak_LFP...')
+    disp('Creating RPI and peak_LFP...')
     % get ripper-power-index
     load(samp_file, 'ripple_power_grid','LFP_power_grid');
     peak_LFP = [];
@@ -166,5 +183,6 @@ if ~exist('ripple_power_tot','var')
     save(samp_file, 'ripple_power_tot', 'LFP_power_tot', '-append')
     clear 'ripple_power_grid','LFP_power_grid';
 end
+
 end
 

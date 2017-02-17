@@ -114,35 +114,83 @@ y_diff = min([abs(spike_y(indA)- ripple_y(indB)); 63-abs(spike_y(indA)- ripple_y
 pos_diff_opt = sqrt(x_diff.^2 + y_diff.^2);
 
 
+% % collect spike hist according to raw ripple peak position
+% n_bins = 5;
+% t_tmp = t_common(indA);
+% raw_h = peak_common(3,indB);
+% raw_x = round(peak_common(1,indB));
+% raw_y = round(peak_common(2,indB));
+% spike_hist_t_range = -100:100; % steps
+% spike_ripple_h_bin = linspace(min(raw_h), max(raw_h), n_bins+1);
+% [x_grid_0, y_grid_0] = meshgrid(1:fw, 1:fw);
+% spike_hist_acc_c = zeros(1,n_bins);
+% spike_hist_acc = zeros(fw^2, length(spike_hist_t_range), n_bins);
+%
+% for i = 1:length(t_tmp)
+%     if ~isnan( raw_x(i) ) && ~isnan( raw_h(i) )
+%         t = t_tmp(i);
+%         t_range_tmp = t+spike_hist_t_range;
+%         if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
+%             [ind_neu, ind_t] = find(R.spike_hist{1}(:, t_range_tmp));
+%             if ~isempty(ind_neu)
+%                 x_grid = circshift(x_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+%                 y_grid = circshift(y_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+%                 ind_neu_shifted = sub2ind([fw fw], x_grid(ind_neu), y_grid(ind_neu));
+%                 bin_ind_tmp = find(raw_h(i) >= spike_ripple_h_bin(1:end-1) & raw_h(i) <= spike_ripple_h_bin(2:end), 1);
+%                 spike_hist_tmp = full(sparse(ind_neu_shifted, ind_t, ones(size(ind_t)), fw^2, length(spike_hist_t_range)));
+%                 spike_hist_acc(:,:,bin_ind_tmp) = spike_hist_acc(:,:,bin_ind_tmp) + spike_hist_tmp;
+%                 spike_hist_acc_c(bin_ind_tmp) = spike_hist_acc_c(bin_ind_tmp) + 1;
+%             end
+%         end
+%     end
+% end
+
 % collect spike hist according to raw ripple peak position
-n_bins = 5;
 t_tmp = t_common(indA);
 raw_h = peak_common(3,indB);
 raw_x = round(peak_common(1,indB));
 raw_y = round(peak_common(2,indB));
-spike_hist_t_range = -100:100; % steps
-spike_ripple_h_bin = linspace(min(raw_h), max(raw_h), n_bins+1);
-[x_grid_0, y_grid_0] = meshgrid(1:fw, 1:fw);
-spike_hist_acc_c = zeros(1,n_bins);
-spike_hist_acc = zeros(fw^2, length(spike_hist_t_range), n_bins);
+t_range_ms = 20; %ms;
 
+spike_t_range_steps = round(t_range_ms/R.reduced.dt); %ms;
+
+dt_conv = R.dt/R.reduced.dt;
+
+[x_grid_0, y_grid_0] = meshgrid(1:fw, 1:fw);
+
+
+[Lattice, ~] = lattice_nD(2, (fw-1)/2);
+spike_sort_range = 60;
+centre_neurons = sqrt( Lattice(:,1).^2 + Lattice(:,2).^2 ) <= spike_sort_range;
+
+spike_count_sort = [];
+spike_count_h = [];
 for i = 1:length(t_tmp)
     if ~isnan( raw_x(i) ) && ~isnan( raw_h(i) )
-        t = t_tmp(i);
-        t_range_tmp = t+spike_hist_t_range;
-        if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.step_tot
-            [ind_neu, ind_t] = find(R.spike_hist{1}(:, t_range_tmp));
-            if ~isempty(ind_neu)
-                x_grid = circshift(x_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
-                y_grid = circshift(y_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
-                ind_neu_shifted = sub2ind([fw fw], x_grid(ind_neu), y_grid(ind_neu));
-                bin_ind_tmp = find(raw_h(i) >= spike_ripple_h_bin(1:end-1) & raw_h(i) <= spike_ripple_h_bin(2:end), 1);
-                spike_hist_tmp = full(sparse(ind_neu_shifted, ind_t, ones(size(ind_t)), fw^2, length(spike_hist_t_range)));
-                spike_hist_acc(:,:,bin_ind_tmp) = spike_hist_acc(:,:,bin_ind_tmp) + spike_hist_tmp;
-                spike_hist_acc_c(bin_ind_tmp) = spike_hist_acc_c(bin_ind_tmp) + 1;
-            end
+        spike_count_sort_tmp = [];
+        % spikes
+        t = round(t_tmp(i)*dt_conv);
+        t_range_tmp = (t-spike_t_range_steps):(t+spike_t_range_steps) ;
+        if min(t_range_tmp) > 1 && max(t_range_tmp) <= R.reduced.step_tot
+            
+            [ind_neu, ind_t] = find(R.reduced.spike_hist{1}(:, t_range_tmp));
+            
+            x_grid = circshift(x_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+            y_grid = circshift(y_grid_0, [round(fw/2-raw_x(i))  round(fw/2-raw_y(i))]);
+            ind_neu_shifted = sub2ind([fw fw], x_grid(ind_neu), y_grid(ind_neu));
+            % plot(Lattice(ind_neu_shifted,1),Lattice(ind_neu_shifted,2),'o')
+            spike_hist_tmp = full(sparse(ind_neu_shifted, ind_t, ones(size(ind_t)), fw^2, length(t_range_tmp)));
+            spike_count_sort_tmp = sum(spike_hist_tmp(centre_neurons, :));
+        end
+        
+        if ~isempty(spike_count_sort_tmp) %&& ~isempty(hil_phase_tmp)
+            spike_count_sort = [spike_count_sort; spike_count_sort_tmp(:)']; %#ok<AGROW>
+            spike_count_h = [spike_count_h; raw_h(i)]; %#ok<AGROW>
         end
     end
+    
+    
+    
 end
 
 
@@ -174,10 +222,12 @@ R.grid_SWR.pos_diff_opt = pos_diff_opt;
 
 % R.grid_SWR.spike_img_acc = spike_img_acc;
 % R.grid_SWR.spike_img_acc_c = spike_img_acc_c;
-R.grid_SWR.spike_hist_acc = spike_hist_acc;
-R.grid_SWR.spike_hist_acc_c = spike_hist_acc_c; 
-R.grid_SWR.spike_hist_t_range = spike_hist_t_range;
-R.grid_SWR.spike_ripple_h_bin = spike_ripple_h_bin;
+% R.grid_SWR.spike_hist_acc = spike_hist_acc;
+% R.grid_SWR.spike_hist_acc_c = spike_hist_acc_c;
+% R.grid_SWR.spike_hist_t_range = spike_hist_t_range;
+% R.grid_SWR.spike_ripple_h_bin = spike_ripple_h_bin;
+R.grid_SWR.spike_count_sort = spike_count_sort;
+R.grid_SWR.spike_count_h = spike_count_h;
 end
 
 
