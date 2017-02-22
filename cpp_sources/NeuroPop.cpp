@@ -727,7 +727,7 @@ void NeuroPop::record_stats(const int step_current){
 		stats.I_input_std.push_back(sqrt(var_tmp_I));
 		
 		// online mean and var calculation: Welford's method (1962, Technometrixcs)
-		Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, step_current);
+		Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, step_current, step_current == (step_tot-1));
 		Welford_online(I_GABA, stats.I_GABA_time_avg,  step_current);
 		Welford_online(I_NMDA, stats.I_NMDA_time_avg,  step_current);
 		Welford_online(I_AMPA, stats.I_AMPA_time_avg,  step_current);
@@ -754,9 +754,10 @@ void Welford_online(const vector<double>& data, double& M, double& S){
 		M += (x - M_old) / double(i + 1.0);
 		S += (x - M_old) * (x - M);
 	}
+	S = S / (double(data.size()) - 1.0); // N-1, sample variance
 }
 
-void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K){
+void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K, const bool is_end){
 	// Note that K follows C++ index, K = 0, 1, ....
 	// online mean and var calculation: Welford's method (1962, Technometrixcs)
 	double M_old, x;
@@ -765,7 +766,11 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector<do
 		x = new_data[i];
 		M[i] += (x - M_old) / double(K + 1.0);
 		S[i] += (x - M_old) * (x - M[i]);
+		if (is_end == true){
+			S[i] = S[i] / double(K); // N-1, sample variance
+		}
 	}
+
 }
 
 void Welford_online(const vector<double>& new_data, vector<double>& M, const int K){

@@ -293,7 +293,7 @@ protected:
 	}current_file;
 }; //class declaration must end with a semi-colon.
 
-void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K); /// online mean and var calculation: Welford's method (1962, Technometrixcs)
+void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K, const bool is_end); /// online mean and var calculation: Welford's method (1962, Technometrixcs)
 void Welford_online(const vector<double>& new_data, vector<double>& M, const int K);
 void Welford_online(const vector<double>& data, double& M, double& S); 
 
