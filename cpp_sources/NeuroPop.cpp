@@ -752,7 +752,7 @@ void Welford_online(const vector<double>& data, double& M, double& S){
 		M_old = M;
 		x = data[i];
 		M += (x - M_old) / double(i + 1.0);
-		S += (x - M_old) / (x - M);
+		S += (x - M_old) * (x - M);
 	}
 }
 
@@ -764,7 +764,7 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector<do
 		M_old = M[i];
 		x = new_data[i];
 		M[i] += (x - M_old) / double(K + 1.0);
-		S[i] += (x - M_old) / (x - M[i]);
+		S[i] += (x - M_old) * (x - M[i]);
 	}
 }
 
