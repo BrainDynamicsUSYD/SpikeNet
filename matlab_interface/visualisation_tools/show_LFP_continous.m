@@ -1,10 +1,24 @@
-function show_LFP_continous(R)
+function show_LFP_continous(R, choice)
 dt = R.dt;
 stamp = R.stamp;
 samp_file = [stamp(1:end-3) '0_neurosamp'];
 
-load(samp_file, 'ripple_power_grid');
-[N_s, ~, steps] = size(ripple_power_grid);
+if nargin == 1
+    choice = 1;
+end
+
+if choice == 2
+    load(samp_file, 'ripple_power_grid');
+    X = ripple_power_grid;
+    clear ripple_power_grid;
+elseif choice == 1
+    load(samp_file, 'LFP_power_grid');
+    X = ripple_power_grid;
+    clear LFP_power_grid;
+end
+
+
+[N_s, ~, steps] = size(X);
 N = N_s^2;
 if N ~= R.N(1)
     error('Not all of the excitatory neurons are sampled!')
@@ -13,9 +27,6 @@ w = sqrt(N);
 hw = (w-1)/2;
 [Lattice, ~] = lattice_nD(2, hw);
 load(samp_file, 'peak');
-
-X = ripple_power_grid;
-clear ripple_power_grid;
 
 
 figure('NumberTitle','off','Name','Ripple Hilbert Power','color', 'w');
