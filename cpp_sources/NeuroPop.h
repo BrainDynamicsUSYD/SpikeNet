@@ -9,7 +9,6 @@
 
 #include "MyIO.h"
 
-
 #ifdef HDF5
 	#include <H5Cpp.h>
 	#include <hdf5_hl.h>
@@ -176,12 +175,11 @@ protected:
 			V_std, /// std of membrane potential averaged over neurons at each time step
 			I_input_mean, /// mean of I_input averaged over neurons at each time step
 			I_input_std, /// std of I_input averaged over neurons at each time step
-			I_AMPA_acc, /// accumulator for AMPA input currents into each neuron
 			I_AMPA_time_avg, /// I_AMPA averaged over time for each neuron
-			I_NMDA_acc,  /// accumulator for NMDA input currents into each neuron
 			I_NMDA_time_avg, /// I_NMDA averaged over time for each neuron
-			I_GABA_acc, /// accumulator for GABA input currents into each neuron
 			I_GABA_time_avg, /// I_GABA averaged over time for each neuron
+			I_tot_time_mean, // mean of total current for each neuron
+			I_tot_time_var, // variance of total current for each neuron
 			IE_ratio; /// I-E ratio for each neuron
 	} stats;
 	
@@ -295,8 +293,9 @@ protected:
 	}current_file;
 }; //class declaration must end with a semi-colon.
 
-
-
+void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K); /// online mean and var calculation: Welford's method (1962, Technometrixcs)
+void Welford_online(const vector<double>& new_data, vector<double>& M, const int K);
+void Welford_online(const vector<double>& data, double& M, double& S); 
 
 inline NeuroPop::NeuroPop(){}; /// default constructor
 
