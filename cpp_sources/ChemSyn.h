@@ -72,7 +72,7 @@ private:
 	void update_STD(const int step_current); /// update short-term depression
 	void update_inh_STDP(const int step_current); /// update inhibitory STDP
 	void sample_data(const int step_current); /// sample data
-	void record_stats(); /// record basic statistics
+	void record_stats(int step_current); /// record basic statistics
 
 protected:
 	// constants
@@ -110,7 +110,9 @@ protected:
 			record;
 		vector<double>
 			I_mean,
-			I_std;
+			I_std,
+			s_time_mean,
+			s_time_var;
 	} stats;
 	
 

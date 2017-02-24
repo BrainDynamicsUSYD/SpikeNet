@@ -242,7 +242,7 @@ void ChemSyn::update(const int step_current){
 	sample_data(step_current);
 	
 	//
-	record_stats();
+	record_stats(step_current);
 	
 }// update
 
@@ -565,6 +565,10 @@ void ChemSyn::start_stats_record(){
 	stats.record = true;
 	stats.I_mean.reserve(step_tot);
 	stats.I_std.reserve(step_tot);
+	if (synapse_model == 0){
+		stats.s_time_mean.reserve(N_pre);
+		stats.s_time_var.reserve(N_pre);
+	}
 }
 
 void ChemSyn::output_results(ofstream& output_file){
@@ -911,25 +915,17 @@ void ChemSyn::send_pop_data(vector<NeuroPop*> &NeuronPopArray){
 
 }
 
-void ChemSyn::record_stats(){
+void ChemSyn::record_stats(int step_current){
 	if (stats.record){
-		// get mean
-		double sum_mean = 0.0;
-		for (unsigned int i = 0; i < I.size(); ++i){
-			sum_mean += I[i];
-		}
-		double mean_tmp = sum_mean / double(I.size());
-	
-		// get std
-		double sum_std = 0.0;
-		for (unsigned int i = 0; i < I.size(); ++i){
-			sum_std += (I[i]-mean_tmp)*(I[i]-mean_tmp);
-		}
-		double std_tmp = sqrt( sum_std / double(I.size()));
-	
+		double mean_tmp_I, var_tmp_I;
+		Welford_online(I, mean_tmp_I, var_tmp_I);
 		// record   
-		stats.I_mean.push_back(mean_tmp);
-		stats.I_std.push_back(std_tmp);
+		stats.I_mean.push_back(mean_tmp_I);
+		stats.I_std.push_back( sqrt(var_tmp_I) );
+		
+		if (synapse_model == 0){
+			Welford_online(gsm_0.s, stats.s_time_mean, stats.s_time_var, step_current, step_current == (step_tot-1));
+		}
 	}
 }
 
@@ -1261,6 +1257,10 @@ void ChemSyn::output_results(H5File& file, int syn_ind){
 	if (stats.record){
 		write_vector_HDF5(group_syn, stats.I_mean, string("stats_I_mean"));
 		write_vector_HDF5(group_syn, stats.I_std, string("stats_I_std"));
+		if (synapse_model == 0){
+			write_vector_HDF5(group_syn, stats.s_time_mean, string("stats_s_time_mean"));
+			write_vector_HDF5(group_syn, stats.s_time_var, string("stats_s_time_var"));
+		}
 	}
 }
 
