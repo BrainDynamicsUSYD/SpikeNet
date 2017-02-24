@@ -39,7 +39,7 @@ writeExtSpikeSettingsHDF5(FID, 1, 1, k,  20, 10*ones(1,step_tot), ones(1, N(1)) 
 
 % neuronal data sampling
 sample_steps = zeros(1,step_tot);
-sample_steps(1:2:step_tot) =  true;
+sample_steps(1:1:step_tot) =  true;
 writeNeuronSamplingHDF5(FID, 1, ones(1,8), 1:2:10 , sample_steps);
 writeNeuronSamplingHDF5(FID, 2, ones(1,8), 1 , sample_steps);
 
@@ -85,8 +85,6 @@ writeInitCondHDF5(FID, r_V0, p_fire)
 
 writeSpikeFreqAdptHDF5(FID, 1);
 
-
-writeLFPRecordHDF5(FID, 1, 0.5*ones(1,N(1)));
 % %%%%%%% write runaway killer
 min_ms = 10*1000; % 10 sec
 runaway_Hz = 20; % ??

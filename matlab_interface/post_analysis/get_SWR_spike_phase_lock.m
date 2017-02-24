@@ -6,8 +6,12 @@ lag_step = round(lag_ms/R.reduced.dt);
 hil_phase = [];
 spike_count = [];
 rp_amp_no_std  = [];
+spike_sort_range = 6;
+try
 spike_sort_range = R.LFP.ripple_event.spike_sort_range;
-% spike_sort_range = 12;
+catch
+end
+
 
 dt_conv = R.dt/R.reduced.dt;
 for i = 1:length(R.LFP.LFP_ripple(:,1))

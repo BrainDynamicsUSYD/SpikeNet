@@ -1,9 +1,8 @@
 function get_LFP_continous(R)
 stamp = R.stamp;
 samp_file = [stamp(1:end-3) '0_neurosamp'];
-fw = sqrt(R.N);
-
-
+fw = sqrt(R.N(1));
+hw = (fw-1)/2;
 try
     load(samp_file, 'ripple_power_grid');
     [N_s, ~, steps] = size(ripple_power_grid);
@@ -12,7 +11,7 @@ try
         error('Not all of the excitatory neurons are sampled!')
     end
     fw = sqrt(N);
-    hw = (fw-1)/2;
+   
 catch
 end
 
@@ -82,7 +81,7 @@ if ~exist('ripple_power_grid','var')
         for j= 1:fw
             ripple_tmp = ripple_grid(i,j,:);
             hil_tmp = abs(hilbert( ripple_tmp));
-            ripple_power_grid(i,j,:) = conv(hil_tmp, Kernel,'same');
+            ripple_power_grid(i,j,:) = conv(hil_tmp(:)', Kernel,'same');
         end
     end
     save(samp_file, 'ripple_power_grid', '-append')
@@ -93,7 +92,7 @@ if ~exist('ripple_fit','var')
     
     % get peak and ripple fit
     disp('Fitting ripple power...')
-    [A_row, A_col,~] = size(ripple_power_grid);
+    [A_row, A_col, steps] = size(ripple_power_grid);
     [x_grid, y_grid] = meshgrid(1:A_row, 1:A_col);
     circ_gauss = fittype( @(h, sigma, x_c, y_c,  x, y) h*exp(-((x-x_c).^2 + (y-y_c).^2)/(2*sigma^2) ),...
         'independent', {'x', 'y'},...

@@ -3,11 +3,19 @@ dt = R.dt;
 stamp = R.stamp;
 samp_file = [stamp(1:end-3) '0_neurosamp'];
 
+
+down_sample = 20;
+
 if nargin == 1
     choice = 1;
 end
 
-if choice == 2
+if choice == 3
+    load(samp_file, 'V');
+    [N, steps] = size(V);
+    X = reshape(V, [sqrt(N) sqrt(N) steps]);
+    clear V;
+elseif choice == 2
     load(samp_file, 'ripple_power_grid');
     X = ripple_power_grid;
     clear ripple_power_grid;
@@ -41,7 +49,7 @@ h2 = plot(Lattice(s,2),Lattice(s,1),'r.','MarkerSize',15);
 
 t = find(R.neuron_sample.t_ind{1});
 
-for i = 1:steps
+for i = 1:down_sample:steps
     s = find(R.spike_hist{1}(:,t(i)));
     pause(0.01)
     set(h1,'CData',X(:,:,i));

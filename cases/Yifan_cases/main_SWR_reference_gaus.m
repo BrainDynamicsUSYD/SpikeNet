@@ -8,7 +8,7 @@ function main_SWR_reference_gaus(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 6*sec; % use 10 second!
+step_tot = 10*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -16,7 +16,7 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 10;
+repeats = 20;
 for P0_init = 0.08*ones(1,repeats)
     
     P_mat = [P0_init 0.1;

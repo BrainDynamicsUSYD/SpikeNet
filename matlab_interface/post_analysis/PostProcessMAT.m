@@ -58,16 +58,16 @@ for i = 1:num_files
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
 
-     % get_LFP_continous(R_temp);
+      get_LFP_continous(R_temp);
 
 
-     %     R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-     %     grid = R_temp.grid; %#ok<NASGU>
-     %     save(files{i},'grid', '-append');
-     %
-     %    R_temp = get_grid_SWR_consistency(R_temp);
-     %    grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
-     %    save(files{i},'grid_SWR', '-append');
+          R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+          grid = R_temp.grid; %#ok<NASGU>
+          save(files{i},'grid', '-append');
+     
+         R_temp = get_grid_SWR_consistency(R_temp);
+         grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
+         save(files{i},'grid_SWR', '-append');
      
      R_temp = get_SWR_spike_phase_lock(R_temp);
      SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
