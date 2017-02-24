@@ -566,8 +566,8 @@ void ChemSyn::start_stats_record(){
 	stats.I_mean.reserve(step_tot);
 	stats.I_std.reserve(step_tot);
 	if (synapse_model == 0){
-		stats.s_time_mean.reserve(N_pre);
-		stats.s_time_var.reserve(N_pre);
+		stats.s_time_mean.fill(N_pre, 0.0);
+		stats.s_time_var.fill(N_pre,0.0);
 	}
 }
 
