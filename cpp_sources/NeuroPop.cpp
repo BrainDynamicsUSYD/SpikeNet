@@ -162,6 +162,9 @@ void NeuroPop::start_stats_record()
 	stats.I_GABA_time_avg.assign(N, 0.0);
 	stats.I_tot_time_mean.assign(N, 0.0);
 	stats.I_tot_time_var.assign(N, 0.0);
+	stats.V_time_mean.assign(N, 0.0);
+	stats.V_time_var.assign(N, 0.0);
+	
 	
 	stats.IE_ratio.assign(N, 0.0);
 }
@@ -728,6 +731,7 @@ void NeuroPop::record_stats(const int step_current){
 		
 		// online mean and var calculation: Welford's method (1962, Technometrixcs)
 		Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, step_current, step_current == (step_tot-1));
+		Welford_online(V, stats.V_time_mean, stats.V_time_var, step_current, step_current == (step_tot-1));
 		Welford_online(I_GABA, stats.I_GABA_time_avg,  step_current);
 		Welford_online(I_NMDA, stats.I_NMDA_time_avg,  step_current);
 		Welford_online(I_AMPA, stats.I_AMPA_time_avg,  step_current);
@@ -1144,6 +1148,8 @@ void NeuroPop::output_results(H5File& file){
 		write_vector_HDF5(group_pop, stats.I_GABA_time_avg, string("stats_I_GABA_time_avg"));
 		write_vector_HDF5(group_pop, stats.I_tot_time_mean, string("stats_I_tot_time_mean"));
 		write_vector_HDF5(group_pop, stats.I_tot_time_var, string("stats_I_tot_time_var"));
+		write_vector_HDF5(group_pop, stats.V_time_mean, string("stats_V_time_mean"));
+		write_vector_HDF5(group_pop, stats.V_time_var, string("stats_V_time_var"));
 		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
 	}
 	
