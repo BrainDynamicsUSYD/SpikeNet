@@ -143,6 +143,9 @@ if ~isempty(files)
                 OutData{id_out}.syn_stats{syn_ind, 1}.I_std =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_std']));
                 OutData{id_out}.syn_stats{syn_ind, 1}.s_mean =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_s_time_mean']));
                 OutData{id_out}.syn_stats{syn_ind, 1}.s_var =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_s_time_var']));
+                OutData{id_out}.syn_stats{syn_ind, 1}.I_time_mean =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_I_time_mean']));
+                OutData{id_out}.syn_stats{syn_ind, 1}.I_time_var =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_I_time_var']));
+                
                 %
                 OutData{id_out}.SynPara{syn_ind, 1} = try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/syn_para']);
             end
