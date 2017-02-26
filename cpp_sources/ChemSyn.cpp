@@ -568,6 +568,8 @@ void ChemSyn::start_stats_record(){
 	if (synapse_model == 0){
 		stats.s_time_mean.assign(N_pre, 0.0);
 		stats.s_time_var.assign(N_pre,0.0);
+		stats.I_time_mean.assign(N_pre, 0.0);
+		stats.I_time_var.assign(N_pre,0.0);
 	}
 }
 
@@ -925,6 +927,7 @@ void ChemSyn::record_stats(int step_current){
 		
 		if (synapse_model == 0){
 			Welford_online(gsm_0.s, stats.s_time_mean, stats.s_time_var, step_current, step_current == (step_tot-1));
+			Welford_online(I, stats.I_time_mean, stats.I_time_var, step_current, step_current == (step_tot-1));
 		}
 	}
 }
@@ -1260,6 +1263,8 @@ void ChemSyn::output_results(H5File& file, int syn_ind){
 		if (synapse_model == 0){
 			write_vector_HDF5(group_syn, stats.s_time_mean, string("stats_s_time_mean"));
 			write_vector_HDF5(group_syn, stats.s_time_var, string("stats_s_time_var"));
+			write_vector_HDF5(group_syn, stats.I_time_mean, string("stats_I_time_mean"));
+			write_vector_HDF5(group_syn, stats.I_time_var, string("stats_I_time_var"));
 		}
 	}
 }

@@ -109,10 +109,12 @@ protected:
 		bool
 			record;
 		vector<double>
-			I_mean,
-			I_std,
-			s_time_mean,
-			s_time_var;
+			I_mean, // over all the synapses for each step
+			I_std, // over all the synapses for each step
+			s_time_mean, // over all the time steps for each synapse
+			s_time_var, // over all the time steps for each synapse
+			I_time_mean, // over all the time steps for each synapse
+			I_time_var; // over all the time steps for each synapse
 	} stats;
 	
 
