@@ -570,8 +570,19 @@ void ChemSyn::start_stats_record(){
 		stats.s_time_var.assign(N_pre,0.0);
 		stats.I_time_mean.assign(N_pre, 0.0);
 		stats.I_time_var.assign(N_pre,0.0);
+		stats.time_start = 0;
+		stats.time_end = step_tot - 1;
 	}
 }
+
+void ChemSyn::start_stats_record(const int time_start, const int time_end){
+	start_stats_record();
+	if (synapse_model == 0){
+		stats.time_start = time_start;
+		stats.time_end = time_end;
+	}
+}
+
 
 void ChemSyn::output_results(ofstream& output_file){
 	// SYND001 # synapse parameters
@@ -926,8 +937,12 @@ void ChemSyn::record_stats(int step_current){
 		stats.I_std.push_back( sqrt(var_tmp_I) );
 		
 		if (synapse_model == 0){
-			Welford_online(gsm_0.s, stats.s_time_mean, stats.s_time_var, step_current, step_current == (step_tot-1));
-			Welford_online(I, stats.I_time_mean, stats.I_time_var, step_current, step_current == (step_tot-1));
+			if (step_current >= stats.time_start && step_current <= stats.time_end){
+				int k = step_current-stats.time_start;
+				bool is_end = step_current == (stats.time_end-1);
+				Welford_online(gsm_0.s, stats.s_time_mean, stats.s_time_var, k, is_end);
+				Welford_online(I, stats.I_time_mean, stats.I_time_var, k, is_end);
+			}
 		}
 	}
 }

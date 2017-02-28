@@ -48,7 +48,8 @@ public:
 	const double & get_Cm();
 		
 	void start_stats_record();
-
+	void start_stats_record(const int time_start, const int time_end);
+	
 	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
@@ -183,6 +184,9 @@ protected:
 			V_time_mean, /// mean of membrane potential for each neuron
 			V_time_var, /// variance of membrane potential for each neuron
 			IE_ratio; /// I-E ratio for each neuron
+		int
+			time_start,
+			time_end;
 	} stats;
 	
 	struct Lfp {

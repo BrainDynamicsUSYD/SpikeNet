@@ -38,6 +38,8 @@ public:
 	void add_sampling(const vector<int> & sample_neurons, const vector<bool> & sample_time_points);  /// add data sampling 
 
 	void start_stats_record(); /// turn on basic statistics recording
+	void start_stats_record(const int time_start, const int time_end);
+		
 	void output_results(ofstream& output_file); /// write output to file
 
 	void add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscaleE, double iscaleI,double lrate_E,double lrateall_E,double lrate_I,double lrateall_I,int intau, double innoise, int type_pre, int type_post);
@@ -115,6 +117,9 @@ protected:
 			s_time_var, // over all the time steps for each synapse
 			I_time_mean, // over all the time steps for each synapse
 			I_time_var; // over all the time steps for each synapse
+		int
+			time_start,
+			time_end;
 	} stats;
 	
 
