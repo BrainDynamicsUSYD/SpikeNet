@@ -182,8 +182,9 @@ protected:
 			I_tot_time_mean, /// mean of total current for each neuron
 			I_tot_time_var, /// variance of total current for each neuron
 			V_time_mean, /// mean of membrane potential for each neuron
-			V_time_var, /// variance of membrane potential for each neuron
 			IE_ratio; /// I-E ratio for each neuron
+		vector< vector <double> >
+			V_time_cov; /// covariance of membrane potential for each neuron
 		int
 			time_start,
 			time_end;
@@ -300,6 +301,7 @@ protected:
 }; //class declaration must end with a semi-colon.
 
 void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K, const bool is_end); /// online mean and var calculation: Welford's method (1962, Technometrixcs)
+void Welford_online(const vector<double>& new_data, vector<double>& M, vector< vector <double> >& Cov, const int K, const bool is_end); 
 void Welford_online(const vector<double>& new_data, vector<double>& M, const int K);
 void Welford_online(const vector<double>& data, double& M, double& S); 
 

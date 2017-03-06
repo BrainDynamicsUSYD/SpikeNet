@@ -163,7 +163,10 @@ void NeuroPop::start_stats_record()
 	stats.I_tot_time_mean.assign(N, 0.0);
 	stats.I_tot_time_var.assign(N, 0.0);
 	stats.V_time_mean.assign(N, 0.0);
-	stats.V_time_var.assign(N, 0.0);
+	stats.V_time_cov.resize(N);
+	for (int i = 0; i < N; ++i){
+		stats.V_time_cov[i].assign(N, 0.0);
+	}
 	
 	stats.time_start = 0;
 	stats.time_end = step_tot - 1;
@@ -749,7 +752,7 @@ void NeuroPop::record_stats(const int step_current){
 			int k = step_current-stats.time_start;
 			bool is_end = step_current == (stats.time_end-1);
 			Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, k, is_end);
-			Welford_online(V, stats.V_time_mean, stats.V_time_var,  k, is_end);
+			Welford_online(V, stats.V_time_mean, stats.V_time_cov,  k, is_end);
 			Welford_online(I_GABA, stats.I_GABA_time_avg, k);
 			Welford_online(I_NMDA, stats.I_NMDA_time_avg, k);
 			Welford_online(I_AMPA, stats.I_AMPA_time_avg, k);
@@ -796,6 +799,35 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector<do
 	}
 
 }
+
+
+void Welford_online(const vector<double>& new_data, vector<double>& M, vector< vector <double> >& Cov, const int K, const bool is_end){
+	double M_old, x;
+	int N_tmp = int(M.size());
+	vector<double> M_add; 
+	M_add.resize(N_tmp);
+	
+	for (int i = 0; i < N_tmp; ++i){ 
+		M_old = M[i];
+		x = new_data[i];
+		M_add[i] = (x - M_old) / double(K + 1.0);
+		M[i] += M_add[i];
+	}
+	
+	// covariance
+	for (int i = 0; i < N_tmp; ++i){ 
+		for (int j = i; j < N_tmp; ++j){ 
+			Cov[i][j] -= Cov[i][j] / double(K + 1.0);
+			Cov[i][j] += double(K) * M_add[i] * M_add[j];
+			if (is_end == true){
+				Cov[i][j] = Cov[i][j] * double(K + 1.0) / double(K);
+				Cov[j][i] = Cov[i][j];
+			}
+		}
+	}
+	
+}
+
 
 void Welford_online(const vector<double>& new_data, vector<double>& M, const int K){
 	// Note that K follows C++ index, K = 0, 1, ....
@@ -1169,7 +1201,7 @@ void NeuroPop::output_results(H5File& file){
 		write_vector_HDF5(group_pop, stats.I_tot_time_mean, string("stats_I_tot_time_mean"));
 		write_vector_HDF5(group_pop, stats.I_tot_time_var, string("stats_I_tot_time_var"));
 		write_vector_HDF5(group_pop, stats.V_time_mean, string("stats_V_time_mean"));
-		write_vector_HDF5(group_pop, stats.V_time_var, string("stats_V_time_var"));
+		write_matrix_HDF5(group_pop, stats.V_time_cov, string("stats_V_time_cov"));
 		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
 	}
 	

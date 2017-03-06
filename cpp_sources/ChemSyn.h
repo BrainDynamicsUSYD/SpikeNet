@@ -114,9 +114,10 @@ protected:
 			I_mean, // over all the synapses for each step
 			I_std, // over all the synapses for each step
 			s_time_mean, // over all the time steps for each synapse
-			s_time_var, // over all the time steps for each synapse
 			I_time_mean, // over all the time steps for each synapse
 			I_time_var; // over all the time steps for each synapse
+		vector< vector<double> >
+			s_time_cov; // over all the time steps for each synapse
 		int
 			time_start,
 			time_end;
