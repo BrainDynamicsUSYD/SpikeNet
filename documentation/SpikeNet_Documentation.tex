@@ -26,7 +26,8 @@
 \author[1]{Yifan Gu\thanks{yigu8115@gmail.com}}
 \author[1]{James Henderson}
 \author[1]{Yuxi Liu}
-\affil[1]{School of Physics, University of Sydney, NSW 2006, Australia}
+\author[1]{Guozhang Chen}
+\affil[1]{School of Physics and ARC Centre of Excellence for Integrative Brain Function, University of Sydney, NSW 2006, Australia}
 
 %%\renewcommand\Authands{ and }
 
@@ -484,6 +485,17 @@ HDF5-based input protocols basically follow the text-based protocols (with a few
 }
 \xdef\tpd{\the\prevdepth}
 \end{minipage}
+
+
+\subsection{Notes on RNG control}
+To fully control the RNG in C++ simulator, you need to pass the seed via this two functions.
+\begin{enumerate}
+\item writeExtSpikeSettingsHDF5(..., Seed)
+\item writePopSeedHDF5
+\end{enumerate}
+
+
+
 
 \subsection{Text-based output protocols}
 The default filename of text-based output file is ``filename-X.ygout'', where X is a time-stamp that uniquely marks the output file so that multiple simulations can be run for the same input files.
