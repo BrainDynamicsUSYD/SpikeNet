@@ -163,7 +163,6 @@ void NeuroPop::start_stats_record()
 	stats.I_tot_time_mean.assign(N, 0.0);
 	stats.I_tot_time_var.assign(N, 0.0);
 	stats.V_time_mean.assign(N, 0.0);
-<<<<<<< HEAD
 	stats.V_time_cov.resize(N);
 	for (int i = 0; i < N; ++i){
 		stats.V_time_cov[i].assign(N, 0.0);
@@ -186,20 +185,8 @@ void NeuroPop::start_stats_record(const int time_start, const int time_end)
 
 }
 
-
-
-void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_input){
-	if (int(LFP_neurons_input[0].size()) != N){
-=======
-	stats.V_time_var.assign(N, 0.0);
-
-
-	stats.IE_ratio.assign(N, 0.0);
-}
-
 void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_input) {
 	if (int(LFP_neurons_input[0].size()) != N) {
->>>>>>> 23e79de7724e6d20682f27d373fd3dba49b593f7
 		cout << "start_LFP_record failed: LFP_neurons should be 1-by-N logical vector!" << endl;
 	}
 	else {
@@ -213,8 +200,6 @@ void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_inpu
 		}
 	}
 }
-
-
 
 void NeuroPop::set_para(string para_str) {
 	if (!para_str.empty()) {
@@ -760,7 +745,6 @@ void NeuroPop::record_stats(const int step_current) {
 		stats.I_input_std.push_back(sqrt(var_tmp_I));
 
 		// online mean and var calculation: Welford's method (1962, Technometrixcs)
-<<<<<<< HEAD
 		if (step_current >= stats.time_start && step_current <= stats.time_end){
 			int k = step_current-stats.time_start;
 			bool is_end = step_current == (stats.time_end-1);
@@ -771,17 +755,6 @@ void NeuroPop::record_stats(const int step_current) {
 			Welford_online(I_AMPA, stats.I_AMPA_time_avg, k);
 		}
 		
-		
-		
-=======
-		Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, step_current, step_current == (step_tot - 1));
-		Welford_online(V, stats.V_time_mean, stats.V_time_var, step_current, step_current == (step_tot - 1));
-		Welford_online(I_GABA, stats.I_GABA_time_avg,  step_current);
-		Welford_online(I_NMDA, stats.I_NMDA_time_avg,  step_current);
-		Welford_online(I_AMPA, stats.I_AMPA_time_avg,  step_current);
-
-
->>>>>>> 23e79de7724e6d20682f27d373fd3dba49b593f7
 		// get time average for each neuron
 		if (step_current == step_tot - 1) { // at the end of the last time step
 			for (int i = 0; i < N; ++i) {
@@ -822,8 +795,6 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector<do
 
 }
 
-<<<<<<< HEAD
-
 void Welford_online(const vector<double>& new_data, vector<double>& M, vector< vector <double> >& Cov, const int K, const bool is_end){
 	double M_old, x;
 	int N_tmp = int(M.size());
@@ -853,9 +824,6 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector< v
 
 
 void Welford_online(const vector<double>& new_data, vector<double>& M, const int K){
-=======
-void Welford_online(const vector<double>& new_data, vector<double>& M, const int K) {
->>>>>>> 23e79de7724e6d20682f27d373fd3dba49b593f7
 	// Note that K follows C++ index, K = 0, 1, ....
 	// online mean and var calculation: Welford's method (1962, Technometrixcs)
 	double M_old, x;

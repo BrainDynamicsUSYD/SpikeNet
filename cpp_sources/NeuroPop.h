@@ -172,7 +172,6 @@ protected:
 		bool
 		record; /// whether stats should be recorded (false by default)
 		vector<double>
-<<<<<<< HEAD
 			V_mean, /// mean of membrane potential averaged over neurons at each time step
 			V_std, /// std of membrane potential averaged over neurons at each time step
 			I_input_mean, /// mean of I_input averaged over neurons at each time step
@@ -189,20 +188,6 @@ protected:
 		int
 			time_start,
 			time_end;
-=======
-		V_mean, /// mean of membrane potential averaged over neurons at each time step
-		V_std, /// std of membrane potential averaged over neurons at each time step
-		I_input_mean, /// mean of I_input averaged over neurons at each time step
-		I_input_std, /// std of I_input averaged over neurons at each time step
-		I_AMPA_time_avg, /// I_AMPA averaged over time for each neuron
-		I_NMDA_time_avg, /// I_NMDA averaged over time for each neuron
-		I_GABA_time_avg, /// I_GABA averaged over time for each neuron
-		I_tot_time_mean, /// mean of total current for each neuron
-		I_tot_time_var, /// variance of total current for each neuron
-		V_time_mean, /// mean of membrane potential for each neuron
-		V_time_var, /// variance of membrane potential for each neuron
-		IE_ratio; /// I-E ratio for each neuron
->>>>>>> 23e79de7724e6d20682f27d373fd3dba49b593f7
 	} stats;
 
 	struct Lfp {
