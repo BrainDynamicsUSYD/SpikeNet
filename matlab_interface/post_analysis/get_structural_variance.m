@@ -1,4 +1,4 @@
-function stru_var = get_structural_variance( target_in_deg, deg_tol)
+function stru_var = get_structural_variance( target_in_deg, deg_tol, in_file, config_file)
 
 N = 63^2;
 fw = sqrt(N);
@@ -14,15 +14,19 @@ a_steps = ones(fw, fw);
 i_pre = 1;
 j_post = 1;
 
+if nargin == 2
+    in_file = '*in.h5';
+    config_file = '*config_data.mat';
+end
 
-dir_strut = dir('*in.h5');
+dir_strut = dir(in_file);
 num_files = length(dir_strut);
 in_files = cell(1,num_files);
 for id_out = 1:num_files
     in_files{id_out} = dir_strut(id_out).name;
 end
 
-dir_strut = dir('*config_data.mat');
+dir_strut = dir(config_file);
 num_files = length(dir_strut);
 conf_files = cell(1,num_files);
 for id_out = 1:num_files
