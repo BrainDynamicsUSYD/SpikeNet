@@ -119,7 +119,7 @@ if ~isempty(files)
             OutData{id_out}.neuron_stats.I_tot_time_mean{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_tot_time_mean']));
             OutData{id_out}.neuron_stats.I_tot_time_var{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_tot_time_var']));
             OutData{id_out}.neuron_stats.V_time_mean{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_mean']));
-            OutData{id_out}.neuron_stats.V_time_var{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_var']));
+            OutData{id_out}.neuron_stats.V_time_cov{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_cov']));
             %
             OutData{id_out}.neuron_stats.IE_ratio{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_IE_ratio']));
             %
@@ -142,7 +142,7 @@ if ~isempty(files)
                 OutData{id_out}.syn_stats{syn_ind, 1}.I_mean =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_I_mean']));
                 OutData{id_out}.syn_stats{syn_ind, 1}.I_std =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_std']));
                 OutData{id_out}.syn_stats{syn_ind, 1}.s_mean =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_s_time_mean']));
-                OutData{id_out}.syn_stats{syn_ind, 1}.s_var =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_s_time_var']));
+                OutData{id_out}.syn_stats{syn_ind, 1}.s_cov =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_s_time_cov']));
                 OutData{id_out}.syn_stats{syn_ind, 1}.I_time_mean =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_I_time_mean']));
                 OutData{id_out}.syn_stats{syn_ind, 1}.I_time_var =  transpose(try_h5read(files{id_out}, ['/syn_result_' ,num2str(syn_ind-1), '/stats_I_time_var']));
                 
@@ -164,7 +164,7 @@ if ~isempty(files)
                 I_ext = try_h5read( samp_file,  '/I_ext' );
                 V = try_h5read( samp_file,  '/V' );
                 I_leak = try_h5read( samp_file,  '/I_leak' );
-                save(samp_file_mat, 'I_AMPA', 'I_GABA','I_K','I_ext' ,'V', 'I_leak');
+                save(samp_file_mat, 'I_AMPA', 'I_GABA','I_K','I_ext' ,'V', 'I_leak','-v7.3');
                 clear 'I_AMPA'  'I_GABA' 'I_K' 'I_ext' 'V''I_leak';
                 fprintf('done\n');
             end
