@@ -1,7 +1,7 @@
 function [ R ] = get_grid_firing_centre( R, varargin )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-
+% If you want to change mode,eg:[R] = get_grid_firing_centre(R,'mode','bayesian')
 
 % parameters
 win_len = 50; % window length in time steps

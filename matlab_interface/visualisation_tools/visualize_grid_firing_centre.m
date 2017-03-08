@@ -1,8 +1,8 @@
 
-function visualize_grid_firing_centre(R)
+function visualize_grid_firing_centre(R,mode)
 close all;
 clc;
-mode = 'bayesian';
+% mode = 'bayesian';
 
 hw = 31;
 fw = 2*hw+1;
@@ -17,6 +17,10 @@ switch mode
         x_centre = R.grid.bayes.centre(1,:);
         y_centre = R.grid.bayes.centre(2,:);
         width = R.grid.bayes.radius;
+    case 'quick'
+        x_centre = R.grid.quick.centre(1,:);
+        y_centre = R.grid.quick.centre(2,:);
+        width = R.grid.quick.radius;
 end
 
 
