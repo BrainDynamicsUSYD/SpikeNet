@@ -807,8 +807,8 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector< v
 		M_add[i] = (x - M_old) / double(K + 1.0);
 		M[i] += M_add[i];
 	}
-	
 	// covariance
+	/*
 	for (int i = 0; i < N_tmp; ++i){ 
 		for (int j = i; j < N_tmp; ++j){ 
 			Cov[i][j] -= Cov[i][j] / double(K + 1.0);
@@ -819,7 +819,24 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector< v
 			}
 		}
 	}
-	
+	*/
+	vector<double> Cov_add;
+	Cov_add.resize(N_tmp);
+	for (int i = 0; i < N_tmp; ++i){ 
+		// Cov[i][j] -= Cov[i][j] / double(K + 1.0);
+		transform(Cov[i].begin(), Cov[i].end(), Cov[i].begin(), [K](double x){return x - (x / double(K + 1.0));});
+		// Cov_add = double(K) * M_add[i];
+		fill(Cov_add.begin(), Cov_add.end(), double(K) * M_add[i]);
+		// Cov_add = Cov_add * M_add[j];
+		transform(Cov_add.begin(), Cov_add.end(), M_add.begin(), Cov_add.begin(), multiplies<double>());
+		// Cov[i][j] += Cov_add;
+		transform(Cov[i].begin(), Cov[i].end(), Cov_add.begin(), Cov[i].begin(), plus<double>());
+		if (is_end == true){
+			// Cov[i][j] = Cov[i][j] * double(K + 1.0) / double(K);
+			transform(Cov[i].begin(), Cov[i].end(), Cov[i].begin(), [K](double x){return x * double(K + 1.0) / double(K);});
+		}
+	}
+
 }
 
 
