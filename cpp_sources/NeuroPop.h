@@ -182,6 +182,7 @@ protected:
 			I_tot_time_mean, /// mean of total current for each neuron
 			I_tot_time_var, /// variance of total current for each neuron
 			V_time_mean, /// mean of membrane potential for each neuron
+			V_time_var,
 			IE_ratio; /// I-E ratio for each neuron
 		vector< vector <double> >
 			V_time_cov; /// covariance of membrane potential for each neuron

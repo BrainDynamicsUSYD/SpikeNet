@@ -163,10 +163,13 @@ void NeuroPop::start_stats_record()
 	stats.I_tot_time_mean.assign(N, 0.0);
 	stats.I_tot_time_var.assign(N, 0.0);
 	stats.V_time_mean.assign(N, 0.0);
+	stats.V_time_var.assign(N, 0.0);
+	/*
 	stats.V_time_cov.resize(N);
 	for (int i = 0; i < N; ++i){
 		stats.V_time_cov[i].assign(N, 0.0);
 	}
+	*/
 	
 	stats.time_start = 0;
 	stats.time_end = step_tot - 1;
@@ -749,7 +752,8 @@ void NeuroPop::record_stats(const int step_current) {
 			int k = step_current-stats.time_start;
 			bool is_end = step_current == (stats.time_end-1);
 			Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, k, is_end);
-			Welford_online(V, stats.V_time_mean, stats.V_time_cov,  k, is_end);
+			// Welford_online(V, stats.V_time_mean, stats.V_time_cov,  k, is_end);
+			Welford_online(V, stats.V_time_mean, stats.V_time_var,  k, is_end);
 			Welford_online(I_GABA, stats.I_GABA_time_avg, k);
 			Welford_online(I_NMDA, stats.I_NMDA_time_avg, k);
 			Welford_online(I_AMPA, stats.I_AMPA_time_avg, k);
@@ -1214,7 +1218,8 @@ void NeuroPop::output_results(H5File& file) {
 		write_vector_HDF5(group_pop, stats.I_tot_time_mean, string("stats_I_tot_time_mean"));
 		write_vector_HDF5(group_pop, stats.I_tot_time_var, string("stats_I_tot_time_var"));
 		write_vector_HDF5(group_pop, stats.V_time_mean, string("stats_V_time_mean"));
-		write_matrix_HDF5(group_pop, stats.V_time_cov, string("stats_V_time_cov"));
+		write_vector_HDF5(group_pop, stats.V_time_var, string("stats_V_time_var"));
+		//write_matrix_HDF5(group_pop, stats.V_time_cov, string("stats_V_time_cov"));
 		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
 	}
 
