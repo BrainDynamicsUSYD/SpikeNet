@@ -20,7 +20,7 @@ function [pairs] = rand_unique_pairs(N, pair_num, ordered, self_pair)
 if nargin == 2
     ordered = 0;
 end
-if nargin == 3
+if nargin <= 3
     self_pair = 0;
 end
 
@@ -32,7 +32,7 @@ if ordered == 0 % (i,j) is the same as (j,i)
         pair_num = max_pair_num;
         warning('pair_num is larger than allowed!');
     end
-    NN = ones(N);onnection
+    NN = ones(N);
     if self_pair == 0
         NN(logical(eye(N))) = 0; % set diagonal entries to zero, no self-pair
     end
