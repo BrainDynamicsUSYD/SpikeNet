@@ -8,7 +8,7 @@ function main_SWR_reference_size(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 6*sec; % use 10 second!
+step_tot = 4*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -16,39 +16,46 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 5;
+repeats = 2;
 
-for P0_init = 0.08*ones(1,repeats)
+
+for trans_a = [0.5 0.7 0.9]
+dist_cutoff  =  sqrt(63^2/pi);
     
-    for hw = [31 37 44 51]
-        %%%%%%%%
-        P_mat_0 = [P0_init 0.1;
-            0.1  0.2]*2;
-        % sptially embedded network
-        hw_0 = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
-        N_e_0 = (hw_0*2+1)^2; %
-        N_i_0 = 1000;
-        N_0 = [N_e_0, N_i_0];
-        %%%%%%%%
+    
+    for g_balance = [1.05 1 0.95 ]
         
-        N_e = (hw*2+1)^2; %
-        N_i = round(N_i_0/N_e_0*N_e);
-        N = [N_e, N_i];
-        
-        P_mat = P_mat_0;
-        P_mat(:,1) = P_mat(:,1)/N(1)*N_0(1);
-        P_mat(:,2) = P_mat(:,2)/N(2)*N_0(2);
-        
-        Num_pop = length(N);
-        Type_mat = ones(Num_pop);
-        Type_mat(end, :) = 2;
-        in_out_r = [0.13 ];
-        
-        % parameter
-        SpikeFreqAapt = [ 1]
-        
-        for LFP_range_sigma = [8]; % 8
-            for cn_scale_wire = [2 ];
+        for P0_init = 0.08*ones(1,repeats)
+            
+            for hw = [31 51 61] %[31 37 44 51]
+                %%%%%%%%
+                P_mat_0 = [P0_init 0.1;
+                    0.1  0.2]*2;
+                % sptially embedded network
+                hw_0 = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
+                N_e_0 = (hw_0*2+1)^2; %
+                N_i_0 = 1000;
+                N_0 = [N_e_0, N_i_0];
+                %%%%%%%%
+                
+                N_e = (hw*2+1)^2; %
+                N_i = round(N_i_0/N_e_0*N_e);
+                N = [N_e, N_i];
+                
+                P_mat = P_mat_0;
+                P_mat(:,1) = P_mat(:,1)/N(1)*N_0(1);
+                P_mat(:,2) = P_mat(:,2)/N(2)*N_0(2);
+                
+                Num_pop = length(N);
+                Type_mat = ones(Num_pop);
+                Type_mat(end, :) = 2;
+                in_out_r = [0.13 ];
+                
+                % parameter
+                SpikeFreqAapt = 1;
+                
+                LFP_range_sigma = [8]; % 8
+                cn_scale_wire = [2 ];
                 for cn_scale_weight = [2 ];
                     iter_num = 5;
                     
@@ -121,9 +128,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 writePopParaHDF5(FID, pop_ind,  'tau_ref', tau_ref);
                                                             end
                                                             
-                                                            % write external currents
-                                                            writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
-                                                            writeExtSpikeSettingsHDF5(FID, 2, 1, g_ext,  N_ext, rate_ext_I*ones(1, step_tot),  ones(1, N(2)) );
+                                                            
                                                             
                                                             % write synapse para
                                                             writeSynParaHDF5(FID, 'tau_decay_GABA', 3);
@@ -162,7 +167,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                             
                                                             [ deg_in_0, deg_out_0 ] = hybrid_degree( N_e, deg_mean, deg_std_logn, in_out_r, deg_hybrid );
                                                             
-                                                            [ I_ee, J_ee, dist_IJ, iter_hist, Lattice_E ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c_EE, cn_scale_wire, iter_num );
+                                                            [ I_ee, J_ee, dist_IJ, iter_hist, Lattice_E ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c_EE, cn_scale_wire, iter_num, dist_cutoff );
                                                             in_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 1)); % row vector
                                                             out_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 2));
                                                             
@@ -191,12 +196,20 @@ for P0_init = 0.08*ones(1,repeats)
                                                             [~,ind_sorted] = sort(in_degree);
                                                             sample_neuron = ind_sorted(1:500:end);
                                                             
+                                                            % write external currents
+                                                            trans_neu_ind =  double( Lattice_E(:,1).^2 + Lattice_E(:,2).^2 < tau_c_EE^2);
+                                                            trans_input = zeros(1, step_tot);
+                                                            trans_input(round(0.2*sec)) = trans_a*rate_ext_E;
+                                                            writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, trans_input,  trans_neu_ind );
+                                                            writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, (1-trans_a)*rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
+                                                            writeExtSpikeSettingsHDF5(FID, 2, 1, g_ext,  N_ext, rate_ext_I*ones(1, step_tot),  ones(1, N(2)) );
+                                                            
                                                             %%%%%%%%%%%%%%%%%%%%%%
-                                                            [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );
+                                                            [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1), dist_cutoff );
                                                             D = rand(size(I))*delay;
                                                             K = zeros(size(J));
                                                             for i_E = 1:N(1)
-                                                                mu_K_tmp = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
+                                                                mu_K_tmp = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu)*g_balance;
                                                                 K(J==i_E) = abs(randn([1 sum(J==i_E)])*(mu_K_tmp/4) + mu_K_tmp); % this is a bit too arbitary!
                                                             end
                                                             % K = ones(size(I))*K_mat(2,1);
@@ -204,14 +217,14 @@ for P0_init = 0.08*ones(1,repeats)
                                                             clear I J K D;
                                                             
                                                             %%%%%%%%%%%%%%%%%%%%%%
-                                                            [ I,J ] = Lattice2Lattice( Lattice_E, Lattice_I, hw, tau_c_IE, P_mat(1,2) );
+                                                            [ I,J ] = Lattice2Lattice( Lattice_E, Lattice_I, hw, tau_c_IE, P_mat(1,2),dist_cutoff );
                                                             D = rand(size(I))*delay;
                                                             K = ones(size(I))*K_mat(1,2);
                                                             writeChemicalConnectionHDF5(FID, Type_mat(1, 2),  1, 2,   I,J,K,D);
                                                             clear I J K D;
                                                             
                                                             %%%%%%%%%%%%%%%%%%%%%%
-                                                            [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_I, hw, tau_c_I, P_mat(2,2) );
+                                                            [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_I, hw, tau_c_I, P_mat(2,2),dist_cutoff );
                                                             D = rand(size(I))*delay;
                                                             K = ones(size(I))*K_mat(2,2);
                                                             writeChemicalConnectionHDF5(FID, Type_mat(2, 2),  2, 2,   I,J,K,D);
@@ -229,7 +242,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                                     syn_type = 1;
                                                                 end
                                                                 %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
-                                                                writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
+                                                                %writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                             end
                                                             writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
                                                             writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
@@ -282,7 +295,10 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 'inh_STDP', inh_STDP, ...
                                                                 'deg_hybrid', deg_hybrid,...
                                                                 'LFP_range_sigma', LFP_range_sigma,...
-                                                                'hw',hw);
+                                                                'hw',hw, ...
+                                                                'dist_cutoff',dist_cutoff,...
+                                                                'g_balance',g_balance,...
+                                                                'trans_a',trans_a);
                                                             
                                                             
                                                             %                                                     % Adding comments in raster plot
