@@ -1091,8 +1091,7 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 	}
 
 	
-	if (true){
-		
+	if (group_exist_HDF5(in_filename, string("/config/syns"))){
 		int n_syns = read_scalar_HDF5<int>(file, string("/config/syns/n_syns"));
 		for (int ind = 0; ind < n_syns; ++ind){
 			cout << "\t Initialising chemical synapses ";
