@@ -323,9 +323,7 @@ void ChemSyn::calc_I(){
 		}
 	}
 
-	// decay gs_sum
-	// numerical error of this integration scheme should be less 1.5%
-	for (int j = 0; j < N_post; ++j){ gs_sum[j] *= exp_step_decay; };
+	
 	
 }
 
@@ -376,6 +374,9 @@ void ChemSyn::update_gs_sum_model_0(const int step_current){
 	for (int j_post = 0; j_post < N_post; ++j_post){
 		gs_sum[j_post] += gsm_0.d_gs_sum_buffer[t_ring][j_post];
 		// should I decay gs_sum here??
+		// decay gs_sum
+		// numerical error of this integration scheme should be less 1.5%
+		gs_sum[j_post] *= exp_step_decay;
 	}
 	// immediately reset the current buffer to zeros after being used!!
 	fill(gsm_0.d_gs_sum_buffer[t_ring].begin(), gsm_0.d_gs_sum_buffer[t_ring].end(), 0.0);
