@@ -153,6 +153,28 @@ switch lower(mode)
         R.grid.bayes.bayes_factor_ln = bayes_factor_ln;
 end
 
+if ~isfield(R, 'grid_sub') 
+    R_sub.grid_sub = []; % to stop recursion
+    % do the substitute study
+    n_s = sum(R.spike_hist{1},2);
+    i_s = [];
+    t_s = [];
+    for i = 1:R.N(1)
+        i_s = [i_s i*ones(1,n_s(i))]; %#ok<*AGROW>
+        t_s = [t_s randperm(R.step_tot, n_s(i))];
+    end
+    sh = sparse( i_s, t_s, ones(size(i_s)),  R.N(1), R.step_tot);
+    R_sub.num_spikes{1} = sum(sh, 1);
+    R_sub.N = R.N;
+    R_sub.dt = R.dt;
+    R_sub.step_tot = R.step_tot;
+    [sc,~] = find(sh);
+    R_sub.spike_hist_compressed{1} = sc;
+    % 
+    [ R_sub ] = get_grid_firing_centre( R_sub, varargin );
+    R.grid_sub = R_sub.grid;
 end
 
+end
 
+% function 

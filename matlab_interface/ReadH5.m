@@ -93,7 +93,7 @@ if ~isempty(files)
         OutData{id_out}.step_tot = try_h5read(config_filename, '/config/Net/INIT002/step_tot');
         OutData{id_out}.Num_pop = length(OutData{id_out}.N);
         
-        OutData{id_out}.step_killed = double(try_h5read(files{id_out}, '/run_away_killed/step'));
+        OutData{id_out}.step_killed = double(try_h5read(files{id_out}, '/run_away_killed/step')) + 1;
         
         % need debugging!
         for pop_ind = 1:OutData{id_out}.Num_pop
@@ -120,6 +120,7 @@ if ~isempty(files)
             OutData{id_out}.neuron_stats.I_tot_time_var{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_tot_time_var']));
             OutData{id_out}.neuron_stats.V_time_mean{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_mean']));
             OutData{id_out}.neuron_stats.V_time_cov{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_cov']));
+            OutData{id_out}.neuron_stats.V_time_var{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_var']));
             %
             OutData{id_out}.neuron_stats.IE_ratio{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_IE_ratio']));
             %

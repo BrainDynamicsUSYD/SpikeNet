@@ -1,4 +1,4 @@
-function [ I, J, dist_IJ, iter_hist, Lattice ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_d, cn_scale_wire, iter_num )
+function [ I, J, dist_IJ, iter_hist, Lattice ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_d, cn_scale_wire, iter_num, dist_cutoff )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -52,6 +52,11 @@ for iter = 1:iter_num
         joint_factor = dist_factor.*degree_in_factor.*cn_factor; % will be properly scaled later;
         joint_factor = normc(joint_factor);
         
+        % distance cutoff
+        if nargin == 6
+            joint_factor(post_dist > dist_cutoff) = NaN;
+        end
+    
         % establish connections
         [~, ind] = sort( rand(N,1)./joint_factor, 'ascend' );
         chosen_j = ind(1: degree_out_0(i) );
