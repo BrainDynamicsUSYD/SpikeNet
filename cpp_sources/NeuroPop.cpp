@@ -218,6 +218,7 @@ void NeuroPop::set_para(string para_str) {
 			else if (para_name.find("V_lk") != string::npos) {V_lk = para_value;}
 			else if (para_name.find("V_th") != string::npos) {V_th = para_value;}
 			else if (para_name.find("g_lk") != string::npos) {g_lk = para_value;}
+			else if (para_name.find("V_ext") != string::npos) {V_ext = para_value;}
 			else {cout << "Unrecognized parameter: " << para_name << endl;}
 		}
 	}

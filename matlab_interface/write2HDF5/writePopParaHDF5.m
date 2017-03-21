@@ -14,7 +14,9 @@ function writePopParaHDF5(FID, pop_ind, varargin)
 % V_lk = -70.0;   % Leak reversal, -70.0
 % V_th = -50.0;   % Threshold // -55.0
 % % Leak conductance
-% g_lk = 0.0167;   % (miuS), time constants=Cm/gL=15 ms!
+% g_lk = 0.0167;  % (miuS), time constants=Cm/gL=15 ms!
+% % Reversal potential for external currents
+% V_ext = 0.0;      % mV
 
 
 % for C/C++ index convetion
@@ -29,6 +31,9 @@ else
 
     para_str = [];
     for i = 1:var_num
+        if strcmp(varargin{i*2-1}, 'V_ext')
+            warning('Unless you know what you are doing, V_ext should usually be identical to V_ex in SynPara!')
+        end
         para_str = [para_str, varargin{i*2-1}, ',' , num2str(varargin{i*2}), ',']; %#ok<AGROW>
     end
     hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/PARA001/para_str_ascii'], double(para_str),'WriteMode','append');
