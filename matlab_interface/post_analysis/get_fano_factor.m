@@ -17,7 +17,9 @@ ker_gap_ratio = 2; % should be larger than 1
 
 
 if spatial_temporal_option == 1
-    win_len = 50:50:500; % ms
+    n_sample = 1000;
+    ind_sample = randperm(N(1), n_sample);
+    win_len = [10:10:100 200:100:1000]; % ms
     % temporal fano factor
     fano_tmpo = [];
     for win_tmp = win_len
@@ -25,16 +27,16 @@ if spatial_temporal_option == 1
         trans_step = round(trans_ms/dt);
         t_b = trans_step+win_step+1 : round(win_gap_ratio*win_step): step_tot;
         t_a = t_b - win_step + 1;
-        SC_tmp = zeros(length(t_a),N(1));
+        SC_tmp = zeros(length(t_a),n_sample);
         for i = 1:length(t_a)
-            SC_tmp(i,:) = full(sum(spike_hist(t_a(i):t_b(i),:)));
+            SC_tmp(i,:) = full(sum(spike_hist(t_a(i):t_b(i),ind_sample)));
         end
-        fano_tmpo = [fano_tmpo mean(var(SC_tmp)./mean(SC_tmp))]; %#ok<AGROW>
+        fano_tmpo = [fano_tmpo nanmean(var(SC_tmp)./mean(SC_tmp))]; %#ok<AGROW>
     end
 
     R.Analysis.fano_tmpo = fano_tmpo;
     R.Analysis.fano_tmpo_win = win_len;
-    
+    R.Analysis.fano_n_sample = n_sample;
     
 elseif spatial_temporal_option == 2
     ker_len = 4:2:16;
