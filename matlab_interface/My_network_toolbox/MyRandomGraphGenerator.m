@@ -6,6 +6,50 @@ addpath(genpath('/import/yossarian1/yifan/Project1/My_network_toolbox'));
 
 switch upper(Method)
     %������������������������������������������%
+    case 'E_R_UNI_BI'
+        % Erdos-Renyi random graph with unidirectional and bidirectional
+        % connection probability given
+        
+        % Default parameters
+        N = 1000;
+        uni_p = 0.4;
+        bi_p = 0.1;
+       
+
+        % Read parameter setting
+        for i = 1:length(varargin)/2
+            temp = varargin{2*i};
+            eval([varargin{2*i-1}, '= temp;']);
+        end
+        fprintf('E-R Graph: N=%d, uni_p=%g, bi_p=%g\n', N, uni_p, bi_p);
+        
+        % Generate graph
+        R = rand(N,N);
+        A = zeros(N,N);
+        R(logical(triu(ones(N,N)))) = NaN;
+        
+        % uni
+        [~, R_ind] = sort(R(:));
+        ind_uni_lower = R_ind(1:round((N*(N-1))*uni_p/2));
+        [i_uni_lower, j_uni_lower] = ind2sub([N,N],ind_uni_lower);
+        ind_uni_lower = sub2ind([N,N],i_uni_lower, j_uni_lower);
+        ij = rand(size(j_uni_lower)) > 0.5;
+        i_uni = [i_uni_lower(ij); j_uni_lower(~ij)];
+        j_uni = [j_uni_lower(ij); i_uni_lower(~ij)];
+        ind_uni = sub2ind([N,N],i_uni, j_uni);
+        A(ind_uni) = 1; 
+        
+        % bi
+        R(ind_uni_lower) = NaN;
+        [~, R_ind] = sort(R(:));
+        ind_bi_lower = R_ind(1:round((N*(N-1))*bi_p/2));
+        [i_bi_lower, j_bi_lower] = ind2sub([N,N],ind_bi_lower);
+        i_bi = [i_bi_lower; j_bi_lower];
+        j_bi = [j_bi_lower; i_bi_lower];
+        ind_bi = sub2ind([N,N],i_bi, j_bi);
+        A(ind_bi) = 1; 
+        
+        
     case 'E_R'
         % Erdos-Renyi random graph (directed or undirected)
         % All possible pairs of nodes are connected with probability 'p'
