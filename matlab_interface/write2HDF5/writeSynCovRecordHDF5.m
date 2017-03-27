@@ -1,4 +1,4 @@
-function writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
+function writeSynCovRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type,  time_start, time_end)
 
 % for C/C++ index convetion
 pop_ind_pre = pop_ind_pre-1;
@@ -23,7 +23,12 @@ end
 if isnan(n_match)
     error('Cannot find syn with identical pop_ind_pre, pop_ind_post and syn_type!')
 else
-    hdf5write(FID,['/config/syns/syn',num2str(n_match),'/SAMP004/record'], 1,'WriteMode','append');
+    time_start = time_start - 1;
+    time_end = time_end - 1;
+    % write
+    hdf5write(FID,['/config/syns/syn',num2str(n_match),'/SAMP104/time_start'],time_start,'WriteMode','append');
+    hdf5write(FID,['/config/syns/syn',num2str(n_match),'/SAMP104/time_end'],time_end,'WriteMode','append');
+    
 end
 
 end
