@@ -28,6 +28,7 @@ ChemSyn::ChemSyn(const double dt_input, const int step_tot_input, const char del
 
 	// default settting
 	stats.record = false;
+	stats.record_cov = false;
 	STD.on = false; 
 	STD.on_step = -1;
 	inh_STDP.on_step = -1;
@@ -568,22 +569,22 @@ void ChemSyn::start_stats_record(){
 	stats.I_std.reserve(step_tot);
 	if (synapse_model == 0){
 		stats.s_time_mean.assign(N_pre, 0.0);
+		stats.s_time_var.assign(N_pre, 0.0);
+		stats.I_time_mean.assign(N_pre, 0.0);
+		stats.I_time_var.assign(N_pre,0.0);
+	}
+}
+
+void ChemSyn::start_cov_record(const int time_start, const int time_end){
+	if (synapse_model == 0){
+		stats.record_cov = true;
+		stats.time_start_cov = time_start;
+		stats.time_end_cov = time_end;
+		stats.s_time_mean_dumb.assign(N_pre, 0.0);
 		stats.s_time_cov.resize(N_pre);
 		for (int i = 0;i < N_pre; ++i){
 			stats.s_time_cov[i].assign(N_pre,0.0);
 		}
-		stats.I_time_mean.assign(N_pre, 0.0);
-		stats.I_time_var.assign(N_pre,0.0);
-		stats.time_start = 0;
-		stats.time_end = step_tot - 1;
-	}
-}
-
-void ChemSyn::start_stats_record(const int time_start, const int time_end){
-	start_stats_record();
-	if (synapse_model == 0){
-		stats.time_start = time_start;
-		stats.time_end = time_end;
 	}
 }
 
@@ -941,11 +942,19 @@ void ChemSyn::record_stats(int step_current){
 		stats.I_std.push_back( sqrt(var_tmp_I) );
 		
 		if (synapse_model == 0){
-			if (step_current >= stats.time_start && step_current <= stats.time_end){
-				int k = step_current-stats.time_start;
-				bool is_end = step_current == (stats.time_end-1);
-				Welford_online(gsm_0.s, stats.s_time_mean, stats.s_time_cov, k, is_end);
-				Welford_online(I, stats.I_time_mean, stats.I_time_var, k, is_end);
+			int k = step_current;
+			bool is_end = step_current == (step_tot-1);
+			Welford_online(gsm_0.s, stats.s_time_mean, stats.s_time_var, k, is_end);
+			Welford_online(I, stats.I_time_mean, stats.I_time_var, k, is_end);
+		}
+	}
+	
+	if (stats.record_cov){
+		if (synapse_model == 0){
+			if (step_current >= stats.time_start_cov && step_current <= stats.time_end_cov){
+				int k = step_current-stats.time_start_cov;
+				bool is_end = step_current == (stats.time_end_cov-1);
+				Welford_online(gsm_0.s, stats.s_time_mean_dumb, stats.s_time_cov, k, is_end);
 			}
 		}
 	}

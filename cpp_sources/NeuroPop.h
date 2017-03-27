@@ -48,7 +48,7 @@ public:
 	const double & get_Cm();
 
 	void start_stats_record();
-	void start_stats_record(const int time_start, const int time_end);
+	void start_cov_record(const int time_start, const int time_end);
 	
 	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
@@ -170,7 +170,8 @@ protected:
 
 	struct Stats {
 		bool
-		record; /// whether stats should be recorded (false by default)
+			record, /// whether stats should be recorded (false by default)
+			record_cov;
 		vector<double>
 			V_mean, /// mean of membrane potential averaged over neurons at each time step
 			V_std, /// std of membrane potential averaged over neurons at each time step
@@ -182,13 +183,14 @@ protected:
 			I_tot_time_mean, /// mean of total current for each neuron
 			I_tot_time_var, /// variance of total current for each neuron
 			V_time_mean, /// mean of membrane potential for each neuron
+			V_time_mean_dumb, /// mean of membrane potential for each neuron
 			V_time_var,
 			IE_ratio; /// I-E ratio for each neuron
 		vector< vector <double> >
 			V_time_cov; /// covariance of membrane potential for each neuron
 		int
-			time_start,
-			time_end;
+			time_start_cov,
+			time_end_cov;
 	} stats;
 
 	struct Lfp {

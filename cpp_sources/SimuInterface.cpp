@@ -1009,12 +1009,12 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 				cout << "done." << endl;
 			}
 			
-			// neuron stats record settings
+			// neuron cov record settings
 			if (group_exist_HDF5(in_filename, pop_n + string("/SAMP103"))){
-				cout << "\t\t Neuron stats record settings...";
+				cout << "\t\t Neuron cov record settings...";
 				int time_start = read_scalar_HDF5<int>(file, pop_n + string("/SAMP103/time_start"));
 				int time_end = read_scalar_HDF5<int>(file, pop_n + string("/SAMP103/time_end"));
-				network.NeuroPopArray[ind]->start_stats_record(time_start, time_end);
+				network.NeuroPopArray[ind]->start_cov_record(time_start, time_end);
 				cout << "done." << endl;
 			}
 			
@@ -1187,12 +1187,12 @@ bool SimuInterface::import_HDF5(string in_filename_input){
 					cout << "done." << endl;
 				}	
 				
-				// syn stat record settings
+				// syn cov record settings
 				if (group_exist_HDF5(in_filename, syn_n + string("/SAMP104"))){
 					cout << "\t\t Synapse stats record settings...";
 					int time_start = read_scalar_HDF5<int>(file, syn_n + string("/SAMP104/time_start"));
 					int time_end = read_scalar_HDF5<int>(file, syn_n + string("/SAMP104/time_end"));
-					network.ChemSynArray.back()->start_stats_record(time_start, time_end);
+					network.ChemSynArray.back()->start_cov_record(time_start, time_end);
 					cout << "done." << endl;
 				}	
 				

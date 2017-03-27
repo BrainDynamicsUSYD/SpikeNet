@@ -38,7 +38,7 @@ public:
 	void add_sampling(const vector<int> & sample_neurons, const vector<bool> & sample_time_points);  /// add data sampling 
 
 	void start_stats_record(); /// turn on basic statistics recording
-	void start_stats_record(const int time_start, const int time_end);
+	void start_cov_record(const int time_start, const int time_end);
 		
 	void output_results(ofstream& output_file); /// write output to file
 
@@ -109,18 +109,21 @@ protected:
 	//
 	struct Stats {
 		bool
-			record;
+			record,
+			record_cov;
 		vector<double>
 			I_mean, // over all the synapses for each step
 			I_std, // over all the synapses for each step
 			s_time_mean, // over all the time steps for each synapse
+			s_time_mean_dumb, // over all the time steps for each synapse
+			s_time_var, // over all the time steps for each synapse
 			I_time_mean, // over all the time steps for each synapse
 			I_time_var; // over all the time steps for each synapse
 		vector< vector<double> >
 			s_time_cov; // over all the time steps for each synapse
 		int
-			time_start,
-			time_end;
+			time_start_cov,
+			time_end_cov;
 	} stats;
 	
 

@@ -72,6 +72,7 @@ void NeuroPop::init()
 
 	//
 	stats.record = false;
+	stats.record_cov = false;
 	LFP.record = false;
 	spike_freq_adpt = false;
 
@@ -164,28 +165,22 @@ void NeuroPop::start_stats_record()
 	stats.I_tot_time_var.assign(N, 0.0);
 	stats.V_time_mean.assign(N, 0.0);
 	stats.V_time_var.assign(N, 0.0);
-	/*
-	stats.V_time_cov.resize(N);
-	for (int i = 0; i < N; ++i){
-		stats.V_time_cov[i].assign(N, 0.0);
-	}
-	*/
-	
-	stats.time_start = 0;
-	stats.time_end = step_tot - 1;
-	
+
 	stats.IE_ratio.assign(N, 0.0);
 }
 
 
-void NeuroPop::start_stats_record(const int time_start, const int time_end)
+void NeuroPop::start_cov_record(const int time_start, const int time_end)
 {
-	start_stats_record();
-	
+	stats.record_cov = true;
+	stats.V_time_mean_dumb.assign(N, 0.0);
+	stats.V_time_cov.resize(N);
+	for (int i = 0; i < N; ++i){
+		stats.V_time_cov[i].assign(N, 0.0);
+	}
 	// over-write the following two variables
-	stats.time_start = time_start;
-	stats.time_end = time_end;
-
+	stats.time_start_cov = time_start;
+	stats.time_end_cov = time_end;
 }
 
 void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_input) {
@@ -749,17 +744,14 @@ void NeuroPop::record_stats(const int step_current) {
 		stats.I_input_std.push_back(sqrt(var_tmp_I));
 
 		// online mean and var calculation: Welford's method (1962, Technometrixcs)
-		if (step_current >= stats.time_start && step_current <= stats.time_end){
-			int k = step_current-stats.time_start;
-			bool is_end = step_current == (stats.time_end-1);
-			Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, k, is_end);
-			// Welford_online(V, stats.V_time_mean, stats.V_time_cov,  k, is_end);
-			Welford_online(V, stats.V_time_mean, stats.V_time_var,  k, is_end);
-			Welford_online(I_GABA, stats.I_GABA_time_avg, k);
-			Welford_online(I_NMDA, stats.I_NMDA_time_avg, k);
-			Welford_online(I_AMPA, stats.I_AMPA_time_avg, k);
-		}
-		
+		bool is_end = step_current == (step_tot-1);
+		int k = step_current;
+		Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, k, is_end);
+		Welford_online(I_GABA, stats.I_GABA_time_avg, k);
+		Welford_online(I_NMDA, stats.I_NMDA_time_avg, k);
+		Welford_online(I_AMPA, stats.I_AMPA_time_avg, k);
+		Welford_online(V, stats.V_time_mean, stats.V_time_var,  k, is_end);
+
 		// get time average for each neuron
 		if (step_current == step_tot - 1) { // at the end of the last time step
 			for (int i = 0; i < N; ++i) {
@@ -767,6 +759,14 @@ void NeuroPop::record_stats(const int step_current) {
 				// also, the only source of I_ext is generated internally
 				stats.IE_ratio[i] = stats.I_GABA_time_avg[i] / (stats.I_AMPA_time_avg[i] + stats.I_NMDA_time_avg[i] + I_ext_mean[i]);
 			}
+		}
+	}
+	
+	if (stats.record_cov){
+		if (step_current >= stats.time_start_cov && step_current <= stats.time_end_cov){
+			bool is_end = step_current == (stats.time_end_cov-1);
+			int k = step_current-stats.time_start_cov;
+			Welford_online(V, stats.V_time_mean_dumb, stats.V_time_cov,  k, is_end);
 		}
 	}
 }
@@ -1220,8 +1220,10 @@ void NeuroPop::output_results(H5File& file) {
 		write_vector_HDF5(group_pop, stats.I_tot_time_var, string("stats_I_tot_time_var"));
 		write_vector_HDF5(group_pop, stats.V_time_mean, string("stats_V_time_mean"));
 		write_vector_HDF5(group_pop, stats.V_time_var, string("stats_V_time_var"));
-		//write_matrix_HDF5(group_pop, stats.V_time_cov, string("stats_V_time_cov"));
 		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
+	}
+	if (stats.record_cov) {
+		write_matrix_HDF5(group_pop, stats.V_time_cov, string("stats_V_time_cov"));
 	}
 
 	if (LFP.record) {
