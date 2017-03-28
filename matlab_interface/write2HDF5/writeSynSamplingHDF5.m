@@ -20,6 +20,12 @@ pop_ind_post = pop_ind_post-1;
 syn_type = syn_type-1;
 sample_ind = sample_ind-1;
 
+% sampling frequency check
+dt = hdf5read(FID,'/config/Net/INIT002/dt');
+freq_s = 1000 / (mode(diff(find(time_index)))*dt);
+if freq_s < 1000
+    warning('You are assuming the Nyquist frequency of the system is lower than %g Hz. /n', freq_s);
+end
 
 n_syns = h5read(FID,'/config/syns/n_syns');
 n_match = NaN; 
