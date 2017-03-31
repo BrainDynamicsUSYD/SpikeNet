@@ -3,6 +3,7 @@ SpikeNet is a software that has three standard alone components.
 1. User interface for configuring spiking neuronal networks
 2. A c++ simulator 
 3. User interface for parsing and post-analyzing the simulation results.
+
 The design of SpikeNet provides the following four main features.
 
 * **Configurability** SpikeNet supports any user-defined structure of synaptic connectivity topologies, coupling strengths and conduction delays. It can be easily extended by developers to support any variations of integrate-and-fire neuron and synapse models.
@@ -25,87 +26,110 @@ The design of SpikeNet provides the following four main features.
 
 #### FAQ
 Q: What if I am using Windows?
+
 A: Sorry, you are on your own. Well, you can always run a Linux virtual machine on Windows.
 
 Q: What if I do not have Matlab or simply hate it?
+
 A: You can either request I/O interface in Python from us or contribute to the project by translating the existing Matlab I/O interface into Python or other langangues.
 
 ### Installing
-Following are the steps to set up the SpikeNet c++ simulator.
+
 1. Ask for read permission from one of the contributors with admin rights.
-\item Make a new directory: \mylstinline{mkdir tmp; cd tmp}
-\item Clone SpikeNet: \mylstinline{git clone git@github.com:BrainDynamicsUSYD/SpikeNet.git}
-\newline (Method 2: \mylstinline{git clone https://github.com/BrainDynamicsUSYD/SpikeNet})
+2. Make a new directory
+```
+mkdir tmp
+cd tmp
+```
+3. Clone the github repo
+```
+git clone https://github.com/BrainDynamicsUSYD/SpikeNet
+```
+4. Build the c++ simulator
+```
+cd SpikeNet
+autoconf
+./configure
+make
+make clean
+cd ..
+```
 
-\item Go into the directory: \mylstinline{cd SpikeNet}
-\item Make a copy of the makefile: \mylstinline{cp other_scripts/make*bak makefile}
-\item Build the C\texttt{++} simulator:  \mylstinline{make; make clean}
-\end{itemize}
-
-Now you should see the ``simulator'' in the current directory, with which you can run simulations by creating input files according to \nameref{sec:IO protocols}.
-However, it will be much easier to work with the Matlab user interface.
-If you do not have access to Matlab, try to contact the contributors to request interfaces with other high-level programming languages (Python for example).
+Now you should see the simulator in the current directory, with which you can run simulations by creating input files using the Matlab user interface.
 Following are the steps to use the Matlab user interface.
-\begin{itemize}
-\item Make a new directory for storing data: \mylstinline{cd ..; mkdir tmp_data; ls}
-\item Start Matlab: \mylstinline{matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
-\item Generate the example input files: \mylstinline{cd ../tmp_data; main_demo;}
-\item Quit Matlab: \mylstinline{quit}
-\item Run the simulator with the input files: \mylstinline{cd tmp_data; ../simulator *ygin;}
-\item Start Matlab: \mylstinline{cd ..; matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
-\item Parse the output files, run some basic post-processing and visualization: 
-\newline \mylstinline{cd ../tmp_data; PostProcessYG()}
-\item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
-\end{itemize}
+1. Make a new directory for storing data
+```
+mkdir tmp_data
+```
+2. Start Matlab and set up the environment (in Matlab)
+```
+cd SpikeNet
+addpath(genpath(cd))
+```
+4. Generate the example input files (in Matlab)
+```
+cd ../tmp_data
+main_demo
+```
+5. Run the simulator with the input file
+```
+cd tmp_data
+../simulator *in.h5
+```
+6. Parse the output files into matlab .mat file, run some basic post-processing (in Matlab)
+```
+cd ../tmp_data
+PostProcessYG()
+```
+7. Load the .mat file and do some basic visualization (in Matlab)
+``` 
+d = dir('*RYG.mat')
+R = load(d(1).name)}
+raster_plot(R,1)
+```
 
-For HDF5, please make relevant changes in the makefile to specify the paths where you have installed your HDF5 API. Each of the matlab interfaces has a corresponding HDF5 version. For a complete list of both types of matlab interfaces,  
-\begin{itemize}
-\item \mylstinline{ls SpikeNet/matlab_interfaces/write2ygin}
-\item \mylstinline{ls SpikeNet/matlab_interfaces/write2HDF5}
-\end{itemize}
+For mo
 
+For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab --> c++ --> Matlab workflow for PBS job array submission. 
+The script all_in_one.sh has the following features:
+1. It automatically detects which stage each array job (with a unique 4-digit integer array ID) has reached: pre-processing done, simulation done or post-simulation data parsing done. 
+2. It will start each array job from the last unfinished stage instead of the first stage. This feature comes in handy when hundreds of array jobs end prematurely at different stages, say, due to the HPC being shut down unexpectedly, in which case simply a re-submission of the script will clean up the mess.
+3. It passes the array ID as an input argument to the matlab pre-processing script.
+4. It automatically saves a copy of the pre-processing Matlab script to the data directory when starting the array job with ID 0001.
 
-For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
-The script all\_in\_one.sh has the following features:
-\begin{itemize}
-\item It automatically detects which stage each array job (with a unique 4-digit integer array ID) has reached: pre-processing done, simulation done or post-simulation data parsing done. The script will start each array job from the last unfinished stage instead of the first stage. This feature comes in handy when hundreds of array jobs end prematurely at different stages, say, due to the HPC being shut down unexpectedly, in which case simply a re-submission of the script will clean up the mess.
-\item It passes the array ID as an input argument to the matlab pre-processing script.
-\item It automatically saves a copy of the pre-processing Matlab script to the data directory when starting the array job with ID 0001.
-\end{itemize}
+Following are the steps to use the PBS script to run your arry jobs.
+1. Make sure you have set up your PBS environment correctly (e.g., modelue load HDF5-1.10.0) and rebuild the c++ simulator.
+2. Go to the tmp director and make a copy of the script
+``` 
+cp SpikeNet/other_scripts/all*bak all_in_one.sh
+```
+3. Change it to executable
+```
+chmod +x all_in_one.sh
+```
+4. Edit the following variables in the bash script accordingly: 
+```
+MATLAB_SOURCE_PATH_2=`your_path'
+MATLAB_PRE_PROCESS_FUNC=`your_functions'
+```
+5. Make a directory for PBS output
+```
+mkdir PBSout
+```
+6. Submit the PBS array job 
+```
+qsub -t 1-X -q queue_name all_in_one.sh
+```
+If your version PBS system uses `-J` instead of `-t` for array job, you also need to change `$PBS_ARRAYID` into `$PBS_ARRAY_INDEX` in the all_in_one.sh script.
 
-Following are the steps to use the PBS script.
-\begin{itemize}
-\item Make sure you have set up your PBS environment correctly (e.g., modelue load HDF5-1.10.0). This can be done by editing shell config file.
-\item Go to the tmp directory
-\item Make a copy of the script: \mylstinline{cp SpikeNet/other_scripts/all*bak all_in_one.sh}
-\item Change it to executable: \mylstinline{chmod +x all_in_one.sh}
-\item Edit the following variables in the bash script accordingly: 
-\begin{itemize}
-\item {\footnotesize MATLAB\_SOURCE\_PATH\_2=`your\_path'}
-\item {\footnotesize MATLAB\_PRE\_PROCESS\_FUNC=`your\_functions'}
-\end{itemize}
-\item Make a directory for PBS output: \mylstinline{mkdir PBSout}
-\item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
-\end{itemize}
-
+7. Once the array job is finished, you can collect the data from the array job for post-analysis, for example (in matlab)
+```
+cd tmp_data
+[mean_firing_rate, arrayID] = CollectVectorYG('Analysis','mean(Analysis.rate{1})');
+plot(arrayID, mean_firing_rate);
+```
 
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
-
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
 
 ## Authors
 
