@@ -6,35 +6,21 @@ HEADER_FILES = $(SRC_DIR)/*.h
 OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o MyIO.o
 
 
-HDF5 = yes # put anything here to compile with HDF5
-ifdef HDF5
-	HDF5FLAG = -DHDF5
-	HDF5INCLUDE = -I/usr/local/include # for typical iOS
-	#HDF5INCLUDE = -I/usr/include/hdf5/serial/ # for typical ubuntu
-	#HDF5INCLUDE = -I/usr/physics/hdf5/include
-	HDF5LIBS = -L/usr/local/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl # for typical iOS
-	#HDF5LIBS = -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5_cpp -lhdf5 -lhdf5_hl # for typical ubuntu
-	#HDF5LIBS = -L/usr/physics/hdf5/lib/ -lhdf5_cpp -lhdf5 -lhdf5_hl
-else
-	HDF5FLAG =
-	HDF5INCLUDE =
-	HDF5LIBS =
-endif
+HDF5FLAG = -DHDF5
+HDF5INCLUDE =  @HDF5_CPPFLAGS@ #-I/usr/local/include
+HDF5LIBS = @HDF5_LDFLAGS@ -lhdf5_cpp -lhdf5 -lhdf5_hl
+
 
 ###########################################################################
-CXX = g++ # must use version that MATLAB supp
+CXX = @CXX@ # must use version that MATLAB supp
 
-CXXFLAGS = -std=c++11 -Wall -Wextra $(HDF5FLAG)
-
-CXXDEBUGFLAGS = -Wall -g #-pg #-pg for gprof
-
-CXXOPTIMFLAGS = #-O1 #higher level: -O2 or -O3
+CXXFLAGS = -std=c++11 @CXXFLAGS@ $(HDF5FLAG)
 
 CXXINCLUDE = $(HDF5INCLUDE)
 
 CXXLIBS = $(HDF5LIBS)
 
-COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXDEBUGFLAGS) $(CXXOPTIMFLAGS) $(CXXINCLUDE) -c $<
+COMPILE_THIS_ONE = $(CXX) $(CXXFLAGS) $(CXXINCLUDE) -c $<
 ###########################################################################
 #include includes.mk
 all: $(EXEC)
@@ -83,7 +69,9 @@ html/index.html: ${SRC_FILES} ${HEADER_FILES} Doxyfile
 #	@echo "OBJ compiled"
 
 clean: 
-	rm *.o
+	rm *.o 
+	rm -rf *cache 
+	rm config.* configure
 	@echo "clean done"
 
 clean_all:
