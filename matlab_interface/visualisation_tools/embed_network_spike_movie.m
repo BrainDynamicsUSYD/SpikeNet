@@ -1,5 +1,7 @@
 % vivvvsual the spiking pattern of the spatially embedded network
 function embed_network_spike_movie(R)
+
+figure('NumberTitle','off','Name','Spike Movie','color','w')
    N = R.N(1);
 hw = (sqrt(N)-1)/2;
 [Lattice, ~] = lattice_nD(2, hw);
@@ -20,7 +22,7 @@ box on;
 hold on;
 h1 = plot(0, 0, 'rx');
 
-t_bin = 2;
+t_bin = 1;
 for t = 1:t_bin:(step_tot-t_bin)
     [spikes_t, ~, ~] = find(spike_hist(:,t:(t+t_bin)));
     

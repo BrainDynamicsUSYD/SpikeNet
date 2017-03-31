@@ -42,46 +42,69 @@ for i = 1:num_files
 %     stPR = R_temp.stPR;
 %     save(files{i},'stPR', '-append');
 %     
-
-    
-
-%      R_temp = get_SWR(R_temp);
-%      LFP = R_temp.LFP;
-%      save(files{i},'LFP', '-append');
-%      
+% 
+%     
+% 
+% %      R_temp = get_SWR(R_temp);
+% %      LFP = R_temp.LFP;
+% %      save(files{i},'LFP', '-append');
+% %      
 %      [R_temp] = get_CC_pop(R_temp, 1);
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
-%      
+     
 
 %      [R_temp] = get_lagged_cov(R_temp);
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
 
-      get_LFP_continous(R_temp);
+%       get_LFP_continous(R_temp);
 
 
-          R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-          grid = R_temp.grid; %#ok<NASGU>
-          save(files{i},'grid', '-append');
-     
-         R_temp = get_grid_SWR_consistency(R_temp);
-         grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
-         save(files{i},'grid_SWR', '-append');
-     
-     R_temp = get_SWR_spike_phase_lock(R_temp);
-     SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
-     save(files{i},'SWR_spike_phase_lock', '-append');
-     
-     % plot_SWR(R_temp, save_fig);
-     %
-    
-    
-    %     R_temp = get_CC_pop(R_temp);
-    %     R_temp = get_EI_current_crosscorr(R_temp);
-    %     Balance = R_temp.Balance;
-    %     Analysis = R_temp.Analysis;
-    %     save(files{i},'Balance', 'Analysis', '-append');
+%           R_temp = get_grid_firing_centre(R_temp,'mode','quick');
+%           grid = R_temp.grid; %#ok<NASGU>
+%           grid_sub = R_temp.grid_sub; %#ok<NASGU>
+%           save(files{i},'grid','grid_sub', '-append');
+
+%         hw = 31;
+%         % [R_temp] = get_fano_factor(R_temp, 2, hw);
+%         [R_temp] = get_fano_factor(R_temp, 1);
+%         Analysis = R_temp.Analysis;
+%         save(files{i},'Analysis', '-append');
+
+
+% [R_temp] = get_rich_club(R_temp);
+% rich_club = R_temp.rich_club;
+% save(files{i},'rich_club', '-append');
+% % 
+% % 
+% [R_temp] = get_motif(R_temp);
+% motif = R_temp.motif;
+% save(files{i},'motif', '-append');
+
+
+R_temp = get_stru_var_decomp(R_temp);
+stru_var_decomp = R_temp.stru_var_decomp;
+save(files{i},'stru_var_decomp', '-append');
+
+
+%          R_temp = get_grid_SWR_consistency(R_temp);
+%          grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
+%          save(files{i},'grid_SWR', '-append');
+%
+%      R_temp = get_SWR_spike_phase_lock(R_temp);
+%      SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
+%      save(files{i},'SWR_spike_phase_lock', '-append');
+
+% plot_SWR(R_temp, save_fig);
+%
+
+
+%     R_temp = get_CC_pop(R_temp);
+%     R_temp = get_EI_current_crosscorr(R_temp);
+%     Balance = R_temp.Balance;
+%     Analysis = R_temp.Analysis;
+%     save(files{i},'Balance', 'Analysis', '-append');
     
 
     
