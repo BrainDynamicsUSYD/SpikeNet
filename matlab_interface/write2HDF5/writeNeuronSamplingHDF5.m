@@ -29,6 +29,13 @@ if length(data_type) ~= 8
     error('data_type must have a length of 8.')
 end
 
+% sampling frequency check
+dt = hdf5read(FID,'/config/Net/INIT002/dt');
+freq_s = 1000 / (mode(diff(find(time_index)))*dt);
+if freq_s < 1000
+    warning('You are assuming the Nyquist frequency of the system is lower than %g Hz. /n', freq_s);
+end
+
 % write
 % fprintf(FID, '%s\n', '# neuronal membrane potential and currents sampling setting // pop_ind;sample_ind');
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/V'],data_type(1),'WriteMode','append'); 
