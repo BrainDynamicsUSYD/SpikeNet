@@ -60,6 +60,6 @@ TEST_AND_SET_CXXFLAG(-O3)
 TEST_AND_SET_CXXFLAG(-g)
 
 dnl Process Makefile.in to create Makefile
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([makefile])
 AC_OUTPUT
 
