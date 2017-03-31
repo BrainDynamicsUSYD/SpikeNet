@@ -5,8 +5,6 @@ SRC_FILES = $(SRC_DIR)/*.cpp
 HEADER_FILES = $(SRC_DIR)/*.h
 OBJ = main.o NeuroPop.o NeuroNet.o ChemSyn.o SimuInterface.o MyIO.o
 
-
-HDF5FLAG = -DHDF5
 HDF5INCLUDE =  @HDF5_CPPFLAGS@ #-I/usr/local/include
 HDF5LIBS = @HDF5_LDFLAGS@ -lhdf5_cpp -lhdf5 -lhdf5_hl
 
@@ -14,7 +12,7 @@ HDF5LIBS = @HDF5_LDFLAGS@ -lhdf5_cpp -lhdf5 -lhdf5_hl
 ###########################################################################
 CXX = @CXX@ # must use version that MATLAB supp
 
-CXXFLAGS = -std=c++11 @CXXFLAGS@ $(HDF5FLAG)
+CXXFLAGS = -std=c++11 @CXXFLAGS@ 
 
 CXXINCLUDE = $(HDF5INCLUDE)
 

@@ -10,13 +10,11 @@
 
 using namespace std;
 
-NeuroNet::NeuroNet(vector<int> N_array_input, double dt_input, int step_tot_input, char delim_input, char indicator_input){
+NeuroNet::NeuroNet(vector<int> N_array_input, double dt_input, int step_tot_input){
 
 	N_array = N_array_input;
 	dt = dt_input;
 	step_tot = step_tot_input;
-	delim = delim_input;
-	indicator = indicator_input;
 	Num_pop = N_array.size();
 	runaway_killed = false;
 	step_killed = -1;
@@ -88,35 +86,11 @@ void NeuroNet::update(int step_current){
 
 }
 
-
-
-void NeuroNet::output_results(ofstream& output_file){
-
-	// write data
-	// cout << "Outputting results into text file..." << endl;
-	
-	// KILL002 # step at which runaway activity is killed
-	output_file << indicator << " KILL002" << endl;
-	output_file << step_killed << delim << endl;
-
-	// dump population data
-	for (int i = 0; i < Num_pop; i++){
-		NeuroPopArray[i]->output_results(output_file);
-	}
-
-	// dump synapse data
-	for (unsigned int i = 0; i < ChemSynArray.size(); i++){
-		ChemSynArray[i]->output_results(output_file);
-	}
-	
-}
-
-#ifdef HDF5
 void NeuroNet::import_restart(H5File & file,string out_filename){
 
 	Num_pop=read_scalar_HDF5<int>(file,string("/Net/Num_pop"));
 	for (unsigned int ind = 0; ind < N_array.size(); ++ind){
-		NeuroPopArray.push_back(new NeuroPop(ind, N_array[ind], dt, step_tot, delim, indicator));
+		NeuroPopArray.push_back(new NeuroPop(ind, N_array[ind], dt, step_tot));
 		cout << "\t Initialising neuron pop " << ind+1 << "..." << endl;
 
 		NeuroPopArray[ind]->import_restart(file,ind,out_filename);
@@ -126,7 +100,7 @@ void NeuroNet::import_restart(H5File & file,string out_filename){
 	int n_syns=read_scalar_HDF5<int>(file,syn_str+"n_syns");
 	for (int ind = 0; ind < n_syns; ++ind){
 
-		ChemSynArray.push_back(new ChemSyn(dt, step_tot, delim, indicator));
+		ChemSynArray.push_back(new ChemSyn(dt, step_tot));
 		// network.ChemSynArray.back()->init(type, i_pre, j_post, N_array[i_pre], N_array[j_post], I, J, K, D);
 
 		ChemSynArray[ind]->import_restart(file,ind);
@@ -178,6 +152,3 @@ void NeuroNet::output_results(H5File & file_HDF5){
 	}
 	
 }
-
-#endif
-

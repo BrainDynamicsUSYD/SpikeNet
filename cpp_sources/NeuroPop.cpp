@@ -9,14 +9,12 @@
 #include "NeuroPop.h"
 #include <functional> // for bind(), plus
 
-NeuroPop::NeuroPop(const int pop_ind_input, const int N_input, const double dt_input, const int step_tot_input, const char delim_input, const char indicator_input)
+NeuroPop::NeuroPop(const int pop_ind_input, const int N_input, const double dt_input, const int step_tot_input)
 {
 	pop_ind = pop_ind_input;
 	N = N_input;
 	dt = dt_input;
 	step_tot = step_tot_input; // this parameter is designed to be self-adapting (step_killed), so should be any other stuff that relies on it!!
-	delim = delim_input;
-	indicator = indicator_input;
 
 	// Using consistant units: msec+mV+nF+miuS+nA
 	// Initialise default parameters
@@ -200,6 +198,7 @@ void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_inpu
 }
 
 void NeuroPop::set_para(string para_str) {
+	const char delim = ',';
 	if (!para_str.empty()) {
 		istringstream para(para_str);
 		string para_name, para_value_str;
@@ -427,10 +426,7 @@ void NeuroPop::update_V(const int step_current) {
 
 	// Data sampling, which must be done here!
 	// sample_data(step_current);  // this is deprecated due to poor memory performance
-#ifdef HDF5
 	output_sampled_data_real_time_HDF5(step_current);
-#endif
-	output_sampled_data_real_time(step_current);
 
 	// update menbrane potentials
 	double Vdot;
@@ -458,58 +454,6 @@ void NeuroPop::update_V(const int step_current) {
 	record_LFP();
 
 }
-
-
-void NeuroPop::add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string sample_file_name_input) {
-	sample.file_type = 1;
-	sample.neurons = sample_neurons_input;
-	sample.type = sample_type_input;
-	sample.time_points = sample_time_points_input;
-
-	sample.file_name = sample_file_name_input.append(to_string(pop_ind)).append(".ygout_samp");
-	sample.file.open(sample.file_name);
-
-	sample.N_steps = 0;
-	for (int tt = 0; tt < step_tot; ++tt) {
-		if (sample.time_points[tt]) {sample.N_steps += 1;}
-	}
-	sample.N_neurons = sample.neurons.size();
-}
-
-
-
-
-void NeuroPop::output_sampled_data_real_time(const int step_current) {
-	if (!sample.neurons.empty() && step_current == 0 && sample.file_type == 1) {
-
-		sample.file << indicator << " POPD006" << endl;
-		sample.file << pop_ind << delim << sample.N_neurons << delim << sample.N_steps << delim << endl;
-		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
-		for (unsigned int tt = 0; tt < data_types.size(); ++tt) {
-			if (sample.type[tt]) {sample.file << data_types[tt] << delim; }
-		}
-		sample.file << endl;
-	}
-
-	if (!sample.neurons.empty() && sample.file_type == 1) {
-		if (sample.time_points[step_current]) { // push_back is amazing
-			for (int i = 0; i < sample.N_neurons; ++i) { // performance issue when sampling many neurons?
-				int ind_temp = sample.neurons[i];
-				if (sample.type[0]) {sample.file << V[ind_temp] << delim;}
-				if (sample.type[1]) {sample.file << I_leak[ind_temp] << delim;}
-				if (sample.type[2]) {sample.file << I_AMPA[ind_temp] << delim;}
-				if (sample.type[3]) {sample.file << I_GABA[ind_temp] << delim;}
-				if (sample.type[4]) {sample.file << I_NMDA[ind_temp] << delim;}
-				if (sample.type[5]) {sample.file << I_GJ[ind_temp] << delim;}
-				if (sample.type[6]) {sample.file << I_ext[ind_temp] << delim;}
-				if (sample.type[7]) {sample.file << I_K[ind_temp] << delim;}
-				sample.file << endl;
-			}
-		}
-	}
-
-}
-
 
 
 void NeuroPop::add_sampling(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input) {
@@ -640,82 +584,6 @@ void NeuroPop::reset_Q() {
 		}
 	}
 }
-
-
-void NeuroPop::output_results(ofstream& output_file) {
-
-	// POPD001 # spike history of neuron population
-	output_file << indicator << " POPD001" << endl;
-	output_file << pop_ind << delim << endl;
-	write2file(output_file, spike_hist_tot);
-	write2file(output_file, num_spikes_pop);
-	write2file(output_file, num_ref_pop);
-
-	// POPD002 # neuron parameters in the population
-	stringstream dump_count;
-	string para_str = dump_para();
-	dump_count << para_str;
-	string str_temp;
-	int var_number = 0;
-	while (getline(dump_count, str_temp)) {++var_number;} // count number of variables
-	output_file << indicator << " POPD002" << endl;
-	output_file << pop_ind << delim << var_number << delim << endl;
-	output_file << para_str;
-
-	// POPD003 # membrane potential mean and std
-	if (stats.record) {
-		output_file << indicator << " POPD003" << endl;
-		output_file << pop_ind << delim << endl;
-		write2file(output_file, stats.V_mean);
-		write2file(output_file, stats.V_std);
-		write2file(output_file, stats.I_input_mean);
-		write2file(output_file, stats.I_input_std);
-	}
-
-	// POPD007 # local field potential
-	if (LFP.record) {
-		output_file << indicator << " POPD007" << endl;
-		output_file << pop_ind << delim << LFP.data.size() << delim << endl;
-		write2file(output_file, LFP.data);
-	}
-
-	// POPD005 # E-I ratio for each neuron
-	if (stats.record) {
-		output_file << indicator << " POPD005" << endl;
-		output_file << pop_ind << delim << endl;
-		write2file(output_file, stats.IE_ratio);
-	}
-
-	// SAMF001 # sampled data file name
-	if (!sample.file_name.empty()) {
-		output_file << indicator << " SAMF001" << endl;
-		output_file << sample.file_name << endl;
-	}
-
-
-	/* // This following output protocol is deprecated due to poor memeory performance
-	// POPD004 # sampled neuron data
-	if (!sample_neurons.empty()){
-		output_file << indicator << " POPD004" << endl;
-		output_file << pop_ind << delim << sample.neurons.size() << delim << endl;
-
-		vector< string > data_types = { "V", "I_leak", "I_AMPA", "I_GABA", "I_NMDA", "I_GJ", "I_ext", "I_K" };
-		for (unsigned int tt = 0; tt < data_types.size(); ++tt){
-			if (sample.type[tt] == true){output_file << data_types[tt] << delim;}
-		}
-		output_file << endl;
-
-
-		for (unsigned int c = 0; c < sample.type.size(); ++c){
-			if (!sample.data[c].empty()){
-				NeuroPop::write2file(output_file, sample.data[c]); // 2D matrix
-			}
-		}
-	}
-	*/
-
-}
-
 
 
 void NeuroPop::record_LFP() {
@@ -856,10 +724,6 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, const int
 	}
 }
 
-
-
-
-#ifdef HDF5
 
 void NeuroPop::load_file_current_input(string fname) {
 	cout << "\t\tLoading currents from file... " << fname;
@@ -1372,6 +1236,4 @@ void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current) {
 	}
 }
 
-
-#endif
 

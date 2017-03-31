@@ -7,12 +7,10 @@
 
 #include "ChemSyn.h"
 
-ChemSyn::ChemSyn(const double dt_input, const int step_tot_input, const char delim_input, const char indicator_input){
+ChemSyn::ChemSyn(const double dt_input, const int step_tot_input){
 	
 	dt = dt_input;
 	step_tot = step_tot_input;
-	delim = delim_input;
-	indicator = indicator_input;
 	
 	// Default parameters
 	V_ex = 0.0;     // Excitatory reversal, 0.0
@@ -508,6 +506,7 @@ void ChemSyn::sample_data(const int step_current){
 
 
 void ChemSyn::set_para(string para_str){
+	const char delim = ',';
 	if (!para_str.empty()){
 		istringstream para(para_str);
 		string para_name, para_value_str; 
@@ -532,8 +531,9 @@ void ChemSyn::set_para(string para_str){
 
 
 string ChemSyn::dump_para(){
+	const char delim = ',';
+	
 	stringstream dump;
-
 
 	dump << "pop_ind_pre" << delim << pop_ind_pre << delim << endl;
 	dump << "pop_ind_post" << delim << pop_ind_post << delim << endl;
@@ -588,44 +588,6 @@ void ChemSyn::start_cov_record(const int time_start, const int time_end){
 	}
 }
 
-
-void ChemSyn::output_results(ofstream& output_file){
-	// SYND001 # synapse parameters
-	// count number of variables
-	stringstream dump_count;
-	string para_str = dump_para();
-	dump_count << para_str;
-	string str_temp;
-	int var_number = 0;
-	while(getline(dump_count,str_temp)){++var_number;} // count number of variables
-	output_file << indicator << " SYND001" << endl;
-	output_file << var_number << delim << endl;
-	output_file << para_str;
-	
-	
-	// SYND002 # sampled synapse data
-	if (!sample.neurons.empty()){
-		output_file << indicator << " SYND002" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << sample.neurons.size() << delim << endl;
-		write2file(output_file, sample.data); // 2D matrix
-	}
-
-	
-	// SYND003 # currents mean and std
-	if (stats.record){
-		output_file << indicator << " SYND003" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << endl;
-		write2file(output_file, stats.I_mean);
-		write2file(output_file, stats.I_std);
-	}
-	
-	// tmp data
-	if (tmp_data.size() != 0){
-		output_file << indicator << " SYND004" << endl;
-		output_file << pop_ind_pre << delim << pop_ind_post << delim << syn_type << delim << tmp_data.size() << delim << endl;
-		write2file(output_file, tmp_data);	
-	}
-}
 
 void ChemSyn::add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscaleE, double iscaleI,double lrate_E, double lrateall_E,double lrate_I, double lrateall_I,int intau, double innoise,int type_pre,int type_post){
 	
@@ -959,9 +921,6 @@ void ChemSyn::record_stats(int step_current){
 		}
 	}
 }
-
-
-#ifdef HDF5
 
 void ChemSyn::import_restart(H5File& file, int syn_ind){
 
@@ -1297,4 +1256,3 @@ void ChemSyn::output_results(H5File& file, int syn_ind){
 	}
 }
 
-#endif

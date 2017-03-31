@@ -15,7 +15,7 @@ class ChemSyn
 {
 public:
 	ChemSyn(); /// default constructor
-	ChemSyn(const double dt, const int step_tot, const char delim, const char indicator); /// parameterised constructor
+	ChemSyn(const double dt, const int step_tot); /// parameterised constructor
 
 	void init(const int syn_type, const int pop_ind_pre, const int pop_ind_post, const int N_pre, const int N_post, const vector<int> &C_i, const vector<int> &C_j, const vector<double> &K_ij, const vector<double> &D_ij); /// initialise chemical synapses by reading already prepared connections
 
@@ -51,18 +51,15 @@ public:
 	void old_pre_spikes_K_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
 	void record_V_post_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
 
-#ifdef HDF5
 	void import_restart(H5File& file, int syn_ind);
 	void export_restart(Group& Group, int syn_ind);
 	void output_results(H5File& file_HDF5, int syn_ind);
-#endif
+
 	const int & get_syn_type(); /// get synapse type
 	const int & get_pop_ind_pre(); /// get index of pre-synaptic population
 	const int & get_pop_ind_post(); /// get index of post-synaptic population
 private:
 
-	char delim; /// delimiter for input and output files, usually comma
-	char indicator; /// indicator for protocols, usually a single greater than operator
 	void init(); /// parameter-dependent initialisation
 	
 	string dump_para(); // dump all the parameter values used

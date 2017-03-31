@@ -56,10 +56,6 @@ void write2file(ofstream& output_file, const vector<double>& v){
 }
 
 
-
-
-#ifdef HDF5
-
 /*--------------------------------------- HDF5 --------------------------------------------*/
 void write_scalar_HDF5(Group & group, unsigned int s, const string & v_name){
 	vector<unsigned int> v_tmp;
@@ -485,4 +481,3 @@ template int read_scalar_HDF5<int>(const H5File & file, const string & name);
 template unsigned int read_scalar_HDF5<unsigned int>(const H5File & file, const string & name);
 
 
-#endif
