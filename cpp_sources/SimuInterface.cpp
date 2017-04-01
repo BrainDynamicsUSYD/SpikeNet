@@ -44,8 +44,9 @@ void SimuInterface::simulate(){
 	cout << "Simulation done." << endl;
 
 	// output results into HDF5 file
-	export_restart_HDF5();
 	output_results_HDF5();
+	export_restart_HDF5();
+	
 
 	
 }

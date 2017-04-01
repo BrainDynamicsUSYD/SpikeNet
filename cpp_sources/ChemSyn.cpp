@@ -1249,10 +1249,16 @@ void ChemSyn::output_results(H5File& file, int syn_ind){
 		write_vector_HDF5(group_syn, stats.I_std, string("stats_I_std"));
 		if (synapse_model == 0){
 			write_vector_HDF5(group_syn, stats.s_time_mean, string("stats_s_time_mean"));
-			write_matrix_HDF5(group_syn, stats.s_time_cov, string("stats_s_time_cov"));
+			write_vector_HDF5(group_syn, stats.s_time_var, string("stats_s_time_var"));
 			write_vector_HDF5(group_syn, stats.I_time_mean, string("stats_I_time_mean"));
 			write_vector_HDF5(group_syn, stats.I_time_var, string("stats_I_time_var"));
 		}
 	}
+	if (stats.record_cov){
+		if (synapse_model == 0){
+			write_matrix_HDF5(group_syn, stats.s_time_cov, string("stats_s_time_cov"));
+		}
+	}
+	
 }
 
