@@ -27,7 +27,7 @@ The design of SpikeNet provides the following four main features.
 #### FAQ
 Q: What if I am using Windows?
 
-A: Sorry, you are on your own. Well, you can always run a Linux virtual machine on Windows.
+A: Sorry, you are on your own.
 
 Q: What if I do not have Matlab or simply hate it?
 
@@ -87,8 +87,6 @@ d = dir('*RYG.mat')
 R = load(d(1).name)}
 raster_plot(R,1)
 ```
-
-For mo
 
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab --> c++ --> Matlab workflow for PBS job array submission. 
 The script all_in_one.sh has the following features:
