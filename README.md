@@ -1,5 +1,5 @@
 # SpikeNet
-SpikeNet is a software that has three standard alone components.
+SpikeNet is a software that has three stand-alone components.
 1. User interface for configuring spiking neuronal networks
 2. A c++ simulator 
 3. User interface for parsing and post-analyzing the simulation results.
