@@ -18,7 +18,7 @@ The design of SpikeNet provides the following four main features.
 ## Getting Started
 
 ### Prerequisites
-* Autoconf, a tandard tool on OSX and linux distributions
+* Autoconf, a standard tool on OSX and linux distributions
 * A c++ compiler that supports c++11 standard (GCC 4.2.1 or later; Intel C++ 12.0 or later)
 * HDF5 c/c++ API (open source)
 * Matlab (2013a or later) is optional but highly recommended
