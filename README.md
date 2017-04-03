@@ -55,6 +55,8 @@ make clean
 cd ..
 ```
 
+### Run the demo
+
 Now you should see the simulator in the current directory, with which you can run simulations by creating input files using the Matlab user interface.
 Following are the steps to use the Matlab user interface.
 1. Make a new directory for storing data
@@ -87,6 +89,8 @@ d = dir('*RYG.mat')
 R = load(d(1).name)}
 raster_plot(R,1)
 ```
+
+### High performance computing
 
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab --> c++ --> Matlab workflow for PBS job array submission. 
 The script all_in_one.sh has the following features:
@@ -127,6 +131,23 @@ cd tmp_data
 plot(arrayID, mean_firing_rate);
 ```
 
+### The workflow
+
+The typical workflow of SpikeNet is as shown in the following flowchart.
+
+![alt tag](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/work_flow.pdf)
+
+Notes:
+* Although the c++ simulator accepts input files with any names, A-T1 is the recommended and default naming format.
+* A is a 4-digit PBS array ID number.
+* T1 is a timestamp identifying when the in.h5 file was generated.
+* Similarly, T2 is a timestamp identifying when the out.h5 file was generated, which allows multiple simulations to be run for the same in.h5 file.
+* The restart\_TreeID.h5 files allow the users to directly modify any aspect of a simulation and restart it from there. 
+* The TreeID is automatically generated to ensure that the users can make as many different modifications and restart the simulation as many times as desired.
+* For technical reasons, the time series data sampled from each neuron population or synapse group, identified by an ID number, during simulation are stored separately in samp.h5 files.
+* The dashed lines mean that the C\texttt{++} simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
+
+### More 
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
 For more details, please see the full [documentation](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/SpikeNet_Documentation.pdf).
