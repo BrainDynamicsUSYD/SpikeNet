@@ -129,6 +129,7 @@ plot(arrayID, mean_firing_rate);
 
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
+For more details, please see the full [documentation](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/SpikeNet_Documentation.pdf).
 ## Authors
 
 * **Yifan Gu** - *Initial work* - [yigu8115](https://github.com/yigu8115)
