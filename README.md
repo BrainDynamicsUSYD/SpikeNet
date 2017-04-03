@@ -135,17 +135,17 @@ plot(arrayID, mean_firing_rate);
 
 The typical workflow of SpikeNet is as shown in the following flowchart.
 
-![alt text](documentation/work_flow.png)
+![alt text](documentation/work_flow.png =500x)
 
 Notes:
-* Although the c++ simulator accepts input files with any names, A-T1 is the recommended and default naming format.
-* A is a 4-digit PBS array ID number.
-* T1 is a timestamp identifying when the in.h5 file was generated.
-* Similarly, T2 is a timestamp identifying when the out.h5 file was generated, which allows multiple simulations to be run for the same in.h5 file.
-* The restart\_TreeID.h5 files allow the users to directly modify any aspect of a simulation and restart it from there. 
-* The TreeID is automatically generated to ensure that the users can make as many different modifications and restart the simulation as many times as desired.
-* For technical reasons, the time series data sampled from each neuron population or synapse group, identified by an ID number, during simulation are stored separately in samp.h5 files.
-* The dashed lines mean that the C\texttt{++} simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
+* Although the c++ simulator accepts input files with any names, **A-T1** is the recommended and default naming format.
+* **A** is a 4-digit PBS array ID number.
+* **T1** is a timestamp identifying when the **in.h5** file was generated.
+* Similarly, **T2** is a timestamp identifying when the **out.h5** file was generated, which allows multiple simulations to be run for the same **in.h5** file.
+* The **restart\_TreeID.h5** files allow the users to directly modify any aspect of a simulation and restart it from there. 
+* The **TreeID** is automatically generated to ensure that the users can make as many different modifications and restart the simulation as many times as desired.
+* For technical reasons, the time series data sampled from each neuron population or synapse group, identified by an ID number, during simulation are stored in separate **samp.h5** files.
+* The dashed lines mean that the c++ simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
 
 ### More 
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
