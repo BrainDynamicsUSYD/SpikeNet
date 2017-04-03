@@ -1,3 +1,15 @@
+* [SpikeNet](#spikenet)
+   * [Getting Started](#getting-started)
+      * [Prerequisites](#prerequisites)
+         * [FAQ](#faq)
+      * [Installing](#installing)
+      * [Run the demo](#run-the-demo)
+* [High performance computing](#high-performance-computing)
+* [The workflow](#the-workflow)
+* [More details](#more-details)
+* [Authors](#authors)
+* [License](#license)
+   
 # SpikeNet
 SpikeNet is a software that has three stand-alone components.
 1. User interface for configuring spiking neuronal networks
@@ -15,16 +27,16 @@ The design of SpikeNet provides the following four main features.
 * **Scalability** The design of the SpikeNet c++ simulator readily supports parallel computing using Message Passing Interface (MPI). Additionally, the HDF5-based I/O file format provides big data handling capability. Also Portable Batch System (PBS) scripts for array jobs are provided if the you have access to a cluster.
 
 
-## Getting Started
+# Getting Started
 
-### Prerequisites
+## Prerequisites
 * Autoconf, a standard tool on OSX and linux distributions
 * A c++ compiler that supports c++11 standard (GCC 4.2.1 or later; Intel C++ 12.0 or later)
 * HDF5 c/c++ API (open source)
 * Matlab (2013a or later) is optional but highly recommended
 * Portable Batch System (PBS) is optional but highly recommended
 
-#### FAQ
+### FAQ
 Q: What if I am using Windows?
 
 A: Sorry, you are on your own.
@@ -33,7 +45,7 @@ Q: What if I do not have Matlab or simply hate it?
 
 A: You can either request I/O interface in Python from us or contribute to the project by translating the existing Matlab I/O interface into Python or other langangues.
 
-### Installing
+## Installing
 
 1. Ask for read permission from one of the contributors with admin rights.
 2. Make a new directory
@@ -55,7 +67,7 @@ make clean
 cd ..
 ```
 
-### Run the demo
+## Run the demo
 
 Now you should see the simulator in the current directory, with which you can run simulations by creating input files using the Matlab user interface.
 Following are the steps to use the Matlab user interface.
@@ -90,7 +102,7 @@ R = load(d(1).name)}
 raster_plot(R,1)
 ```
 
-### High performance computing
+# High performance computing
 
 For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab --> c++ --> Matlab workflow for PBS job array submission. 
 The script all_in_one.sh has the following features:
@@ -131,7 +143,7 @@ cd tmp_data
 plot(arrayID, mean_firing_rate);
 ```
 
-### The workflow
+# The workflow
 
 The typical workflow of SpikeNet is as shown in the following flowchart.
 
@@ -147,18 +159,19 @@ Notes:
 * For technical reasons, the time series data sampled from each neuron population or synapse group, identified by an ID number, during simulation are stored in separate **samp.h5** files.
 * The dashed lines mean that the c++ simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
 
-### More 
+# More details 
 For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
-For more details, please see the full [documentation](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/SpikeNet_Documentation.pdf).
-## Authors
+Also the full documentation is available [here](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/SpikeNet_Documentation.pdf).
+
+# Authors
 
 * **Yifan Gu** - *Initial work* - [yigu8115](https://github.com/yigu8115)
 * **James A Henderson** - *HDF5-based I/O and learning schemes* - [JamesAHenderson](https://github.com/JamesAHenderson)
 
 See also the list of [contributors](https://github.com/BrainDynamicsUSYD/SpikeNet/graphs/contributors) who participated in this project.
 
-## License
+# License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
