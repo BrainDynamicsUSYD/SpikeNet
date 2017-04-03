@@ -135,7 +135,7 @@ plot(arrayID, mean_firing_rate);
 
 The typical workflow of SpikeNet is as shown in the following flowchart.
 
-![alt tag](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/work_flow.pdf)
+![alt text](documentation/work_flow.pdf)
 
 Notes:
 * Although the c++ simulator accepts input files with any names, A-T1 is the recommended and default naming format.
