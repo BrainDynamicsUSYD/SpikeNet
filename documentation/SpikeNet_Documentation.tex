@@ -13,8 +13,12 @@
 \usepackage[textwidth=365pt]{geometry}
 \usepackage{dirtree}
 \usepackage{tikz}
+\usetikzlibrary{external}
+\tikzexternalize % activate!
+\tikzset{external/force remake}
 \usetikzlibrary{shapes,arrows,calc}
 \usepackage{authblk}
+\usepackage{verbatim}
 
 \newcommand{\mylstinline}[1] {\colorbox{Lavender}{\lstinline[basicstyle=\ttfamily\footnotesize\color{Black}]|#1|} }
  
@@ -54,84 +58,11 @@ SpikeNet is a software developed for simulating spiking neuronal networks, of wh
 Please see \nameref{sec:matlab user interface} for more detailed descriptions of the work-flow. 
 This design essentially makes the SpikeNet C\texttt{++} simulator a stand-alone software. 
 Based on these protocols, the C\texttt{++} simulator can easily interface with any other high-level programming languages if Matlab is not prefered.
-Developer users will be interested to know that SpikeNet supports two types of input/output file formats: plain text and HDF5.
-Both text-based and HDF5 file formats follow pre-defined protocols (see \nameref{sec:IO protocols}). 
+Developer users will be interested to know that SpikeNet supports HDF5-based input/output file format which follows pre-defined protocols (see \nameref{sec:IO protocols}). 
 
 \item [Scalability] The design of the SpikeNet C\texttt{++} simulator readily supports parallel computing used Message Passing Interface (MPI). The simulator has two central C\texttt{++} classes, representing populations of neurons and synaptic connectivities among these populations, respectively. For example, for a recurrent network consisting of an excitatory neuron population ($E$) and an inhibitory one ($I$), two neuron population objects will be created together with up to four synaptic connectivity objects including $E\leftarrow E$, $I\leftarrow E$, $E\leftarrow I$ and $I\leftarrow I$. These six objects can be created and simulated in parallel and the amount of message passing among them at each simulation time step is minimal.  Additionally, HDF5 is supported for handling large input/output data files.
 \end{description}
  
-\section{Tech Stack}
-\begin{itemize}
-\item C\texttt{++}11 standard is required (GCC 4.2.1 or later; Intel C++ 12.0 or later).
-\item Matlab (2013a or later) is optional but highly recommended.
-\item HDF5 C\texttt{++} and C API are optional but recommended for data-intensive projects.
-\item Portable Batch System (PBS) is optional.
-\item Message Passing Interface (MPI) implementation is optional.
-\end{itemize}
- 
-\section{Quickstart}
-Following are the steps to set up the SpikeNet C\texttt{++} simulator.
-\begin{itemize}
-\item Ask for read permission from one of the contributors with admin rights.
-\item Make a new directory: \mylstinline{mkdir tmp; cd tmp}
-\item Clone SpikeNet: \mylstinline{git clone git@github.com:BrainDynamicsUSYD/SpikeNet.git}
-\newline (Method 2: \mylstinline{git clone https://github.com/BrainDynamicsUSYD/SpikeNet})
-
-\item Go into the directory: \mylstinline{cd SpikeNet}
-\item Make a copy of the makefile: \mylstinline{cp other_scripts/make*bak makefile}
-\item Build the C\texttt{++} simulator:  \mylstinline{make; make clean}
-\end{itemize}
-
-Now you should see the ``simulator'' in the current directory, with which you can run simulations by creating input files according to \nameref{sec:IO protocols}.
-However, it will be much easier to work with the Matlab user interface.
-If you do not have access to Matlab, try to contact the contributors to request interfaces with other high-level programming languages (Python for example).
-Following are the steps to use the Matlab user interface.
-\begin{itemize}
-\item Make a new directory for storing data: \mylstinline{cd ..; mkdir tmp_data; ls}
-\item Start Matlab: \mylstinline{matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
-\item Generate the example input files: \mylstinline{cd ../tmp_data; main_demo;}
-\item Quit Matlab: \mylstinline{quit}
-\item Run the simulator with the input files: \mylstinline{cd tmp_data; ../simulator *ygin;}
-\item Start Matlab: \mylstinline{cd ..; matlab -nodisplay}
-\item Set up the environment for Matlab: \mylstinline{cd SpikeNet; addpath(genpath(cd));}
-\item Parse the output files, run some basic post-processing and visualization: 
-\newline \mylstinline{cd ../tmp_data; PostProcessYG()}
-\item Load the simulation result: \mylstinline{d = dir(`*RYG.mat'); R = load(d(1).name)} (You may need to correct the single quotes in Matlab if you are directly copying the code from here.)
-\end{itemize}
-
-For HDF5, please make relevant changes in the makefile to specify the paths where you have installed your HDF5 API. Each of the matlab interfaces has a corresponding HDF5 version. For a complete list of both types of matlab interfaces,  
-\begin{itemize}
-\item \mylstinline{ls SpikeNet/matlab_interfaces/write2ygin}
-\item \mylstinline{ls SpikeNet/matlab_interfaces/write2HDF5}
-\end{itemize}
-
-
-For those who have access to a high-performance computing cluster with PBS, SpikeNet also provides bash script that fully automates the above Matlab $\rightarrow$  C\texttt{++}  $\rightarrow$ Matlab workflow for PBS job array submission. 
-The script all\_in\_one.sh has the following features:
-\begin{itemize}
-\item It automatically detects which stage each array job (with a unique 4-digit integer array ID) has reached: pre-processing done, simulation done or post-simulation data parsing done. The script will start each array job from the last unfinished stage instead of the first stage. This feature comes in handy when hundreds of array jobs end prematurely at different stages, say, due to the HPC being shut down unexpectedly, in which case simply a re-submission of the script will clean up the mess.
-\item It passes the array ID as an input argument to the matlab pre-processing script.
-\item It automatically saves a copy of the pre-processing Matlab script to the data directory when starting the array job with ID 0001.
-\end{itemize}
-
-Following are the steps to use the PBS script.
-\begin{itemize}
-\item Make sure you have set up your PBS environment correctly (e.g., modelue load HDF5-1.10.0). This can be done by editing shell config file.
-\item Go to the tmp directory
-\item Make a copy of the script: \mylstinline{cp SpikeNet/other_scripts/all*bak all_in_one.sh}
-\item Change it to executable: \mylstinline{chmod +x all_in_one.sh}
-\item Edit the following variables in the bash script accordingly: 
-\begin{itemize}
-\item {\footnotesize MATLAB\_SOURCE\_PATH\_2=`your\_path'}
-\item {\footnotesize MATLAB\_PRE\_PROCESS\_FUNC=`your\_functions'}
-\end{itemize}
-\item Make a directory for PBS output: \mylstinline{mkdir PBSout}
-\item Submit the job: \mylstinline{qsub -t 1-X -q queue_name all_in_one.sh}
-\end{itemize}
-
-
-For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
 Here are some basic tips on git.
 \begin{itemize}
@@ -157,10 +88,11 @@ Here are some basic tips on git.
 \end{minipage}
 
 \section{Workflow}
-The typical workflow of SpikeNet with text-based input/output files is as shown in the following flowchart.
+The typical workflow of SpikeNet is as shown in the following flowchart.
 \vskip 0.5cm
 
 % Define block styles
+\tikzsetnextfilename{work_flow}
 \tikzstyle{func} = [rectangle, draw, 
      text centered, minimum height=1.5em,  text width=2.5cm]
 \tikzstyle{data} = [rectangle,
@@ -169,17 +101,17 @@ The typical workflow of SpikeNet with text-based input/output files is as shown 
 \begin{tikzpicture}[node distance = 1.2cm, auto]
     % Place nodes
     \node (pre) [func, label=above right:{\tiny matlab}] {\footnotesize Pre-processing};
-    \node (ygin) [data, below of=pre] {\footnotesize A-T1.ygin};
-    \node [data, left of=ygin, node distance=3cm, align=left] (ygin_syn) {\footnotesize A-T1.ygin\_syn \\ \footnotesize (NF.ygin\_syn)};
-    \node (other) [data, right of=ygin, node distance=3cm, align=left]  {\footnotesize other.mat};
-    \node (c++) [func, below of=ygin, label=above right:{\tiny C\texttt{++}} ] {\footnotesize simulator};
-    \node (ygout) [data, below of=c++] {\footnotesize A-T1\_T2.ygout};
-    \node(ygout_samp)  [data, left of=ygout, node distance=3cm] {\footnotesize A-T1\_T2.ygout\_samp};
+    \node (in_h5) [data, below of=pre] {\footnotesize A-T1\_in.h5};
+    \node (other) [data, left of=in_h5, node distance=5cm, align=left]  {\footnotesize other.mat};
+    \node (c++) [func, below of=in_h5, label=above right:{\tiny C\texttt{++}} ] {\footnotesize simulator};
+    \node (ygout) [data, below of=c++] {\footnotesize A-T1\_T2\_out.h5};
+    \node (restart) [data, right of=ygout,  node distance=3cm] {\footnotesize A-T1\_restart\_TreeID.h5};
+    \node (ygout_samp)  [data, left of=ygout, node distance=3cm] {\footnotesize A-T1\_T2\_ID\_samp.h5};
     \node (ReadYG) [func, below of=ygout, label=above right:{\tiny matlab}] {\footnotesize PostProcessYG()};
     \node (RYG) [data, below of=ReadYG] {\footnotesize A-T1\_T2\_RYG.mat};
-    \node (SAMP) [data, left of=RYG, node distance=3cm] {\footnotesize A-T1\_T2\_samp.mat};
+    \node (SAMP) [data, left of=RYG, node distance=3cm] {\footnotesize A-T1\_T2\_ID\_samp.mat};
     \node (post) [func, below of=RYG, label=above right:{\tiny matlab}] {\footnotesize More analysis};
-    \node (read_syn) [func, left of=ReadYG,  node distance=5cm, label=above right:{\tiny matlab}]  {\footnotesize read\_ygin\_syn()};
+    \node (read_syn) [func, right of=RYG,  node distance=5cm, label=above right:{\tiny matlab}]  {\footnotesize read\_syn\_h5()};
     % Draw edges
     \coordinate (Below pre) at ($(pre.south)+(0,-0.2cm)$);
     \coordinate (Above c++) at ($(c++.north) + (0,0.15cm)$);
@@ -187,38 +119,42 @@ The typical workflow of SpikeNet with text-based input/output files is as shown 
     \coordinate (Above ReadYG) at ($(ReadYG.north) + (0,0.15cm)$);
     \coordinate (Below ReadYG) at ($(ReadYG.south)+(0,-0.15cm)$);
     \coordinate (Above post) at ($(post.north) + (0,0.3cm)$);
+    \coordinate (Above read_syn) at ($(read_syn.north) + (0,0.3cm)$);
     
     \path [line] (other) |- (post);
-    \path [line] (Below pre) -| (ygin_syn);
-    \path [line] (pre) -- (ygin);
+    \path [line] (Below pre) -| (in_h5);
+    \path [line] (pre) -- (in_h5);
     \path [line] (Below pre) -| (other);
-    \path [line, dashed] (ygin_syn) -- (c++);
-    \path [line] (ygin) -- (c++);
+    \path [line, dashed] (in_h5) -- (c++);
+    \path [line] (in_h5) -- (c++);
     \path [line] (c++) -- (ygout);
     \path [line] (Below c++) -| (ygout_samp);
+    \path [line] (Below c++) -| (restart);
     \path [line, dashed] (ygout_samp) -- (ReadYG);
     \path [line] (ygout) -- (ReadYG);
     \path [line] (ReadYG) -- (SAMP);
     \path [line] (ReadYG) -- (RYG);
     \path [line] (SAMP) |- (Above post);
     \path [line] (RYG) -- (post);
-    \path [line] (ygin_syn) -| (read_syn);
+    \path [line] (in_h5) -| (read_syn);
     \path [line] (read_syn) |- (post);
     \path [line] (SAMP) -- node [rotate=90,  text centered, anchor=south]  {\scriptsize delete} (ygout_samp);
-    \path [line] (ygin) -| ([xshift=0.5cm,yshift=0cm]c++.east) node [rotate=-90,  text centered, anchor=south] {\scriptsize attached to} |- (ygout);
+    \path [line, dashed] (Above read_syn) |- (ReadYG);
 \end{tikzpicture}
 \vskip 1cm
 
-Although the C\texttt{++} simulator accepts input files with any names, A-T1 is the recommended and default naming format.
+Notes: 
+\begin{itemize}
+\item Although the C\texttt{++} simulator accepts input files with any names, A-T1 is the recommended and default naming format.
 A is a 4-digit PBS array ID number.
-T1 is a timestamp identifying when the ygin file was generated.
-Similarly, T2 is a timestamp identifying when the ygout file was generated.
-Note that T2 allows multiple simulations to be run for the same ygin file.
-The synaptic connectivity definition file ygin\_syn is separated from ygin for better memory management, since the connectivity definitions (protocol INIT006) are the single most memory-intensive component.
-Due to the same reason, the sampled time series data from simulation (protocol SAMP001) are stored separately in ygout\_samp and samp.mat.
-Non-default (NF) ygin\_syn file path should be given in ygin using the provided Matlab interface.
-The dashed lines mean that the C\texttt{++} simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
-
+T1 is a timestamp identifying when the in.h5 file was generated.
+\item Similarly, T2 is a timestamp identifying when the out.h5 file was generated.
+Note that T2 allows multiple simulations to be run for the same in.h5 file.
+\item The restart\_TreeID.h5 files allow the users to directly modify any aspect of a simulation and restart it from there. 
+The TreeID is automatically generated to ensure that the users can make as many different modifications and restart the simulation as many times as desired.
+\item For technical reasons, the time series data sampled from each neuron population or synapse group, identified by an ID number, during simulation are stored separately in samp.h5 files.
+\item The dashed lines mean that the C\texttt{++} simulator and the PostProcessYG() matlab function will automatically look for those auxiliary input files based on the information contained in the main input files.
+\end{itemize}
 
 \section{Documentation for the C\texttt{++} simulator}
 To view the documentation
@@ -329,10 +265,12 @@ See main\_demo.m for a list of the basic case-building matlab functions and thei
 
 \section{Input/Output protocols}
 \label{sec:IO protocols}
+
+\begin{comment}
 \subsection{Text-based input protocols}
-The default filename for text-based input file is ``filename.ygin''.
+The default filename for text-based input file is ``filename.in.h5''.
 It is advised that synapse definitions always be given in a separate file.
-The default synapse definition filename is ``filename.ygin\_syn''.
+The default synapse definition filename is ``filename.in.h5\_syn''.
 Non-default synapse definition file path and name can be specified by ``SYNF001'' protocol.
 Following is the complete list of the input data protocols.
 Note that the protocols use three special characters, including ``\textgreater'' for starting a new protocol, ``\#'' for commenting and "," for delimiting.
@@ -439,8 +377,8 @@ Note that the protocols use three special characters, including ``\textgreater''
 	
 \end{lstlisting}
 
-\subsection{HDF5-based input protocols}
-HDF5-based input protocols basically follow the text-based protocols (with a few exceptions!).
+\end{comment}
+
 
 \hfill\begin{minipage}{\dimexpr\textwidth-1cm}
 \dirtree{%
@@ -491,12 +429,12 @@ HDF5-based input protocols basically follow the text-based protocols (with a few
 To fully control the RNG in C++ simulator, you need to pass the seed via this two functions.
 \begin{enumerate}
 \item writeExtSpikeSettingsHDF5(..., Seed)
-\item writePopSeedHDF5
+\item writePopSeedHDF5(PopID, Seed)
 \end{enumerate}
 
 
 
-
+\begin{comment}
 \subsection{Text-based output protocols}
 The default filename of text-based output file is ``filename-X.ygout'', where X is a time-stamp that uniquely marks the output file so that multiple simulations can be run for the same input files.
 For data completeness, the corresponding input file will be attached to the output file.
@@ -569,10 +507,9 @@ Following is the complete list of the output data protocols.
 	I_mean_t1, I_mean_t2, $\dots$ (1-by-step_tot)
 	I_std_t1, I_std_t2, $\dots$ (1-by-step_tot)
 	
-	
-
 \end{lstlisting}
 
+\end{comment}
 
 \bibliography{SpikeNet_Documentation}{}
 \bibliographystyle{plain}

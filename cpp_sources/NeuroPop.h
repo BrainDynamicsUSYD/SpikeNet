@@ -30,15 +30,11 @@ using namespace std;
 class NeuroPop {
 public:
 	NeuroPop(); /// default constructor
-	NeuroPop(const int pop_ind, const int N_input, const double dt_input, const int step_tot, const char delim, const char indicator); /// parameterised constructor
+	NeuroPop(const int pop_ind, const int N_input, const double dt_input, const int step_tot); /// parameterised constructor
 
 	void init(); // initialise neurons, called by constructor after parameter assignment
 	void set_para(string para); /// set parameters if not using default ones
 	void set_seed(int seed); /// manually set RNG seed
-
-	void output_results(ofstream& output_file);
-
-
 
 	void recv_I(vector<double>& I_add, const int pop_ind_pre, const int syn_type);
 	const vector< int >& get_spikes_current();
@@ -64,9 +60,6 @@ public:
 	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std);
 	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std);
 
-	void add_sampling(const vector<int>& sample_neurons, const vector<bool>& sample_type, const vector<bool>& sample_time_points);
-	void add_sampling_real_time(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
-
 	void load_file_spike_input(string fname);
 	void load_file_current_input(string fname);
 	void get_current_from_file();
@@ -84,12 +77,11 @@ public:
 	// However it is tolerable in development.
 	// Once the JH learning algorithm is published, consider fix it.
 
-#ifdef HDF5
 	void import_restart(H5File & file, int pop_ind, string out_filename);
 	void export_restart(Group & group);
 	void output_results(H5File& file_HDF5);
 	void add_sampling_real_time_HDF5(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input, string samp_file_name);
-#endif
+	void add_sampling(const vector<int>& sample_neurons_input, const vector<bool>& sample_type_input, const vector<bool>& sample_time_points_input);
 	void init_runaway_killer(const double min_ms, const double Hz, const double Hz_ms); /// kill the simulation when runaway activity of the network is detected:
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 
@@ -100,14 +92,8 @@ public:
 private:
 	void generate_I_ext(const int step_current);
 	void record_stats(const int step_current);
-	void output_sampled_data_real_time(const int step_current);
-
-#ifdef HDF5
 	void output_sampled_data_real_time_HDF5(const int step_current);
-#endif
 	string dump_para(); /// dump all the parameter values used
-	char delim;
-	char indicator;
 	void sample_data(const int step_current);
 	void runaway_check(const int step_current);
 	void record_LFP();
@@ -231,14 +217,10 @@ protected:
 		int file_type; /// 0 for no sample, 1 for text-based, 2 for hdf5-based
 		string
 		file_name; /// the file name for sampled time series
-		ofstream
-		file; /// the output file stream for sampled time series
-#ifdef HDF5
 		H5File *
 		file_HDF5;
 		DataSet
 		V_dataset, I_leak_dataset, I_AMPA_dataset, I_GABA_dataset, I_NMDA_dataset, I_GJ_dataset, I_ext_dataset, I_K_dataset;
-#endif
 		int
 		ctr = 0; /// counter that counts how many steps have been sampled
 		vector<int>
