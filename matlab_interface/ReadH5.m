@@ -157,7 +157,7 @@ if ~isempty(files)
         for pop_ind = 1:OutData{id_out}.Num_pop
             samp_file = [stamps num2str(pop_ind-1) '_neurosamp.h5'];
             samp_file_mat = [samp_file(1:end-2) 'mat'];
-            if exist(samp_file_mat,'file') ~= 2 % 2 for .mat file
+            if exist(samp_file,'file') == 2 && exist(samp_file_mat,'file') ~= 2 % 2 for .mat file
                 fprintf('   Generating %s...', samp_file_mat);
                 I_AMPA = try_h5read( samp_file,  '/I_AMPA' );
                 I_GABA = try_h5read( samp_file,  '/I_GABA' );
