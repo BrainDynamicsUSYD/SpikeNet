@@ -7,18 +7,29 @@ function [ R ] = get_stPR( R )
 fprintf('\t Getting stPR (may take several minute)...\n');
 pop = 1;
 
+
 % sample a sub-set of neurons from the entire population
-sample_num = min(R.N(pop), 100);
-sample_ind = sort(randperm(R.N(pop), sample_num));
+fw = sqrt(R.N(pop));
+hw = (fw-1)/2;
+if mod(hw,1) ~= 0
+    error('Not a supported grid.');
+end
+rad = 30; % 30 neurons is about 150 miu-meter
+Lat = lattice_nD(2,hw);
+ind_within = find(Lat(:,1).^2+ Lat(:,2).^2 <= rad^2);
+sample_num = 66;
+sample_ind = ind_within( randperm(length(ind_within), sample_num) );
 
 % spikes detected with 1ms resolution
 spike_hist = R.reduced.spike_hist{pop}(sample_ind,:);
 dt = R.reduced.dt; 
 
-% Gaussian smoothing kernel of half-width (std?) 12 ms
-kernel_width = 12; %ms
+% Gaussian smoothing kernel of "half-width" 12/sqrt(2) ms
+% FWHM = sigma * sqrt(8*log(2))
+FWHM = 12/sqrt(2)*2;
+kernel_std = FWHM / sqrt(8*log(2)) ; %ms
 kernel_type = 'Gaussian_Hz';
-sm_kernel = spike_train_kernel_YG(kernel_width, dt, kernel_type);
+sm_kernel = spike_train_kernel_YG(kernel_std, dt, kernel_type);
 
 % population coupling
 f_pop = conv( full(sum(double(spike_hist))), sm_kernel,'same');
@@ -44,7 +55,7 @@ end
 % "Population rate dynamics and multineuron firing patterns in 
 %  sensory cortex", Journal of Neuroscience.
 spike_hist_shuffle = spike_hist';
-shuffle_num = 30*nchoosek(sample_num,2); 
+shuffle_num = 100*nchoosek(sample_num,2); 
 c = ceil(rand(shuffle_num,2)*sample_num); % two randomly selected columns
 for i = 1:shuffle_num
   I = spike_hist_shuffle(:,c(i,1)) + spike_hist_shuffle(:,c(i,2)) == 1; % where the 2 columns don't coincide
@@ -77,7 +88,7 @@ end
 R.stPR.sample_ind = sample_ind;
 R.stPR.stPR_full = stPR'; %in Hz
 R.stPR.lags = lags*dt/1000; % sec
-R.stPR.kernel_width = kernel_width; %ms
+R.stPR.kernel_width = kernel_std; %ms
 R.stPR.kernel_type = kernel_type;
 R.stPR.c = stPR(:,lagNum+1); % size at zero time lag
 
