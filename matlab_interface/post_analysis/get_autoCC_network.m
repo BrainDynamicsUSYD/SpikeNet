@@ -6,7 +6,7 @@ Num_pop = R.Num_pop;
 dt = R.reduced.dt;
 num_spikes = R.reduced.num_spikes;
 
-max_lag = 1000; % ms
+max_lag = min(1000, round( (R.step_tot*R.dt)/ 4) ); % ms
 
 % network activity auto correlation
 ac = [];
