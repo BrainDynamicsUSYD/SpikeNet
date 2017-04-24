@@ -6,22 +6,26 @@ dt = R.dt;
 disp('Getting neuron sample data statistics');
 window_ms = 100; %ms
 window = round( window_ms/(dt*10) );
-lagNum = round( 10^4/(dt*10) );
+lagNum = round( 0.2*10^3/(dt*10) );
             
-
+s = strsplit(R.stamp, '_');
 
 for pop = 1:2
-    n = length(R.neuron_sample.neuron_ind{pop});
+    f_name = [s{1},'*',num2str(pop-1), '_neurosamp.mat'];
+    f_name = dir(f_name);
+    f_name = f_name.name;
+    load(f_name);
+    n = length(V(:,1));
     
     for i = 1:n
-       
-        E = R.neuron_sample.I_AMPA{pop}(i,:) + R.neuron_sample.I_ext{pop}(i,:); % I_ext is always excitatory
-        I = R.neuron_sample.I_GABA{pop}(i,:); % negative values
-        V = R.neuron_sample.V{pop}(i,:);
 
+        E = I_AMPA(i,:) + I_ext(i,:); %#ok<*NODEF> % I_ext is always excitatory
+        I = I_GABA(i,:); % negative values
+        V_i = V(i,:);
+        
         E = E(1:10:end); % down-sampling
         I = I(1:10:end);
-        V = V(1:10:end);
+        V_i = V_i(1:10:end);
 
 %         E_std_t = movingstd(E, window);
 %         E_mean_t = movingmean(E, window);
@@ -33,7 +37,7 @@ for pop = 1:2
         [xcf_EI,xlags] = crosscorr( E,I, lagNum ); % do NOT use xcorr!!
         [acf_E, lags] = autocorr(E, lagNum );
         [acf_I,~] = autocorr(I, lagNum );
-        [acf_V,~] = autocorr(V, lagNum );
+        [acf_V,~] = autocorr(V_i, lagNum );
         
         [acf_tot_mean,~] = autocorr(tot_mean_t, lagNum );
         [acf_tot_std,~] = autocorr(tot_std_t, lagNum );
@@ -51,7 +55,7 @@ for pop = 1:2
             ACF_TOT_STD = acf_tot_std;
             XCF_TOT_MEAN_STD = xcf_tot_mean_std;
         else
-            XCF_EI = [XCF_EI; xcf_EI];
+            XCF_EI = [XCF_EI; xcf_EI]; %#ok<*AGROW>
             ACF_E = [ACF_E; acf_E];
             ACF_I = [ACF_I; acf_I];
             ACF_V = [ACF_V; acf_V];

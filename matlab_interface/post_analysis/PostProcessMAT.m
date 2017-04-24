@@ -38,9 +38,9 @@ for i = 1:num_files
 %     avalanche = R_temp.avalanche;
 %     save(files{i},'avalanche', '-append');
 %         
-%     R_temp = get_stPR(R_temp);
-%     stPR = R_temp.stPR;
-%     save(files{i},'stPR', '-append');
+    R_temp = get_stPR(R_temp);
+    stPR = R_temp.stPR;
+    save(files{i},'stPR', '-append');
 %     
 % 
 %     
@@ -48,11 +48,13 @@ for i = 1:num_files
 % %      R_temp = get_SWR(R_temp);
 % %      LFP = R_temp.LFP;
 % %      save(files{i},'LFP', '-append');
-% %      
+%      
 %      [R_temp] = get_CC_pop(R_temp, 1);
+%      [R_temp] = get_dist_CC(R_temp);
+%      
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
-     
+%      
 
 %      [R_temp] = get_lagged_cov(R_temp);
 %      Analysis = R_temp.Analysis;
@@ -82,10 +84,10 @@ for i = 1:num_files
 % motif = R_temp.motif;
 % save(files{i},'motif', '-append');
 
-
-R_temp = get_stru_var_decomp(R_temp);
-stru_var_decomp = R_temp.stru_var_decomp;
-save(files{i},'stru_var_decomp', '-append');
+% 
+% R_temp = get_stru_var_decomp(R_temp);
+% stru_var_decomp = R_temp.stru_var_decomp;
+% save(files{i},'stru_var_decomp', '-append');
 
 
 %          R_temp = get_grid_SWR_consistency(R_temp);
@@ -110,9 +112,9 @@ save(files{i},'stru_var_decomp', '-append');
     
     %save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
     
-    %     R_temp = get_neuron_sample_stats(R_temp);
-    %     neuron_sample_stats = R_temp.neuron_sample_stats;
-    %     save(files{i},'neuron_sample_stats', '-append');
+    R_temp = get_neuron_sample_stats(R_temp);
+    neuron_sample_stats = R_temp.neuron_sample_stats;
+    save(files{i},'neuron_sample_stats', '-append');
     
     
     

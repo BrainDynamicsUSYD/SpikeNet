@@ -33,7 +33,7 @@ if spatial_temporal_option == 1
         end
         fano_tmpo = [fano_tmpo nanmean(var(SC_tmp)./mean(SC_tmp))]; %#ok<AGROW>
     end
-
+    
     R.Analysis.fano_tmpo = fano_tmpo;
     R.Analysis.fano_tmpo_win = win_len;
     R.Analysis.fano_n_sample = n_sample;
@@ -46,7 +46,7 @@ elseif spatial_temporal_option == 2
         hw = R.ExplVar.hw;
     end
     w = hw*2 + 1;
-   
+    
     for k = 1:length(ker_len)
         ker_len_tmp = ker_len(k);
         
@@ -80,25 +80,25 @@ elseif spatial_temporal_option == 2
         end
         fano_spat(k) =  nanmean(var(SC_tmp)./mean(SC_tmp)); %#ok<AGROW>
     end
-   
+    
     R.Analysis.fano_spat = fano_spat;
     R.Analysis.fano_spat_ker = ker_len;
-
+    
 elseif spatial_temporal_option == 3
-    win_len = 100; %50:50:500; % ms
-    ker_len = 10; %4:2:16;
+    win_len = 50:50:500; % ms
+    ker_len = 4:2:16;
     % spatial-tmporal fano factor
     if nargin < 3
         hw = R.ExplVar.hw;
     end
-    w = hw*2 + 1;
-   
+    fw = hw*2 + 1;
+    
     for k = 1:length(ker_len)
         ker_len_tmp = ker_len(k);
         
         ker_neu_ind = [];
         
-        xy_b = 1+ker_len_tmp:round(ker_len_tmp*ker_gap_ratio):w;
+        xy_b = 1+ker_len_tmp:round(ker_len_tmp*ker_gap_ratio):fw;
         xy_a = xy_b - ker_len_tmp;
         
         [xy_a_x, xy_a_y] = meshgrid(xy_a,xy_a);
@@ -106,18 +106,18 @@ elseif spatial_temporal_option == 3
         
         for i = 1:length(xy_a)
             for j = 1:length(xy_a)
-                g = zeros(w,w);
+                g = zeros(fw,fw);
                 g(xy_a_x(i,j):xy_b_x(i,j), xy_a_y(i,j):xy_b_y(i,j)) = 1;
                 ker_neu_ind = [ker_neu_ind; find(g(:))']; %#ok<AGROW>
-%                 % debug
-%                 g_tmp = zeros(w,w);
-%                 g_tmp(ker_neu_ind(end,:)) = 1;
-%                 imagesc(g_tmp);
-%                 pause(0.1)
+                %                 % debug
+                %                 g_tmp = zeros(w,w);
+                %                 g_tmp(ker_neu_ind(end,:)) = 1;
+                %                 imagesc(g_tmp);
+                %                 pause(0.1)
             end
         end
-
-
+        
+        
         for w = 1:length(win_len)
             win_tmp = win_len(w);
             win_step = round(win_tmp/dt); % in steps
@@ -126,6 +126,7 @@ elseif spatial_temporal_option == 3
             t_a = t_b - win_step + 1;
             
             SC_tmp = [];
+            length(ker_neu_ind(:,1))
             for i = 1:length(ker_neu_ind(:,1))
                 for t = 1:length(t_a)
                     SC_tmp  = [SC_tmp; sum(spike_hist(t_a(t):t_b(t),ker_neu_ind(i,:)))]; %#ok<AGROW>
