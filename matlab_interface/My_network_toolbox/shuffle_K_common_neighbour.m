@@ -34,9 +34,12 @@ if cn_scale_weight > 1
         K_tmp = K(J == j);
         K_tmp = K_tmp(:)';
         K_tmp_shuffle = zeros(size(K_tmp));
-        % bilinear factor
+        % bilinear factor: the following scheme not doing much because ck_factor is
+        % around 1.1, a very small value due to using global cn_minmax and
+        % K_minmax
         ck_factor = 1 + (c_tmp - cn_minmax(1))./diff(cn_minmax) .* ...
             (K_tmp - K_minmax(1))./diff(K_minmax) * (cn_scale_weight - 1);
+        max(ck_factor)
         [~, ck_factor_sort_ind] = sort( rand(size(c_tmp))./ck_factor, 'ascend' );
         % shuffle
         K_tmp_shuffle(ck_factor_sort_ind) = sort( K_tmp, 'descend' );
