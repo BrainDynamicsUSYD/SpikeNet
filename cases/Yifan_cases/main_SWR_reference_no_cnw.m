@@ -8,7 +8,7 @@ function main_SWR_reference_no_cnw(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 0.1*sec; % use 10 second!
+step_tot = 10*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
