@@ -38,10 +38,10 @@ for i = 1:num_files
 %     avalanche = R_temp.avalanche;
 %     save(files{i},'avalanche', '-append');
 %         
-    R_temp = get_stPR(R_temp);
-    stPR = R_temp.stPR;
-    save(files{i},'stPR', '-append');
-%     
+%     R_temp = get_stPR(R_temp);
+%     stPR = R_temp.stPR;
+%     save(files{i},'stPR', '-append');
+% %     
 % 
 %     
 % 
@@ -69,15 +69,15 @@ for i = 1:num_files
 %           save(files{i},'grid','grid_sub', '-append');
 
 %         hw = 31;
-%         % [R_temp] = get_fano_factor(R_temp, 2, hw);
-%         [R_temp] = get_fano_factor(R_temp, 1);
-%         Analysis = R_temp.Analysis;
-%         save(files{i},'Analysis', '-append');
+% % [R_temp] = get_fano_factor(R_temp, 2, hw);
+% [R_temp] = get_fano_factor(R_temp, 1);
+% Analysis = R_temp.Analysis;
+% save(files{i},'Analysis', '-append');
 
 
-% [R_temp] = get_rich_club(R_temp);
-% rich_club = R_temp.rich_club;
-% save(files{i},'rich_club', '-append');
+[R_temp] = get_rich_club(R_temp);
+rich_club = R_temp.rich_club;
+save(files{i},'rich_club', '-append');
 % % 
 % % 
 % [R_temp] = get_motif(R_temp);
@@ -112,9 +112,9 @@ for i = 1:num_files
     
     %save(files{i},'-struct', 'R_temp', '-v7.3'); % -v7.3 for >2GB
     
-    R_temp = get_neuron_sample_stats(R_temp);
-    neuron_sample_stats = R_temp.neuron_sample_stats;
-    save(files{i},'neuron_sample_stats', '-append');
+%     R_temp = get_neuron_sample_stats(R_temp);
+%     neuron_sample_stats = R_temp.neuron_sample_stats;
+%     save(files{i},'neuron_sample_stats', '-append');
     
     
     
