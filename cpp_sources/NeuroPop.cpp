@@ -173,7 +173,7 @@ void NeuroPop::start_cov_record(const int time_start, const int time_end)
 	stats.record_cov = true;
 	stats.V_time_mean_dumb.assign(N, 0.0);
 	stats.V_time_cov.resize(N);
-	for (int i = 0; i < N; ++i){
+	for (int i = 0; i < N; ++i) {
 		stats.V_time_cov[i].assign(N, 0.0);
 	}
 	// over-write the following two variables
@@ -266,6 +266,15 @@ void NeuroPop::set_init_condition(const double r_V0, const double p_fire) {
 			V[i] = V_th + 1.0; // above threshold for firing
 		}
 		else {V[i] = V_rt + (V_th - V_rt) * r_V0 * ZeroOne();}
+	}
+}
+
+void NeuroPop::set_init_V_external(const vector<double>& exteral_init_V) {
+	if (*max_element(V.begin(),V.end()) != V_lk ) {
+		cout << "\t\t Warning: random initial V are overwritted by exteral intial V!" << endl;
+	}
+	for (int i = 0; i < N; ++i) {
+		V[i] = exteral_init_V[i];
 	}
 }
 
@@ -612,7 +621,7 @@ void NeuroPop::record_stats(const int step_current) {
 		stats.I_input_std.push_back(sqrt(var_tmp_I));
 
 		// online mean and var calculation: Welford's method (1962, Technometrixcs)
-		bool is_end = step_current == (step_tot-1);
+		bool is_end = step_current == (step_tot - 1);
 		int k = step_current;
 		Welford_online(I_input, stats.I_tot_time_mean, stats.I_tot_time_var, k, is_end);
 		Welford_online(I_GABA, stats.I_GABA_time_avg, k);
@@ -629,11 +638,11 @@ void NeuroPop::record_stats(const int step_current) {
 			}
 		}
 	}
-	
-	if (stats.record_cov){
-		if (step_current >= stats.time_start_cov && step_current <= stats.time_end_cov){
-			bool is_end = step_current == (stats.time_end_cov-1);
-			int k = step_current-stats.time_start_cov;
+
+	if (stats.record_cov) {
+		if (step_current >= stats.time_start_cov && step_current <= stats.time_end_cov) {
+			bool is_end = step_current == (stats.time_end_cov - 1);
+			int k = step_current - stats.time_start_cov;
 			Welford_online(V, stats.V_time_mean_dumb, stats.V_time_cov,  k, is_end);
 		}
 	}
@@ -668,13 +677,13 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector<do
 
 }
 
-void Welford_online(const vector<double>& new_data, vector<double>& M, vector< vector <double> >& Cov, const int K, const bool is_end){
+void Welford_online(const vector<double>& new_data, vector<double>& M, vector< vector <double> >& Cov, const int K, const bool is_end) {
 	double M_old, x;
 	int N_tmp = int(M.size());
-	vector<double> M_add; 
+	vector<double> M_add;
 	M_add.resize(N_tmp);
-	
-	for (int i = 0; i < N_tmp; ++i){ 
+
+	for (int i = 0; i < N_tmp; ++i) {
 		M_old = M[i];
 		x = new_data[i];
 		M_add[i] = (x - M_old) / double(K + 1.0);
@@ -682,8 +691,8 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector< v
 	}
 	// covariance
 	/*
-	for (int i = 0; i < N_tmp; ++i){ 
-		for (int j = i; j < N_tmp; ++j){ 
+	for (int i = 0; i < N_tmp; ++i){
+		for (int j = i; j < N_tmp; ++j){
 			Cov[i][j] -= Cov[i][j] / double(K + 1.0);
 			Cov[i][j] += double(K) * M_add[i] * M_add[j];
 			if (is_end == true){
@@ -695,25 +704,25 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, vector< v
 	*/
 	vector<double> Cov_add;
 	Cov_add.resize(N_tmp);
-	for (int i = 0; i < N_tmp; ++i){ 
+	for (int i = 0; i < N_tmp; ++i) {
 		// Cov[i][j] -= Cov[i][j] / double(K + 1.0);
-		transform(Cov[i].begin(), Cov[i].end(), Cov[i].begin(), [K](double x){return x - (x / double(K + 1.0));});
+		transform(Cov[i].begin(), Cov[i].end(), Cov[i].begin(), [K](double x) {return x - (x / double(K + 1.0));});
 		// Cov_add = double(K) * M_add[i];
 		fill(Cov_add.begin(), Cov_add.end(), double(K) * M_add[i]);
 		// Cov_add = Cov_add * M_add[j];
 		transform(Cov_add.begin(), Cov_add.end(), M_add.begin(), Cov_add.begin(), multiplies<double>());
 		// Cov[i][j] += Cov_add;
 		transform(Cov[i].begin(), Cov[i].end(), Cov_add.begin(), Cov[i].begin(), plus<double>());
-		if (is_end == true){
+		if (is_end == true) {
 			// Cov[i][j] = Cov[i][j] * double(K + 1.0) / double(K);
-			transform(Cov[i].begin(), Cov[i].end(), Cov[i].begin(), [K](double x){return x * double(K + 1.0) / double(K);});
+			transform(Cov[i].begin(), Cov[i].end(), Cov[i].begin(), [K](double x) {return x * double(K + 1.0) / double(K);});
 		}
 	}
 
 }
 
 
-void Welford_online(const vector<double>& new_data, vector<double>& M, const int K){
+void Welford_online(const vector<double>& new_data, vector<double>& M, const int K) {
 	// Note that K follows C++ index, K = 0, 1, ....
 	// online mean and var calculation: Welford's method (1962, Technometrixcs)
 	double M_old, x;
