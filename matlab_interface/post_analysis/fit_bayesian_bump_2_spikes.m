@@ -3,6 +3,7 @@ function [ x, y, width, mlh, height, bayes_factor  ] = fit_bayesian_bump_2_spike
 %   Detailed explanation goes here
 % mode: 'bayesian' or 'quick'
 
+
 if isempty(spike_x_pos_o)
     x = NaN;
     y = NaN;
@@ -61,12 +62,17 @@ else
                 func_handle_gauss = @(v) -get_gaus_lh_log_ad_hoc(x_grid, y_grid, spike_count, v(1), v(2), v(3), v(4) );
                 [v, fval] = fminsearchbnd(func_handle_gauss, x0, [min(x_r) min(y_r) 0 0] , [max(x_r) max(y_r)  500 100*fw]);
                 mlh = -fval;
+                
                 % get bayes factor
                 func_handle_unif = @(rate) -get_unif_lh_log_ad_hoc( spike_count, rate );
                 [rate_unif, fval] = fminsearchbnd(func_handle_unif, peak_rate_guess/2, 0 , peak_rate_guess);
                 mlh_unif = -fval;
                 bayes_factor = mlh - mlh_unif - 0.5*(4-1)*log(sum(sum(spike_count)));
                 % See Gu and Gong, 2016, The dynamics of memory retrieval in hierarchical networks: a modeling study
+
+                % get P-value
+                % % No!! It is very hard to design a meaningful p-value
+                % here.
                 
             case 'quick'
                 v = x0;

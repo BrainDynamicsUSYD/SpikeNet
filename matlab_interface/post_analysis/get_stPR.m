@@ -1,4 +1,4 @@
-function [ R ] = get_stPR( R )
+function [ R ] = get_stPR( R, varargin )
 %population coupling measured by the size of spike-triggered population
 %rate at zero time lag
 %   Calculate population coupling as defined in
@@ -9,7 +9,17 @@ pop = 1;
 
 n_trials = 10;
 sample_num = 66;
+n_sample_region = 2000;
 
+for i = 1:length(varargin)/2
+    var_name = varargin{2*i-1};
+    var_value = varargin{2*i};
+     if isnumeric(var_value)
+        eval([var_name, '=', num2str(var_value), ';']);
+     else
+         eval([var_name, '=''', var_value, ''';']);
+     end
+end
 
 dt = R.reduced.dt;
 max_lag = 500; % 500 ms
@@ -28,7 +38,8 @@ hw = (fw-1)/2;
 if mod(hw,1) ~= 0
     error('Not a supported grid.');
 end
-rad = sqrt(2000/pi); % 30 neurons is about 150 miu-meter
+
+rad = sqrt(n_sample_region/pi); % 25 neurons is about 125 miu-meter
 Lat = lattice_nD(2,hw);
 ind_within = find(Lat(:,1).^2+ Lat(:,2).^2 <= rad^2);
 

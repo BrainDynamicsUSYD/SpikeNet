@@ -38,23 +38,23 @@ for i = 1:num_files
 %     avalanche = R_temp.avalanche;
 %     save(files{i},'avalanche', '-append');
 %         
-%     R_temp = get_stPR(R_temp);
+%     R_temp = get_stPR(R_temp,'n_sample_region', 1000);
 %     stPR = R_temp.stPR;
 %     save(files{i},'stPR', '-append');
-% %     
+%     
 % 
 %     
 % 
 % %      R_temp = get_SWR(R_temp);
 % %      LFP = R_temp.LFP;
 % %      save(files{i},'LFP', '-append');
-%      
+% %      
 %      [R_temp] = get_CC_pop(R_temp, 1);
-%      [R_temp] = get_dist_CC(R_temp);
+%      % [R_temp] = get_dist_CC(R_temp);
 %      
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
-%      
+% %      
 
 %      [R_temp] = get_lagged_cov(R_temp);
 %      Analysis = R_temp.Analysis;
@@ -63,7 +63,7 @@ for i = 1:num_files
 %       get_LFP_continous(R_temp);
 
 
-%           R_temp = get_grid_firing_centre(R_temp,'mode','quick');
+%           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
 %           grid = R_temp.grid; %#ok<NASGU>
 %           grid_sub = R_temp.grid_sub; %#ok<NASGU>
 %           save(files{i},'grid','grid_sub', '-append');
@@ -74,10 +74,20 @@ for i = 1:num_files
 % Analysis = R_temp.Analysis;
 % save(files{i},'Analysis', '-append');
 
+% 
+% [R_temp] = get_rich_club(R_temp);
+% rich_club = R_temp.rich_club;
+% save(files{i},'rich_club', '-append');
 
-[R_temp] = get_rich_club(R_temp);
-rich_club = R_temp.rich_club;
-save(files{i},'rich_club', '-append');
+R_temp = get_triplet_sequence(R_temp,'hw_sample', 10);
+triplet_double = R_temp.triplet;
+save(files{i},'triplet_double', '-append');
+
+
+% R_temp = get_local_spike_corr(R_temp);
+% local_cc = R_temp.local_cc;
+% save(files{i},'local_cc', '-append');
+
 % % 
 % % 
 % [R_temp] = get_motif(R_temp);
@@ -116,8 +126,10 @@ save(files{i},'rich_club', '-append');
 %     neuron_sample_stats = R_temp.neuron_sample_stats;
 %     save(files{i},'neuron_sample_stats', '-append');
     
-    
-    
+
+% R_temp = get_weight_vs_CC(  R_temp );
+% w_CC = R_temp.w_CC;
+% save(files{i},'w_CC', '-append');
     %%%%%%% do something above
     disp('Data processed and saved.');
     
