@@ -49,8 +49,13 @@ public:
 	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
 	void random_V(const double firing_probability); /// Generate random initial condition for V. This function is deprecated!
-	void set_init_condition(const double r_V0, const double p_fire); /// Uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
 
+	/// uniform random distribution [V_rt, V_rt + (V_th - V_rt)*r_V0] and then randomly set neurons to fire according to p_fire
+	void set_init_condition(const double r_V0, const double p_fire); 
+	/// initial V = exteral_init_V
+	void set_init_V_external(const vector<double>& exteral_init_V);
+	/// set initial V according to externally given vector
+	
 	void set_neuron_model(int n_mod);
 	void set_ELIF_Params(double elif_delT, double elif_VT);
 
