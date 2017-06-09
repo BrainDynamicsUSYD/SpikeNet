@@ -79,9 +79,9 @@ for i = 1:num_files
 % rich_club = R_temp.rich_club;
 % save(files{i},'rich_club', '-append');
 
-R_temp = get_triplet_sequence(R_temp,'hw_sample', 10);
-triplet_double = R_temp.triplet;
-save(files{i},'triplet_double', '-append');
+% R_temp = get_triplet_sequence(R_temp,'hw_sample', 10);
+% triplet_double = R_temp.triplet;
+% save(files{i},'triplet_double', '-append');
 
 
 % R_temp = get_local_spike_corr(R_temp);
@@ -90,9 +90,9 @@ save(files{i},'triplet_double', '-append');
 
 % % 
 % % 
-% [R_temp] = get_motif(R_temp);
-% motif = R_temp.motif;
-% save(files{i},'motif', '-append');
+[R_temp] = get_motif(R_temp);
+motif = R_temp.motif;
+save(files{i},'motif', '-append');
 
 % 
 % R_temp = get_stru_var_decomp(R_temp);
