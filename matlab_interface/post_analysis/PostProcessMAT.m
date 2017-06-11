@@ -83,6 +83,14 @@ for i = 1:num_files
 % triplet_double = R_temp.triplet;
 % save(files{i},'triplet_double', '-append');
 
+% R_temp = get_triplet_sequence(R_temp,'hw_sample', 10);
+% triplet_double = R_temp.triplet;
+% save(files{i},'triplet_double', '-append');
+
+
+R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 10);
+triplet_no_latency = R_temp.triplet;
+save(files{i},'triplet_no_latency', '-append');
 
 % R_temp = get_local_spike_corr(R_temp);
 % local_cc = R_temp.local_cc;
@@ -90,9 +98,9 @@ for i = 1:num_files
 
 % % 
 % % 
-[R_temp] = get_motif(R_temp);
-motif = R_temp.motif;
-save(files{i},'motif', '-append');
+% [R_temp] = get_motif(R_temp);
+% motif = R_temp.motif;
+% save(files{i},'motif', '-append');
 
 % 
 % R_temp = get_stru_var_decomp(R_temp);
