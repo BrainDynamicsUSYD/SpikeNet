@@ -63,10 +63,10 @@ for i = 1:num_files
 %       get_LFP_continous(R_temp);
 
 
-%           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-%           grid = R_temp.grid; %#ok<NASGU>
-%           grid_sub = R_temp.grid_sub; %#ok<NASGU>
-%           save(files{i},'grid','grid_sub', '-append');
+          R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+          grid = R_temp.grid; %#ok<NASGU>
+          grid_sub = R_temp.grid_sub; %#ok<NASGU>
+          save(files{i},'grid','grid_sub', '-append');
 
 %         hw = 31;
 % % [R_temp] = get_fano_factor(R_temp, 2, hw);
@@ -88,9 +88,9 @@ for i = 1:num_files
 % save(files{i},'triplet_double', '-append');
 
 
-R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 10);
-triplet_no_latency = R_temp.triplet;
-save(files{i},'triplet_no_latency', '-append');
+% R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 10);
+% triplet_no_latency = R_temp.triplet;
+% save(files{i},'triplet_no_latency', '-append');
 
 % R_temp = get_local_spike_corr(R_temp);
 % local_cc = R_temp.local_cc;
