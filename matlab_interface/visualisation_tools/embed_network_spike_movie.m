@@ -1,4 +1,4 @@
-% vivvvsual the spiking pattern of the spatially embedded network
+% visualize the spiking pattern of the spatially embedded network
 function embed_network_spike_movie(R)
 
 figure('NumberTitle','off','Name','Spike Movie','color','w')

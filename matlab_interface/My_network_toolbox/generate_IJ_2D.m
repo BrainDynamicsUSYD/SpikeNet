@@ -1,4 +1,4 @@
-function [ I, J, dist_IJ, iter_hist, Lattice ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_d, cn_scale_wire, iter_num, dist_cutoff )
+function [ I, J, dist_IJ, iter_hist, Lattice ] = generate_IJ_2D( degree_in_0, degree_out_0, tau_d, cn_scale_wire, iter_num, dist_cutoff, record_cc )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,8 +9,9 @@ D = 2; % Pulin: 2D is enough
 
 show_wait_bar = 0;
 
-if nargin == 4
-    iter_num = 5;% 5 is arbitrary, try something else?
+
+if nargin == 6
+    record_cc = 1;% 5 is arbitrary, try something else?
 end
 
 if cn_scale_wire < 1
@@ -21,15 +22,17 @@ for iter = 1:iter_num
     fprintf('Generate I and J: Iteration = %d \n', iter)
     if show_wait_bar == 1
         wb_h = waitbar(0,'Please wait...');
-        wb_p = 0;
+        
     end
+    wb_p = 0;
     I = []; % pre node index
     J = []; % post node index
     dist_IJ = [];
     degree_in_left = degree_in_0;
     for i = randperm(N)
+        wb_p = wb_p + 1;
         if show_wait_bar == 1
-            wb_p = wb_p + 1;
+            
             waitbar(wb_p / N)
         end
         % distance factor
@@ -97,8 +100,16 @@ for iter = 1:iter_num
     Y = histc(cn_dist, edges);
     cn_minmax = minmax(cn_dist);
     cn_std = std(cn_dist);
-    ccoef = full(clustering_coef_wd(A));
-    
+    if record_cc == 1
+        if hw > 31 % only calculate it for a circular region with radius less than 31 for computational reasons
+            sample_ind = (Lattice(:,1).^2 + Lattice(:,2).^2) <= 31^2;
+            ccoef = full(clustering_coef_wd(A(sample_ind,sample_ind)));
+        else
+            ccoef = full(clustering_coef_wd(A));
+        end
+    else
+        ccoef = 0;
+    end
     clear cn_dist;
     % store iteration history
     if iter == 1
