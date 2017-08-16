@@ -142,6 +142,7 @@ cd tmp_data
 [mean_firing_rate, arrayID] = CollectVectorYG('Analysis','mean(Analysis.rate{1})');
 plot(arrayID, mean_firing_rate);
 ```
+8. Be aware that the seed for random number generator in PBS arry jobs may need to be manually set or remains as constant otherwise.
 
 # The workflow
 
