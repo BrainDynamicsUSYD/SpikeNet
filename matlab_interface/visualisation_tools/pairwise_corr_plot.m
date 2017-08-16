@@ -29,9 +29,9 @@ function [ah_bi, ah_uni ] = pairwise_corr_plot(X, VarName, varargin)
 n_var = length(VarName); % number of variables
 subplot_pos = [n_var n_var 1];
 n_bins = 20; % number of bins for the histograms
-label_fontsize = 6;
-text_fontsize = 6;
-axis_fontsize = 6;
+label_fontsize = 8;
+text_fontsize = 8;
+axis_fontsize = 8;
 
 % Read varargin
 var_len = length(varargin);
@@ -83,7 +83,7 @@ for i = 1:n_var
                 set(ah,'ytick',[]);
             end
             box on;
-            set(ah,'xtick',[], 'fontSize', axis_fontsize );
+            set(ah,'xtick',[], 'fontSize', axis_fontsize, 'TickLabelInterpreter','latex' );
            
            
             
@@ -93,12 +93,12 @@ for i = 1:n_var
             [N] = hist3([X(:,j) X(:,i)], 'Edges', {bin_edge_x, bin_edge_y});
             imagesc(bin_centre_x, bin_centre_y, N(1:end-1,1:end-1));
             if i == n_var
-                xlabel(VarName{j},'FontSize', label_fontsize)
+                xlabel(VarName{j},'FontSize', label_fontsize,'Interpreter','latex')
             else
                 set(ah,'xtick',[]);
             end
             if j == 1
-                ylabel(VarName{i},'FontSize', label_fontsize)
+                ylabel(VarName{i},'FontSize', label_fontsize,'Interpreter','latex')
             else
                 set(ah,'ytick',[]);
             end
@@ -110,7 +110,7 @@ for i = 1:n_var
             set(gca,'fontsize', text_fontsize);
             % use dummy axes to make positioning text easier
             axes('Parent', gcf, 'Position', pos, 'Visible', 'off', 'XLim', [0, 1],'YLim', [0, 1], 'NextPlot', 'add'); %#ok<LAXES>
-            text (0.5, 1.02, r_str, 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'FontSize', text_fontsize);
+            text (0.5, 1.02, r_str, 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'FontSize', text_fontsize,'Interpreter','latex');
             set(ah,'YDir','normal','fontsize', axis_fontsize );
         end
     end

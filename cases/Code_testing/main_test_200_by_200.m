@@ -1,14 +1,12 @@
-function main_SWR_reference_size(varargin)
-% Do it!!!
-% Find it!!!
-% Hunt it down!!!
+function main_test_200_by_200(varargin)
 
+tic;
 
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 4*sec; % use 10 second!
+step_tot = 3*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -16,7 +14,7 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 2;
+repeats = 1;
 
 dist_cutoff  = 31*sqrt(2);
 
@@ -24,7 +22,7 @@ for g_balance = 1
     
 for P0_init = 0.08*ones(1,repeats)
     
-    for hw = [31 37 44 51 61]
+    for hw = 101 %[31 37 44 51]
         %%%%%%%%
         P_mat_0 = [P0_init 0.1;
             0.1  0.2]*2;
@@ -53,8 +51,8 @@ for P0_init = 0.08*ones(1,repeats)
         
         LFP_range_sigma = [8]; % 8
             for cn_scale_wire = [2 ];
-                for cn_scale_weight = [1];
-                    iter_num = 5;
+                for cn_scale_weight = [1 ];
+                    iter_num = 2;
                     
                     
                     STD_on = 0;
@@ -164,7 +162,17 @@ for P0_init = 0.08*ones(1,repeats)
                                                             
                                                             [ deg_in_0, deg_out_0 ] = hybrid_degree( N_e, deg_mean, deg_std_logn, in_out_r, deg_hybrid );
                                                             
-                                                            [ I_ee, J_ee, dist_IJ, iter_hist, Lattice_E ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c_EE, cn_scale_wire, iter_num, dist_cutoff );
+                                                            disp('generate_IJ_2D')
+                                                            tic
+                                                            [ I_ee, J_ee, dist_IJ, iter_hist, Lattice_E ] = generate_IJ_2D( deg_in_0, deg_out_0, tau_c_EE, cn_scale_wire, iter_num, dist_cutoff, 0 );
+                                                            toc
+                                                            % 1.2hr for
+                                                            % iter_num = 2,
+                                                            % hw = 101;
+                                                            % 4min for
+                                                            % iter_num = 2, hw = 51
+                                                            
+                                                            
                                                             in_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 1)); % row vector
                                                             out_degree = full(sum(sparse(I_ee,J_ee,ones(size(I_ee))), 2));
                                                             
@@ -173,16 +181,28 @@ for P0_init = 0.08*ones(1,repeats)
                                                             s_p = sqrt(log(EPSP_sigma^2/(EPSP_mu^2)+1));
                                                             mu_p = mu_p + s_p^2;
                                                             g_pool_generator_hld = @(N)g_pool_generator(N, mu_p, s_p);
+                                                            
                                                             K_scale = sqrt(in_degree);
+                                                            disp('inverse_pool')
+                                                            tic
                                                             K_cell = inverse_pool( in_degree, K_scale, g_pool_generator_hld);
+                                                            toc
+                                                            % 10.7 hr for
+                                                            % hw = 101;
+                                                            % 20min for hw
+                                                            % = 51
+                                                            
                                                             K_ee = NaN;
                                                             if ~isnan(K_cell{1})
                                                                 K_ee = zeros(size(J_ee)); for j = 1:N_e;  K_ee(J_ee==j) = K_cell{j}'; end, clear K_cell; % reformat K
                                                             end
                                                             % shuffle K accordind to common neighbour rule
+                                                            disp('shuffle_K_common_neighbour')
+                                                            tic
                                                             if ~isnan( K_ee)
                                                                 [  K_ee ] = shuffle_K_common_neighbour(  K_ee, I_ee, J_ee, cn_scale_weight );
                                                             end
+                                                            toc
                                                             K_ee_mean = mean(K_ee);
                                                             EE_input = full(sum(sparse(I_ee,J_ee,K_ee),1));
                                                             
@@ -202,8 +222,11 @@ for P0_init = 0.08*ones(1,repeats)
                                                             writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
                                                             writeExtSpikeSettingsHDF5(FID, 2, 1, g_ext,  N_ext, rate_ext_I*ones(1, step_tot),  ones(1, N(2)) );
                                                             
-                                                            %%%%%%%%%%%%%%%%%%%%%%
+                                                            %%%%%%%%%%%%%%%%%%%%%% 
+                                                            disp('Lattice2Lattice')
+                                                            tic;
                                                             [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1), dist_cutoff );
+                                                            toc
                                                             D = rand(size(I))*delay;
                                                             K = zeros(size(J));
                                                             for i_E = 1:N(1)
@@ -242,8 +265,8 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                                                                 %writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                             end
-                                                            writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
-                                                            writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
+                                                            %writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
+                                                            %writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
                                                             
                                                             % Add LFP sampling
                                                             [Lattice, ~] = lattice_nD(2, hw);
@@ -263,7 +286,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 LFP_neurons = [LFP_neurons; transpose(gaus_tmp(:))]; %#ok<AGROW>
                                                             end
                                                             
-                                                            % writeLFPRecordHDF5(FID, 1, LFP_neurons);
+                                                            %writeLFPRecordHDF5(FID, 1, LFP_neurons);
                                                             
                                                             % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                             % Record explanatory variables, also called "controlled variables"
@@ -326,6 +349,7 @@ for P0_init = 0.08*ones(1,repeats)
         end
     end
 end
+toc
 end
 
 

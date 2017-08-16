@@ -244,12 +244,12 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				network.NeuroPopArray[ind]->set_init_condition(r_V0, p_fire);
 				cout << "done." << endl;
 			}
-			// exteral initial membrane potential setting, whose prior is higher than random settings
+			// external initial membrane potential setting, whose prior is higher than random settings
 			if (group_exist_HDF5(in_filename, pop_n + string("/SETINITV"))) {				
 				cout << "\t\t External initial V settings...";
-				vector<double> exteral_init_V;
-				read_vector_HDF5(file, pop_n + string("/SETINITV/exteral_init_V"), exteral_init_V);
-				network.NeuroPopArray[ind]->set_init_V_external(exteral_init_V);
+				vector<double> external_init_V;
+				read_vector_HDF5(file, pop_n + string("/SETINITV/external_init_V"), external_init_V);
+				network.NeuroPopArray[ind]->set_init_V_external(external_init_V);
 				cout << "done." << endl;
 			}
 

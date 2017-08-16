@@ -3,7 +3,7 @@ function R = get_motif(R)
 disp('Getting motif...')
 warning('Lots of hard coded numbers here.')
 
-n_sub = 100;
+n_sub = 100; % number of substitute network
 n_sample = 1000;
 
 L = lattice_nD(2, 31);

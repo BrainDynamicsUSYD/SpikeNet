@@ -41,7 +41,7 @@ for i = 1:num_files
 %     R_temp = get_stPR(R_temp,'n_sample_region', 1000);
 %     stPR = R_temp.stPR;
 %     save(files{i},'stPR', '-append');
-%     
+% %     
 % 
 %     
 % 
@@ -51,14 +51,13 @@ for i = 1:num_files
 % %      
 %      [R_temp] = get_CC_pop(R_temp, 1);
 %      % [R_temp] = get_dist_CC(R_temp);
-%      
 %      Analysis = R_temp.Analysis;
 %      save(files{i},'Analysis', '-append');
-% %      
+% % %      
 
-%      [R_temp] = get_lagged_cov(R_temp);
-%      Analysis = R_temp.Analysis;
-%      save(files{i},'Analysis', '-append');
+     [R_temp] = get_lagged_cov(R_temp);
+     Analysis = R_temp.Analysis;
+     save(files{i},'Analysis', '-append');
 
 %       get_LFP_continous(R_temp);
 
@@ -79,10 +78,18 @@ for i = 1:num_files
 % rich_club = R_temp.rich_club;
 % save(files{i},'rich_club', '-append');
 
-R_temp = get_triplet_sequence(R_temp,'hw_sample', 10);
-triplet_double = R_temp.triplet;
-save(files{i},'triplet_double', '-append');
+% R_temp = get_triplet_sequence(R_temp);
+% triplet = R_temp.triplet;
+% save(files{i},'triplet', '-append');
 
+% R_temp = get_triplet_sequence(R_temp,'hw_sample', 10);
+% triplet_double = R_temp.triplet;
+% save(files{i},'triplet_double', '-append');
+
+
+% R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 10);
+% triplet_no_latency = R_temp.triplet;
+% save(files{i},'triplet_no_latency', '-append');
 
 % R_temp = get_local_spike_corr(R_temp);
 % local_cc = R_temp.local_cc;

@@ -24,7 +24,7 @@ if cn_scale_weight > 1
     
     for j = 1:N
         if mod(j*10,round(N/10)*10) == 0
-            fprintf('%d...', 10 - j*10 / (round(N/10)*10));
+            % fprintf('%d...', 10 - j*10 / (round(N/10)*10));
         end
         if show_wait_bar == 1
             wb_p = wb_p + 1; waitbar(wb_p / wb_p_tot, wb_h);
