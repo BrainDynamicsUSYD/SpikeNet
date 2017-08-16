@@ -1,5 +1,5 @@
 
-function visualize_grid_firing_centre(R,mode)
+function visualise_grid_firing_centre(R,mode)
 close all;
 clc;
 % mode = 'bayesian';
