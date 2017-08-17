@@ -32,7 +32,10 @@ The design of SpikeNet provides the following four main features.
 ## Prerequisites
 * Autoconf, a standard tool on OSX and linux distributions
 * A c++ compiler that supports c++11 standard (GCC 4.2.1 or later; Intel C++ 12.0 or later)
-* HDF5 c/c++ API (open source)
+* HDF5 c/c++ API (open source), e.g.,
+```
+brew install Homebrew/homebrew-science/HDF5
+```
 * Matlab (2013a or later) is optional but highly recommended
 * Portable Batch System (PBS) is optional but highly recommended
 
@@ -142,6 +145,7 @@ cd tmp_data
 [mean_firing_rate, arrayID] = CollectVectorYG('Analysis','mean(Analysis.rate{1})');
 plot(arrayID, mean_firing_rate);
 ```
+8. Be aware that the seed for random number generator in PBS arry jobs may need to be manually set or remains as constant otherwise.
 
 # The workflow
 

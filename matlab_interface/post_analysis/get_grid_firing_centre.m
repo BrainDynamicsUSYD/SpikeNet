@@ -77,7 +77,7 @@ else
             height_tmp = NaN;
             bayes_factor_tmp = NaN;
         else
-            [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp, height_tmp, bayes_factor_tmp ] = fit_bayesian_bump_2_spikes(x_pos_tmp,y_pos_tmp, fw, mode);
+            [ x_mean_tmp, y_mean_tmp, width_tmp, mlh_tmp, height_tmp, bayes_factor_tmp ] = fit_bayesian_bump_2_spikes_circular(x_pos_tmp,y_pos_tmp, fw, mode);
         end
         
         x_mean =  [x_mean x_mean_tmp]; %#ok<AGROW>

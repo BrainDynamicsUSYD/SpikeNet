@@ -22,7 +22,7 @@ for g_balance = 1
     
 for P0_init = 0.08*ones(1,repeats)
     
-    for hw = 101 %[31 37 44 51]
+    for hw = 81 %[31 37 44 51]
         %%%%%%%%
         P_mat_0 = [P0_init 0.1;
             0.1  0.2]*2;
@@ -139,15 +139,22 @@ for P0_init = 0.08*ones(1,repeats)
                                                             end
                                                             
                                                             % write runaway killer
-                                                            min_ms = 500; % 5 sec
-                                                            runaway_Hz = 100; % ??
+                                                            min_ms = 300; % 5 sec
+                                                            runaway_Hz = 50; % ??
                                                             Hz_ms = 200; % ms
                                                             writeRunawayKillerHDF5(FID, 1, min_ms, runaway_Hz, Hz_ms);
                                                             
                                                             % random initial condition settings (int pop_ind, double p_fire)
-                                                            p_fire = [0.1 0.00]; % between [0,1], 0.05
-                                                            writeInitVHDF5(FID, p_fire);
+%                                                             p_fire = [0.1 0.00]; % between [0,1], 0.05
+%                                                             writeInitVHDF5(FID, p_fire);
                                                             
+                                                            % initial condition settings
+                                                            exteral_init_V = randn(1,N(1))*10 - 70;
+                                                            writeExternalInitVHDF5(FID, 1, exteral_init_V);
+                                                            
+                                                            exteral_init_V = randn(1,N(2))*10 - 70;
+                                                            writeExternalInitVHDF5(FID, 2, exteral_init_V)
+
                                                             
                                                             
                                                             %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
