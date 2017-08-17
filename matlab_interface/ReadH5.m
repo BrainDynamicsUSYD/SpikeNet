@@ -115,7 +115,10 @@ if ~isempty(files)
             OutData{id_out}.pop_stats.V_std{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_std']));
             OutData{id_out}.pop_stats.I_input_mean{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_input_mean']));
             OutData{id_out}.pop_stats.I_input_std{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_input_std']));
-            
+            OutData{id_out}.pop_stats.I_AMPA_time_avg{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_AMPA_time_avg']));
+            OutData{id_out}.pop_stats.I_NMDA_time_avg{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_NMDA_time_avg']));
+            OutData{id_out}.pop_stats.I_GABA_time_avg{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_GABA_time_avg']));
+            OutData{id_out}.pop_stats.I_ext_time_avg{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_ext_time_avg']));
             OutData{id_out}.neuron_stats.I_tot_time_mean{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_tot_time_mean']));
             OutData{id_out}.neuron_stats.I_tot_time_var{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_I_tot_time_var']));
             OutData{id_out}.neuron_stats.V_time_mean{pop_ind, 1} = transpose(try_h5read(files{id_out}, ['/pop_result_' ,num2str(pop_ind-1), '/stats_V_time_mean']));
