@@ -171,6 +171,7 @@ protected:
 			I_AMPA_time_avg, /// I_AMPA averaged over time for each neuron
 			I_NMDA_time_avg, /// I_NMDA averaged over time for each neuron
 			I_GABA_time_avg, /// I_GABA averaged over time for each neuron
+			I_ext_time_avg, /// I_ext averaged over time for each neuron
 			I_tot_time_mean, /// mean of total current for each neuron
 			I_tot_time_var, /// variance of total current for each neuron
 			V_time_mean, /// mean of membrane potential for each neuron
