@@ -15,7 +15,7 @@ k = 1*2.4e-3; % miuSiemens
 
 % Basic parameters
 dt = 0.1;
-step_tot = 1000;
+step_tot = 10000;
 N = [10; 12; ];
 writeBasicParaHDF5(FID, dt, step_tot, N)
 Num_pop = length(N);
