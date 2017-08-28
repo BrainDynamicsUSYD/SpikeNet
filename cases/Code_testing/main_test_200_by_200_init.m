@@ -6,7 +6,7 @@ FID = FID.name;
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
-step_tot = 3*sec; % use 10 second!
+step_tot = 1*sec; % use 10 second!
 
 hw = 101;
 % sptially embedded network
@@ -20,11 +20,12 @@ N = [N_e, N_i];
 
 
 % write basic parameters
-writeBasicParaHDF5(FID, dt, step_tot, N);
+modify = 1;
+writeBasicParaHDF5(FID, dt, step_tot, N, modify);
 
 
 % initial condition settings
-exteral_init_V = randn(1,N(1))*5 - 60;
+exteral_init_V = randn(1,N(1))*5 - 65;
 writeExternalInitVHDF5(FID, 1, exteral_init_V);
 
 exteral_init_V = randn(1,N(2))*5 - 60;

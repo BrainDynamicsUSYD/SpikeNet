@@ -1,4 +1,4 @@
-function writeExternalInitVHDF5(FID,pop,external_init_V)
+function writeExtInitVHDF5(FID,pop,external_init_V)
 % write initial condition for membrane potential 
 %            FID: file id for writing data
 %            pop: is the number of population
