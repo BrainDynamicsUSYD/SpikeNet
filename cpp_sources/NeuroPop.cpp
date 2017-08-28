@@ -270,12 +270,12 @@ void NeuroPop::set_init_condition(const double r_V0, const double p_fire) {
 	}
 }
 
-void NeuroPop::set_init_V_external(const vector<double>& exteral_init_V) {
+void NeuroPop::set_init_V_external(const vector<double>& external_init_V) {
 	if (*max_element(V.begin(),V.end()) != V_lk ) {
-		cout << "\t\t Warning: random initial V are overwritted by exteral intial V!" << endl;
+		cout << "\t\t Warning: random initial V are overwritted by external intial V!" << endl;
 	}
 	for (int i = 0; i < N; ++i) {
-		V[i] = exteral_init_V[i];
+		V[i] = external_init_V[i];
 	}
 }
 

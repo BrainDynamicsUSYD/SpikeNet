@@ -9,8 +9,10 @@ D = 2; % Pulin: 2D is enough
 
 show_wait_bar = 0;
 
-
-if nargin == 6
+if nargin < 6
+    dist_cutoff = Inf; 
+end
+if nargin < 7
     record_cc = 1;% 5 is arbitrary, try something else?
 end
 
