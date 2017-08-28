@@ -20,15 +20,15 @@ N = [N_e, N_i];
 
 
 % write basic parameters
-modify = 1;
+modify = 0;
 writeBasicParaHDF5(FID, dt, step_tot, N, modify);
 
 
 % initial condition settings
 exteral_init_V = randn(1,N(1))*5 - 65;
-writeExternalInitVHDF5(FID, 1, exteral_init_V);
+writeExtInitVHDF5(FID, 1, exteral_init_V);
 
 exteral_init_V = randn(1,N(2))*5 - 60;
-writeExternalInitVHDF5(FID, 2, exteral_init_V)
+writeExtInitVHDF5(FID, 2, exteral_init_V)
 
 end

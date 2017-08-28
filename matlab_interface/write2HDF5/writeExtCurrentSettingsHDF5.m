@@ -1,4 +1,4 @@
-function writeExtCurrentSettingsHDF5(FID, pop_ind, mean, std)
+function writeExtCurrentSettingsHDF5(FID, pop_ind, mean, std, modify)
 % write external current settings
 %     FID: file id for writing data
 % pop_ind: neuron population index
@@ -11,8 +11,16 @@ end
 
 pop_ind = pop_ind - 1;
 
-hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT004/mean'],mean,'WriteMode','append'); 
-hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT004/std'],std,'WriteMode','append'); 
+if nargin == 4
+    modify = 0;
+end
+
+if modify == 0
+    h5create(FID,['/config/pops/pop',num2str(pop_ind),'/INIT004/mean'],length(mean));
+    h5create(FID,['/config/pops/pop',num2str(pop_ind),'/INIT004/std'],length(std));
+end
+h5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT004/mean'],mean);
+h5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT004/std'],std);
 
 end
 
