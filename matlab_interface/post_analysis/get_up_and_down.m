@@ -20,7 +20,7 @@ up_no = 15;
 
 % read non-default parameters
 for i = 1:(length(varargin)/2)
-    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}),',' ]);
+    eval([varargin{i*2-1}, '=', num2str(varargin{i*2}),';' ]);
 end
 
 
