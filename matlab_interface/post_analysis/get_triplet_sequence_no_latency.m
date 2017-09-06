@@ -11,8 +11,9 @@ up_du = 100;
 bin = 3.2; % sec
 gauss_sigma = 10; % sec
 gauss_sigma_bin = gauss_sigma/bin;
-ed = -300:bin:300;
-
+max_t_diff = 300;
+ed = -max_t_diff:bin:max_t_diff;
+C = {ed, ed};
 
 % sampling area of silicon microelectrode
 n_trial = 50; %20;
@@ -84,13 +85,15 @@ for jj = 1:n_trial
         ind_trip_mat(i, :) = ind_trip(:)';
         sp = sh(ind_trip, :);
         
-        [t1, t2, t3] = meshgrid( find(sp(1,:)), find(sp(2,:)), find(sp(3,:)) );
+        %         [t1, t2, t3] = meshgrid( find(sp(1,:)), find(sp(2,:)), find(sp(3,:)) );
+        [t1, t2, t3] = get_t123(sp, max_t_diff);
         ta = t1-t3;
         tb = t2-t3;
-        
-        [N_trip,C] = hist3([ta(:), tb(:)],'Edges',{ed, ed});
+        [N_trip,~] = hist3([ta(:), tb(:)],'Edges',{ed, ed});
+
         N_trip = N_trip / (sum(sp(3,:)) * (bin/1000)^2 );
-        N_trip = imgaussfilt(N_trip,gauss_sigma_bin);
+        N_trip = imgaussfilt(N_trip,gauss_sigma_bin) ;
+
         %     imagesc(C{1},C{2}, N)
         %     axis([-150 150 -150 150])
         
@@ -122,13 +125,16 @@ for jj = 1:n_trial
         ind_trip = ind_trip_mat(i,:);
         sp = sh_shuffle(ind_trip, :);
         
-        [t1, t2, t3] = meshgrid( find(sp(1,:)), find(sp(2,:)), find(sp(3,:)) );
+        %         [t1, t2, t3] = meshgrid( find(sp(1,:)), find(sp(2,:)), find(sp(3,:)) );
+        [t1, t2, t3] = get_t123(sp, max_t_diff);
         ta = t1-t3;
         tb = t2-t3;
-        
-        [N_trip_s,C] = hist3([ta(:), tb(:)],'Edges',{ed, ed});
+        [N_trip_s,~] = hist3([ta(:), tb(:)],'Edges',{ed, ed});
+
         N_trip_s = N_trip_s / (sum(sp(3,:)) * (bin/1000)^2 );
         N_trip_s = imgaussfilt(N_trip_s,gauss_sigma_bin) ;
+        
+        
         %     imagesc(C{1},C{2}, N)
         %     axis([-150 150 -150 150])
         
@@ -171,5 +177,29 @@ R.triplet.trip_peak_shuffle_c = trip_peak_shuffle_c;
 R.triplet.t_from_onset_shuffle_c =  t_from_onset_shuffle_c;
 R.triplet.t_from_onset_c =  t_from_onset_c;
 disp('Done.');
+
+end
+
+
+function [t1, t2, t3] = get_t123(sp, max_t_diff)
+t1 = [];
+t2 = [];
+t3 = [];
+
+t3_all = find(sp(3,:));
+for i = 1:length(t3_all)
+    t3_tmp = t3_all(i);
+    if t3_tmp - max_t_diff > 0 && t3_tmp + max_t_diff <= length(sp(3,:))
+        t_range = (t3_tmp - max_t_diff):(t3_tmp + max_t_diff);
+        
+        
+        [t1_tmp, t2_tmp] = meshgrid( find(sp(1,t_range)), find(sp(2,t_range)) );
+
+        t1 = [t1 t1_tmp(:)']; %#ok<*AGROW>
+        t2 = [t2 t2_tmp(:)'];
+        t3 = [t3 t3_tmp*ones(size(t2_tmp(:)'))];
+    end
+    
+end
 
 end
