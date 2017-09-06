@@ -38,7 +38,7 @@ for i = 1:num_files
 %     avalanche = R_temp.avalanche;
 %     save(files{i},'avalanche', '-append');
 %         
-%     R_temp = get_stPR(R_temp,'n_sample_region', 1000);
+%     R_temp = get_stPR(R_temp,'n_sample_region', 2000);
 %     stPR = R_temp.stPR;
 %     save(files{i},'stPR', '-append');
 % %     
@@ -55,9 +55,9 @@ for i = 1:num_files
 %      save(files{i},'Analysis', '-append');
 % % %      
 
-     [R_temp] = get_lagged_cov(R_temp);
-     Analysis = R_temp.Analysis;
-     save(files{i},'Analysis', '-append');
+%      [R_temp] = get_lagged_cov(R_temp);
+%      Analysis = R_temp.Analysis;
+%      save(files{i},'Analysis', '-append');
 
 %       get_LFP_continous(R_temp);
 
@@ -87,9 +87,9 @@ for i = 1:num_files
 % save(files{i},'triplet_double', '-append');
 
 
-% R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 10);
-% triplet_no_latency = R_temp.triplet;
-% save(files{i},'triplet_no_latency', '-append');
+R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 50);
+triplet_no_latency = R_temp.triplet;
+save(files{i},'triplet_no_latency', '-append');
 
 % R_temp = get_local_spike_corr(R_temp);
 % local_cc = R_temp.local_cc;

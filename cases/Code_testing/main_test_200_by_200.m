@@ -6,7 +6,7 @@ tic;
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 3*sec; % use 10 second!
+step_tot = 2*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -22,7 +22,7 @@ for g_balance = 1
     
 for P0_init = 0.08*ones(1,repeats)
     
-    for hw = 81 %[31 37 44 51]
+    for hw = 101 %[31 37 44 51]
         %%%%%%%%
         P_mat_0 = [P0_init 0.1;
             0.1  0.2]*2;
@@ -149,11 +149,11 @@ for P0_init = 0.08*ones(1,repeats)
 %                                                             writeInitVHDF5(FID, p_fire);
                                                             
                                                             % initial condition settings
-                                                            exteral_init_V = randn(1,N(1))*10 - 70;
-                                                            writeExternalInitVHDF5(FID, 1, exteral_init_V);
+                                                            external_init_V = randn(1,N(1))*5 - 70;
+                                                            writeExtInitVHDF5(FID, 1, external_init_V);
                                                             
-                                                            exteral_init_V = randn(1,N(2))*10 - 70;
-                                                            writeExternalInitVHDF5(FID, 2, exteral_init_V)
+                                                            external_init_V = randn(1,N(2))*5 - 70;
+                                                            writeExtInitVHDF5(FID, 2, external_init_V)
 
                                                             
                                                             

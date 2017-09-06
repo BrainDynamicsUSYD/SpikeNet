@@ -8,7 +8,7 @@ function main_SWR_no_EDR(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 3*sec; % use 10 second!
+step_tot = 100*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -18,7 +18,7 @@ delay = 4;
 
 dist_cutoff  = 31*sqrt(2);
 
-repeats = 4;
+repeats = 5;
 for P0_init = 0.08*ones(1,repeats)
     
     P_mat = [P0_init 0.1;

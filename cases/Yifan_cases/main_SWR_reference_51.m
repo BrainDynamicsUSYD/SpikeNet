@@ -8,7 +8,7 @@ function main_SWR_reference_51(varargin)
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 4*sec; % use 10 second!
+step_tot = 40*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -16,42 +16,42 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 5;
+repeats = 10;
 
 dist_cutoff  = 31*sqrt(2);
 
-for g_balance = [0.8:0.05:1.2]
+for g_balance = [0.8 1 1.2]
     
-for P0_init = 0.08*ones(1,repeats)
-    
-    for hw = 51 %[31 37 44 51]
-        %%%%%%%%
-        P_mat_0 = [P0_init 0.1;
-            0.1  0.2]*2;
-        % sptially embedded network
-        hw_0 = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
-        N_e_0 = (hw_0*2+1)^2; %
-        N_i_0 = 1000;
-        N_0 = [N_e_0, N_i_0];
-        %%%%%%%%
+    for P0_init = 0.08*ones(1,repeats)
         
-        N_e = (hw*2+1)^2; %
-        N_i = round(N_i_0/N_e_0*N_e);
-        N = [N_e, N_i];
-        
-        P_mat = P_mat_0;
-        P_mat(:,1) = P_mat(:,1)/N(1)*N_0(1);
-        P_mat(:,2) = P_mat(:,2)/N(2)*N_0(2);
-        
-        Num_pop = length(N);
-        Type_mat = ones(Num_pop);
-        Type_mat(end, :) = 2;
-        in_out_r = [0.13 ];
-        
-        % parameter
-        SpikeFreqAapt = [ 1]
-        
-        LFP_range_sigma = [8]; % 8
+        for hw = 51 %[31 37 44 51]
+            %%%%%%%%
+            P_mat_0 = [P0_init 0.1;
+                0.1  0.2]*2;
+            % sptially embedded network
+            hw_0 = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
+            N_e_0 = (hw_0*2+1)^2; %
+            N_i_0 = 1000;
+            N_0 = [N_e_0, N_i_0];
+            %%%%%%%%
+            
+            N_e = (hw*2+1)^2; %
+            N_i = round(N_i_0/N_e_0*N_e);
+            N = [N_e, N_i];
+            
+            P_mat = P_mat_0;
+            P_mat(:,1) = P_mat(:,1)/N(1)*N_0(1);
+            P_mat(:,2) = P_mat(:,2)/N(2)*N_0(2);
+            
+            Num_pop = length(N);
+            Type_mat = ones(Num_pop);
+            Type_mat(end, :) = 2;
+            in_out_r = [0.13 ];
+            
+            % parameter
+            SpikeFreqAapt = [ 1]
+            
+            LFP_range_sigma = [8]; % 8
             for cn_scale_wire = [2 ];
                 for cn_scale_weight = [2 ];
                     iter_num = 5;
@@ -125,7 +125,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                                 writePopParaHDF5(FID, pop_ind,  'tau_ref', tau_ref);
                                                             end
                                                             
-                                                        
+                                                            
                                                             
                                                             % write synapse para
                                                             writeSynParaHDF5(FID, 'tau_decay_GABA', 3);
@@ -197,8 +197,8 @@ for P0_init = 0.08*ones(1,repeats)
                                                             trans_neu_ind =  double( Lattice_E(:,1).^2 + Lattice_E(:,2).^2 < tau_c_EE^2);
                                                             trans_rate = zeros(1,step_tot);
                                                             trans_rate(round(0.2*sec)) = 0.1*rate_ext_E;
-%                                                             writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, trans_rate,  trans_neu_ind );
-%                                                             writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, 0.9*rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
+                                                            %                                                             writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, trans_rate,  trans_neu_ind );
+                                                            %                                                             writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, 0.9*rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
                                                             writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
                                                             writeExtSpikeSettingsHDF5(FID, 2, 1, g_ext,  N_ext, rate_ext_I*ones(1, step_tot),  ones(1, N(2)) );
                                                             
