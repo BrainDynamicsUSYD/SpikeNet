@@ -1,5 +1,5 @@
 % visualize the spiking pattern of the spatially embedded network
-function embed_network_spike_movie(R, manual)
+function M = embed_network_spike_movie(R, manual)
 
 figure('NumberTitle','off','Name','Spike Movie','color','w')
    N = R.N(1);
@@ -26,20 +26,21 @@ hold on;
 h1 = plot(0, 0, 'rx');
 
 t_bin = 1;
+
 for t = 1:t_bin:(step_tot-t_bin)
     [spikes_t, ~, ~] = find(spike_hist(:,t:(t+t_bin)));
     
     delete(h1);
     h1 = plot(Lattice(spikes_t,1), Lattice(spikes_t,2), 'rx');
     if manual == 0
-        pause(0.05);
+        pause(0.01);
     else
         pause
     end
     
     xlabel([num2str(t*dt/1000),' sec']);
     
-    % M(t) = getframe(gcf);
+    M(t) = getframe(gcf);
 end
 
 end
