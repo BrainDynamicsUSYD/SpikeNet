@@ -508,6 +508,24 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				// network.ChemSynArray.back()->set_para(syn_para);
 
 			}
+			
+			// external spike setting (with different time invariant rates for differnt neurons) 
+			else if (group_exist_HDF5(in_filename, syn_n + string("/INIT017"))) {
+				cout << ind + 1 << " (ext spike t inv)..." << endl;
+
+				int j_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT017/pop_ind"));
+				int type_ext = read_scalar_HDF5<int>(file, syn_n + string("/INIT017/type_ext"));
+				double K_ext = read_scalar_HDF5<double>(file, syn_n + string("/INIT017/K_ext"));
+				int Num_ext = read_scalar_HDF5<int>(file, syn_n + string("/INIT017/Num_ext"));
+				cout << "done 1" << flush;
+				vector<double> rate_ext_neuron;
+				read_vector_HDF5(file, syn_n + string("/INIT017/rate_ext_neuron"), rate_ext_neuron);
+				network.ChemSynArray.push_back(new ChemSyn(network.dt, network.step_tot));
+				network.ChemSynArray.back()->init(type_ext, j_post, network.N_array[j_post], K_ext, Num_ext, rate_ext_neuron);
+				// network.ChemSynArray.back()->set_para(syn_para);
+
+			}
+			
 
 			// cout << "\t done." << endl;
 

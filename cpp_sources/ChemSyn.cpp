@@ -114,6 +114,38 @@ void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_
 	init();
 }
 
+
+void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_input, const double K_ext, const int Num_ext, const vector<double> &rate_ext_neuron){
+
+	// Initialise chemical synapses for simulating external neuron population
+	syn_type = syn_type_input;
+	pop_ind_pre = -2; // -2 for external noisy population with different time-invariant rates for each neuron
+	pop_ind_post = j_post;
+	N_pre = 1; // just for initialization
+	N_post = N_post_input;
+	max_delay_steps = 0; // no delay;
+
+
+	// Parameters for noise generation
+	ext_noise_t_inv.K_ext = K_ext;
+	ext_noise_t_inv.Num_ext = Num_ext;
+	ext_noise_t_inv.rate_ext_neuron = rate_ext_neuron; // time-invariant rate for each neuron
+	for (int j = 0; j < N_post_input; ++j){
+		ext_noise_t_inv.poi_dist.push_back(new poisson_distribution<int>(ext_noise_t_inv.Num_ext * ext_noise_t_inv.rate_ext_neuron[j] * (dt / 1000.0) ) );	
+	}
+
+
+	// Random seed (random engine should be feed with DIFFERENT seed at every implementation)
+	random_device rd; // random number from operating system for seed
+	my_seed = rd(); // record seed
+
+	// parameter-dependent initialisation
+	init();
+}
+
+
+
+
 void ChemSyn::set_seed(int seed_input){
 	if (pop_ind_pre != -1){
 		cout << "Cannot set RNG seed to the synapses with type " << syn_type + 1 <<" from pop "<< pop_ind_pre + 1 << " to pop " << pop_ind_post + 1 << " since this object does not have RNG." << endl;
@@ -368,6 +400,22 @@ void ChemSyn::update_gs_sum_model_0(const int step_current){
 			}
 		}
 	}
+	else if (pop_ind_pre == -2){ // if external noisy population
+		// Contribution of external spikes, assuming square pulse transmitter release
+		// Generate current random number generator, note that rate_ext_t is in Hz
+		gen.seed(my_seed + step_current);// reseed random engine!!!
+
+		// Post-synaptic dynamics
+		int t_ring;
+		for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
+			t_ring = int( (step_current + t_trans) % gsm_0.buffer_steps );
+			for (int j_post = 0; j_post < N_post; ++j_post){
+				gsm_0.d_gs_sum_buffer[t_ring][j_post] += K_trans[0] * ext_noise_t_inv.K_ext * ext_noise_t_inv.poi_dist[j_post]->operator()(gen); 
+			}
+		}
+	}
+	
+	
 	// update post-synaptic dynamics
 	int t_ring = int( step_current % gsm_0.buffer_steps );
 	for (int j_post = 0; j_post < N_post; ++j_post){

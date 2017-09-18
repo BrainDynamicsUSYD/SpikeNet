@@ -19,8 +19,10 @@ public:
 
 	void init(const int syn_type, const int pop_ind_pre, const int pop_ind_post, const int N_pre, const int N_post, const vector<int> &C_i, const vector<int> &C_j, const vector<double> &K_ij, const vector<double> &D_ij); /// initialise chemical synapses by reading already prepared connections
 
-	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_t, const vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population;
+	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_t, const vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population with different neuron-invariant rates for each time step
 
+	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_neuron); /// external noisy population initialise chemical synapses for simulating external Poissonian neuron population with different time-invariant rates for each neuron
+		
 	void set_para(string para_str); /// set parameter values
 	void set_seed(int seed); /// manually set RNG seed 
 	
@@ -257,6 +259,19 @@ protected:
 			rate_ext_t; // identical rate of firing for external pre-synaptic neurons (chemical synapses)
 	} ext_noise;
 
+	// Simulating external Poisson population (noise)
+	struct Ext_noise_t_inv {
+		double 
+			K_ext; /// identical connection strength for external pre-synaptic neurons
+		int 
+			Num_ext; /// number of external pre-synaptic neurons per post-synaptic neuron
+		vector<double> 
+			rate_ext_neuron; // different time-invariant rates for each neuron
+		vector< poisson_distribution<int>* >
+			poi_dist;
+	} ext_noise_t_inv;
+	
+	
 	// Random number generator
 	int 
 		my_seed;
