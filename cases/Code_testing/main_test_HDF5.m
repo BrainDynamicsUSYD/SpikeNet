@@ -28,14 +28,14 @@ writePopParaHDF5(FID, 2,  'tau_ref', 3.2);
 writeSynParaHDF5(FID, 'tau_decay_AMPA', 2.0, 'Dt_trans_AMPA', 0.5);
 
 % external current settings (int pop_ind, double mean, double std)
-I_ext_strength = 10; %1.4; % nA
-writeExtCurrentSettingsHDF5(FID, 1, I_ext_strength*ones(1,N(1)), 0*ones(1,N(1)));
-
-g_ext_strength = 0.5;
-writeExtConductanceSettingsHDF5(FID, 2, g_ext_strength*ones(1,N(2)), 0*ones(1,N(2)));
+% I_ext_strength = 10; %1.4; % nA
+% writeExtCurrentSettingsHDF5(FID, 1, I_ext_strength*ones(1,N(1)), 0*ones(1,N(1)));
+% 
+% g_ext_strength = 0.5;
+% writeExtConductanceSettingsHDF5(FID, 2, g_ext_strength*ones(1,N(2)), 0*ones(1,N(2)));
 
 % external spike settings (neuron-invariant)
-writeExtSpikeSettingsHDF5(FID, 1, 1, k,  20, 10*ones(1,step_tot), ones(1, N(1)) );
+writeExtSpikeSettingsHDF5(FID, 2, 1, k,  20, 10*ones(1,step_tot), ones(1, N(1)) );
 
 % external spike settings (time-invariant)
 writeExtSpikeTinvSettingsHDF5(FID, 1, 1, k,  20, 10*randn(1,N(1)))
