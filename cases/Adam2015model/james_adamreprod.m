@@ -12,12 +12,12 @@ seed = 1;
 % simulator.
 % FID is the main input file, FID_syn is the input file with the 
 % synaptic connectivity definitions (could be very large).
-[FID, FID_syn] = new_ygin_files_and_randseed(seed);
+[FID] = new_ygin_files_and_randseedHDF5(seed);
 % If no FID_syn is needed, use FID = new_ygin_files_and_randseed(seed,0)
 
 % Use Adam 2016 synapse model instead of the default model
 model_choice = 2;
-writeSynapseModelChoice(FID, model_choice)
+writeSynapseModelChoiceHDF5(FID, model_choice)
 
 %%%% Define some basic parameters
 % Time step (ms)
@@ -63,7 +63,7 @@ SynapseType=[1 1;
 
 N = [Grid(1,1)*Grid(1,2), Grid(2,1)*Grid(2,2)];
 % Write the above basic parameters to the input file
-writeBasicPara(FID, dt, step_tot, N);
+writeBasicParaHDF5(FID, dt, step_tot, N);
 
 
 %%%% Define non-parameters for the neuorn model
@@ -77,7 +77,7 @@ V_lk = -70.0;   % (mV) leaky reversal potential
 V_th = -55.0;   % (mV) firing threshold
 g_lk = 0.050;   % (muS) leaky conductance 
 for pop = 1:length(N)
-    writePopPara(FID, pop,'Cm',Cm,'tau_ref',tau_ref,'V_rt',V_rt,...
+    writePopParaHDF5(FID, pop,'Cm',Cm,'tau_ref',tau_ref,'V_rt',V_rt,...
         'V_lk',V_lk,'V_th',V_th,'g_lk',g_lk);
 end
 
@@ -89,7 +89,7 @@ end
 p_fire = 0*ones(1,length(N)); % initial firing probabilities for both populations
 % set initial V distribution to be [V_rt, V_rt + (V_th-V_rt)*r_V0] 
 r_V0 = 1*ones(1,length(N));
-writeInitCond(FID, r_V0, p_fire)
+writeInitCondHDF5(FID, r_V0, p_fire)
 
 
 %%%% Define runaway killer
@@ -105,12 +105,12 @@ min_ms = 500; % the min simulation duration that should be guaranteed
 runaway_Hz = 40; % the threshold above which the simu should be killed
 Hz_ms = 200; % the window length over which the firing rate is averaged
 pop = 1; % the population to be monitored by the runaway killer
-writeRunawayKiller(FID, pop, min_ms, runaway_Hz, Hz_ms);
+writeRunawayKillerHDF5(FID, pop, min_ms, runaway_Hz, Hz_ms);
 
 
 %%%% Record the basic statistics for the 1st neuron population
 pop = 1;
-writePopStatsRecord(FID, pop);
+writePopStatsRecordHDF5(FID, pop);
 
 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
 % type(1:AMAP, 2:GABAa, 3:NMDA)
@@ -127,7 +127,7 @@ for pop_pre=1:length(N)
         end
         [I, J, K] = find(A);
         D = rand(size(I))*0; % uniformly random conduction delay ms
-        writeChemicalConnection(FID_syn, syn_type,  pop_pre, pop_post, ...
+        writeChemicalConnectionHDF5(FID, syn_type,  pop_pre, pop_post, ...
             I, J, K, D);
     end
 end
@@ -135,8 +135,8 @@ end
 %External Conductances
 for pop =1:length(N)
     %uniform 
-    F_ext=F(pop)*ones(N(pop));
-    writeExtConductanceSettings(FID, pop, F_ext, 0*ones(N(pop)) );
+    F_ext=F(pop)*ones(1,N(pop));
+    writeExtConductanceSettingsHDF5(FID, pop, F_ext, 0*ones(1,N(pop)) );
 end
 %Gaussian
 % pop=1
@@ -164,7 +164,7 @@ end
 % 'tau_decay_AMPA', 2.0, 'Dt_trans_GABA', 0.5)
 
 %%%% synapse parameters conversion
-writeSynPara(FID, 'tau_decay_GABA', 7, 'Dt_trans_GABA', 0.5,...
+writeSynParaHDF5(FID, 'tau_decay_GABA', 7, 'Dt_trans_GABA', 0.5,...
 'tau_decay_AMPA', 2.0, 'Dt_trans_AMPA' , 0.5)
 
 % "help writeSynPara" to see all the parameter names and default values
@@ -175,7 +175,7 @@ writeSynPara(FID, 'tau_decay_GABA', 7, 'Dt_trans_GABA', 0.5,...
 pop_pre = 1;
 pop_post = 1;
 syn_type = 1; % 1 for AMPA-like synapse
-writeSynStatsRecord(FID, pop_pre, pop_post, syn_type);
+writeSynStatsRecordHDF5(FID, pop_pre, pop_post, syn_type);
 
 % %%%% Sample detailed time serious data from the 1st population
 % pop = 1;
@@ -189,37 +189,26 @@ writeSynStatsRecord(FID, pop_pre, pop_post, syn_type);
 
 %%%% Record explanatory variables that are nacessary for post-processing
 discard_transient = 0; % transient period data to be discarded (ms)
-writeExplVar(FID, 'discard_transient', discard_transient, ...
+writeExplVarHDF5(FID, 'discard_transient', discard_transient, ...
     'F', F);
 
 
-%%%% Additional comments to be passed to the post-processing stage
-comment1 = 'This is a demo.';
-comment2 = ['If you have any question regarding SpikeNet,'...
-    'please contact Yifan Gu (yigu8115@gmail.com).'];
-writeExplVar(FID, 'comment1', comment1, 'comment2', comment2);
-
 %%%% append this matlab file to the input file for future reference
-appendThisMatlabFile(FID)
+appendThisMatlabFileHDF5(FID)
 
 end
 
 
 
-function appendThisMatlabFile(FID)
-breaker = ['>',repmat('#',1,80)];
-fprintf(FID, '%s\n', breaker);
-fprintf(FID, '%s\n', '> MATLAB script generating this file: ');
-fprintf(FID, '%s\n', breaker);
-Fself = fopen([mfilename('fullpath'),'.m'],'r');
-while ~feof(Fself)
-    tline = fgetl(Fself);
-    fprintf(FID, '%s\n', tline);
+% This function must be here!
+function appendThisMatlabFileHDF5(FID)
+
+% need to coopy and past the following code into the file to be appended!
+text = fileread([mfilename('fullpath'),'.m']);
+hdf5write(FID,'/config/MATLAB/config.m',text,'WriteMode','append');
+
 end
-fprintf(FID, '%s\n', breaker);
-fprintf(FID, '%s\n', breaker);
-fprintf(FID, '%s\n', breaker);
-end
+
 
 function DM=GridDM(InGrid, OutGrid, pbc)
 % Calculates the distance between all pairs of points from one grid to
