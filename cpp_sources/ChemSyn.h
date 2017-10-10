@@ -21,7 +21,7 @@ public:
 
 	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_t, const vector<bool> &neurons); /// initialise chemical synapses for simulating external Poissonian neuron population with different neuron-invariant rates for each time step
 
-	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<double> &rate_ext_neuron); /// external noisy population initialise chemical synapses for simulating external Poissonian neuron population with different time-invariant rates for each neuron
+	void init(const int syn_type, const int pop_ind_post, const int N_pre, const double K_ext, const int Num_ext, const vector<bool> &rate_ext_on, const vector<double> &rate_ext_neuron); /// external noisy population initialise chemical synapses for simulating external Poissonian neuron population with different time-invariant rates for each neuron
 		
 	void set_para(string para_str); /// set parameter values
 	void set_seed(int seed); /// manually set RNG seed 
@@ -269,6 +269,8 @@ protected:
 			rate_ext_neuron; // different time-invariant rates for each neuron
 		vector< poisson_distribution<int>* >
 			poi_dist;
+		vector<bool> 
+			rate_ext_on; /// true if at the time step such noise is on
 	} ext_noise_t_inv;
 	
 	

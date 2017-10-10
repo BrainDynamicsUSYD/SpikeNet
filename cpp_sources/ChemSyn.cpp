@@ -115,7 +115,7 @@ void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_
 }
 
 
-void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_input, const double K_ext, const int Num_ext, const vector<double> &rate_ext_neuron){
+void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_input, const double K_ext, const int Num_ext, const vector<bool> &rate_ext_on, const vector<double> &rate_ext_neuron){
 
 	// Initialise chemical synapses for simulating external neuron population
 	syn_type = syn_type_input;
@@ -130,6 +130,7 @@ void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_
 	ext_noise_t_inv.K_ext = K_ext;
 	ext_noise_t_inv.Num_ext = Num_ext;
 	ext_noise_t_inv.rate_ext_neuron = rate_ext_neuron; // time-invariant rate for each neuron
+	ext_noise_t_inv.rate_ext_on = rate_ext_on;
 	for (int j = 0; j < N_post_input; ++j){
 		ext_noise_t_inv.poi_dist.push_back(new poisson_distribution<int>(ext_noise_t_inv.Num_ext * ext_noise_t_inv.rate_ext_neuron[j] * (dt / 1000.0) ) );	
 	}
@@ -406,11 +407,13 @@ void ChemSyn::update_gs_sum_model_0(const int step_current){
 		gen.seed(my_seed + step_current);// reseed random engine!!!
 
 		// Post-synaptic dynamics
-		int t_ring;
-		for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
-			t_ring = int( (step_current + t_trans) % gsm_0.buffer_steps );
-			for (int j_post = 0; j_post < N_post; ++j_post){
-				gsm_0.d_gs_sum_buffer[t_ring][j_post] += K_trans[0] * ext_noise_t_inv.K_ext * ext_noise_t_inv.poi_dist[j_post]->operator()(gen); 
+		if (ext_noise_t_inv.rate_ext_on[step_current]){
+			int t_ring;
+			for (int t_trans = 0; t_trans < steps_trans; ++t_trans){
+				t_ring = int( (step_current + t_trans) % gsm_0.buffer_steps );
+				for (int j_post = 0; j_post < N_post; ++j_post){
+					gsm_0.d_gs_sum_buffer[t_ring][j_post] += K_trans[0] * ext_noise_t_inv.K_ext * ext_noise_t_inv.poi_dist[j_post]->operator()(gen); 
+				}
 			}
 		}
 	}
