@@ -121,7 +121,7 @@ void NeuroPop::set_ELIF_Params(double elif_delT, double elif_VT) {
 
 void NeuroPop::recv_I(vector<double>& I, const int pop_ind_pre, const int syn_type)
 {
-	if (pop_ind_pre == -1) { // if noisy external currents, always send to I_ext regardless of the synapse type
+	if (pop_ind_pre < 0) { // if noisy external currents, always send to I_ext regardless of the synapse type
 		for (int j = 0; j < N; ++j) {
 			I_ext[j] += I[j];
 		}
