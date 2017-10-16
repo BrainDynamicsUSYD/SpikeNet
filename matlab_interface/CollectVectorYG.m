@@ -44,7 +44,13 @@ for i = 1:num_files
         fprintf('done.\n');
     end
     expr = sprintf('data_tmp = %s;', data);
-    eval(expr);
+    try        
+        eval(expr);
+    catch
+        % warning('Cannot load %s', data)
+        data_tmp = [];
+    end
+    
     if isempty(data_tmp)
         warning('empty data')
     end
@@ -58,7 +64,7 @@ for i = 1:num_files
     end
     
     clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
-    
+    eval(['clear ' var]); % clear it! Otherwise it could be misused by the consecutive loops.
 end
 
 fprintf('\n');

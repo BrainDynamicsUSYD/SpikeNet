@@ -39,10 +39,12 @@ for i = 1:num_files
     catch
     end
     
-    
-    
-    eval(sprintf('data_tmp = %s;', data));
-    
+    data_tmp = [];
+    try        
+        eval(sprintf('data_tmp = %s;', data));
+    catch
+        % warning('Cannot load %s', data)
+    end
     V_tmp{i} = data_tmp;
     
     if exist('ExplVar','var')
@@ -52,7 +54,7 @@ for i = 1:num_files
     end
 
     clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
-    
+    eval(['clear ' var]); % clear it! Otherwise it could be misused by the consecutive loops.
     %fprintf('done.\n');
 end
 

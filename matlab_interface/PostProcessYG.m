@@ -60,7 +60,8 @@ for id_out = 1:num_files
             Read_and_save_YGSamp(R{ind}.samp_file, R{ind});
         end
     end
-    RasterYG(R, save_fig); % generate raster plot for spiking history
+    
+    % RasterYG(R, save_fig); % generate raster plot for spiking history
 
 end
 

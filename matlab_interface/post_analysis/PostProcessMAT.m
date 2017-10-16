@@ -37,11 +37,11 @@ for i = 1:num_files
 %     R_temp = avalanche_detect(R_temp);
 %     avalanche = R_temp.avalanche;
 %     save(files{i},'avalanche', '-append');
-%         
+        
 %     R_temp = get_stPR(R_temp,'n_sample_region', 2000);
 %     stPR = R_temp.stPR;
 %     save(files{i},'stPR', '-append');
-% %     
+%     
 % 
 %     
 % 
@@ -87,9 +87,9 @@ for i = 1:num_files
 % save(files{i},'triplet_double', '-append');
 
 
-R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 50);
-triplet_no_latency = R_temp.triplet;
-save(files{i},'triplet_no_latency', '-append');
+% R_temp = get_triplet_sequence_no_latency(R_temp,'n_trial', 50);
+% triplet_no_latency = R_temp.triplet;
+% save(files{i},'triplet_no_latency', '-append');
 
 % R_temp = get_local_spike_corr(R_temp);
 % local_cc = R_temp.local_cc;
@@ -107,9 +107,9 @@ save(files{i},'triplet_no_latency', '-append');
 % save(files{i},'stru_var_decomp', '-append');
 
 
-%          R_temp = get_grid_SWR_consistency(R_temp);
-%          grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
-%          save(files{i},'grid_SWR', '-append');
+         R_temp = get_grid_SWR_consistency(R_temp);
+         grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
+         save(files{i},'grid_SWR', '-append');
 %
 %      R_temp = get_SWR_spike_phase_lock(R_temp);
 %      SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
