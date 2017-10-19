@@ -139,6 +139,7 @@ void ChemSyn::init(const int syn_type_input, const int j_post, const int N_post_
 	// Random seed (random engine should be feed with DIFFERENT seed at every implementation)
 	random_device rd; // random number from operating system for seed
 	my_seed = rd(); // record seed
+	gen.seed(my_seed);
 
 	// parameter-dependent initialisation
 	init();
@@ -153,6 +154,7 @@ void ChemSyn::set_seed(int seed_input){
 	}
 	else{
 		my_seed = seed_input; // This will overwrite the auto generated seed.
+		gen.seed(my_seed);
 	}
 }
 
@@ -386,9 +388,8 @@ void ChemSyn::update_gs_sum_model_0(const int step_current){
 	else if (pop_ind_pre == -1){ // if external noisy population
 		// Contribution of external spikes, assuming square pulse transmitter release
 		// Generate current random number generator, note that rate_ext_t is in Hz
-		gen.seed(my_seed + step_current);// reseed random engine!!!
 		poisson_distribution<int> dist(ext_noise.Num_ext * ext_noise.rate_ext_t[step_current] * (dt / 1000.0));		
-		auto ext_spikes = bind(dist, gen);
+		auto ext_spikes = bind(dist, ref(gen));
 
 		// Post-synaptic dynamics
 		int t_ring;
@@ -404,7 +405,6 @@ void ChemSyn::update_gs_sum_model_0(const int step_current){
 	else if (pop_ind_pre == -2){ // if external noisy population
 		// Contribution of external spikes, assuming square pulse transmitter release
 		// Generate current random number generator, note that rate_ext_t is in Hz
-		gen.seed(my_seed + step_current);// reseed random engine!!!
 
 		// Post-synaptic dynamics
 		if (ext_noise_t_inv.rate_ext_on[step_current]){

@@ -95,7 +95,7 @@ public:
 
 
 private:
-	void generate_I_ext(const int step_current);
+	void generate_I_ext();
 	void record_stats(const int step_current);
 	void output_sampled_data_real_time_HDF5(const int step_current);
 	string dump_para(); /// dump all the parameter values used

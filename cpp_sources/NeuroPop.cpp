@@ -60,6 +60,7 @@ void NeuroPop::init()
 	// Random seed (random engine should be feed with DIFFERENT seed at every implementation)
 	random_device rd; // random number from operating system for seed
 	my_seed = rd(); // record seed
+	gen.seed(my_seed);
 	//my_seed = 321;
 	//cout << "My_seed is: " << my_seed << endl;
 
@@ -82,6 +83,7 @@ void NeuroPop::init()
 
 void NeuroPop::set_seed(int seed_input) {
 	my_seed = seed_input; // This will overwrite the auto generated seed.
+	gen.seed(my_seed);
 }
 
 const vector< int > & NeuroPop::get_spikes_current()
@@ -243,9 +245,8 @@ void NeuroPop::random_V(const double p) {
 	// Generate uniform random distribution
 	cout << "Function NeuroPop::random_V(double p) is deprecated!" << endl;
 	if (p < 1.0) {
-		gen.seed(my_seed);// reseed random engine!
 		uniform_real_distribution<double> uniform_dis(0.0, 1.0);
-		auto ZeroOne = bind(uniform_dis, gen);
+		auto ZeroOne = bind(uniform_dis, ref(gen));
 
 		for (int i = 0; i < N; ++i) {
 			// Generate random number.
@@ -259,9 +260,8 @@ void NeuroPop::random_V(const double p) {
 void NeuroPop::set_init_condition(const double r_V0, const double p_fire) {
 	// Set V to be uniformly distributed between [V_rt, V_rt + (V_th - V_rt)*r_V0]
 	// And then randomly set some of them above firing threshold according to p_fire
-	gen.seed(my_seed + pop_ind); // reseed random engine!
 	uniform_real_distribution<double> uniform_dis(0.0, 1.0);
-	auto ZeroOne = bind(uniform_dis, gen);
+	auto ZeroOne = bind(uniform_dis, ref(gen));
 	for (int i = 0; i < N; ++i) {
 		if (ZeroOne() < p_fire) {
 			V[i] = V_th + 1.0; // above threshold for firing
@@ -350,16 +350,15 @@ void NeuroPop::update_spikes(const int step_current) {
 
 }
 
-void NeuroPop::generate_I_ext(const int step_current) {
+void NeuroPop::generate_I_ext() {
 
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0) {
 		if (I_ext_std.size() != 0) {
 			double one_on_sqrt_dt = 1.0 / sqrt(dt); // Here sqrt_dt is on the denominator because I_ext will be multiplied by dt later.
 			// Gaussian random generator
-			gen.seed(my_seed + step_current); // reseed random engine!
 			normal_distribution<double> nrm_dist(0.0, 1.0);
-			auto gaus = bind(nrm_dist, gen);
+			auto gaus = bind(nrm_dist, ref(gen));
 
 			for (int i = 0; i < N; ++i) {
 				I_ext[i] += I_ext_mean[i] + gaus() * I_ext_std[i] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
@@ -377,10 +376,8 @@ void NeuroPop::generate_I_ext(const int step_current) {
 		if (g_ext_std.size() != 0) {
 			double one_on_sqrt_dt = 1.0 / sqrt(dt); // Here sqrt_dt is on the denominator because I_ext will be multiplied by dt later.
 			// Gaussian random generator
-			gen.seed(my_seed + step_current + step_tot); // reseed random engine!
 			normal_distribution<double> nrm_dist(0.0, 1.0);
-			auto gaus = bind(nrm_dist, gen);
-
+			auto gaus = bind(nrm_dist, ref(gen));
 			for (int i = 0; i < N; ++i) {
 				I_ext[i] += -(g_ext_mean[i] + gaus() * g_ext_std[i] * one_on_sqrt_dt) * (V[i] - V_ext); // be careful about the sqrt(dt) term (Wiener Process)
 			}
@@ -412,7 +409,7 @@ void NeuroPop::update_V(const int step_current) {
 	// This function updates menbrane potentials for non-refractory neurons
 
 	// Generate external currents
-	generate_I_ext(step_current);
+	generate_I_ext();
 	// add external current file in [start_step, end_step)
 	if (current_file.on && (step_current >= current_file.start_step) && (step_current < current_file.end_step)) {
 		get_current_from_file();
