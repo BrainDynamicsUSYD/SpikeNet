@@ -74,9 +74,9 @@ for i = 1:num_files
 % save(files{i},'Analysis', '-append');
 
 % 
-% [R_temp] = get_rich_club(R_temp);
-% rich_club = R_temp.rich_club;
-% save(files{i},'rich_club', '-append');
+[R_temp] = get_rich_club(R_temp);
+rich_club = R_temp.rich_club;
+save(files{i},'rich_club', '-append');
 
 % R_temp = get_triplet_sequence(R_temp);
 % triplet = R_temp.triplet;
@@ -107,9 +107,9 @@ for i = 1:num_files
 % save(files{i},'stru_var_decomp', '-append');
 
 
-         R_temp = get_grid_SWR_consistency(R_temp);
-         grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
-         save(files{i},'grid_SWR', '-append');
+%          R_temp = get_grid_SWR_consistency(R_temp);
+%          grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
+%          save(files{i},'grid_SWR', '-append');
 %
 %      R_temp = get_SWR_spike_phase_lock(R_temp);
 %      SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
