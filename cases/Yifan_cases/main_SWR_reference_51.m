@@ -20,7 +20,7 @@ repeats = 10;
 
 dist_cutoff  = 31*sqrt(2);
 
-for g_balance = [0.8 1 1.2]
+for g_balance = [0.8 1 1.2 1.3]
     
     for P0_init = 0.08*ones(1,repeats)
         
