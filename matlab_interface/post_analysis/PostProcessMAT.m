@@ -62,10 +62,10 @@ for i = 1:num_files
 %       get_LFP_continous(R_temp);
 
 
-%           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-%           grid = R_temp.grid; %#ok<NASGU>
-%           grid_sub = R_temp.grid_sub; %#ok<NASGU>
-%           save(files{i},'grid','grid_sub', '-append');
+           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+           grid = R_temp.grid; %#ok<NASGU>
+           grid_sub = R_temp.grid_sub; %#ok<NASGU>
+           save(files{i},'grid','grid_sub', '-append');
 
 %         hw = 31;
 % % [R_temp] = get_fano_factor(R_temp, 2, hw);
@@ -74,9 +74,9 @@ for i = 1:num_files
 % save(files{i},'Analysis', '-append');
 
 % 
-[R_temp] = get_rich_club(R_temp);
-rich_club = R_temp.rich_club;
-save(files{i},'rich_club', '-append');
+%[R_temp] = get_rich_club(R_temp);
+%rich_club = R_temp.rich_club;
+% save(files{i},'rich_club', '-append');
 
 % R_temp = get_triplet_sequence(R_temp);
 % triplet = R_temp.triplet;
