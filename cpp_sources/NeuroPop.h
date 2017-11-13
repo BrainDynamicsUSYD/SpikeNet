@@ -8,6 +8,7 @@
 #include <fstream> // fstream : Stream class to both read and write from / to files
 
 #include "MyIO.h"
+#include "ChemSyn.h"
 
 #ifdef HDF5
 #include <H5Cpp.h>
@@ -70,18 +71,12 @@ public:
 	void get_current_from_file();
 
 
-	void add_JH_Learn();
-	void reset_Q();
-
-	struct JH_Learn_Pop {
-		bool on = false; //indicates if this learning is to be used
-		vector<double> QI;
-		vector<double> QE;
-	} jh_learn_pop;
-	// Making the above struct public is a bad practice, breaking the encapsulation.
-	// However it is tolerable in development.
-	// Once the JH learning algorithm is published, consider fix it.
-
+	void add_JH_Learn(double noise);
+	void get_all_rhat_JHLearn(vector<ChemSyn*> &ChemSynArray, const int step_current);
+	void reset_rhat();
+	const vector< int > & get_spikes_noise(); 
+	const double & get_noise(); 
+	
 	void import_restart(H5File & file, int pop_ind, string out_filename);
 	void export_restart(Group & group);
 	void output_results(H5File& file_HDF5);
@@ -226,7 +221,7 @@ protected:
 		H5File *
 		file_HDF5;
 		DataSet
-		V_dataset, I_leak_dataset, I_AMPA_dataset, I_GABA_dataset, I_NMDA_dataset, I_GJ_dataset, I_ext_dataset, I_K_dataset;
+		V_dataset, I_leak_dataset, I_AMPA_dataset, I_GABA_dataset, I_NMDA_dataset, I_GJ_dataset, I_ext_dataset, I_K_dataset, rhatE_dataset, rhatI_dataset;;
 		int
 		ctr = 0; /// counter that counts how many steps have been sampled
 		vector<int>
@@ -295,6 +290,13 @@ protected:
 		double mean_curr; /// strength scale of external current from file
 
 	} current_file;
+
+	struct JH_Learn_Pop{
+		bool on=false; //indicates if this learning is to be used
+		vector<double> rhatI,rhatE;		
+		double noise;
+		vector<int> noise_spikes;
+	} jh_learn_pop;
 }; //class declaration must end with a semi-colon.
 
 void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K, const bool is_end); /// online mean and var calculation: Welford's method (1962, Technometrixcs)

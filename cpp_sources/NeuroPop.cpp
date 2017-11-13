@@ -86,6 +86,16 @@ void NeuroPop::set_seed(int seed_input) {
 	gen.seed(my_seed);
 }
 
+const vector< int > & NeuroPop::get_spikes_noise() 
+{
+	return jh_learn_pop.noise_spikes;
+}
+
+const double & NeuroPop::get_noise() 
+{
+	return jh_learn_pop.noise;
+}
+
 const vector< int > & NeuroPop::get_spikes_current()
 {
 	return spikes_current;
@@ -303,14 +313,36 @@ void NeuroPop::update_spikes(const int step_current) {
 		}
 	}
 	else {
-		spikes_current = spike_file.spikes[spike_file.spike_ind];
-		spike_counter = spikes_current.size();
+		spikes_current.clear(); // empty vector
+		int neu=-1;
+		for (unsigned int i = 0; i < spike_file.spikes[spike_file.spike_ind].size(); ++i){
+			neu= spike_file.spikes[spike_file.spike_ind][i];
+			if (ref_step_left[neu] == 0){
+				spikes_current.push_back(neu); // record firing neurons
+				ref_step_left[neu] = ref_steps; // steps left for being refractory
+				spike_counter += 1;
+			}
+		}
 		spike_file.spike_ind++;
-		if (spike_file.spike_ind > spike_file.spikes.size()) {
-			spike_file.spike_ind = 0; //go back to start of list
+		if(spike_file.spike_ind>spike_file.spikes.size()){
+			spike_file.spike_ind=0; //go back to start of list
 		}
 	}
 
+	if(jh_learn_pop.on){
+		jh_learn_pop.noise_spikes.clear();
+		jh_learn_pop.noise_spikes.resize(spikes_current.size(),0); //initialise to no noise
+		if(jh_learn_pop.noise>0.0){
+			//noise spikes
+			uniform_real_distribution<double> uniform_dis(0.0, 1.0);
+			auto ZeroOne = bind(uniform_dis,ref(gen));
+			for(unsigned int i=0;i<spikes_current.size();i++){
+				if (ZeroOne() < jh_learn_pop.noise){
+					jh_learn_pop.noise_spikes[i]=1; //noise this spike
+				}
+			}
+		}	
+	}
 
 	// perturbation: remove the last spike
 	if (step_current == step_perturb) {
@@ -577,17 +609,46 @@ void NeuroPop::runaway_check(const int step_current)
 }
 
 
-void NeuroPop::add_JH_Learn() {
-	jh_learn_pop.on = true;
-	jh_learn_pop.QE.resize(N, 0);
-	jh_learn_pop.QI.resize(N, 0);
+void NeuroPop::add_JH_Learn(double noise){
+	jh_learn_pop.on=true;
+	jh_learn_pop.rhatE.resize(N,0);
+	jh_learn_pop.rhatI.resize(N,0);
+
+
+	jh_learn_pop.noise=noise;
 }
 
-void NeuroPop::reset_Q() {
-	if (jh_learn_pop.on) {
-		for (unsigned int i = 0; i < spikes_current.size(); i++) {
-			jh_learn_pop.QI[spikes_current[i]] = 0.0;
-			jh_learn_pop.QE[spikes_current[i]] = 0.0;
+void NeuroPop::reset_rhat(){
+	if(jh_learn_pop.on){
+		fill(jh_learn_pop.rhatE.begin(), jh_learn_pop.rhatE.end(), 0.0);
+		fill(jh_learn_pop.rhatI.begin(), jh_learn_pop.rhatI.end(), 0.0);
+	}
+}
+
+void NeuroPop::get_all_rhat_JHLearn(vector<ChemSyn*> &ChemSynArray,const int step_current){
+	if(jh_learn_pop.on){
+		if (sample.type[8]){
+			if (sample.time_points[step_current]){ 
+				if (!sample.neurons.empty() && sample.file_type == 2){			
+					reset_rhat();
+					for (unsigned int syn_ind = 0; syn_ind < ChemSynArray.size(); ++syn_ind){
+						if(ChemSynArray[syn_ind]->get_pop_ind_pre()==pop_ind){
+							vector <double> temp;
+							temp=ChemSynArray[syn_ind]->get_all_rhat_JH_Learn(sample.neurons);
+							if(ChemSynArray[syn_ind]->get_syn_type()==0){ //AMPA excitatory
+								for(unsigned int i=0;i<sample.neurons.size();i++){
+									jh_learn_pop.rhatE[sample.neurons[i]]+=temp[sample.neurons[i]];
+								}
+							}
+							else if(ChemSynArray[syn_ind]->get_syn_type()==1){ //GABA inhibitory
+								for(unsigned int i=0;i<sample.neurons.size();i++){
+									jh_learn_pop.rhatI[sample.neurons[i]]+=temp[sample.neurons[i]];
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -752,33 +813,43 @@ void NeuroPop::load_file_current_input(string fname) {
 }
 
 void NeuroPop::load_file_spike_input(string fname) {
-	cout << "\t\tLoading spikes from file..." << fname;
+	cout<<"\t\tLoading spikes from file..."<<fname;
 	H5File file(  fname, H5F_ACC_RDONLY );
-	vector< int> x, y, t, pol;
-	int max_x = 1;
+	vector< int> x,y,t,pol;
+	int max_x=1;
+	int max_y=1;
 	read_vector_HDF5(file, string("x"), x);
 	read_vector_HDF5(file, string("y"), y);
 	read_vector_HDF5(file, string("t"), t);
 	read_vector_HDF5(file, string("pol"), pol);
-	max_x = read_scalar_HDF5<int>(file, string("max_x"));
+	max_x=read_scalar_HDF5<int>(file,string("max_x"));
+	max_y=read_scalar_HDF5<int>(file,string("max_y"));
+
+	vector<int> sp_neu;
+	sp_neu.resize(max_x*max_y,0); //  used to mark if already a spike for that neuron to limit to 1 spike per timestep
 	// Now convert list of events into sets of spikes for each timestep dt
-	unsigned long int  i = 0;
+	unsigned long int  i=0;
 	int tmax;
-	tmax = t[1] + int(1000 * dt); // convert from units of microseconds to milliseconds
+	tmax=t[1]+int(1000*dt); // convert from units of microseconds to milliseconds
 	vector< int> tmp_spikes;
-	while (i < t.size()) {
-		while ((t[i] < tmax) & (i < t.size())) {
-			tmp_spikes.push_back(x[i] + max_x * y[i]);
+	while(i<t.size()){
+		while((t[i]<tmax)&(i<t.size())){
+			if(sp_neu[x[i]+max_x*y[i]]==0){ //check if this neuron has already spiked this timestep
+				tmp_spikes.push_back(x[i]+max_x*y[i]);
+				sp_neu[x[i]+max_x*y[i]]=1; //mark this neuron as having spiked
+			}
 			i++;
 		}
 		spike_file.spikes.push_back(tmp_spikes);
 		tmp_spikes.clear();
-		tmax += int(1000 * dt);
+		tmax+=int(1000*dt);
+
+		sp_neu.assign(sp_neu.size(), 0); // reset to 0 so all neurons are marked as NOT having spiked for next timestep
 	}
-	spike_file.file_name = fname;
-	spike_file.spike_ind = 0;
-	spike_file.on = 1;
-	cout << "done.\n";
+	spike_file.file_name=fname;
+	spike_file.spike_ind=0;
+	spike_file.on=1;
+	cout<<"done.\n";
 }
 
 
@@ -907,9 +978,11 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 
 	str = pop_n + "/jh_learn_pop/";
 	if (group_exist_HDF5(file, str)) {
-		jh_learn_pop.on = read_scalar_HDF5<bool>(file, str + string("on"));
-		read_vector_HDF5(file, str + string("QI"), jh_learn_pop.QI);
-		read_vector_HDF5(file, str + string("QE"), jh_learn_pop.QE);
+		jh_learn_pop.on=read_scalar_HDF5<bool>(file,str+string("on"));
+		read_vector_HDF5(file,str+string("rhatE"),jh_learn_pop.rhatE);	
+		read_vector_HDF5(file,str+string("rhatI"),jh_learn_pop.rhatI);
+		read_vector_HDF5(file,str+string("noise_spikes"),jh_learn_pop.noise_spikes);
+		jh_learn_pop.noise=read_scalar_HDF5<double>(file,str+string("noise"));	
 	}
 	str = pop_n + "/spike_file/";
 	if (group_exist_HDF5(file, str)) {
@@ -1047,11 +1120,13 @@ void NeuroPop::export_restart(Group& group) {
 	}
 
 	if (jh_learn_pop.on) {
-		string str = pop_n + "/jh_learn_pop/";
+		string str = pop_n+"/jh_learn_pop/";
 		Group group_jh_learn_pop = group_pop.createGroup(str);
-		write_scalar_HDF5(group_jh_learn_pop, jh_learn_pop.on, string("on"));
-		write_vector_HDF5(group_jh_learn_pop, jh_learn_pop.QI, string("QI"));
-		write_vector_HDF5(group_jh_learn_pop, jh_learn_pop.QE, string("QE"));
+		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.on,string("on"));
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.rhatE,string("rhatE"));	
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.rhatI,string("rhatI"));	
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.noise_spikes,string("noise_spikes"));	
+		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.noise,string("noise"));
 	}
 	if (spike_file.on) {
 		string str = pop_n + "/spike_file/";
@@ -1159,6 +1234,10 @@ void NeuroPop::add_sampling_real_time_HDF5(const vector<int>& sample_neurons_inp
 	if (sample.type[7]) {
 		sample.I_K_dataset = sample.file_HDF5->createDataSet("I_K", PredType::NATIVE_DOUBLE, fspace);
 	}
+	if(sample.type[8]){
+		sample.rhatE_dataset = sample.file_HDF5->createDataSet("rhatE", PredType::NATIVE_DOUBLE, fspace);
+		sample.rhatI_dataset = sample.file_HDF5->createDataSet("rhatI", PredType::NATIVE_DOUBLE, fspace);
+	}
 }
 
 void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current) {
@@ -1242,6 +1321,25 @@ void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current) {
 				}
 				append_vector_to_matrix_HDF5(sample.I_K_dataset, temp_data,  sample.ctr);
 			}
+			if (sample.type[8]){	// "rhat"
+				//rhat
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i]= jh_learn_pop.rhatE[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.rhatE_dataset, temp_data,  sample.ctr);
+
+				fill(temp_data.begin(), temp_data.end(), 0);
+				// Collect the data to write in a temp vector
+				for (int i = 0; i < sample.N_neurons; ++i){ // performance issue when sampling many neurons?
+					ind_temp = sample.neurons[i];
+					temp_data[i]= jh_learn_pop.rhatI[ind_temp];
+				}
+				append_vector_to_matrix_HDF5(sample.rhatI_dataset, temp_data,  sample.ctr);
+
+			}	
 			sample.ctr++;
 		}
 	}

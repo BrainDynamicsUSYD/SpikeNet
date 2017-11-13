@@ -44,13 +44,19 @@ public:
 		
 	void output_results(ofstream& output_file); /// write output to file
 
-	void add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscaleE, double iscaleI,double lrate_E,double lrateall_E,double lrate_I,double lrateall_I,int intau, double innoise, int type_pre, int type_post);
+	void add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscale,double lrate,double lrateall,int intau, double innoise, int type_pre, int type_post, int direction);
 	void update_post_spike_hist_JH_Learn();
 	void update_Vint_JH_Learn();
 	void new_post_spikes_JH_Learn();
+	void wchange_non_Hebbian_outgoing(vector<NeuroPop*> &NeuronPopArray);
+	void wchange_Hebbian_outgoing();
+
+	const int & get_direction(); //
+
 	void new_pre_spikes_JH_Learn();
-	void old_pre_spikes_Q_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
-	void old_pre_spikes_K_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
+	const vector <double> & get_all_rhat_JH_Learn(vector<int> neu_pre_samp);
+	void get_rhat_spiking();
+	void old_pre_spikes();
 	void record_V_post_JH_Learn(vector<NeuroPop*> &NeuronPopArray);
 
 	void import_restart(H5File& file, int syn_ind);
@@ -60,6 +66,9 @@ public:
 	const int & get_syn_type(); /// get synapse type
 	const int & get_pop_ind_pre(); /// get index of pre-synaptic population
 	const int & get_pop_ind_post(); /// get index of post-synaptic population
+
+
+
 private:
 
 	void init(); /// parameter-dependent initialisation
@@ -273,22 +282,20 @@ protected:
 			rate_ext_on; /// true if at the time step such noise is on
 	} ext_noise_t_inv;
 	
-	
-	// Random number generator
-	int 
-		my_seed;
-	typedef mt19937 
-		base_generator_type; // A typedef is used so that base generator type can be changed
-	base_generator_type 
-		gen;
-
-
-
 	struct JH_Learn_Syn{
 		bool on=0; //indicates if this learning is to be used
+		int direction=0; //indicates if learning these synapses as output (=0), or inputs (=1).
+		// Spike_File spike_file_pre;
+		// Spike_File spike_file_post;
+
+		//vector<int> spikes_pre, spikes_post;
+		vector<int> spikes_pre_noise,spikes_post_noise;
+
+		vector<vector<int>> post_noise_hist;
 		vector<vector <int> > post_t_hist; //1st index neuron, 2nd index list
 		vector <int> ind_post_new; // indexes timestep in post_spike_hist and post_V_hist
 		vector<int> ind_post_old;
+		vector<vector<int>> pre_noise_hist;
 		vector<vector<int> >pre_t_hist; 
 		vector<int> ind_pre_new; // indexes timestep in post_spike_hist and post_V_hist
 		vector<int> ind_pre_old;
@@ -299,24 +306,40 @@ protected:
 		int ntype_post;
 		vector<double> Vint;
 		vector<int> Vint_ctr;
-		vector<double> Q_pre;
+
+		double V_th=-55; //+++FIX TO MAKE THIS VALUE FROM CONFIG
+		double V_rt=-70; //+++FIX TO MAKE THIS VALUE FROM CONFIG
+		vector< vector<double>> post_V_hist_b4_th; // this is essentially V before threshold is applied - only different to V_hist when spikes occur
+		vector<int> Vint_reset;
 		vector< vector<double>> post_V_hist; //1st ind time, 2nd index neuron  NEED TO STORE ALL VOLTAGES AT ALL TIMES
 		vector<vector <int> > post_R_hist; //1st index neuron, 2nd index list
 		int t_ind;
 		int inf_steps; // the number of timesteps over which inference is performed
-		double inf_scaleI, inf_scaleE;
-		double learn_rate_E;
-		double learn_rate_all_E;
-		double learn_rate_I;
-		double learn_rate_all_I;
+		double inf_scale;
+		double learn_rate;
+		double learn_rate_all;
+
+		double noise_pre, noise_post;
+
 		double tau;
 		double C;
 		double noise;
+
+		vector<double> rhat;
 		vector< vector<int> >
 			j_2_i, // j_2_i[j_post] gives all the i_pre's (indices of pre-synaptic neurons)
 			j_2_syn_ind; // j_2_syn_ind[j_post] gives all the syn_ind's so that K[i_pre][syn_ind] is a synapse onto j_post
 	
 	} jh_learn_syn;
+	
+	// Random number generator
+	int 
+		my_seed;
+	typedef mt19937 
+		base_generator_type; // A typedef is used so that base generator type can be changed
+	base_generator_type 
+		gen;
+
 
 };
 
