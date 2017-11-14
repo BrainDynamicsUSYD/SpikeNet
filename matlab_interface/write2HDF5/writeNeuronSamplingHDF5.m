@@ -2,7 +2,7 @@ function writeNeuronSamplingHDF5(FID, pop_ind, data_type, sample_ind, time_index
 % write data sampling settings for individual neurons
 %        FID: file id for writing data
 %    pop_ind: neuron population index
-%  data_type: logical vector for [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K]
+%  data_type: logical vector for [V,I_leak,I_AMPA,I_GABA,I_NMDA,I_GJ,I_ext, I_K,rhat]
 % sample_ind: vector of neuron indices to be sampled in pop_ind
 % time_index: logical vector to define time points to be sampled
 %
@@ -25,8 +25,8 @@ if sum((data_type ~= 0) & (data_type ~= 1)) ~= 0
     error('Data_type must be logical vectors: ');
 end
 
-if length(data_type) ~= 8
-    error('data_type must have a length of 8.')
+if length(data_type) ~= 9
+    error('data_type must have a length of 9.')
 end
 
 % sampling frequency check
@@ -46,7 +46,7 @@ hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_NMDA'],
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_GJ'],data_type(6),'WriteMode','append'); 
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_ext'],data_type(7),'WriteMode','append'); 
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/I_K'],data_type(8),'WriteMode','append'); 
-hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/Q'],data_type(9),'WriteMode','append')
+hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/data_type/rhat'],data_type(9),'WriteMode','append')
 
 
 hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/SAMP001/neurons'],sample_ind,'WriteMode','append');

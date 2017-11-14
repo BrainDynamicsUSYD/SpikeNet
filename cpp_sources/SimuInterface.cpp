@@ -327,7 +327,7 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				type[5] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_GJ"));
 				type[6] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_ext"));
 				type[7] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_K"));
-				type[8] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/Q"));
+				type[8] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/rhat"));
 
 				network.NeuroPopArray[ind]->add_sampling_real_time_HDF5(neurons, type, time_points, out_filename);
 				cout << "done." << endl;
