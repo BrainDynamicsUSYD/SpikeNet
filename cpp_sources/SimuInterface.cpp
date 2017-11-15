@@ -351,6 +351,15 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				cout << "done." << endl;
 			}
 
+			// Poisson spiking population
+			if (group_exist_HDF5(in_filename, pop_n + string("/poisson_pop"))) {
+				cout << "\t\t Poisson population input settings...";
+				double rate;
+				rate = read_scalar_HDF5<double>(file,  pop_n + string("/poisson_pop/rate"));
+				network.NeuroPopArray[ind]->init_poisson_pop(rate);
+				cout << "done." << endl;
+			}
+
 			//ext_spike_input from HDF5 file
 			if (group_exist_HDF5(in_filename, pop_n + string("/file_spike_input"))) {
 				cout << "\t\t File spike input settings...";

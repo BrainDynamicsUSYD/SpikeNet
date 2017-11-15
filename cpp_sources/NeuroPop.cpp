@@ -131,6 +131,27 @@ void NeuroPop::set_ELIF_Params(double elif_delT, double elif_VT) {
 	elif.V_T = elif_VT;
 }
 
+void NeuroPop::init_poisson_pop(double rate) {
+	poisson_pop.on=1;
+	// note that the input to the simulator is assumed to be a rate in units of spikes per second (Hz)
+	// thus we convert to spikes per timestep (the simulator timestep is in units of ms)
+	poisson_pop.rate=rate*dt/1000.0; //spikes per timestep
+
+	// In this type of population, each neuron should generate Poisson spike trains with rate lambda
+	// To do this we use the fact that in a Poisson process, the time intervals between pairs of subsequent events 
+	// are distributed exponentially according to lambda*exp(-lambda*t)
+	// So, each time a spike is generated, we then generate a time interval until the next spike and wait until that time is reached before producing a spike 
+	// Note: Poisson events, by definition, are generated independently of previous events
+
+	exponential_distribution<double> exp_dist(poisson_pop.rate);	// random numbers distributed according to lambda*exp(-lambda*X)	
+	auto interval = bind(exp_dist, ref(gen));
+	poisson_pop.next_spike_time.resize(N,0);
+	for (int i = 0; i < N; ++i) {
+		// generate a time interval until the first spike
+		poisson_pop.next_spike_time[i]+=floor(interval());
+	}
+}
+
 void NeuroPop::recv_I(vector<double>& I, const int pop_ind_pre, const int syn_type)
 {
 	if (pop_ind_pre < 0) { // if noisy external currents, always send to I_ext regardless of the synapse type
@@ -302,17 +323,7 @@ void NeuroPop::update_spikes(const int step_current) {
 	// Find the firing neurons, record them, reset their potential and set them to be refractory
 	spikes_current.clear(); // empty vector
 	int spike_counter = 0;
-	if (spike_file.on == 0) {
-		for (int i = 0; i < N; ++i) {
-			if (ref_step_left[i] == 0 && V[i] >= V_th) {
-				spikes_current.push_back(i); // record firing neurons
-				V[i] = V_rt; // reset potential
-				ref_step_left[i] = ref_steps; // steps left for being refractory
-				spike_counter += 1;
-			}
-		}
-	}
-	else {
+	if(spike_file.on==1) {
 		spikes_current.clear(); // empty vector
 		int neu=-1;
 		for (unsigned int i = 0; i < spike_file.spikes[spike_file.spike_ind].size(); ++i){
@@ -326,6 +337,34 @@ void NeuroPop::update_spikes(const int step_current) {
 		spike_file.spike_ind++;
 		if(spike_file.spike_ind>spike_file.spikes.size()){
 			spike_file.spike_ind=0; //go back to start of list
+		}
+	}
+	else if(poisson_pop.on==1){
+		// In this type of population, each neuron should generate Poisson spike trains with rate lambda
+		// To do this we use the fact that in a Poisson process, the time intervals between pairs of subsequent events 
+		// are distributed exponentially according to lambda*exp(-lambda*t)
+		// So, each time a spike is generated, we then generate a time interval until the next spike and wait until that time is reached before producing a spike 
+		// Note: Poisson events, by definition, are generated independently of previous events
+
+		exponential_distribution<double> exp_dist(poisson_pop.rate);	// random numbers distributed according to lambda*exp(-lambda*X)	
+		auto interval = bind(exp_dist, ref(gen));
+		for (int i = 0; i < N; ++i) {
+			if(poisson_pop.next_spike_time[i]<=step_current){
+				spikes_current.push_back(i); // record firing neurons
+				spike_counter += 1;
+				//now generate a new spike interval
+				poisson_pop.next_spike_time[i]+=floor(interval());
+			}
+		}
+	}
+	else{
+		for (int i = 0; i < N; ++i) {
+			if (ref_step_left[i] == 0 && V[i] >= V_th) {
+				spikes_current.push_back(i); // record firing neurons
+				V[i] = V_rt; // reset potential
+				ref_step_left[i] = ref_steps; // steps left for being refractory
+				spike_counter += 1;
+			}
 		}
 	}
 
@@ -991,6 +1030,14 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 		load_file_spike_input(spike_file.file_name);
 		spike_file.spike_ind = read_scalar_HDF5<unsigned int>(file, str + string("spike_ind")); //must go after load_file_spike_input
 	}
+
+	str = pop_n + "/poisson_pop/";
+	if (group_exist_HDF5(file, str)) {
+		poisson_pop.on = 1;
+		poisson_pop.rate = read_scalar_HDF5<unsigned int>(file, str + string("rate")); 
+		read_vector_HDF5(file,str+string("next_spike_time"),poisson_pop.next_spike_time);
+	}
+
 	str = pop_n + "/current_file/";
 	if (group_exist_HDF5(file, str)) {
 		current_file.on = 1;
@@ -1133,6 +1180,13 @@ void NeuroPop::export_restart(Group& group) {
 		Group group_spike_file = group_pop.createGroup(str);
 		write_scalar_HDF5(group_spike_file, spike_file.spike_ind, string("spike_ind"));
 		write_string_HDF5(group_spike_file, spike_file.file_name, string("file_name"));
+	}
+
+	if (poisson_pop.on) {
+		string str = pop_n + "/poisson_pop/";
+		Group group_spike_file = group_pop.createGroup(str);
+		write_scalar_HDF5(group_spike_file, poisson_pop.rate, string("rate"));
+		write_vector_HDF5(group_spike_file, poisson_pop.next_spike_time, string("next_spike_time"));
 	}
 	if (current_file.on) {
 		string str = pop_n + "/current_file/";

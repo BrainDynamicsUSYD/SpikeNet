@@ -59,6 +59,7 @@ public:
 	
 	void set_neuron_model(int n_mod);
 	void set_ELIF_Params(double elif_delT, double elif_VT);
+	void init_poisson_pop(double rate);
 
 	void update_spikes(const int step_current); /// Find the firing neurons, record them, reset their potential and update nonref
 	// Following member(s) should not be inherited
@@ -274,6 +275,12 @@ protected:
 		string file_name;
 
 	} spike_file;
+
+	struct Poisson_Pop{
+		int on=0;
+		vector <int>  next_spike_time; // timestep of next spike for each neuron
+		double rate; //in spikes per timestep
+	}poisson_pop;
 
 
 	// external current file
