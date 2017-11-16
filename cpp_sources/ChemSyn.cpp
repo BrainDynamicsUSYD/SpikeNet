@@ -842,17 +842,14 @@ const vector<double> & ChemSyn::get_all_rhat_JH_Learn(vector<int> neu_pre_samp){
 					inf_t_ind=(jh_learn_syn.t_ind+jh_learn_syn.post_V_hist.size()-jh_learn_syn.inf_steps)%(jh_learn_syn.post_V_hist.size()); 
 					expdecay=exp(-(jh_learn_syn.inf_steps-1-age)/jh_learn_syn.tau);
 					if(syn_type==0){
-						if(V_post[j_post]<V_ex){
-							post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay;
-							jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
-						}
+						post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay;
 					}
 					else
 					{
-						if(V_post[j_post]>V_in){
-							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
-							jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
-						}
+						post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
+					}
+					if(post_h>0){
+						jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
 					}
 				}
 			}
@@ -905,17 +902,14 @@ void ChemSyn::get_rhat_spiking(){
 						inf_t_ind=(jh_learn_syn.t_ind+jh_learn_syn.post_V_hist.size()-jh_learn_syn.inf_steps)%(jh_learn_syn.post_V_hist.size()); 
 						expdecay=exp(-(jh_learn_syn.inf_steps-1-age)/jh_learn_syn.tau);
 						if(syn_type==0){
-							if(V_post[j_post]<V_ex){
-								post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay;
-								jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
-							}
+							post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay;
 						}
 						else
 						{
-							if(V_post[j_post]>V_in){
-								post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
-								jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
-							}
+							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
+						}
+						if(post_h>0){
+							jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
 						}
 					// }
 				}
@@ -950,25 +944,18 @@ void ChemSyn::wchange_Hebbian_outgoing(){
 						expdecay=exp(-(jh_learn_syn.inf_steps-1-age)/jh_learn_syn.tau); 
 						if(syn_type==0){
 							post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay/(1.0-jh_learn_syn.noise_pre);
-							if(post_h>0){
-								K[i_pre][syn_ind]+=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*post_h/jh_learn_syn.rhat[i_pre]*(K[i_pre][syn_ind]);
-								if(K[i_pre][syn_ind]<0){
-									K[i_pre][syn_ind]=0;
-								}
-							}
 						}
 						else
 						{
 							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay/(1.0-jh_learn_syn.noise_pre);
-							if(post_h>0){
-								
-								K[i_pre][syn_ind]+=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*post_h/jh_learn_syn.rhat[i_pre]*(K[i_pre][syn_ind]);
-								if(K[i_pre][syn_ind]<0){
-									K[i_pre][syn_ind]=0;
-								}
+
+						}
+						if(post_h>0){
+							K[i_pre][syn_ind]+=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*post_h/jh_learn_syn.rhat[i_pre]*(K[i_pre][syn_ind]);
+							if(K[i_pre][syn_ind]<0){
+								K[i_pre][syn_ind]=0;
 							}
 						}
-
 					}
 				}
 				if(jh_learn_syn.learn_rate_all>0){
