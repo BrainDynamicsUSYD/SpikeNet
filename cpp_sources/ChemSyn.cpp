@@ -827,7 +827,7 @@ const vector<double> & ChemSyn::get_all_rhat_JH_Learn(vector<int> neu_pre_samp){
 		int i_pre,j_post,inf_t_ind,age;
 		unsigned int syn_ind;
 		double expdecay;
-		double post_h;
+		double post_h=0;
 		for(unsigned int i=0;i<neu_pre_samp.size();i++){
 			i_pre=neu_pre_samp[i];
 			// Calculate rhat value
@@ -888,7 +888,7 @@ void ChemSyn::get_rhat_spiking(){
 		int i_pre,j_post,inf_t_ind,age;
 		unsigned int syn_ind,i;
 		double expdecay;
-		double post_h;
+		double post_h=0;
 		for(i=0;i<jh_learn_syn.old_pre.size();i++){
 			i_pre=jh_learn_syn.old_pre[i];
 			jh_learn_syn.rhat[i_pre]=0;
@@ -924,7 +924,7 @@ void ChemSyn::wchange_Hebbian_outgoing(){
 		int i_pre,j_post,inf_t_ind,age;
 		unsigned int syn_ind,i;
 		double expdecay;
-		double post_h;
+		double post_h=0;
 		
 		for(i=0;i<jh_learn_syn.old_pre.size();i++){
 			i_pre=jh_learn_syn.old_pre[i];	
@@ -1141,6 +1141,18 @@ void ChemSyn::import_restart(H5File& file, int syn_ind){
 	read_matrix_HDF5(file, syn_str+"D",D);
 	read_matrix_HDF5(file,syn_str+"K",K);
 
+	//need to remove trailing zero entries that are padded into the matrix storage but aren't supposed to be there
+	// this happens typically when there are no periodic boundaries and neurons near the edge have fewer connections
+	for(unsigned int i=0;i<C.size();i++){
+		int j=C[i].size()-1;
+		while((C[i][j]==-1.0)&(j>=0)){
+			C[i].pop_back();
+			D[i].pop_back();
+			K[i].pop_back();
+			j--;
+		}
+	}
+
 	str =syn_str+"/Ext_noise/";
 	if(group_exist_HDF5(file,str)){
 		ext_noise.K_ext=read_scalar_HDF5<double>(file, str+ "K_ext");
@@ -1302,6 +1314,23 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 	}
 	
 	if (pop_ind_pre >= 0){
+		// every neuron doesn't need to have the same number of connections
+		// so when stored as a matrix we need to pad out missing connections
+		// we choose to pad by -1, as we assume entries are always positive,
+		// so they can then be identified as padding later
+		
+		//find max number of entries
+		unsigned int max=0;
+		for(unsigned int i=0;i<C.size();i++){
+			if(C[i].size()>max){
+				max=C[i].size();
+			}
+		}
+		for(unsigned int i=0;i<C.size();i++){
+			C[i].resize(max,-1.0);
+			D[i].resize(max,-1.0);
+			K[i].resize(max,-1.0);
+		}
 		write_matrix_HDF5(group_syn, C, "C");
 		write_matrix_HDF5(group_syn, D, "D");
 		write_matrix_HDF5(group_syn, K, "K");
