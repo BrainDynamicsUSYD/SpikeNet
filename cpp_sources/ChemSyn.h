@@ -66,6 +66,7 @@ public:
 	const int & get_syn_type(); /// get synapse type
 	const int & get_pop_ind_pre(); /// get index of pre-synaptic population
 	const int & get_pop_ind_post(); /// get index of post-synaptic population
+	const int & get_post_neu_type(); // get the neuron type of the post synaptic population
 
 
 

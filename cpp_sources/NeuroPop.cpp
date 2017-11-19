@@ -674,12 +674,12 @@ void NeuroPop::get_all_rhat_JHLearn(vector<ChemSyn*> &ChemSynArray,const int ste
 						if(ChemSynArray[syn_ind]->get_pop_ind_pre()==pop_ind){
 							vector <double> temp;
 							temp=ChemSynArray[syn_ind]->get_all_rhat_JH_Learn(sample.neurons);
-							if(ChemSynArray[syn_ind]->get_syn_type()==0){ //AMPA excitatory
+							if(ChemSynArray[syn_ind]->get_post_neu_type()==0){ //AMPA excitatory
 								for(unsigned int i=0;i<sample.neurons.size();i++){
 									jh_learn_pop.rhatE[sample.neurons[i]]+=temp[sample.neurons[i]];
 								}
 							}
-							else if(ChemSynArray[syn_ind]->get_syn_type()==1){ //GABA inhibitory
+							else if(ChemSynArray[syn_ind]->get_post_neu_type()==1){ //GABA inhibitory
 								for(unsigned int i=0;i<sample.neurons.size();i++){
 									jh_learn_pop.rhatI[sample.neurons[i]]+=temp[sample.neurons[i]];
 								}

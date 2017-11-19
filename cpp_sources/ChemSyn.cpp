@@ -249,6 +249,11 @@ const int & ChemSyn::get_pop_ind_post()
 	return pop_ind_post;
 }
 
+const int & ChemSyn::get_post_neu_type()
+{
+	return jh_learn_syn.ntype_post;
+}
+
 void ChemSyn::set_synapse_model(const int synapse_model_input){
 	if (synapse_model_input != 0){
 		synapse_model = synapse_model_input;
