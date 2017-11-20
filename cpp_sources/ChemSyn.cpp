@@ -775,7 +775,7 @@ void ChemSyn::wchange_non_Hebbian_outgoing(vector<NeuroPop*> &NeuronPopArray){
 			j_post=spikes_post[i];
 			if(jh_learn_syn.spikes_post_noise[i]==0){
 				//update weights with Vint
-				Kscale=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*dt*jh_learn_syn.Vint[j_post]/(1.0-NeuronPopArray[pop_ind_post]->get_noise());
+				Kscale=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*dt*jh_learn_syn.Vint[j_post]/(1.0-jh_learn_syn.noise_post);
 				for( ind=0; ind< jh_learn_syn.j_2_i[j_post].size(); ind++){
 					i_pre=jh_learn_syn.j_2_i[j_post][ind];
 					syn_ind=jh_learn_syn.j_2_syn_ind[j_post][ind];
@@ -948,12 +948,11 @@ void ChemSyn::wchange_Hebbian_outgoing(){
 						inf_t_ind=(jh_learn_syn.t_ind+jh_learn_syn.post_V_hist.size()-jh_learn_syn.inf_steps)%(jh_learn_syn.post_V_hist.size()); 
 						expdecay=exp(-(jh_learn_syn.inf_steps-1-age)/jh_learn_syn.tau); 
 						if(syn_type==0){
-							post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay/(1.0-jh_learn_syn.noise_pre);
+							post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay/((1.0-jh_learn_syn.noise_pre)*(1.0-jh_learn_syn.noise_post));
 						}
 						else
 						{
-							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay/(1.0-jh_learn_syn.noise_pre);
-
+							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay/((1.0-jh_learn_syn.noise_pre)*(1.0-jh_learn_syn.noise_post));
 						}
 						if(post_h>0){
 							K[i_pre][syn_ind]+=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*post_h/jh_learn_syn.rhat[i_pre]*(K[i_pre][syn_ind]);
