@@ -1034,7 +1034,7 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 	str = pop_n + "/poisson_pop/";
 	if (group_exist_HDF5(file, str)) {
 		poisson_pop.on = 1;
-		poisson_pop.rate = read_scalar_HDF5<unsigned int>(file, str + string("rate")); 
+		poisson_pop.rate = read_scalar_HDF5<double>(file, str + string("rate")); 
 		read_vector_HDF5(file,str+string("next_spike_time"),poisson_pop.next_spike_time);
 	}
 
