@@ -1199,7 +1199,25 @@ void ChemSyn::import_restart(H5File& file, int syn_ind){
 		jh_learn_syn.C=read_scalar_HDF5<double>(file, str+"C");
 		jh_learn_syn.noise=read_scalar_HDF5<double>(file,str+ "noise");
 		read_matrix_HDF5(file,str+"j_2_i",jh_learn_syn.j_2_i);
+		//need to remove trailing zero entries that are padded into the matrix storage but aren't supposed to be there
+		// this happens typically when there are no periodic boundaries and neurons near the edge have fewer connections
+		for(unsigned int i=0;i<jh_learn_syn.j_2_i.size();i++){
+			int j=jh_learn_syn.j_2_i[i].size()-1;
+			while((jh_learn_syn.j_2_i[i][j]==-1.0)&(j>=0)){
+				jh_learn_syn.j_2_i[i].pop_back();
+				j--;
+			}
+		}
 		read_matrix_HDF5(file,str+"j_2_syn_ind",jh_learn_syn.j_2_syn_ind);
+		//need to remove trailing zero entries that are padded into the matrix storage but aren't supposed to be there
+		// this happens typically when there are no periodic boundaries and neurons near the edge have fewer connections
+		for(unsigned int i=0;i<jh_learn_syn.j_2_syn_ind.size();i++){
+			int j=jh_learn_syn.j_2_syn_ind[i].size()-1;
+			while((jh_learn_syn.j_2_syn_ind[i][j]==-1.0)&(j>=0)){
+				jh_learn_syn.j_2_syn_ind[i].pop_back();
+				j--;
+			}
+		}
 
 		read_vector_HDF5(file,str+ "spikes_pre_noise",jh_learn_syn.spikes_pre_noise);
 		read_vector_HDF5(file,str+ "spikes_post_noise",jh_learn_syn.spikes_post_noise);
@@ -1385,7 +1403,39 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.tau, "tau");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.C, "C");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise, "noise");
+		// every neuron doesn't need to have the same number of connections
+		// so when stored as a matrix we need to pad out missing connections
+		// we choose to pad by -1, as we assume entries are always positive,
+		// so they can then be identified as padding later
+			
+		//find max number of entries
+		unsigned int max=0;
+		for(unsigned int i=0;i<jh_learn_syn.j_2_i.size();i++){
+			if(jh_learn_syn.j_2_i[i].size()>max){
+				max=jh_learn_syn.j_2_i[i].size();
+			}
+		}
+		for(unsigned int i=0;i<jh_learn_syn.j_2_i.size();i++){
+			jh_learn_syn.j_2_i[i].resize(max,-1.0);
+		}
 		write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_i,"j_2_i");
+		// every neuron doesn't need to have the same number of connections
+		// so when stored as a matrix we need to pad out missing connections
+		// we choose to pad by -1, as we assume entries are always positive,
+		// so they can then be identified as padding later
+			
+		//find max number of entries
+		max=0;
+		for(unsigned int i=0;i<jh_learn_syn.j_2_syn_ind.size();i++){
+			if(jh_learn_syn.j_2_syn_ind[i].size()>max){
+				max=jh_learn_syn.j_2_syn_ind[i].size();
+			}
+		}
+		for(unsigned int i=0;i<jh_learn_syn.j_2_syn_ind.size();i++){
+			jh_learn_syn.j_2_syn_ind[i].resize(max,-1.0);
+			jh_learn_syn.j_2_syn_ind[i].resize(max,-1.0);
+			jh_learn_syn.j_2_syn_ind[i].resize(max,-1.0);
+		}
 		write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_syn_ind ,"j_2_syn_ind");
 
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.V_th, "V_th");
