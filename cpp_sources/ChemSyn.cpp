@@ -1433,8 +1433,6 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 		}
 		for(unsigned int i=0;i<jh_learn_syn.j_2_syn_ind.size();i++){
 			jh_learn_syn.j_2_syn_ind[i].resize(max,-1.0);
-			jh_learn_syn.j_2_syn_ind[i].resize(max,-1.0);
-			jh_learn_syn.j_2_syn_ind[i].resize(max,-1.0);
 		}
 		write_matrix_HDF5(group_JH_Learn,jh_learn_syn.j_2_syn_ind ,"j_2_syn_ind");
 
