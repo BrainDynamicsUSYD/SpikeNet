@@ -1199,7 +1199,8 @@ void ChemSyn::import_restart(H5File& file, int syn_ind){
 		jh_learn_syn.C=read_scalar_HDF5<double>(file, str+"C");
 		jh_learn_syn.noise=read_scalar_HDF5<double>(file,str+ "noise");
 		jh_learn_syn.noise_post=read_scalar_HDF5<double>(file,str+ "noise_post");
-		h_learn_syn.noise_pre=read_scalar_HDF5<double>(file,str+ "noise_pre");
+		jh_learn_syn.noise_pre=read_scalar_HDF5<double>(file,str+ "noise_pre");
+		
 		read_matrix_HDF5(file,str+"j_2_i",jh_learn_syn.j_2_i);
 		//need to remove trailing zero entries that are padded into the matrix storage but aren't supposed to be there
 		// this happens typically when there are no periodic boundaries and neurons near the edge have fewer connections
