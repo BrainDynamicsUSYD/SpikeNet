@@ -823,6 +823,7 @@ void ChemSyn::new_pre_spikes_JH_Learn(){
 			i_pre=spikes_pre[i];
 			jh_learn_syn.ind_pre_new[i_pre]=(jh_learn_syn.ind_pre_new[i_pre]+1)%jh_learn_syn.pre_hist_len;
 			jh_learn_syn.pre_t_hist[jh_learn_syn.ind_pre_new[i_pre]][i_pre]=0;
+			jh_learn_syn.pre_noise_hist[jh_learn_syn.ind_pre_new[i_pre]][i_pre]=jh_learn_syn.spikes_pre_noise[i];
 		}
 	}
 }
@@ -877,10 +878,10 @@ void ChemSyn::old_pre_spikes(){
 			if(	(((jh_learn_syn.ind_pre_new[i_pre]+1)%jh_learn_syn.pre_hist_len!=jh_learn_syn.ind_pre_old[i_pre]) &&
 				(jh_learn_syn.pre_t_hist[jh_learn_syn.ind_pre_old[i_pre]][i_pre]>=jh_learn_syn.inf_steps))	){
 				// the oldest pre spike is too old 
-				// if(jh_learn_syn.pre_noise_hist[jh_learn_syn.ind_pre_old[i_pre]][i_pre]==0){
+				if(jh_learn_syn.pre_noise_hist[jh_learn_syn.ind_pre_old[i_pre]][i_pre]==0){
 					//spike was not dropped out
 					jh_learn_syn.old_pre.push_back(i_pre);
-				// }
+				}
 				jh_learn_syn.ind_pre_old[i_pre]=(jh_learn_syn.ind_pre_old[i_pre]+1)%jh_learn_syn.pre_hist_len;
 				
 			}
