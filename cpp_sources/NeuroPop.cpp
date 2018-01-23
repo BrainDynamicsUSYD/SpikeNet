@@ -545,6 +545,12 @@ void NeuroPop::add_spike_freq_adpt() {
 }
 
 
+void NeuroPop::set_spike_freq_adpt_para(const double dg_K_input) {
+	dg_K = dg_K_input; // default value 0.01 (uS=miuSiemens)
+}
+
+
+
 void NeuroPop::init_runaway_killer(const double min_ms, const double Hz, const double Hz_ms)
 {
 	killer.min_pop_size = 100;

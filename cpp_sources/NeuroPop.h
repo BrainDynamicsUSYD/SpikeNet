@@ -92,7 +92,7 @@ public:
 
 	void add_perturbation(const int step_perturb);
 	void add_spike_freq_adpt(); /// add spike-frequency adaptation
-
+	void set_spike_freq_adpt_para(const double dg_K_input); /// add spike-frequency adaptation
 
 private:
 	void generate_I_ext();
