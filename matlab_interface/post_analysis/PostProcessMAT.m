@@ -62,10 +62,14 @@ for i = 1:num_files
 %       get_LFP_continous(R_temp);
 
 
-           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-           grid = R_temp.grid; %#ok<NASGU>
-           grid_sub = R_temp.grid_sub; %#ok<NASGU>
-           save(files{i},'grid','grid_sub', '-append');
+%            R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+%            grid = R_temp.grid; %#ok<NASGU>
+%            grid_sub = R_temp.grid_sub; %#ok<NASGU>
+%            save(files{i},'grid','grid_sub', '-append');
+
+%            R_temp = get_grid_firing_centre(R_temp,'mode','quick','win_len', 150);
+%            grid_150 = R_temp.grid; %#ok<NASGU>
+%            save(files{i},'grid_150', '-append');
 
 %         hw = 31;
 % % [R_temp] = get_fano_factor(R_temp, 2, hw);
@@ -110,7 +114,11 @@ for i = 1:num_files
 %          R_temp = get_grid_SWR_consistency(R_temp);
 %          grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
 %          save(files{i},'grid_SWR', '-append');
-%
+% 
+%          R_temp = get_grid_SWR_consistency(R_temp);
+%          grid_SWR_6 = R_temp.grid_SWR; %#ok<NASGU>
+%          save(files{i},'grid_SWR_6', '-append');
+
 %      R_temp = get_SWR_spike_phase_lock(R_temp);
 %      SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
 %      save(files{i},'SWR_spike_phase_lock', '-append');

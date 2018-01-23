@@ -21,6 +21,7 @@ else
     ax = spike_x_pos_o*conv_factor;
     ay = spike_y_pos_o*conv_factor;
     
+    % mean of circular variable
     x_shift = atan2(sum(sin(ax)), sum(cos(ax))) / conv_factor;
     y_shift = atan2(sum(sin(ay)), sum(cos(ay))) / conv_factor;
 
@@ -30,7 +31,7 @@ else
     spike_y_pos_shifted =  mod(spike_y_pos_o - y_shift+hw, fw) - hw;
     
     width_guess  = max( std(spike_x_pos_shifted), std(spike_y_pos_shifted) );
-
+    
     x_c_guess = mean(spike_x_pos_shifted);
     y_c_guess = mean(spike_y_pos_shifted);
 

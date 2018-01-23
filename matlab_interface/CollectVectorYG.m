@@ -54,6 +54,7 @@ for i = 1:num_files
     if isempty(data_tmp)
         warning('empty data')
     end
+    
     data_tmp = data_tmp(:)'; % row vector
     V = [V, data_tmp ]; %#ok<AGROW>
     

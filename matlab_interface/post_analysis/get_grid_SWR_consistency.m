@@ -160,7 +160,7 @@ dt_conv = R.dt/R.reduced.dt;
 
 
 [Lattice, ~] = lattice_nD(2, (fw-1)/2);
-spike_sort_range = 60;
+spike_sort_range = 6; % use 60
 centre_neurons = sqrt( Lattice(:,1).^2 + Lattice(:,2).^2 ) <= spike_sort_range;
 
 spike_count_sort = [];
