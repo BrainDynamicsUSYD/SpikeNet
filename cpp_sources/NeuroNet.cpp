@@ -56,24 +56,38 @@ void NeuroNet::update(int step_current){
 		// Electrical coupling
 		
 		/*------------------------------------------------------------------------------------------------------*/
-		// JH Learning Scheme
+// JH Learning Scheme
 		for (int pop_ind = 0; pop_ind < Num_pop; ++pop_ind){
-			NeuroPopArray[pop_ind]->reset_Q();
+			NeuroPopArray[pop_ind]->reset_rhat();
 		}
 
 		for (unsigned int syn_ind = 0; syn_ind < ChemSynArray.size(); ++syn_ind){	
 			ChemSynArray[syn_ind]->record_V_post_JH_Learn(NeuroPopArray);
 			ChemSynArray[syn_ind]->update_post_spike_hist_JH_Learn(); 
-			ChemSynArray[syn_ind]->new_post_spikes_JH_Learn();
-			ChemSynArray[syn_ind]->old_pre_spikes_Q_JH_Learn(NeuroPopArray);
-			ChemSynArray[syn_ind]->update_Vint_JH_Learn();//goes at end	
+			ChemSynArray[syn_ind]->new_post_spikes_JH_Learn(); 
+			ChemSynArray[syn_ind]->old_pre_spikes();
+			if(ChemSynArray[syn_ind]->get_direction()==0){	
+				ChemSynArray[syn_ind]->get_rhat_spiking(); //include all synpases? CHANGE?
+				ChemSynArray[syn_ind]->wchange_non_Hebbian_outgoing(NeuroPopArray);	
+				ChemSynArray[syn_ind]->update_Vint_JH_Learn();//goes at end	
+			}
+			else if(ChemSynArray[syn_ind]->get_direction()==1){
+				//TODO
+			}	
 		}
-
+ // cout <<"DEBUG3\n";
 		for (unsigned int syn_ind = 0; syn_ind < ChemSynArray.size(); ++syn_ind){
-			ChemSynArray[syn_ind]->old_pre_spikes_K_JH_Learn(NeuroPopArray); 
+			if(ChemSynArray[syn_ind]->get_direction()==0){
+				//Apply U rule
+				ChemSynArray[syn_ind]->wchange_Hebbian_outgoing();  
+			}
 			ChemSynArray[syn_ind]->new_pre_spikes_JH_Learn(); // goes after old_pre_spikes which increments t_hist	
 		}
-		
+		// for JH learn scheme rhat sampling (like all sampling) happens during update_V
+		// so need to update rhat's before the call to update_V below
+		for (int pop_ind = 0; pop_ind < Num_pop; ++pop_ind){
+			NeuroPopArray[pop_ind]->get_all_rhat_JHLearn(ChemSynArray, step_current);
+		}
 		/*------------------------------------------------------------------------------------------------------*/
 		// Update membrane potential
 		// Post-coupling update

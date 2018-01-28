@@ -323,7 +323,7 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				read_vector_HDF5(file, pop_n + string("/SAMP001/neurons"), neurons);
 				read_vector_HDF5(file, pop_n + string("/SAMP001/time_points"), time_points);
 
-				type.resize(8);
+				type.resize(9);
 				type[0] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/V"));
 				type[1] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_leak"));
 				type[2] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_AMPA"));
@@ -332,7 +332,10 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				type[5] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_GJ"));
 				type[6] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_ext"));
 				type[7] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/I_K"));
-
+				type[8] = 0;
+				if (dataset_exist_HDF5(file, pop_n + string("/SAMP001/data_type/rhat"))) {
+					type[8] = read_scalar_HDF5<bool>(file, pop_n + string("/SAMP001/data_type/rhat"));
+				}
 				network.NeuroPopArray[ind]->add_sampling_real_time_HDF5(neurons, type, time_points, out_filename);
 				cout << "done." << endl;
 			}
@@ -350,6 +353,15 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				delT = read_scalar_HDF5<double>(file, pop_n + string("/ELIF/ELIF_delT"));
 				network.NeuroPopArray[ind]->set_ELIF_Params(delT, V_T);
 
+				cout << "done." << endl;
+			}
+
+			// Poisson spiking population
+			if (group_exist_HDF5(in_filename, pop_n + string("/poisson_pop"))) {
+				cout << "\t\t Poisson population input settings...";
+				double rate;
+				rate = read_scalar_HDF5<double>(file,  pop_n + string("/poisson_pop/rate"));
+				network.NeuroPopArray[ind]->init_poisson_pop(rate);
 				cout << "done." << endl;
 			}
 
@@ -450,18 +462,19 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				if (group_exist_HDF5(in_filename, syn_n + string("/INIT016"))) {
 					cout << "\t\t JH Learning settings...";
 					int infsteps = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/infsteps"));
-					double infscaleE = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/infscaleE"));
-					double infscaleI = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/infscaleI"));
-					double learnrate_E = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrate_E"));
-					double learnrateall_E = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateall_E"));
-					double learnrate_I = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrate_I"));
-					double learnrateall_I = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateall_I"));
+					double infscale = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/infscale"));
+					double learnrate = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrate"));
+					double learnrateall = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateall"));
 					double noise = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/noise"));
 					int tau = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/tau"));
 					int ntype_pre = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/ntype_pre"));
 					int ntype_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/ntype_post"));
-					network.ChemSynArray.back()->add_JH_Learning(network.NeuroPopArray, infsteps, infscaleE, infscaleI, learnrate_E, learnrateall_E, learnrate_I, learnrateall_I, tau, noise, ntype_pre, ntype_post);
-					network.NeuroPopArray[i_pre]->add_JH_Learn();
+					vector<double> dropout;
+					read_vector_HDF5(file, syn_n + string("/INIT016/dropout"),dropout);
+					network.NeuroPopArray[i_pre]->add_JH_Learn(dropout[0]);
+					network.NeuroPopArray[j_post]->add_JH_Learn(dropout[1]);
+					int direction = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/direction"));
+					network.ChemSynArray.back()->add_JH_Learning(network.NeuroPopArray,infsteps,infscale,learnrate,learnrateall,tau,noise,ntype_pre,ntype_post,direction);
 					cout << "done." << endl;
 				}
 
