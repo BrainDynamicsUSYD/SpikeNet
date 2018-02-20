@@ -87,8 +87,9 @@ public:
 	// mean number of refractory neurons over previous steps "runaway_steps" in any population exceeding "mean_num_ref"
 
 	void add_perturbation(const int step_perturb);
-	void add_spike_freq_adpt(); /// add spike-frequency adaptation
+	void add_spike_freq_adpt(); /// add spike-frequency adaptation	
 	void set_spike_freq_adpt_para(const double dg_K_input); /// add spike-frequency adaptation
+	void set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const int start_step, const int end_step); /// add heterogenous spike-frequency adaptation
 
 private:
 	void generate_I_ext();
@@ -159,7 +160,7 @@ protected:
 		bool
 			record, /// whether stats should be recorded (false by default)
 			record_cov;
-		vector<double>
+			vector<double>
 			V_mean, /// mean of membrane potential averaged over neurons at each time step
 			V_std, /// std of membrane potential averaged over neurons at each time step
 			I_input_mean, /// mean of I_input averaged over neurons at each time step
@@ -174,15 +175,15 @@ protected:
 			V_time_mean_dumb, /// mean of membrane potential for each neuron
 			V_time_var,
 			IE_ratio; /// I-E ratio for each neuron
-		vector< vector <double> >
+			vector< vector <double> >
 			V_time_cov; /// covariance of membrane potential for each neuron
-		int
+			int
 			time_start_cov,
 			time_end_cov;
-	} stats;
+		} stats;
 
-	struct Lfp {
-		bool
+		struct Lfp {
+			bool
 		record; /// whether LFP should be recorded (false by default)
 		vector< vector<double> >
 		neurons; /// each component vector defines a LFP measure by specifying which neurons should be included
@@ -205,9 +206,18 @@ protected:
 	// spike-frequency adaptation
 	bool
 	spike_freq_adpt; /// whether spike-frequency adaptation should be used (false by default)
+	struct Spike_freq_adpt_heter
+	{
+		bool on = false; /// whether heterogenous spike-frequency adaptation should be used (false by default)
+		int
+		start_step,
+		end_step;
+	} spike_freq_adpt_heter;
+	
 	vector<double>
 	g_K, /// potassium conductance that produces spike-frequency adaptation (nS)
-	I_K; /// potassium currents that produces spike-frequency adaptation (nS)
+	I_K, /// potassium currents that produces spike-frequency adaptation (nS)
+	dg_K_heter; /// heterogeneous spike-freq-adap
 	double
 	V_K, /// reversal potential for the potassium conductance
 	dg_K,
