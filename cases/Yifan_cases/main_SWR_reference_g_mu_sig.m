@@ -12,11 +12,11 @@ step_tot = 10*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
-loop_num = 0;
+loop_num = 50;
 tau_ref = 4;
 delay = 4;
 
-repeats = 5;
+repeats = 10;
 for P0_init = 0.08*ones(1,repeats)
     
     P_mat = [P0_init 0.1;
@@ -38,7 +38,7 @@ for P0_init = 0.08*ones(1,repeats)
         
         for LFP_range_sigma = [8]; % 8
             for cn_scale_wire = [2 ];
-                for cn_scale_weight = [2 ];
+                for cn_scale_weight = [1 ];
                     iter_num = 5;
                     
                     
@@ -62,7 +62,7 @@ for P0_init = 0.08*ones(1,repeats)
                             
                             
                             inh_STDP = [0 ];
-                            for g_balance = [0.7:0.1:1.3] 
+                            for g_balance = 0.8 %[0.7:0.15:1.3] 
                                 
                                 
                                 %  K_ee_mean is about 0.5, need 1000 in-coming connections.
@@ -178,7 +178,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                         clear I J K D;
                                                         
                                                         [~,ind_sorted] = sort(in_degree);
-                                                        sample_neuron = ind_sorted(1:500:end);
+                                                        sample_neuron = ind_sorted(1:100:end);
                                                         
                                                         %%%%%%%%%%%%%%%%%%%%%%
                                                         [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );

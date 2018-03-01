@@ -31,8 +31,9 @@ for i = 1:num_files
     disp('done.');
     %%%%%%% do something here
 
-
-    
+%     R_temp = get_CN_prob(R_temp);
+%     CN_prob = R_temp.CN_prob;
+%     save(files{i},'CN_prob', '-append');
     
 %     R_temp = avalanche_detect(R_temp);
 %     avalanche = R_temp.avalanche;
@@ -49,11 +50,11 @@ for i = 1:num_files
 % %      LFP = R_temp.LFP;
 % %      save(files{i},'LFP', '-append');
 % %      
-%      [R_temp] = get_CC_pop(R_temp, 1);
-%      % [R_temp] = get_dist_CC(R_temp);
-%      Analysis = R_temp.Analysis;
-%      save(files{i},'Analysis', '-append');
-% % %      
+     [R_temp] = get_CC_pop(R_temp, 1);
+     % [R_temp] = get_dist_CC(R_temp);
+     Analysis = R_temp.Analysis;
+     save(files{i},'Analysis', '-append');
+% %      
 
 %      [R_temp] = get_lagged_cov(R_temp);
 %      Analysis = R_temp.Analysis;

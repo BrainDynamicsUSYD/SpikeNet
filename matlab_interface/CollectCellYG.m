@@ -33,7 +33,11 @@ loop_num = [];
 fprintf('Collecting data %s from %d files: \n', data, num_files);
 for i = 1:num_files
     % fprintf('\t Loading data %s from file %s...', data, files{i});
-    load(files{i}, var)
+    if strcmp(var,'ALL') %v load all
+        load(files{i});
+    else
+        load(files{i}, var)
+    end
     try 
         load(files{i},  ExplVar')
     catch
@@ -54,7 +58,9 @@ for i = 1:num_files
     end
 
     clear data_tmp; % clear it! Otherwise it could be misused by the consecutive loops.
-    eval(['clear ' var]); % clear it! Otherwise it could be misused by the consecutive loops.
+    if ~strcmp(var,'ALL') %v load all
+        eval(['clear ' var]); % clear it! Otherwise it could be misused by the consecutive loops.
+    end
     %fprintf('done.\n');
 end
 
