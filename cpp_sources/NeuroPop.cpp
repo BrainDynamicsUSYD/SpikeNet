@@ -52,6 +52,8 @@ void NeuroPop::init()
 	I_ext_mean.assign(N, 0.0);
 	ref_step_left.assign(N, 0);
 	ref_steps = (int)round(tau_ref / dt);
+	// heterogenous spike-freq-adap
+	dg_K_heter.assign(N,0.0);
 
 	spike_hist_tot.reserve(step_tot * 50); // reserve!
 	num_ref_pop.reserve(step_tot); // reserve and push_back so that it won't be affected by adapting step_tot
@@ -73,7 +75,7 @@ void NeuroPop::init()
 	stats.record = false;
 	stats.record_cov = false;
 	LFP.record = false;
-	spike_freq_adpt = false;
+	spike_freq_adpt = false;	
 
 	// perturbation
 	step_perturb = -1;
@@ -489,14 +491,27 @@ void NeuroPop::update_V(const int step_current) {
 
 	// potassium conductance for spike-frequency adaptation
 	if (spike_freq_adpt == true) {
-		for (unsigned int ind = 0; ind < spikes_current.size(); ++ind) {
-			g_K[ spikes_current[ind] ] += dg_K;
+		if (spike_freq_adpt_heter.on && (step_current >= spike_freq_adpt_heter.start_step) && (step_current < spike_freq_adpt_heter.end_step)){
+		// heterogenous potassium conductance for spike-frequency adaptation
+			for (unsigned int ind = 0; ind < spikes_current.size(); ++ind) {
+				g_K[ spikes_current[ind] ] += dg_K_heter[ spikes_current[ind] ];
+			}
 		}
+		// homogenous potassium conductance for spike-frequency adaptation
+		else{
+			for (unsigned int ind = 0; ind < spikes_current.size(); ++ind) {
+				g_K[ spikes_current[ind] ] += dg_K;
+			}
+		}		
+		
 		for (int i = 0; i < N; ++i) {
 			g_K[i] *= exp_K_step;
 			I_K[i] = -g_K[i] * (V[i] - V_K);
 		}
 	}
+
+	
+
 
 	// Collect Currents from all pre-synapses (for MPI job)!!!!!!!!!!!!!!!
 
@@ -615,11 +630,16 @@ void NeuroPop::add_spike_freq_adpt() {
 	g_K.assign(N, 0.0);
 }
 
-
 void NeuroPop::set_spike_freq_adpt_para(const double dg_K_input) {
 	dg_K = dg_K_input; // default value 0.01 (uS=miuSiemens)
 }
 
+void NeuroPop::set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const int start_step, const int end_step) {
+	dg_K_heter = dg_K_heter_input; // default value 0.01 (uS=miuSiemens)
+	spike_freq_adpt_heter.on = true;
+	spike_freq_adpt_heter.start_step = start_step;
+	spike_freq_adpt_heter.end_step = end_step;
+}
 
 
 void NeuroPop::init_runaway_killer(const double min_ms, const double Hz, const double Hz_ms)
@@ -980,7 +1000,7 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 
 
 	V_ext = read_scalar_HDF5<double>(file, pop_n + string("V_ext"));
-	spike_freq_adpt = read_scalar_HDF5<bool>(file, pop_n + string("spike_freq_adpt"));
+	spike_freq_adpt = read_scalar_HDF5<bool>(file, pop_n + string("spike_freq_adpt"));	
 	if (dataset_exist_HDF5(file, pop_n + string("g_K"))) {
 		read_vector_HDF5(file, pop_n + string("g_K"), g_K);
 	}
@@ -988,6 +1008,8 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 
 	V_K = read_scalar_HDF5<double>(file, pop_n + string("V_K"));
 	dg_K = read_scalar_HDF5<double>(file, pop_n + string("dg_K"));
+	// heterogenous spike-freq-adap
+	read_vector_HDF5(file, pop_n + string("dg_K_heter"),dg_K_heter);
 	tau_K = read_scalar_HDF5<double>(file, pop_n + string("tau_K"));
 	exp_K_step = read_scalar_HDF5<double>(file, pop_n + string("exp_K_step"));
 
@@ -1132,12 +1154,13 @@ void NeuroPop::export_restart(Group& group) {
 
 	write_scalar_HDF5(group_pop, V_ext, string("V_ext"));
 
-	write_scalar_HDF5(group_pop, spike_freq_adpt, string("spike_freq_adpt"));
+	write_scalar_HDF5(group_pop, spike_freq_adpt, string("spike_freq_adpt"));	
 	write_vector_HDF5(group_pop, g_K, string("g_K"));
 	write_vector_HDF5(group_pop, I_K, "I_K");
 
 	write_scalar_HDF5(group_pop, V_K, string("V_K"));
 	write_scalar_HDF5(group_pop, dg_K, string("dg_K"));
+	write_vector_HDF5(group_pop, dg_K_heter, string("dg_K_heter"));
 	write_scalar_HDF5(group_pop, tau_K, string("tau_K"));
 	write_scalar_HDF5(group_pop, exp_K_step, string("exp_K_step"));
 

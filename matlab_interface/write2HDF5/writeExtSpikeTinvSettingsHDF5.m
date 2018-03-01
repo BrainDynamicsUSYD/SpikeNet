@@ -36,7 +36,7 @@ hdf5write(FID,['/config/syns/syn',num2str(n),'/INIT017/rate_ext_on'],rate_ext_on
 fprintf('C++ external spikes: n_syn = %d, pop = %d, type = %d\n'  , n, pop_ind, type_ext);
 
 % set seed
-if nargin == 7
+if nargin == 8
     if mod(seed,1) ~= 0 || seed < 0
         disp('The seed should be a positive integer!\n')
     else
