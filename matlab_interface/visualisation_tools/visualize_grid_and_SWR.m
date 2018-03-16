@@ -4,17 +4,17 @@ close all;
 clc;
 
 dt = R.dt;
-ind_a_vec = R.grid.raw.ind_ab(1,:);
-ind_b_vec = R.grid.raw.ind_ab(2,:);
+ind_a_vec = R.grid.ind_ab(1,:);
+ind_b_vec = R.grid.ind_ab(2,:);
 
 hw = 31;
 fw = 2*hw+1;
-x_mean_chosen = R.grid.centre(1,:);
-y_mean_chosen = R.grid.centre(2,:);
-dist_std_chosen = R.grid.radius;
-t_mid = R.grid.raw.t_mid;
+x_mean_chosen = R.grid.bayes.centre(1,:);
+y_mean_chosen = R.grid.bayes.centre(2,:);
+dist_std_chosen = R.grid.bayes.radius;
+t_mid = R.grid.t_mid;
 t_mid_chosen = R.grid.t_mid;
-jump_dist = R.grid.jump_dist;
+jump_dist = R.grid.bayes.jump_dist;
 
 [Lattice, ~] = lattice_nD(2, hw);
 x_pos_o = Lattice(R.spike_hist_compressed{1}, 1);

@@ -208,10 +208,10 @@ for P0_init = 0.08*ones(1,repeats)
                                                         
                                                         
                                                         %%%%%%% data sampling
-                                                        sample_pop = 1;
-                                                        writePopStatsRecordHDF5(FID, sample_pop);
+                                                        writePopStatsRecordHDF5(FID, 1);
+                                                        writePopStatsRecordHDF5(FID, 2);
                                                         for pop_ind_pre = 1:Num_pop
-                                                            pop_ind_post = sample_pop;
+                                                            pop_ind_post = 1;
                                                             if pop_ind_pre == Num_pop
                                                                 syn_type = 2;
                                                             else
@@ -220,7 +220,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                             %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
                                                             writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                         end
-                                                        writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
+                                                       
                                                         writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
                                                         
                                                         % Add LFP sampling
@@ -242,6 +242,10 @@ for P0_init = 0.08*ones(1,repeats)
                                                         end
                                                                 
                                                         writeLFPRecordHDF5(FID, 1, LFP_neurons);
+                                                        
+                                                        [~, sample_neuron] = max(LFP_neurons,[],2);
+                                                        writeNeuronSamplingHDF5(FID, 1, [1,1,1,1,0,0,1,1], sample_neuron, ones(1, step_tot) )
+                                                        
                                                         
                                                         % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                         % Record explanatory variables, also called "controlled variables"
