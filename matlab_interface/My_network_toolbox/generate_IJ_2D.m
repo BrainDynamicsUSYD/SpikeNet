@@ -13,7 +13,7 @@ if nargin < 6
     dist_cutoff = Inf; 
 end
 if nargin < 7
-    record_cc = 1;% 5 is arbitrary, try something else?
+    record_cc = 0;% 5 is arbitrary, try something else?
 end
 
 if cn_scale_wire < 1

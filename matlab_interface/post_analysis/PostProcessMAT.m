@@ -31,8 +31,9 @@ for i = 1:num_files
     disp('done.');
     %%%%%%% do something here
 
-
-    
+%     R_temp = get_CN_prob(R_temp);
+%     CN_prob = R_temp.CN_prob;
+%     save(files{i},'CN_prob', '-append');
     
 %     R_temp = avalanche_detect(R_temp);
 %     avalanche = R_temp.avalanche;
@@ -49,11 +50,11 @@ for i = 1:num_files
 % %      LFP = R_temp.LFP;
 % %      save(files{i},'LFP', '-append');
 % %      
-%      [R_temp] = get_CC_pop(R_temp, 1);
-%      % [R_temp] = get_dist_CC(R_temp);
-%      Analysis = R_temp.Analysis;
-%      save(files{i},'Analysis', '-append');
-% % %      
+     [R_temp] = get_CC_pop(R_temp, 1);
+     % [R_temp] = get_dist_CC(R_temp);
+     Analysis = R_temp.Analysis;
+     save(files{i},'Analysis', '-append');
+% %      
 
 %      [R_temp] = get_lagged_cov(R_temp);
 %      Analysis = R_temp.Analysis;
@@ -62,10 +63,14 @@ for i = 1:num_files
 %       get_LFP_continous(R_temp);
 
 
-%           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-%           grid = R_temp.grid; %#ok<NASGU>
-%           grid_sub = R_temp.grid_sub; %#ok<NASGU>
-%           save(files{i},'grid','grid_sub', '-append');
+%            R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+%            grid = R_temp.grid; %#ok<NASGU>
+%            grid_sub = R_temp.grid_sub; %#ok<NASGU>
+%            save(files{i},'grid','grid_sub', '-append');
+
+%            R_temp = get_grid_firing_centre(R_temp,'mode','quick','win_len', 150);
+%            grid_150 = R_temp.grid; %#ok<NASGU>
+%            save(files{i},'grid_150', '-append');
 
 %         hw = 31;
 % % [R_temp] = get_fano_factor(R_temp, 2, hw);
@@ -74,8 +79,8 @@ for i = 1:num_files
 % save(files{i},'Analysis', '-append');
 
 % 
-% [R_temp] = get_rich_club(R_temp);
-% rich_club = R_temp.rich_club;
+%[R_temp] = get_rich_club(R_temp);
+%rich_club = R_temp.rich_club;
 % save(files{i},'rich_club', '-append');
 
 % R_temp = get_triplet_sequence(R_temp);
@@ -107,10 +112,14 @@ for i = 1:num_files
 % save(files{i},'stru_var_decomp', '-append');
 
 
-         R_temp = get_grid_SWR_consistency(R_temp);
-         grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
-         save(files{i},'grid_SWR', '-append');
-%
+%          R_temp = get_grid_SWR_consistency(R_temp);
+%          grid_SWR = R_temp.grid_SWR; %#ok<NASGU>
+%          save(files{i},'grid_SWR', '-append');
+% 
+%          R_temp = get_grid_SWR_consistency(R_temp);
+%          grid_SWR_6 = R_temp.grid_SWR; %#ok<NASGU>
+%          save(files{i},'grid_SWR_6', '-append');
+
 %      R_temp = get_SWR_spike_phase_lock(R_temp);
 %      SWR_spike_phase_lock = R_temp.SWR_spike_phase_lock; %#ok<NASGU>
 %      save(files{i},'SWR_spike_phase_lock', '-append');

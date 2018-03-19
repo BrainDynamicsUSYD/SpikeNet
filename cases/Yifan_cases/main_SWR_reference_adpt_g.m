@@ -1,4 +1,4 @@
-function main_SWR_reference_g_mu_sig(varargin)
+function main_SWR_reference_adpt_g(varargin)
 % Do it!!!
 % Find it!!!
 % Hunt it down!!!
@@ -12,11 +12,11 @@ step_tot = 10*sec; % use 10 second!
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
-loop_num = 50;
+loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-repeats = 10;
+repeats = 5;
 for P0_init = 0.08*ones(1,repeats)
     
     P_mat = [P0_init 0.1;
@@ -32,10 +32,10 @@ for P0_init = 0.08*ones(1,repeats)
     Type_mat = ones(Num_pop);
     Type_mat(end, :) = 2;
     in_out_r = [0.13 ];
-    
+    dg_K0 = 0.01; 
     % parameter
-    for SpikeFreqAapt = [ 1]
-        
+    SpikeFreqAapt = 1;
+    for dg_K = 0 %(0.0:0.2:1.0)*dg_K0
         for LFP_range_sigma = [8]; % 8
             for cn_scale_wire = [2 ];
                 for cn_scale_weight = [1 ];
@@ -61,8 +61,9 @@ for P0_init = 0.08*ones(1,repeats)
                             EPSP_sigma = 1;
                             
                             
-                            inh_STDP = [0 ];
-                            for g_balance = 0.8 %[0.7:0.15:1.3] 
+                            
+                            for g_balance = [0.7:0.1:0.9 0.95 1.0:0.05:1.4]
+                                inh_STDP = [0 ];
                                 
                                 
                                 %  K_ee_mean is about 0.5, need 1000 in-coming connections.
@@ -71,7 +72,7 @@ for P0_init = 0.08*ones(1,repeats)
                                 %  ref: A Lognormal Recurrent Network Model for Burst Generation during Hippocampal Sharp Waves
                                 
                                 
-                                for g_EI = [ 13.5 ]*10^-3*g_balance %11 12
+                                for g_EI = [ 13.5 ]*10^-3 %11 12
                                     for g_IE = [5 ]*10^-3
                                         for g_II = [25]*10^-3
                                             
@@ -102,7 +103,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                             g_EI  g_II]; % miuSiemens
                                                         
                                                         if SpikeFreqAapt == 1
-                                                            writeSpikeFreqAdptHDF5(FID, 1);
+                                                            writeSpikeFreqAdptHDF5(FID, 1,dg_K);
                                                         end
                                                         
                                                         % write pop para
@@ -178,14 +179,14 @@ for P0_init = 0.08*ones(1,repeats)
                                                         clear I J K D;
                                                         
                                                         [~,ind_sorted] = sort(in_degree);
-                                                        sample_neuron = ind_sorted(1:100:end);
+                                                        sample_neuron = ind_sorted(1:500:end);
                                                         
                                                         %%%%%%%%%%%%%%%%%%%%%%
                                                         [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );
                                                         D = rand(size(I))*delay;
                                                         K = zeros(size(J));
                                                         for i_E = 1:N(1)
-                                                            mu_K_tmp = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu);
+                                                            mu_K_tmp = EE_input(i_E)/sum(J==i_E)*(g_EI/g_mu)*g_balance;
                                                             K(J==i_E) = abs(randn([1 sum(J==i_E)])*(mu_K_tmp/4) + mu_K_tmp); % this is a bit too arbitary!
                                                         end
                                                         % K = ones(size(I))*K_mat(2,1);
@@ -241,7 +242,7 @@ for P0_init = 0.08*ones(1,repeats)
                                                             LFP_neurons = [LFP_neurons; transpose(gaus_tmp(:))]; %#ok<AGROW>
                                                         end
                                                                 
-                                                        % writeLFPRecordHDF5(FID, 1, LFP_neurons);
+                                                        writeLFPRecordHDF5(FID, 1, LFP_neurons);
                                                         
                                                         % Explanatory (ExplVar) and response variables (RespVar) for cross-simulation data gathering and post-processing
                                                         % Record explanatory variables, also called "controlled variables"
@@ -271,7 +272,8 @@ for P0_init = 0.08*ones(1,repeats)
                                                             'inh_STDP', inh_STDP, ...
                                                             'deg_hybrid', deg_hybrid,...
                                                             'LFP_range_sigma', LFP_range_sigma,...
-                                                            'g_balance', g_balance);
+                                                            'dg_K',dg_K,...
+                                                            'g_balance',g_balance);
                                                         
                                                         
                                                         %                                                     % Adding comments in raster plot

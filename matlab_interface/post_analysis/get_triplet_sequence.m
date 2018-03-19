@@ -63,6 +63,7 @@ PETH_c = cell(1,n_trial);
 latency_c = cell(1,n_trial);
 PETH_unique_c = cell(1,n_trial);
 up_onset_c = cell(1,n_trial);
+up_offset_c = cell(1,n_trial);
 for jj = 1:n_trial % need this to get a wide range of latency
     
     sh = sh_c{jj};
@@ -119,6 +120,7 @@ for jj = 1:n_trial % need this to get a wide range of latency
     end
     
     up_onset_c{jj} = up_onset;
+    up_offset_c{jj} = up_offset;
     PETH_1st_c{jj} = PETH_1st;
     PETH_2nd_c{jj} = PETH_2nd;
     latency_1st_c{jj} = latency_1st;
@@ -277,5 +279,7 @@ R.triplet.N_trip_shuffle_c = N_trip_shuffle_c;
 R.triplet.trip_peak_shuffle_c = trip_peak_shuffle_c;
 R.triplet.t_from_onset_shuffle_c =  t_from_onset_shuffle_c;
 R.triplet.t_from_onset_c =  t_from_onset_c;
+R.triplet.up_onset = up_onset_c;
+R.triplet.up_offset = up_offset_c;
 disp('Done.');
 end
