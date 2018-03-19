@@ -50,11 +50,11 @@ for i = 1:num_files
 % %      LFP = R_temp.LFP;
 % %      save(files{i},'LFP', '-append');
 % %      
-     [R_temp] = get_CC_pop(R_temp, 1);
-     % [R_temp] = get_dist_CC(R_temp);
-     Analysis = R_temp.Analysis;
-     save(files{i},'Analysis', '-append');
-% %      
+% [R_temp] = get_CC_pop(R_temp, 1);
+% % [R_temp] = get_dist_CC(R_temp);
+% Analysis = R_temp.Analysis;
+% save(files{i},'Analysis', '-append');
+% % %
 
 %      [R_temp] = get_lagged_cov(R_temp);
 %      Analysis = R_temp.Analysis;
@@ -63,10 +63,10 @@ for i = 1:num_files
 %       get_LFP_continous(R_temp);
 
 
-%            R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
-%            grid = R_temp.grid; %#ok<NASGU>
-%            grid_sub = R_temp.grid_sub; %#ok<NASGU>
-%            save(files{i},'grid','grid_sub', '-append');
+           R_temp = get_grid_firing_centre(R_temp,'mode','bayesian');
+           grid = R_temp.grid; %#ok<NASGU>
+           grid_sub = R_temp.grid_sub; %#ok<NASGU>
+           save(files{i},'grid','grid_sub', '-append');
 
 %            R_temp = get_grid_firing_centre(R_temp,'mode','quick','win_len', 150);
 %            grid_150 = R_temp.grid; %#ok<NASGU>

@@ -1,5 +1,14 @@
 % visualize the spiking pattern of the spatially embedded network
-function M = embed_network_spike_movie(R, manual)
+function embed_network_spike_movie(R, make_video, manual)
+
+if nargin == 1
+    make_video = 0;
+end
+
+if make_video == 1
+    writerObj = VideoWriter('default_system.avi');
+    open(writerObj)
+end
 
 figure('NumberTitle','off','Name','Spike Movie','color','w')
    N = R.N(1);
@@ -8,10 +17,11 @@ hw = (sqrt(N)-1)/2;
 
 spike_hist = R.reduced.spike_hist{1};
 dt = R.reduced.dt;
-step_tot = R.reduced.step_tot;
 
-if nargin == 1
-    manual = 0
+step_tot = min(R.reduced.step_tot, 10^3);
+
+if nargin < 3
+    manual = 0;
 end
 
 if isempty(findall(0,'Type','Figure'))
@@ -40,7 +50,14 @@ for t = 1:t_bin:(step_tot-t_bin)
     
     xlabel([num2str(t*dt/1000),' sec']);
     
-    M(t) = getframe(gcf);
+    % M(t) = getframe(gcf);
+    if make_video == 1
+        writeVideo(writerObj, getframe(gcf));
+    end
+    
+end
+if make_video == 1
+    close(writerObj);
 end
 
 end

@@ -35,6 +35,7 @@ switch mode
         x_centre = R.grid.quick.centre(1,:);
         y_centre = R.grid.quick.centre(2,:);
         width = R.grid.quick.radius;
+        is_pattern = ones(size(width));
 end
 
 
