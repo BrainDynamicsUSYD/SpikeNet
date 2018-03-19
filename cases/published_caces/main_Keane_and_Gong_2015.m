@@ -1,9 +1,12 @@
-function james_adamreprod()
+function main_Keane_and_Gong_2015()
 % Use coherent units (msec+mV+nF+miuS+nA) unless otherwise stated
-% The following configuration reproduced the dynamics in the paper by Adam
-% Kean and Pulin Gong, Propagating Waves Can Explain Irregular Neural
-% Dynamics.
-% For weight conversion, please see conductance_model_comparison()
+% The following configuration reproduced the dynamics in the paper:
+% Adam Kean and Pulin Gong, Propagating Waves Can Explain Irregular Neural
+% Dynamics, The Journal of Neuroscience, 2015
+
+% Code written by James Henderson.
+% Yifan Gu has contributed by calculating the weight conversion; please see
+% conductance_model_comparison() 
 
 %%%% Seed the Matlab random number generator
 seed = 1;
