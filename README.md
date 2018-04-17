@@ -170,7 +170,7 @@ Also the full documentation is available [here](https://github.com/BrainDynamics
 
 # Authors
 
-* **Yifan Gu** - *Initial work* - [yigu8115](https://github.com/yigu8115)
+* **Yifan Gu** - *Chief architect and initial work* - [yigu8115](https://github.com/yigu8115)
 * **James A Henderson** - *HDF5-based I/O and learning schemes* - [JamesAHenderson](https://github.com/JamesAHenderson)
 
 See also the list of [contributors](https://github.com/BrainDynamicsUSYD/SpikeNet/graphs/contributors) who participated in this project.
