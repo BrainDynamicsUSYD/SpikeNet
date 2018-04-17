@@ -11,7 +11,7 @@
 * [License](#license)
    
 # SpikeNet
-SpikeNet is a software that has three stand-alone components.
+SpikeNet is a computational platform for studying spiking neural circuits. As  a software, it has three stand-alone components.
 1. User interface for configuring spiking neuronal networks
 2. A c++ simulator 
 3. User interface for parsing and post-analyzing the simulation results.
