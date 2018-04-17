@@ -4,12 +4,13 @@ function main_SWR_reference_ext_prof(varargin)
 % Hunt it down!!!
 
 
+rand_seed = 2; % same network
 
 dt = 0.1;
 sec = round(10^3/dt); % 1*(10^3/dt) = 1 sec
 
-step_tot = 2.5*sec; % use 10 second!
-t_start = 2*sec;
+step_tot = 1*sec; % use 10 second!
+t_start = 0.5*sec;
 discard_transient = 0; % ms
 
 % Loop number for PBS array job
@@ -17,18 +18,22 @@ loop_num = 0;
 tau_ref = 4;
 delay = 4;
 
-t_end = t_start+(0.1)*sec;
+t_end = t_start+0.05*sec;
 
 % sptially embedded network
 hw = 31; % half-width, (31*2+1)^2 = 3969 ~ 4000, hw=44 gives 7921
 N_e = (hw*2+1)^2; %
 
-for ctrst = 0.05:0.05:0.2
-    [Lattice, ~] = lattice_nD(2, hw);
-    inc = sqrt(Lattice(:,1).^2 + Lattice(:,2).^2) < 8;
-    
-    repeats = 10;
-    for P0_init = 0.08*ones(1,repeats)
+for prof_sigma = [15];
+    for ctrst = [0 0 0 0 0 ones(1,20) ];
+        [Lattice, ~] = lattice_nD(2, hw);
+        
+        dist = lattice_nD_find_dist(Lattice, hw, 0 , 0);
+        gaus_tmp = exp(-0.5*(dist/prof_sigma).^2);
+        gaus_tmp = gaus_tmp/max(gaus_tmp);
+        
+        repeats = 1;
+        for P0_init = 0.08*ones(1,repeats);
         
         P_mat = [P0_init 0.1;
             0.1  0.2]*2;
@@ -42,11 +47,11 @@ for ctrst = 0.05:0.05:0.2
         in_out_r = [0.13 ];
         
         % parameter
-        for SpikeFreqAapt = [ 1]
+        SpikeFreqAapt = 1;
             
             for LFP_range_sigma = [8]; % 8
                 for cn_scale_wire = [2 ];
-                    for cn_scale_weight = [2 ];
+                    for cn_scale_weight = [1 ];
                         iter_num = 5;
                         
                         
@@ -102,7 +107,9 @@ for ctrst = 0.05:0.05:0.2
                                                                 % seed the matlab rand function! The seed is global.
                                                                 [FID] = new_ygin_files_and_randseedHDF5(loop_num);
                                                                 
-                                                                
+                                                                alg='twister';
+                                                                rng(rand_seed,alg);
+
                                                                 % write basic parameters
                                                                 writeBasicParaHDF5(FID, dt, step_tot, N);
                                                                 
@@ -121,6 +128,21 @@ for ctrst = 0.05:0.05:0.2
                                                                 % write external currents
                                                                 writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext_E*ones(1, step_tot),  ones(1, N(1)) );
                                                                 writeExtSpikeSettingsHDF5(FID, 2, 1, g_ext,  N_ext, rate_ext_I*ones(1, step_tot),  ones(1, N(2)) );
+                                                                
+                                                                %%%%%% extra
+                                                                %%%%%% external
+                                                                %%%%%% input
+                                                                rate_ext_on = zeros(1,step_tot);
+                                                                rate_ext_on(t_start: t_end) = 1;
+                                                                rate_ext_n = gaus_tmp* rate_ext_E*ctrst;
+                                                                writeExtSpikeTinvSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext_n, rate_ext_on)
+                                                                
+                                                                samp_steps = zeros(1,step_tot);
+                                                                samp_steps(t_start-0.1*sec: t_end+0.2*sec) = 1;
+                                                                
+                                                                writeNeuronSamplingHDF5(FID, 1, [1,1,1,1,0,1,1, 0], 1:N(1), samp_steps )
+                                                                
+                                                                
                                                                 
                                                                 % write synapse para
                                                                 writeSynParaHDF5(FID, 'tau_decay_GABA', 3);
@@ -217,7 +239,7 @@ for ctrst = 0.05:0.05:0.2
                                                                 
                                                                 %%%%%%% data sampling
                                                                 sample_pop = 1;
-                                                                writePopStatsRecordHDF5(FID, sample_pop, t_start, t_end);
+                                                                writePopStatsRecordHDF5(FID, sample_pop);
                                                                 for pop_ind_pre = 1:Num_pop
                                                                     pop_ind_post = sample_pop;
                                                                     if pop_ind_pre == Num_pop
@@ -226,16 +248,14 @@ for ctrst = 0.05:0.05:0.2
                                                                         syn_type = 1;
                                                                     end
                                                                     %writeSynSampling(FID, pop_ind_pre, pop_ind_post, syn_type, sample_neurons, sample_steps)
-                                                                    writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type, t_start, t_end)
+                                                                    writeSynStatsRecordHDF5(FID, pop_ind_pre, pop_ind_post, syn_type)
                                                                 end
-                                                                writeNeuronSamplingHDF5(FID, sample_pop, [1,1,1,1,0,0,1, 0], sample_neuron, ones(1, step_tot) )
+                                                                
+                                                                
                                                                 writeNeuronSamplingHDF5(FID, 2, [1,1,1,1,0,0,1,0], [1 100], ones(1, step_tot) )
                                                                 
                                                                 
-                                                                %%%%%% extra
-                                                                %%%%%% external
-                                                                %%%%%% input
-                                                                writeExtSpikeSettingsHDF5(FID, 1, 1, g_ext,  N_ext, rate_ext_E*ctrst*ones(1, step_tot),  double(inc));
+                                                                
                                                                 
                                                                 % Add LFP sampling
                                                                 [Lattice, ~] = lattice_nD(2, hw);
@@ -286,7 +306,9 @@ for ctrst = 0.05:0.05:0.2
                                                                     'deg_hybrid', deg_hybrid,...
                                                                     'LFP_range_sigma', LFP_range_sigma,...
                                                                     't_end',t_end,...
-                                                                    'ctrst',ctrst);
+                                                                    't_start',t_start,...
+                                                                    'ctrst',ctrst,...
+                                                                    'prof_sigma',prof_sigma);
                                                                 
                                                                 
                                                                 %                                                     % Adding comments in raster plot
