@@ -118,7 +118,7 @@ Following are the steps to use the PBS script to run your arry jobs.
 1. Make sure you have set up your PBS environment correctly (e.g., modelue load HDF5-1.10.0) and rebuild the c++ simulator.
 2. Go to the tmp director and make a copy of the script
 ``` 
-cp SpikeNet/other_scripts/all*bak all_in_one.sh
+cp SpikeNet/shell_scripts/all*bak all_in_one.sh
 ```
 3. Change it to executable
 ```
