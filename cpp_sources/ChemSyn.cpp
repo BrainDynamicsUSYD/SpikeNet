@@ -741,14 +741,14 @@ void ChemSyn::update_Vint_JH_Learn(){
 			jh_learn_syn.Vint[j_post]*=exp(-1/jh_learn_syn.tau); //dt=1 since tau is in units of timesteps
 			jh_learn_syn.Vint_ctr[j_post]++;
 			if(syn_type==0){
-				if(V_post[j_post]<V_ex){
+				// if(V_post[j_post]<V_ex){
 					jh_learn_syn.Vint[j_post]-=(V_post[j_post]-V_ex);
-				}
+				// }
 			}
 			else{
-				if(V_post[j_post]>V_in){
+				// if(V_post[j_post]>V_in){
 					jh_learn_syn.Vint[j_post]+=(V_post[j_post]-V_in);
-				}
+				// }
 			}
 		}
 	}
@@ -861,9 +861,9 @@ const vector<double> & ChemSyn::get_all_rhat_JH_Learn(vector<int> neu_pre_samp){
 					{
 						post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
 					}
-					if(post_h>0){
+					// if(post_h>0){
 						jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
-					}
+					// }
 				}
 			}
 			jh_learn_syn.rhat[i_pre]*=jh_learn_syn.inf_scale[i_pre]*1.0/jh_learn_syn.C;	
@@ -924,15 +924,15 @@ void ChemSyn::get_rhat_spiking(){
 					// use noise in computing rhat
 					if(jh_learn_syn.post_noise_hist[jh_learn_syn.ind_post_old[j_post]][j_post]==0){
 						//spike was not dropped out
-						if(post_h>0){
+						// if(post_h>0){
 							jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
-						}
+						// }
 					}
 				
 					// don't use noise in computing rhat
-					if(post_h>0){
+					// if(post_h>0){
 						delV+=post_h*K[i_pre][syn_ind];
-					}
+					// }
 					
 				}
 			}
@@ -982,12 +982,12 @@ void ChemSyn::wchange_Hebbian_outgoing(){
 						{
 							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay/((1.0-jh_learn_syn.noise_pre)*(1.0-jh_learn_syn.noise_post));
 						}
-						if(post_h>0){
+						// if(post_h>0){
 							K[i_pre][syn_ind]+=jh_learn_syn.learn_rate*(1.0/jh_learn_syn.C)*post_h/jh_learn_syn.rhat[i_pre]*(K[i_pre][syn_ind]);
 							if(K[i_pre][syn_ind]<0){
 								K[i_pre][syn_ind]=0;
 							}
-						}
+						// }
 					}
 				}
 				if(jh_learn_syn.learn_rate_all>0){
