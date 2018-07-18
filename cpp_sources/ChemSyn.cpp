@@ -649,12 +649,12 @@ void ChemSyn::start_cov_record(const int time_start, const int time_end){
 	}
 }
 
-void ChemSyn::add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscale,double lrate, double lrateall,int intau, double innoise,int type_pre,int type_post, int direction){
+void ChemSyn::add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscale,double lrate, double lrateall,double lrate_inf_scale, double Vtar, int noise_rhat,int intau, double innoise,int type_pre,int type_post, int direction){
 	jh_learn_syn.on=true; //indicates this learning is to be used
 	jh_learn_syn.direction=direction;
 
-	jh_learn_syn.noise_pre=NeuronPopArray[pop_ind_pre]->get_noise();
-	jh_learn_syn.noise_post=NeuronPopArray[pop_ind_post]->get_noise();
+	jh_learn_syn.noise_pre=NeuronPopArray[pop_ind_pre]->get_noise_pre();
+	jh_learn_syn.noise_post=NeuronPopArray[pop_ind_post]->get_noise_post();
 
 	jh_learn_syn.inf_steps=isteps;
 	double Vinit=-70;
@@ -677,7 +677,11 @@ void ChemSyn::add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, doub
 		//TODO
 	}
 	jh_learn_syn.rhat.resize(N_pre,0);
-	jh_learn_syn.inf_scale=iscale;
+	jh_learn_syn.inf_scale.resize(N_pre,iscale);
+	jh_learn_syn.learn_rate_inf_scale=lrate_inf_scale;
+	jh_learn_syn.Vtarget=Vtar;
+	jh_learn_syn.noise_rhat=noise_rhat;
+
 	jh_learn_syn.learn_rate=lrate;
 	jh_learn_syn.learn_rate_all=lrateall;
 	jh_learn_syn.tau=intau;
@@ -765,7 +769,7 @@ void ChemSyn::new_post_spikes_JH_Learn(){
 	}
 }
 
-void ChemSyn::wchange_non_Hebbian_outgoing(vector<NeuroPop*> &NeuronPopArray){
+void ChemSyn::wchange_non_Hebbian_outgoing(){
 	if(jh_learn_syn.on){
 		int  j_post, i_pre;
 		unsigned int syn_ind,ind, i;
@@ -823,7 +827,9 @@ void ChemSyn::new_pre_spikes_JH_Learn(){
 			i_pre=spikes_pre[i];
 			jh_learn_syn.ind_pre_new[i_pre]=(jh_learn_syn.ind_pre_new[i_pre]+1)%jh_learn_syn.pre_hist_len;
 			jh_learn_syn.pre_t_hist[jh_learn_syn.ind_pre_new[i_pre]][i_pre]=0;
+// cout << "DEBUGC1\n" << jh_learn_syn.spikes_pre_noise.size()<<endl;;				
 			jh_learn_syn.pre_noise_hist[jh_learn_syn.ind_pre_new[i_pre]][i_pre]=jh_learn_syn.spikes_pre_noise[i];
+// cout << "DEBUGC2\n";				
 		}
 	}
 }
@@ -843,6 +849,7 @@ const vector<double> & ChemSyn::get_all_rhat_JH_Learn(vector<int> neu_pre_samp){
 				j_post = C[i_pre][syn_ind];
 				if(jh_learn_syn.ind_post_old[j_post]!=(jh_learn_syn.ind_post_new[j_post]+1)%jh_learn_syn.post_hist_len){
 					//there is a j_post spike in history
+					// note this function is for computing rhat to write for sampling so we ignore noise used in learning
 									
 					age=jh_learn_syn.post_t_hist[jh_learn_syn.ind_post_old[j_post]][j_post];
 					inf_t_ind=(jh_learn_syn.t_ind+jh_learn_syn.post_V_hist.size()-jh_learn_syn.inf_steps)%(jh_learn_syn.post_V_hist.size()); 
@@ -859,7 +866,7 @@ const vector<double> & ChemSyn::get_all_rhat_JH_Learn(vector<int> neu_pre_samp){
 					}
 				}
 			}
-			jh_learn_syn.rhat[i_pre]*=jh_learn_syn.inf_scale*1.0/jh_learn_syn.C;	
+			jh_learn_syn.rhat[i_pre]*=jh_learn_syn.inf_scale[i_pre]*1.0/jh_learn_syn.C;	
 		}
 	}
 	return jh_learn_syn.rhat;
@@ -895,32 +902,56 @@ void ChemSyn::get_rhat_spiking(){
 		unsigned int syn_ind,i;
 		double expdecay;
 		double post_h=0;
+		double delV=0;
 		for(i=0;i<jh_learn_syn.old_pre.size();i++){
 			i_pre=jh_learn_syn.old_pre[i];
 			jh_learn_syn.rhat[i_pre]=0;
+			delV=0;
 			for (syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
 				j_post = C[i_pre][syn_ind];
 				if(jh_learn_syn.ind_post_old[j_post]!=(jh_learn_syn.ind_post_new[j_post]+1)%jh_learn_syn.post_hist_len){
 					//there is a j_post spike in history
-					// if(jh_learn_syn.post_noise_hist[jh_learn_syn.ind_post_old[j_post]][j_post]==0){
+					age=jh_learn_syn.post_t_hist[jh_learn_syn.ind_post_old[j_post]][j_post];
+					inf_t_ind=(jh_learn_syn.t_ind+jh_learn_syn.post_V_hist.size()-jh_learn_syn.inf_steps)%(jh_learn_syn.post_V_hist.size()); 
+					expdecay=exp(-(jh_learn_syn.inf_steps-1-age)/jh_learn_syn.tau);
+					if(syn_type==0){
+						post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay;
+					}
+					else
+					{
+						post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
+					}
+					// use noise in computing rhat
+					if(jh_learn_syn.post_noise_hist[jh_learn_syn.ind_post_old[j_post]][j_post]==0){
 						//spike was not dropped out
-						age=jh_learn_syn.post_t_hist[jh_learn_syn.ind_post_old[j_post]][j_post];
-						inf_t_ind=(jh_learn_syn.t_ind+jh_learn_syn.post_V_hist.size()-jh_learn_syn.inf_steps)%(jh_learn_syn.post_V_hist.size()); 
-						expdecay=exp(-(jh_learn_syn.inf_steps-1-age)/jh_learn_syn.tau);
-						if(syn_type==0){
-							post_h=-(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_ex)*expdecay;
-						}
-						else
-						{
-							post_h=(jh_learn_syn.post_V_hist[inf_t_ind][j_post]-V_in)*expdecay;
-						}
 						if(post_h>0){
 							jh_learn_syn.rhat[i_pre]+=post_h*K[i_pre][syn_ind];
 						}
-					// }
+					}
+				
+					// don't use noise in computing rhat
+					if(post_h>0){
+						delV+=post_h*K[i_pre][syn_ind];
+					}
+					
 				}
 			}
-			jh_learn_syn.rhat[i_pre]*=jh_learn_syn.inf_scale*(1/jh_learn_syn.C);
+			
+
+			// Change infscale to optimize for target voltage change
+			
+			jh_learn_syn.inf_scale[i_pre]+=jh_learn_syn.learn_rate_inf_scale*(delV-jh_learn_syn.Vtarget)*jh_learn_syn.inf_scale[i_pre];
+
+			if(jh_learn_syn.inf_scale[i_pre]<0){
+				jh_learn_syn.inf_scale[i_pre]=0;
+			}
+		
+			if(jh_learn_syn.noise_rhat){
+				jh_learn_syn.rhat[i_pre]*=jh_learn_syn.inf_scale[i_pre]/( (jh_learn_syn.C)*(1-jh_learn_syn.noise_post) );
+			}
+			else{
+				jh_learn_syn.rhat[i_pre]=delV*jh_learn_syn.inf_scale[i_pre]/jh_learn_syn.C;			
+			}
 		}
 	}
 }
@@ -935,10 +966,6 @@ void ChemSyn::wchange_Hebbian_outgoing(){
 		for(i=0;i<jh_learn_syn.old_pre.size();i++){
 			i_pre=jh_learn_syn.old_pre[i];	
 
-			// If rhat is less than noise then make it noise level
-			if(jh_learn_syn.rhat[i_pre]<jh_learn_syn.noise){
-				jh_learn_syn.rhat[i_pre]=jh_learn_syn.noise;
-			}
 			for (syn_ind = 0; syn_ind < C[i_pre].size(); ++syn_ind){
 				j_post = C[i_pre][syn_ind];
 				if(jh_learn_syn.ind_post_old[j_post]!=(jh_learn_syn.ind_post_new[j_post]+1)%jh_learn_syn.post_hist_len){
@@ -989,13 +1016,13 @@ void ChemSyn::recv_pop_data(vector<NeuroPop*> &NeuronPopArray){
 		if(jh_learn_syn.on){
 
 			if(jh_learn_syn.direction==0){
-				jh_learn_syn.spikes_pre_noise = NeuronPopArray[pop_ind_pre]->get_spikes_noise(); 
+				jh_learn_syn.spikes_pre_noise = NeuronPopArray[pop_ind_pre]->get_spikes_noise_pre(); 
 			}
 			else if(jh_learn_syn.direction==1){
 				//TODO 
 			}
 			if(jh_learn_syn.direction==0){
-				jh_learn_syn.spikes_post_noise = NeuronPopArray[pop_ind_post]->get_spikes_noise();
+				jh_learn_syn.spikes_post_noise = NeuronPopArray[pop_ind_post]->get_spikes_noise_post();
 			}
 			else if(jh_learn_syn.direction==1){
 				//TODO 
@@ -1193,14 +1220,17 @@ void ChemSyn::import_restart(H5File& file, int syn_ind){
 		read_matrix_HDF5(file,str+ "post_R_hist",jh_learn_syn.post_R_hist);
 		jh_learn_syn.t_ind=read_scalar_HDF5<int>(file,str+ "t_ind");
 		jh_learn_syn.inf_steps=read_scalar_HDF5<int>(file,str+ "inf_steps");
-		jh_learn_syn.inf_scale=read_scalar_HDF5<double>(file,str+ "inf_scale");
+		read_vector_HDF5(file,str+ "inf_scale",jh_learn_syn.inf_scale);
 		jh_learn_syn.learn_rate=read_scalar_HDF5<double>(file,str+ "learn_rate");
 		jh_learn_syn.learn_rate_all=read_scalar_HDF5<double>(file,str+ "learn_rate_all");
+		jh_learn_syn.learn_rate_inf_scale=read_scalar_HDF5<double>(file,str+ "learn_rate_inf_scale");
 		jh_learn_syn.tau=read_scalar_HDF5<double>(file,str+ "tau");
 		jh_learn_syn.C=read_scalar_HDF5<double>(file, str+"C");
 		jh_learn_syn.noise=read_scalar_HDF5<double>(file,str+ "noise");
 		jh_learn_syn.noise_post=read_scalar_HDF5<double>(file,str+ "noise_post");
 		jh_learn_syn.noise_pre=read_scalar_HDF5<double>(file,str+ "noise_pre");
+		jh_learn_syn.noise_rhat=read_scalar_HDF5<int>(file,str+ "noise_rhat");
+		jh_learn_syn.Vtarget=read_scalar_HDF5<double>(file,str+ "Vtarget");
 		
 		read_matrix_HDF5(file,str+"j_2_i",jh_learn_syn.j_2_i);
 		//need to remove trailing zero entries that are padded into the matrix storage but aren't supposed to be there
@@ -1374,7 +1404,7 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 	write_scalar_HDF5(group_syn, my_seed, "my_seed");
 	// +++ TODO BASE_GENERATOR_TYP
 
-	// JH Learning
+// JH Learning
 	if (jh_learn_syn.on){
 		string str = syn_str+"/JH_Learn/";
 		Group group_JH_Learn = group_syn.createGroup(str);
@@ -1401,14 +1431,17 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.t_ind, "t_ind");
 
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.inf_steps, "inf_steps");
-		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.inf_scale, "inf_scale");
+		write_vector_HDF5(group_JH_Learn,jh_learn_syn.inf_scale, "inf_scale");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate, "learn_rate");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate_all, "learn_rate_all");
+		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.learn_rate_inf_scale, "learn_rate_inf_scale");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.tau, "tau");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.C, "C");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise, "noise");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise_pre, "noise_pre");
 		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise_post, "noise_post");
+		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.noise_rhat, "noise_rhat");
+		write_scalar_HDF5(group_JH_Learn,jh_learn_syn.Vtarget, "Vtarget");
 		// every neuron doesn't need to have the same number of connections
 		// so when stored as a matrix we need to pad out missing connections
 		// we choose to pad by -1, as we assume entries are always positive,

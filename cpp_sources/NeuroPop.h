@@ -72,11 +72,13 @@ public:
 	void get_current_from_file();
 
 
-	void add_JH_Learn(double noise);
+	void add_JH_Learn(double noise_pre, double noise_post);
 	void get_all_rhat_JHLearn(vector<ChemSyn*> &ChemSynArray, const int step_current);
 	void reset_rhat();
-	const vector< int > & get_spikes_noise(); 
-	const double & get_noise(); 
+	const vector< int > & get_spikes_noise_pre(); 
+	const vector< int > & get_spikes_noise_post(); 
+	const double & get_noise_pre(); 
+	const double & get_noise_post();
 	
 	void import_restart(H5File & file, int pop_ind, string out_filename);
 	void export_restart(Group & group);
@@ -311,8 +313,10 @@ protected:
 	struct JH_Learn_Pop{
 		bool on=false; //indicates if this learning is to be used
 		vector<double> rhatI,rhatE;		
-		double noise;
-		vector<int> noise_spikes;
+		double noise_pre;
+		double noise_post;
+		vector<int> noise_pre_spikes;
+		vector<int> noise_post_spikes;
 	} jh_learn_pop;
 }; //class declaration must end with a semi-colon.
 

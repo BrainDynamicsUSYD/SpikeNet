@@ -75,7 +75,7 @@ void NeuroPop::init()
 	stats.record = false;
 	stats.record_cov = false;
 	LFP.record = false;
-	spike_freq_adpt = false;	
+	spike_freq_adpt = false;
 
 	// perturbation
 	step_perturb = -1;
@@ -87,15 +87,23 @@ void NeuroPop::set_seed(int seed_input) {
 	my_seed = seed_input; // This will overwrite the auto generated seed.
 	gen.seed(my_seed);
 }
-
-const vector< int > & NeuroPop::get_spikes_noise() 
+const vector< int > & NeuroPop::get_spikes_noise_pre()
 {
-	return jh_learn_pop.noise_spikes;
+	return jh_learn_pop.noise_pre_spikes;
 }
 
-const double & NeuroPop::get_noise() 
+const vector< int > & NeuroPop::get_spikes_noise_post()
 {
-	return jh_learn_pop.noise;
+	return jh_learn_pop.noise_post_spikes;
+}
+
+const double & NeuroPop::get_noise_pre()
+{
+	return jh_learn_pop.noise_pre;
+}
+const double & NeuroPop::get_noise_post()
+{
+	return jh_learn_pop.noise_post;
 }
 
 const vector< int > & NeuroPop::get_spikes_current()
@@ -140,12 +148,12 @@ void NeuroPop::init_poisson_pop(double rate) {
 	poisson_pop.rate=rate*dt/1000.0; //spikes per timestep
 
 	// In this type of population, each neuron should generate Poisson spike trains with rate lambda
-	// To do this we use the fact that in a Poisson process, the time intervals between pairs of subsequent events 
+	// To do this we use the fact that in a Poisson process, the time intervals between pairs of subsequent events
 	// are distributed exponentially according to lambda*exp(-lambda*t)
-	// So, each time a spike is generated, we then generate a time interval until the next spike and wait until that time is reached before producing a spike 
+	// So, each time a spike is generated, we then generate a time interval until the next spike and wait until that time is reached before producing a spike
 	// Note: Poisson events, by definition, are generated independently of previous events
 
-	exponential_distribution<double> exp_dist(poisson_pop.rate);	// random numbers distributed according to lambda*exp(-lambda*X)	
+	exponential_distribution<double> exp_dist(poisson_pop.rate);	// random numbers distributed according to lambda*exp(-lambda*X)
 	auto interval = bind(exp_dist, ref(gen));
 	poisson_pop.next_spike_time.resize(N,0);
 	for (int i = 0; i < N; ++i) {
@@ -343,12 +351,12 @@ void NeuroPop::update_spikes(const int step_current) {
 	}
 	else if(poisson_pop.on==1){
 		// In this type of population, each neuron should generate Poisson spike trains with rate lambda
-		// To do this we use the fact that in a Poisson process, the time intervals between pairs of subsequent events 
+		// To do this we use the fact that in a Poisson process, the time intervals between pairs of subsequent events
 		// are distributed exponentially according to lambda*exp(-lambda*t)
-		// So, each time a spike is generated, we then generate a time interval until the next spike and wait until that time is reached before producing a spike 
+		// So, each time a spike is generated, we then generate a time interval until the next spike and wait until that time is reached before producing a spike
 		// Note: Poisson events, by definition, are generated independently of previous events
 
-		exponential_distribution<double> exp_dist(poisson_pop.rate);	// random numbers distributed according to lambda*exp(-lambda*X)	
+		exponential_distribution<double> exp_dist(poisson_pop.rate);	// random numbers distributed according to lambda*exp(-lambda*X)
 		auto interval = bind(exp_dist, ref(gen));
 		for (int i = 0; i < N; ++i) {
 			if(poisson_pop.next_spike_time[i]<=step_current){
@@ -371,18 +379,30 @@ void NeuroPop::update_spikes(const int step_current) {
 	}
 
 	if(jh_learn_pop.on){
-		jh_learn_pop.noise_spikes.clear();
-		jh_learn_pop.noise_spikes.resize(spikes_current.size(),0); //initialise to no noise
-		if(jh_learn_pop.noise>0.0){
+		jh_learn_pop.noise_pre_spikes.clear();
+		jh_learn_pop.noise_post_spikes.clear();
+		jh_learn_pop.noise_pre_spikes.resize(spikes_current.size(),0); //initialise to no noise
+		jh_learn_pop.noise_post_spikes.resize(spikes_current.size(),0); //initialise to no noise
+		if(jh_learn_pop.noise_pre>0.0){
 			//noise spikes
 			uniform_real_distribution<double> uniform_dis(0.0, 1.0);
 			auto ZeroOne = bind(uniform_dis,ref(gen));
 			for(unsigned int i=0;i<spikes_current.size();i++){
-				if (ZeroOne() < jh_learn_pop.noise){
-					jh_learn_pop.noise_spikes[i]=1; //noise this spike
+				if (ZeroOne() < jh_learn_pop.noise_pre){
+					jh_learn_pop.noise_pre_spikes[i]=1; //noise this spike
 				}
 			}
-		}	
+		}
+		if(jh_learn_pop.noise_post>0.0){
+			//noise spikes
+			uniform_real_distribution<double> uniform_dis(0.0, 1.0);
+			auto ZeroOne = bind(uniform_dis,ref(gen));
+			for(unsigned int i=0;i<spikes_current.size();i++){
+				if (ZeroOne() < jh_learn_pop.noise_post){
+					jh_learn_pop.noise_post_spikes[i]=1; //noise this spike
+				}
+			}
+		}
 	}
 
 	// perturbation: remove the last spike
@@ -502,15 +522,15 @@ void NeuroPop::update_V(const int step_current) {
 			for (unsigned int ind = 0; ind < spikes_current.size(); ++ind) {
 				g_K[ spikes_current[ind] ] += dg_K;
 			}
-		}		
-		
+		}
+
 		for (int i = 0; i < N; ++i) {
 			g_K[i] *= exp_K_step;
 			I_K[i] = -g_K[i] * (V[i] - V_K);
 		}
 	}
 
-	
+
 
 
 	// Collect Currents from all pre-synapses (for MPI job)!!!!!!!!!!!!!!!
@@ -674,13 +694,14 @@ void NeuroPop::runaway_check(const int step_current)
 }
 
 
-void NeuroPop::add_JH_Learn(double noise){
+void NeuroPop::add_JH_Learn(double noise_pre, double noise_post){
 	jh_learn_pop.on=true;
 	jh_learn_pop.rhatE.resize(N,0);
 	jh_learn_pop.rhatI.resize(N,0);
 
 
-	jh_learn_pop.noise=noise;
+	jh_learn_pop.noise_pre=noise_pre;
+	jh_learn_pop.noise_post=noise_post;
 }
 
 void NeuroPop::reset_rhat(){
@@ -693,8 +714,8 @@ void NeuroPop::reset_rhat(){
 void NeuroPop::get_all_rhat_JHLearn(vector<ChemSyn*> &ChemSynArray,const int step_current){
 	if(jh_learn_pop.on){
 		if (sample.type[8]){
-			if (sample.time_points[step_current]){ 
-				if (!sample.neurons.empty() && sample.file_type == 2){			
+			if (sample.time_points[step_current]){
+				if (!sample.neurons.empty() && sample.file_type == 2){
 					reset_rhat();
 					for (unsigned int syn_ind = 0; syn_ind < ChemSynArray.size(); ++syn_ind){
 						if(ChemSynArray[syn_ind]->get_pop_ind_pre()==pop_ind){
@@ -880,13 +901,12 @@ void NeuroPop::load_file_current_input(string fname) {
 void NeuroPop::load_file_spike_input(string fname) {
 	cout<<"\t\tLoading spikes from file..."<<fname;
 	H5File file(  fname, H5F_ACC_RDONLY );
-	vector< int> x,y,t,pol;
+	vector< int> x,y,t;
 	int max_x=1;
 	int max_y=1;
 	read_vector_HDF5(file, string("x"), x);
 	read_vector_HDF5(file, string("y"), y);
 	read_vector_HDF5(file, string("t"), t);
-	read_vector_HDF5(file, string("pol"), pol);
 	max_x=read_scalar_HDF5<int>(file,string("max_x"));
 	max_y=read_scalar_HDF5<int>(file,string("max_y"));
 
@@ -1000,7 +1020,7 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 
 
 	V_ext = read_scalar_HDF5<double>(file, pop_n + string("V_ext"));
-	spike_freq_adpt = read_scalar_HDF5<bool>(file, pop_n + string("spike_freq_adpt"));	
+	spike_freq_adpt = read_scalar_HDF5<bool>(file, pop_n + string("spike_freq_adpt"));
 	if (dataset_exist_HDF5(file, pop_n + string("g_K"))) {
 		read_vector_HDF5(file, pop_n + string("g_K"), g_K);
 	}
@@ -1045,11 +1065,13 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 
 	str = pop_n + "/jh_learn_pop/";
 	if (group_exist_HDF5(file, str)) {
-		jh_learn_pop.on=read_scalar_HDF5<bool>(file,str+string("on"));
-		read_vector_HDF5(file,str+string("rhatE"),jh_learn_pop.rhatE);	
+		jh_learn_pop.on=1;
+		read_vector_HDF5(file,str+string("rhatE"),jh_learn_pop.rhatE);
 		read_vector_HDF5(file,str+string("rhatI"),jh_learn_pop.rhatI);
-		read_vector_HDF5(file,str+string("noise_spikes"),jh_learn_pop.noise_spikes);
-		jh_learn_pop.noise=read_scalar_HDF5<double>(file,str+string("noise"));	
+		read_vector_HDF5(file,str+string("noise_pre_spikes"),jh_learn_pop.noise_pre_spikes);
+		read_vector_HDF5(file,str+string("noise_post_spikes"),jh_learn_pop.noise_post_spikes);
+		jh_learn_pop.noise_pre=read_scalar_HDF5<double>(file,str+string("noise_pre"));
+		jh_learn_pop.noise_post=read_scalar_HDF5<double>(file,str+string("noise_post"));
 	}
 	str = pop_n + "/spike_file/";
 	if (group_exist_HDF5(file, str)) {
@@ -1062,7 +1084,7 @@ void NeuroPop::import_restart(H5File& file, int pop_ind, string out_filename) {
 	str = pop_n + "/poisson_pop/";
 	if (group_exist_HDF5(file, str)) {
 		poisson_pop.on = 1;
-		poisson_pop.rate = read_scalar_HDF5<double>(file, str + string("rate")); 
+		poisson_pop.rate = read_scalar_HDF5<double>(file, str + string("rate"));
 		read_vector_HDF5(file,str+string("next_spike_time"),poisson_pop.next_spike_time);
 	}
 
@@ -1154,7 +1176,7 @@ void NeuroPop::export_restart(Group& group) {
 
 	write_scalar_HDF5(group_pop, V_ext, string("V_ext"));
 
-	write_scalar_HDF5(group_pop, spike_freq_adpt, string("spike_freq_adpt"));	
+	write_scalar_HDF5(group_pop, spike_freq_adpt, string("spike_freq_adpt"));
 	write_vector_HDF5(group_pop, g_K, string("g_K"));
 	write_vector_HDF5(group_pop, I_K, "I_K");
 
@@ -1199,10 +1221,12 @@ void NeuroPop::export_restart(Group& group) {
 		string str = pop_n+"/jh_learn_pop/";
 		Group group_jh_learn_pop = group_pop.createGroup(str);
 		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.on,string("on"));
-		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.rhatE,string("rhatE"));	
-		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.rhatI,string("rhatI"));	
-		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.noise_spikes,string("noise_spikes"));	
-		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.noise,string("noise"));
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.rhatE,string("rhatE"));
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.rhatI,string("rhatI"));
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.noise_pre_spikes,string("noise_pre_spikes"));
+		write_vector_HDF5(group_jh_learn_pop,jh_learn_pop.noise_post_spikes,string("noise_post_spikes"));
+		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.noise_pre,string("noise_pre"));
+		write_scalar_HDF5(group_jh_learn_pop,jh_learn_pop.noise_post,string("noise_post"));
 	}
 	if (spike_file.on) {
 		string str = pop_n + "/spike_file/";
@@ -1215,6 +1239,9 @@ void NeuroPop::export_restart(Group& group) {
 		string str = pop_n + "/poisson_pop/";
 		Group group_spike_file = group_pop.createGroup(str);
 		write_scalar_HDF5(group_spike_file, poisson_pop.rate, string("rate"));
+
+		// Subtract step tot as first step in next simulation will be 0
+		transform(poisson_pop.next_spike_time.begin(), poisson_pop.next_spike_time.end(), poisson_pop.next_spike_time.begin(),bind2nd(std::plus<int>(), -step_tot));
 		write_vector_HDF5(group_spike_file, poisson_pop.next_spike_time, string("next_spike_time"));
 	}
 	if (current_file.on) {
@@ -1422,10 +1449,8 @@ void NeuroPop::output_sampled_data_real_time_HDF5(const int step_current) {
 				}
 				append_vector_to_matrix_HDF5(sample.rhatI_dataset, temp_data,  sample.ctr);
 
-			}	
+			}
 			sample.ctr++;
 		}
 	}
 }
-
-

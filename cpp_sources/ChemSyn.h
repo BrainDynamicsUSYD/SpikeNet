@@ -44,11 +44,11 @@ public:
 		
 	void output_results(ofstream& output_file); /// write output to file
 
-	void add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscale,double lrate,double lrateall,int intau, double innoise, int type_pre, int type_post, int direction);
+	void add_JH_Learning(vector<NeuroPop*> &NeuronPopArray,int isteps, double iscale,double lrate,double lrateall,double lrate_inf_scale, double Vtar, int noise_rhat, int intau, double innoise, int type_pre, int type_post, int direction);
 	void update_post_spike_hist_JH_Learn();
 	void update_Vint_JH_Learn();
 	void new_post_spikes_JH_Learn();
-	void wchange_non_Hebbian_outgoing(vector<NeuroPop*> &NeuronPopArray);
+	void wchange_non_Hebbian_outgoing();
 	void wchange_Hebbian_outgoing();
 
 	const int & get_direction(); //
@@ -286,10 +286,7 @@ protected:
 	struct JH_Learn_Syn{
 		bool on=0; //indicates if this learning is to be used
 		int direction=0; //indicates if learning these synapses as output (=0), or inputs (=1).
-		// Spike_File spike_file_pre;
-		// Spike_File spike_file_post;
 
-		//vector<int> spikes_pre, spikes_post;
 		vector<int> spikes_pre_noise,spikes_post_noise;
 
 		vector<vector<int>> post_noise_hist;
@@ -316,11 +313,14 @@ protected:
 		vector<vector <int> > post_R_hist; //1st index neuron, 2nd index list
 		int t_ind;
 		int inf_steps; // the number of timesteps over which inference is performed
-		double inf_scale;
+		vector<double> inf_scale;
 		double learn_rate;
 		double learn_rate_all;
+		double learn_rate_inf_scale;
+		double Vtarget;
 
 		double noise_pre, noise_post;
+		int noise_rhat=0; //flag to use postsynaptic noise in computing rhat
 
 		double tau;
 		double C;

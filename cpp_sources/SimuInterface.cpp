@@ -245,7 +245,7 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				cout << "done." << endl;
 			}
 			// external initial membrane potential setting, whose prior is higher than random settings
-			if (group_exist_HDF5(in_filename, pop_n + string("/SETINITV"))) {				
+			if (group_exist_HDF5(in_filename, pop_n + string("/SETINITV"))) {
 				cout << "\t\t External initial V settings...";
 				vector<double> external_init_V;
 				read_vector_HDF5(file, pop_n + string("/SETINITV/external_init_V"), external_init_V);
@@ -272,16 +272,16 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/dg_K"))) {
 					cout << "reading dg_K...";
 					double dg_K = read_scalar_HDF5<double>(file, pop_n + string("/INIT010/dg_K"));
-					network.NeuroPopArray[ind]->set_spike_freq_adpt_para(dg_K); 
+					network.NeuroPopArray[ind]->set_spike_freq_adpt_para(dg_K);
 				}
 				// read in heterogenous spike_freq_adpt para
-				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/dg_K_heter"))) {					
+				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/dg_K_heter"))) {
 					cout << "reading dg_K_heter...";
 					vector<double> dg_K_heter;
 					int heter_SFA_start_step = read_scalar_HDF5<int>(file, pop_n + string("/INIT010/start_step"));
 					int heter_SFA_end_step = read_scalar_HDF5<int>(file, pop_n + string("/INIT010/end_step"));
 					read_vector_HDF5(file, pop_n + string("/INIT010/dg_K_heter"), dg_K_heter);
-					network.NeuroPopArray[ind]->set_spike_freq_adpt_para_heter(dg_K_heter,heter_SFA_start_step,heter_SFA_end_step); 
+					network.NeuroPopArray[ind]->set_spike_freq_adpt_para_heter(dg_K_heter,heter_SFA_start_step,heter_SFA_end_step);
 				}
 				cout << "done." << endl;
 			}
@@ -391,6 +391,13 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				network.NeuroPopArray[ind]->load_file_current_input(fname);
 				cout << "done." << endl;
 			}
+			if (group_exist_HDF5(in_filename, pop_n + string("/JHLearn"))) {
+				cout << "\t\t JH Learning settings...";
+				double noise_pre=read_scalar_HDF5<double>(file, pop_n + string("/JHLearn/noise_pre"));
+				double noise_post=read_scalar_HDF5<double>(file, pop_n + string("/JHLearn/noise_post"));
+				network.NeuroPopArray[ind]->add_JH_Learn(noise_pre,noise_post);
+				cout << "done." << endl;
+			}
 
 			// cout << "\t done." << endl;
 		}
@@ -474,16 +481,17 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 					double infscale = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/infscale"));
 					double learnrate = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrate"));
 					double learnrateall = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateall"));
+					double learnrate_infscale = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/learnrateinfscale"));
+					double Vtarget = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/Vtarget"));
+					int noise_rhat = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/noise_rhat"));
 					double noise = read_scalar_HDF5<double>(file, syn_n + string("/INIT016/noise"));
 					int tau = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/tau"));
 					int ntype_pre = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/ntype_pre"));
 					int ntype_post = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/ntype_post"));
 					vector<double> dropout;
-					read_vector_HDF5(file, syn_n + string("/INIT016/dropout"),dropout);
-					network.NeuroPopArray[i_pre]->add_JH_Learn(dropout[0]);
-					network.NeuroPopArray[j_post]->add_JH_Learn(dropout[1]);
+
 					int direction = read_scalar_HDF5<int>(file, syn_n + string("/INIT016/direction"));
-					network.ChemSynArray.back()->add_JH_Learning(network.NeuroPopArray,infsteps,infscale,learnrate,learnrateall,tau,noise,ntype_pre,ntype_post,direction);
+					network.ChemSynArray.back()->add_JH_Learning(network.NeuroPopArray,infsteps,infscale,learnrate,learnrateall,learnrate_infscale,Vtarget, noise_rhat,tau,noise,ntype_pre,ntype_post,direction);
 					cout << "done." << endl;
 				}
 
@@ -535,8 +543,8 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				// network.ChemSynArray.back()->set_para(syn_para);
 
 			}
-			
-			// external spike setting (with different time invariant rates for differnt neurons) 
+
+			// external spike setting (with different time invariant rates for differnt neurons)
 			else if (group_exist_HDF5(in_filename, syn_n + string("/INIT017"))) {
 				cout << ind + 1 << " (ext spike t inv)..." << endl;
 
@@ -554,7 +562,7 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				// network.ChemSynArray.back()->set_para(syn_para);
 
 			}
-			
+
 
 			// cout << "\t done." << endl;
 
@@ -591,6 +599,3 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 // 	}
 // 	return convert_temp.str(); // set 'Result' to the contents of the stream
 // }
-
-
-
