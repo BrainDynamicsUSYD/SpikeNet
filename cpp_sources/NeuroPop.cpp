@@ -443,7 +443,7 @@ void NeuroPop::update_spikes(const int step_current) {
 
 }
 
-void NeuroPop::generate_I_ext() {
+void NeuroPop::generate_I_ext(const int step_current) {
 
 	// Gaussian white external currents
 	if (I_ext_mean.size() != 0) {
@@ -454,12 +454,12 @@ void NeuroPop::generate_I_ext() {
 			auto gaus = bind(nrm_dist, ref(gen));
 
 			for (int i = 0; i < N; ++i) {
-				I_ext[i] += I_ext_mean[i] + gaus() * I_ext_std[i] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
+				I_ext[i] += I_ext_mean[i] * I_ext_mean_TV_factor[step_current] + gaus() * I_ext_std[i] * *I_ext_std_TV_factor[step_current] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
 			}
 		}
 		else {
 			for (int i = 0; i < N; ++i) {
-				I_ext[i] += I_ext_mean[i];
+				I_ext[i] += I_ext_mean[i] * I_ext_mean_TV_factor[step_current];
 			}
 		}
 	}
@@ -502,7 +502,7 @@ void NeuroPop::update_V(const int step_current) {
 	// This function updates menbrane potentials for non-refractory neurons
 
 	// Generate external currents
-	generate_I_ext();
+	generate_I_ext(step_current);
 	// add external current file in [start_step, end_step)
 	if (current_file.on && (step_current >= current_file.start_step) && (step_current < current_file.end_step)) {
 		get_current_from_file();
@@ -622,12 +622,29 @@ void NeuroPop::sample_data(const int step_current) {
 void NeuroPop::set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std) {
 	I_ext_mean = mean;
 	I_ext_std = std;
+	I_ext_mean_TV_factor.assign(step_tot, 1.0);
+	I_ext_std_TV_factor.assign(step_tot, 1.0);
+
 
 	double max_std = *max_element(I_ext_std.begin(), I_ext_std.end());
 	if (max_std == 0.0) {
 		I_ext_std.resize(0);
 	}
 }
+
+void NeuroPop::set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor) {
+	I_ext_mean = mean;
+	I_ext_std = std;
+	I_ext_mean_TV_factor = mean_TV_factor;
+	I_ext_std_TV_factor = std_TV_factor;
+
+
+	double max_std = *max_element(I_ext_std.begin(), I_ext_std.end());
+	if (max_std == 0.0) {
+		I_ext_std.resize(0);
+	}
+}
+
 
 void NeuroPop::set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std) {
 	g_ext_mean = mean;

@@ -216,6 +216,20 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				cout << "done." << endl;
 			}
 
+			// external current setting with time-variant factors
+			if (group_exist_HDF5(in_filename, pop_n + string("/INIT014"))) {
+				cout << "\t\t External current (time-variant) settings...";
+				vector<double> mean, std, mean_TV, std_TV;
+				read_vector_HDF5(file, pop_n + string("/INIT014/mean"), mean);
+				read_vector_HDF5(file, pop_n + string("/INIT014/std"), std);
+				read_vector_HDF5(file, pop_n + string("/INIT014/mean_TV"), mean_TV);
+				read_vector_HDF5(file, pop_n + string("/INIT014/std_TV"), std_TV);
+				network.NeuroPopArray[ind]->set_gaussian_I_ext(mean, std, mean_TV, std_TV);
+				cout << "done." << endl;
+			}
+
+
+
 			// external conductance setting
 			if (group_exist_HDF5(in_filename, pop_n + string("/INIT012"))) {
 				cout << "\t\t External conductance settings...";

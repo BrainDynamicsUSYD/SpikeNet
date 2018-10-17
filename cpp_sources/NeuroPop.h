@@ -65,7 +65,7 @@ public:
 	// Following member(s) should not be inherited
 	void update_V(const int step_current); // Update potential
 	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std);
-	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std);
+	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor);
 
 	void load_file_spike_input(string fname);
 	void load_file_current_input(string fname);
@@ -94,7 +94,7 @@ public:
 	void set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const int start_step, const int end_step); /// add heterogenous spike-frequency adaptation
 
 private:
-	void generate_I_ext();
+	void generate_I_ext(const int step_current);
 	void record_stats(const int step_current);
 	void output_sampled_data_real_time_HDF5(const int step_current);
 	string dump_para(); /// dump all the parameter values used
@@ -196,7 +196,11 @@ protected:
 	// parameters for Generate Gaussian random external current
 	vector<double> // a vector for each neuron
 	I_ext_mean, /// mean of external currents (Gaussian noise) for each neuron
-	I_ext_std; /// std of external currents (Gaussian noise) for each neuron
+	I_ext_std, /// std of external currents (Gaussian noise) for each neuron
+	I_ext_mean_TV_factor;  ///  the time-variant (TV) factor for mean
+	I_ext_std_TV_factor;  ///  the time-variant (TV) factor for std
+
+
 
 	// parameters for Generate Gaussian random external conductance
 	vector<double> // a vector for each neuron
