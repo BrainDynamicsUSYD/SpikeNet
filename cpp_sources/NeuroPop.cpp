@@ -452,9 +452,8 @@ void NeuroPop::generate_I_ext(const int step_current) {
 			// Gaussian random generator
 			normal_distribution<double> nrm_dist(0.0, 1.0);
 			auto gaus = bind(nrm_dist, ref(gen));
-
 			for (int i = 0; i < N; ++i) {
-				I_ext[i] += I_ext_mean[i] * I_ext_mean_TV_factor[step_current] + gaus() * I_ext_std[i] * *I_ext_std_TV_factor[step_current] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
+				I_ext[i] += I_ext_mean[i] * I_ext_mean_TV_factor[step_current] + gaus() * I_ext_std[i] * I_ext_std_TV_factor[step_current] * one_on_sqrt_dt; // be careful about the sqrt(dt) term (Wiener Process)
 			}
 		}
 		else {
@@ -472,12 +471,12 @@ void NeuroPop::generate_I_ext(const int step_current) {
 			normal_distribution<double> nrm_dist(0.0, 1.0);
 			auto gaus = bind(nrm_dist, ref(gen));
 			for (int i = 0; i < N; ++i) {
-				I_ext[i] += -(g_ext_mean[i] + gaus() * g_ext_std[i] * one_on_sqrt_dt) * (V[i] - V_ext); // be careful about the sqrt(dt) term (Wiener Process)
+				I_ext[i] += -(g_ext_mean[i] * g_ext_mean_TV_factor[step_current] + gaus() * g_ext_std[i] * g_ext_std_TV_factor[step_current] * one_on_sqrt_dt) * (V[i] - V_ext); // be careful about the sqrt(dt) term (Wiener Process)
 			}
 		}
 		else {
 			for (int i = 0; i < N; ++i) {
-				I_ext[i] += -g_ext_mean[i] * (V[i] - V_ext);
+				I_ext[i] += -g_ext_mean[i] * g_ext_mean_TV_factor[step_current] * (V[i] - V_ext);
 			}
 		}
 	}
@@ -649,12 +648,29 @@ void NeuroPop::set_gaussian_I_ext(const vector<double>& mean, const vector<doubl
 void NeuroPop::set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std) {
 	g_ext_mean = mean;
 	g_ext_std = std;
+	g_ext_mean_TV_factor.assign(step_tot, 1.0);
+	g_ext_std_TV_factor.assign(step_tot, 1.0);
+
 
 	double max_std = *max_element(g_ext_std.begin(), g_ext_std.end());
 	if (max_std == 0.0) {
 		g_ext_std.resize(0);
 	}
 }
+
+void NeuroPop::set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor) {
+	g_ext_mean = mean;
+	g_ext_std = std;
+	g_ext_mean_TV_factor = mean_TV_factor;
+	g_ext_std_TV_factor = std_TV_factor;
+
+
+	double max_std = *max_element(g_ext_std.begin(), g_ext_std.end());
+	if (max_std == 0.0) {
+		g_ext_std.resize(0);
+	}
+}
+
 
 
 void NeuroPop::add_perturbation(const int step_perturb_input) {

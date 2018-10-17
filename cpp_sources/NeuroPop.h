@@ -66,6 +66,9 @@ public:
 	void update_V(const int step_current); // Update potential
 	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std);
 	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor);
+	
+	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std);
+	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor);
 
 	void load_file_spike_input(string fname);
 	void load_file_current_input(string fname);
@@ -197,7 +200,7 @@ protected:
 	vector<double> // a vector for each neuron
 	I_ext_mean, /// mean of external currents (Gaussian noise) for each neuron
 	I_ext_std, /// std of external currents (Gaussian noise) for each neuron
-	I_ext_mean_TV_factor;  ///  the time-variant (TV) factor for mean
+	I_ext_mean_TV_factor,  ///  the time-variant (TV) factor for mean
 	I_ext_std_TV_factor;  ///  the time-variant (TV) factor for std
 
 
@@ -205,7 +208,9 @@ protected:
 	// parameters for Generate Gaussian random external conductance
 	vector<double> // a vector for each neuron
 	g_ext_mean, /// mean of external conductance (Gaussian noise) for each neuron
-	g_ext_std; /// std of external conductance (Gaussian noise) for each neuron
+	g_ext_std, /// std of external conductance (Gaussian noise) for each neuron
+	g_ext_mean_TV_factor,  ///  the time-variant (TV) factor for mean
+	g_ext_std_TV_factor;  ///  the time-variant (TV) factor for std
 	double
 	V_ext; // reversal potential for external conductance (Gaussian noise)
 
