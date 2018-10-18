@@ -29,6 +29,8 @@ ChemSyn::ChemSyn(const double dt_input, const int step_tot_input){
 	stats.record_cov = false;
 	STD.on = false; 
 	STD.on_step = -1;
+	SP.on = false; 
+	SP.on_step = -1;
 	inh_STDP.on_step = -1;
 	inh_STDP.on = false;
 	synapse_model = 0; // default model
@@ -268,6 +270,9 @@ void ChemSyn::update(const int step_current){
 	if (synapse_model == 0){ 
 		// short-term depression
 		update_STD(step_current);
+
+		// synaptic plasticity
+        update_SP(step_current);
 		
 		// inhibitory STDP
 		update_inh_STDP(step_current);
@@ -304,6 +309,25 @@ void ChemSyn::update_STD(const int step_current){
 		}
 		for (int i = 0; i < N_pre; ++i){
 			STD.f_ves[i] = 1.0 - STD.exp_ves * (1.0 - STD.f_ves[i]); // decay to 1.0
+		}
+	}
+
+}
+
+void ChemSyn::update_SP(const int step_current){
+	// SP modifies K_trans
+	
+	if (SP.on_step == step_current){SP.on = true;}
+	// synaptic plasticity
+	if (SP.on == true){
+		for (unsigned int i = 0; i < spikes_pre.size(); ++i){ 
+			SP.u[spikes_pre.at(i)] = SP.u[spikes_pre.at(i)] * (1.0 - SP.U) + SP.U; 
+            SP.x[spikes_pre.at(i)] *= 1.0 - SP.u[spikes_pre.at(i)];
+		}
+		for (int i = 0; i < N_pre; ++i){
+			SP.u[i] = SP.u[i] * (1.0 - dt / SP.tau_F) + dt * SP.U / SP.tau_F; 
+            SP.x[i] = SP.x[i] * (1.0 - dt / SP.tau_D) + dt / SP.tau_D; 
+            K_trans[i] = 1.0 / steps_trans * SP.u[i] * SP.x[i];
 		}
 	}
 
@@ -505,6 +529,26 @@ void ChemSyn::add_short_term_depression(const int STD_on_step_input){
 	STD.tau_ves =  700; // ms
 	STD.f_ves.assign(N_pre, 1.0);
 	STD.exp_ves = exp(-dt / STD.tau_ves);
+}
+
+void ChemSyn::add_synaptic_plasticity(const int SP_on_step_input){
+	if (syn_type != 0){
+		cout << "Warning: initializing SP on non-AMPA synapses!" << endl;
+	}
+	if (synapse_model != 0){
+		cout << "Warning: SP is not supported for synapse models other than 0 yet!" << endl;
+	}
+	
+	SP.on_step = SP_on_step_input;
+	if (SP.on_step == 0){
+		SP.on = true;
+	}
+	// synaptic plasticity
+	SP.U =  0.2; // baseline utilization factor; see Mongillo, 2008, Science
+	SP.tau_F = 1500; // ms; recovery time of utilization factor
+    SP.tau_D = 200; // ms; recovery time of synaptic resources
+	SP.u.assign(N_pre, 0.3);
+	SP.x.assign(N_pre, 1.0);
 }
 
 
@@ -1150,6 +1194,17 @@ void ChemSyn::import_restart(H5File& file, int syn_ind){
 		read_vector_HDF5(file, str+ "f_ves",STD.f_ves);
 	}
 
+	str =syn_str+"/Sp/";
+	if(group_exist_HDF5(file,str)){
+		SP.on=read_scalar_HDF5<bool>(file, str+ "on");
+		SP.U=read_scalar_HDF5<double>(file,  str+"U");
+		SP.tau_F=read_scalar_HDF5<double>(file,  str+"tau_F");
+		SP.tau_D=read_scalar_HDF5<double>(file,  str+"tau_D");
+		SP.on_step=read_scalar_HDF5<bool>(file,  str+"on_step");
+		read_vector_HDF5(file, str+ "u",SP.u);
+        read_vector_HDF5(file, str+ "x",SP.x);
+	}
+
 	synapse_model=read_scalar_HDF5<int>(file,syn_str+ "synapse_model");
 	read_vector_HDF5(file, syn_str+"gs_sum",gs_sum);
 
@@ -1346,6 +1401,18 @@ void ChemSyn::export_restart(Group& group, int syn_ind){
 		write_scalar_HDF5(group_STD,STD.exp_ves, "exp_ves");
 		write_scalar_HDF5(group_STD,STD.on_step, "on_step");
 		write_vector_HDF5(group_STD,STD.f_ves, "f_ves");
+	}
+
+	if(SP.on){
+		string str =syn_str+"/Sp";
+		Group group_SP = group_syn.createGroup(str);
+		write_scalar_HDF5(group_SP,SP.on, "on");
+		write_scalar_HDF5(group_SP,SP.U, "U");
+		write_scalar_HDF5(group_SP,SP.tau_F, "tau_F");
+		write_scalar_HDF5(group_SP,SP.tau_D, "tau_D");
+		write_scalar_HDF5(group_SP,SP.on_step, "on_step");
+		write_vector_HDF5(group_SP,SP.u, "u");
+        write_vector_HDF5(group_SP,SP.x, "x");
 	}
 
 	write_scalar_HDF5(group_syn,synapse_model, "synapse_model");

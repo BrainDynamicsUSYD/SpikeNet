@@ -492,6 +492,14 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 					cout << "done." << endl;
 				}
 
+				// SP
+				if (group_exist_HDF5(in_filename, syn_n + string("/INIT015"))) {
+					cout << "\t\t Synaptic plasticity settings...";
+					int SP_on_step = read_scalar_HDF5<int>(file, syn_n + string("/INIT015/SP_on_step"));
+					network.ChemSynArray.back()->add_synaptic_plasticity(SP_on_step);
+					cout << "done." << endl;
+				}
+
 
 				// Inhibitory STDP
 				if (group_exist_HDF5(in_filename, syn_n + string("/INIT009"))) {

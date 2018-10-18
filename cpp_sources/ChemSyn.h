@@ -34,6 +34,8 @@ public:
 	void send_pop_data(vector<NeuroPop*> &NeuronPopArray); ///  send data to neuron populations
 
 	void add_short_term_depression(const int STD_on_step); /// turn on short term depression
+
+	void add_synaptic_plasticity(const int SP_on_step); /// turn on synaptic plasticity
 	
 	void add_inh_STDP(const int inh_STDP_on_step); /// turn on inhibitory STDP
 	
@@ -81,6 +83,7 @@ private:
 	void update_gs_sum_model_0(const int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 0
 	void update_gs_sum_model_1(const int step_current); /// update the gs_sum term for each post-synaptic neuron using synaptic dynamics model 1
 	void update_STD(const int step_current); /// update short-term depression
+	void update_SP(const int step_current); /// update synaptic plasticity
 	void update_inh_STDP(const int step_current); /// update inhibitory STDP
 	void sample_data(const int step_current); /// sample data
 	void record_stats(int step_current); /// record basic statistics
@@ -214,6 +217,20 @@ protected:
 		vector<double>
 			f_ves; // the fraction of available vesicles
 	} STD;
+
+	struct Sp {
+		double // synaptic plasticity constants
+			U, // baseline utilization factor
+			tau_F,
+			tau_D;
+		bool
+			on; //  
+		int
+			on_step; // the step where SP should turned on
+		vector<double>
+			u, // the utilization parameter
+            x; // the amount of available resources
+	} SP;
 
 	//
 	int
