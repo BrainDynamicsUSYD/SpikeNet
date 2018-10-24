@@ -49,7 +49,6 @@ void NeuroPop::init()
 	I_GJ.assign(N, 0.0);
 	I_ext.assign(N, 0.0);
 	I_K.assign(N, 0.0);
-	I_ext_mean.assign(N, 0.0);
 	ref_step_left.assign(N, 0);
 	ref_steps = (int)round(tau_ref / dt);
 	// heterogenous spike-freq-adap
@@ -623,7 +622,6 @@ void NeuroPop::set_gaussian_I_ext(const vector<double>& mean, const vector<doubl
 	I_ext_std = std;
 	I_ext_mean_TV_factor.assign(step_tot, 1.0);
 	I_ext_std_TV_factor.assign(step_tot, 1.0);
-
 
 	double max_std = *max_element(I_ext_std.begin(), I_ext_std.end());
 	if (max_std == 0.0) {
