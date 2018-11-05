@@ -1,4 +1,4 @@
-function Data = ReduceSolution(Data)
+function Data = ReduceResolution(Data, reduced_step_length)
     % Re-format the raw spike history data into natural structure with
     % reduced resolution
     % Dump relevant fields
@@ -10,8 +10,10 @@ function Data = ReduceSolution(Data)
     num_spikes = Data.num_spikes;
     num_ref = Data.num_ref;
     
-    reduced_dt = 1; % (ms)
-    reduced_step_length = round(reduced_dt/dt);
+    if nargin == 1
+        reduced_step_length = 10; % (ms)
+    end
+    reduced_dt = reduced_step_length*dt;
     reduced_step_tot = ceil(step_tot/reduced_step_length);
     reduced_spike_hist = cell(Num_pop,1);
     reduced_num_spikes = cell(Num_pop,1);

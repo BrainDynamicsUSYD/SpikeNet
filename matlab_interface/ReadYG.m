@@ -399,7 +399,7 @@ if ~isempty(files)
         OutData{r_num} = DiscardTransientData(OutData{r_num});
         
         % Reduce solution
-        OutData{r_num} = ReduceSolution(OutData{r_num});
+        OutData{r_num} = ReduceResolution(OutData{r_num});
     end
     
 end % if ~isempty(name)

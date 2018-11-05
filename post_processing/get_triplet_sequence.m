@@ -28,6 +28,8 @@ n_trip = 50;
 n_sample = 50;
 hw_sample = 5;
 
+shuffle_method = 1;
+
 for i = 1:length(varargin)/2
     var_name = varargin{2*i-1};
     var_value = varargin{2*i};
@@ -192,7 +194,13 @@ for jj = 1:n_trial
     
     % shuffled triplet
     trip_peak_shuffle = zeros(n_trip, 3);
-    sh_shuffle = raster_marginals_shuffling(sh);
+    if shuffle_method == 1
+        sh_shuffle = raster_marginals_shuffling(sh);
+    elseif shuffle_method == 2
+        D = 15;
+        sh_shuffle = spike_jittering(sh, D);
+    end
+    
     t_from_onset_shuffle = cell(1,n_trip);
     for i = 1:n_trip
 %         ah(i) = subaxis(6,6,i,'PR',0.01);
@@ -233,8 +241,8 @@ for jj = 1:n_trial
     trip_peak_c{jj} = trip_peak;
     N_trip_shuffle_c{jj} = N_trip_s; %  only record the last one to save some memory
     trip_peak_shuffle_c{jj} = trip_peak_shuffle;
-    t_from_onset_shuffle_c{jj} =  t_from_onset_shuffle;
-    t_from_onset_c{jj} =  t_from_onset;
+    t_from_onset_shuffle_c{jj} =  cell2mat(t_from_onset_shuffle(:)'); %t_from_onset_shuffle;
+    t_from_onset_c{jj} =  cell2mat(t_from_onset(:)');
 end
 
 % triplet vs latency
@@ -282,4 +290,14 @@ R.triplet.t_from_onset_c =  t_from_onset_c;
 R.triplet.up_onset = up_onset_c;
 R.triplet.up_offset = up_offset_c;
 disp('Done.');
+end
+
+function sh_shuffle = spike_jittering(sh, D)
+[i, t] = find(full(sh));
+t_max = length(sh(1,:));
+[ta, tb]= size(t);
+t = t + randi(2*D+1, ta, tb) - (D+1);
+i(t <=0 | t>t_max) = [];
+t(t <=0 | t>t_max) = [];
+sh_shuffle = full(sparse(i,t,ones(size(t))));
 end
