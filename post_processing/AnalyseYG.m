@@ -22,7 +22,7 @@ for r_num = 1:Result_num
     Result_cell{r_num} = get_rate(Result_cell{r_num});
     
     % Get ISI distribution
-    Result_cell{r_num} = get_ISI(Result_cell{r_num});
+    %Result_cell{r_num} = get_ISI(Result_cell{r_num});
     
     
 %     % Re-arrange the neuron index
@@ -32,12 +32,12 @@ for r_num = 1:Result_num
 
     
     % Correlation coefficient (zero time-lag)
-    if get_corrcoef == 1
-        Result_cell{r_num} = get_CC_pop(Result_cell{r_num});
+    %if get_corrcoef == 1
+    %    Result_cell{r_num} = get_CC_pop(Result_cell{r_num});
         
-    end
+    %end
     
-    Result_cell{r_num} = get_autoCC_network(Result_cell{r_num});
+    %Result_cell{r_num} = get_autoCC_network(Result_cell{r_num});
     
     % Generate comments
     Result_cell{r_num} = generate_comments(Result_cell{r_num});
