@@ -113,30 +113,8 @@ clear I J K D;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 %%%%%%%%%%%%%%%%%%% Chemical Connections %%%%%%%%%%%%%%%%%%%%%%%
-% type(1:AMAP, 2:GABAa)
-
 Lattice_I = quasi_lattice_2D( N(2) , hw); %  inhibitory neurons are randomly positioned 
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%
 [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_E, hw, tau_c_I, P_mat(2,1) );
