@@ -12,23 +12,25 @@ step_tot = 10*sec; % total number of simulation time steps
 hw = 31; % half-width of the square grid for excitatory population, hw = 31 gives (31*2+1)^2 = 3969 ~ 4000 excitatory neurons
 N_e = (hw*2+1)^2; % size of the excitatory population
 N_i = 1000; % size of the inhibitory population
+N = [N_e, N_i];
+Num_pop = length(N);
 
 %%%%% neuron and synapse parameters
 tau_ref = 4; % (ms) refractory period
 delay_max = 4; % (ms)  the range of conduction delay: [0, delay_max]
 dg_K = 0.01; % (muS) unit increase in potassium conductance (strength of spike frequency adaptation)
 
-
-
-
+%%%%% connection type (1 is excitatory and 2 is inhibitory)
+Type_mat = ones(Num_pop);
+Type_mat(end, :) = 2;
 
 % seed the matlab rand function
-[FID] = new_ygin_files_and_randseedHDF5(loop_num);
+seed = 1
+[FID] = new_ygin_files_and_randseedHDF5(seed);
 
 
 % write basic parameters
 writeBasicParaHDF5(FID, dt, step_tot, N);
-
 
 % write pop para
 for pop_ind = 1:Num_pop
@@ -111,11 +113,6 @@ clear I J K D;
 
 
 
-N = [N_e, N_i];
-Num_pop = length(N);
-Type_mat = ones(Num_pop);
-Type_mat(end, :) = 2;
-
 
 
 
@@ -156,14 +153,14 @@ clear I J K D;
 %%%%%%%%%%%%%%%%%%%%%%
 [ I,J ] = Lattice2Lattice( Lattice_E, Lattice_I, hw, tau_c_IE, P_mat(1,2) );
 D = rand(size(I))*delay_max;
-K = ones(size(I))*K_mat(1,2);
+K = ones(size(I))*g_IE;
 writeChemicalConnectionHDF5(FID, Type_mat(1, 2),  1, 2,   I,J,K,D);
 clear I J K D;
 
 %%%%%%%%%%%%%%%%%%%%%%
 [ I,J ] = Lattice2Lattice( Lattice_I, Lattice_I, hw, tau_c_I, P_mat(2,2) );
 D = rand(size(I))*delay_max;
-K = ones(size(I))*K_mat(2,2);
+K = ones(size(I))*g_II;
 writeChemicalConnectionHDF5(FID, Type_mat(2, 2),  2, 2,   I,J,K,D);
 clear I J K D;
 
