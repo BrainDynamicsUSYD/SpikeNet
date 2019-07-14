@@ -5,7 +5,7 @@ function writeExtCurrentTimeVariantSettingsHDF5(FID, pop_ind, mean, std, mean_TV
 %      mean: mean value for Gaussian currents (nA) for each neuron
 %       std: std for Gaussrian currents for each neuron
 %   mean_TV: a time-variant factor multiplied to the mean value for Gaussian currents (nA) for each neuron
-%  mean_std: a time-variant factor multiplied to the std value for Gaussrian currents for each neuron
+%    std_TV: a time-variant factor multiplied to the std value for Gaussrian currents for each neuron
 %    modify: whether this is for modifying existing HDF5 file content or not
 %
 % Explanation: For neuron i, at time step t, the external current will be a Gaussian random number with a mean of mean[i]*mean_TV[t] and a std of std[i]*std_TV[t]	

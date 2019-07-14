@@ -66,6 +66,8 @@ public:
 	void update_V(const int step_current); // Update potential
 	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std);
 	void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor);
+    void set_gaussian_I_ext(const vector<double>& mean, const vector<double>& std, const vector< vector<double> >&  mean_TV_factor, const vector< vector<double> >&  std_TV_factor, const vector< int >& TV_group);
+    
 	
 	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std);
 	void set_gaussian_g_ext(const vector<double>& mean, const vector<double>& std, const vector<double>&  mean_TV_factor, const vector<double>&  std_TV_factor);
@@ -199,10 +201,14 @@ protected:
 	// parameters for Generate Gaussian random external current
 	vector<double> // a vector for each neuron
 	I_ext_mean, /// mean of external currents (Gaussian noise) for each neuron
-	I_ext_std, /// std of external currents (Gaussian noise) for each neuron
-	I_ext_mean_TV_factor,  ///  the time-variant (TV) factor for mean
-	I_ext_std_TV_factor;  ///  the time-variant (TV) factor for std
-
+    I_ext_std;
+    
+    vector< vector<double> > /// external currents (Gaussian noise) for each neuron
+	I_ext_mean_TV_factor,  ///  the time-variant (TV) factor for mean, each row is for each group
+	I_ext_std_TV_factor;  ///  the time-variant (TV) factor for std, each row is for each group
+    
+    vector< int >
+    I_ext_TV_group; // group number for I_ext_mean_TV_factor and I_ext_std_TV_factor
 
 
 	// parameters for Generate Gaussian random external conductance
