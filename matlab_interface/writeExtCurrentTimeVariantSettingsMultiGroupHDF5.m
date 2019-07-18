@@ -27,10 +27,10 @@ if n_group > step_tot % if the size is not right
 else
     mean_TV = mean_TV'; % columns
     std_TV = std_TV'; % columns
-    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT0019/mean_TV'],mean_TV,'WriteMode','append');
-    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT0019/std_TV'],std_TV,'WriteMode','append');
-    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT0019/mean'],mean,'WriteMode','append');
-    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT0019/std'],std,'WriteMode','append');
-    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT0019/TV_group'],TV_group,'WriteMode','append');
+    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT019/mean_TV'],mean_TV,'WriteMode','append');
+    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT019/std_TV'],std_TV,'WriteMode','append');
+    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT019/mean'],mean,'WriteMode','append');
+    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT019/std'],std,'WriteMode','append');
+    hdf5write(FID,['/config/pops/pop',num2str(pop_ind),'/INIT019/TV_group'],TV_group,'WriteMode','append');
 
 end
