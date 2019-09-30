@@ -176,6 +176,24 @@ Also the full documentation is available [here](https://github.com/BrainDynamics
 
 See also the list of [contributors](https://github.com/BrainDynamicsUSYD/SpikeNet/graphs/contributors) who participated in this project.
 
+# Citation
+If you find this code useful in your research, please cite:
+
+```
+@article{10.1371/journal.pcbi.1006902,
+    author = {Gu, Yifan AND Qi, Yang AND Gong, Pulin},
+    journal = {PLOS Computational Biology},
+    publisher = {Public Library of Science},
+    title = {Rich-club connectivity, diverse population coupling, and dynamical activity patterns emerging from local cortical circuits},
+    year = {2019},
+    month = {04},
+    volume = {15},
+    url = {https://doi.org/10.1371/journal.pcbi.1006902},
+    pages = {1-34},    
+    number = {4},
+    doi = {10.1371/journal.pcbi.1006902}
+}
+```
 # License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
