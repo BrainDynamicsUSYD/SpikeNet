@@ -194,6 +194,18 @@ If you find this code useful in your research, please cite:
     doi = {10.1371/journal.pcbi.1006902}
 }
 ```
+```
+@article{
+    author = {Chen, Guozhang AND Gong, Pulin},
+    journal = {Nature communications},    
+    title = {Computing by modulating spontaneous cortical activity patterns as a mechanism of active visual processing},
+    year = {2019},
+    month = {10},
+    volume = {10},
+    url = {https://www.nature.com/articles/s41467-019-12918-8#citeas},    
+    doi = {10.1038/s41467-019-12918-8}
+}
+```
 # License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
