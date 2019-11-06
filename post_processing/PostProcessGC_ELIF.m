@@ -31,24 +31,16 @@ for id_out = 1:num_files
     R = AnalyseGC_ELIF(R); % do some simple analysis
     SaveRYG(R);
     disp('Done');
-    %RasterGC_ELIF(R, save_fig); % generate raster plot for spiking history
-    %CascadeAnalysis_GC(R)
-    %GCplotV_onegrid(R); % record the video of V combing E and I
-    %     GCplotV_onegrid_nosquare(R)
-    %     GCplotV_onegrid_savetransientfig(R); % save the shot of specific duration.
-    %GCtrackPattern(R,1); % track patterns
-    % GCplotSpike_onegrid(R); % record the video of spike
-    %         GCplotCurr_onegrid(R,'AMPA'); % record the video of excitatory current
-    %         GCplotCurr_onegrid(R,'GABA'); % record the video of inhibitory current
+    RasterGC_ELIF(R, save_fig); % generate raster plot for spiking history
+
+    GCplotV_onegrid(R); % record the video of V combing E and I
+
+    GCplotSpike_onegrid(R); % record the video of spike
     
     get_initialV(R,R{1}.step_tot/50); % get the last V for external setting V
-%     try
-%         CombineSampleData(R)
-%     catch
-%     end
-    %     GCplot_totalCurr_onegrid(R)
-%     get_combinedSpikeHist(R)
+
+    get_combinedSpikeHist(R)
 end
-%     CombineFig(1);% 1: firing rate and raster
+
 end
 

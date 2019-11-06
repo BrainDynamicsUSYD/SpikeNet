@@ -39,7 +39,7 @@ for dump = 1:length(d_E)
     step_tot = 1*10^5;
 
     %Define grids [no rows, no columns, grid step size]
-    gsize=300;
+    gsize=250;
     Grid = sparse(gsize,gsize);
     Grid(2:2:gsize,2:2:gsize) = true; % 0 is Exc, 1 is Inh.
     
@@ -74,7 +74,7 @@ for dump = 1:length(d_E)
     F=10^-2; % muS    
     F_ext=F*ones(1, N(1));
     writeExtConductanceSettingsHDF5(FID, 1, F_ext, F*ones(1,N(1)) );
-    writeExtConductanceSettingsHDF5(FID, 2, F*ones(1,N(2)), Fvar*ones(1,N(2)) );
+    writeExtConductanceSettingsHDF5(FID, 2, F*ones(1,N(2)), F*ones(1,N(2)) );
     
     % coupling range
     Drange=[ 45 45;

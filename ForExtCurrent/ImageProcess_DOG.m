@@ -1,5 +1,5 @@
 
-function [fname_E,fname_I]= ImageProcess_DOG(mean_curr,num)
+function [fname_E,fname_I]= ImageProcess_DOG(mean_curr,gender,num)
 % process the nature image
 % filtered by DOG(difference of Gaussian) then make them as
 % external current and transfer it to HDF5 file for E and I populations
@@ -7,8 +7,6 @@ function [fname_E,fname_I]= ImageProcess_DOG(mean_curr,num)
 % gender = ['w','m'];num = 1:8
 
 path = 'Add your dataset path here';
-
-
 
 % pyr = cell(1,16); pind = cell(1,16);
 netsz=250; % MAKE THIS GRIDSIZE OF EXCITATORY NEURONS
@@ -19,11 +17,13 @@ Grid(2:2:netsz,2:2:netsz) = 1;
 ind_E = Grid == 0;
 ind_I = Grid == 1;
 
-FaceName = num2str(num);
-face = imread([path,FaceName,'.jpg']);
+FaceName = [gender,num2str(num),'N'];
+face = imread([path,FaceName,'.JPG']);
 imwrite(face,['original_',FaceName,'.jpg'])
-face = rgb2gray(face);
 
+if length(size(face,3)) == 3
+    face = rgb2gray(face);
+end
 
 face=imresize(face,[netsz netsz]); % resize the square image to the same size as the excitatory neural population
 % get local variance
