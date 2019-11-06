@@ -168,11 +168,16 @@ For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
 Also the full documentation is available [here](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/SpikeNet_Documentation.pdf).
 
+# Reproduce published papers
+To reproduce the dynamics reported in Gu et al, 2019, please submit the PBS script YG_all_in_one.sh.
+
+To reproduce the dynamics reported in Chen & Gong, 2019, please submit the PBS script GC_all_in_one.sh.
+
 # Authors
 
 * **Yifan Gu** - *Chief architect and initial work* - [yigu8115](https://github.com/yigu8115)
 * **James A Henderson** - *HDF5-based I/O and learning schemes* - [JamesAHenderson](https://github.com/JamesAHenderson)
-* **Guozhang Chen** - *More functions* - [ifgovh](https://github.com/ifgovh)
+* **Guozhang Chen** - *Other functions* - [ifgovh](https://github.com/ifgovh)
 
 See also the list of [contributors](https://github.com/BrainDynamicsUSYD/SpikeNet/graphs/contributors) who participated in this project.
 
