@@ -46,6 +46,7 @@ public:
 
 	void start_stats_record();
 	void start_cov_record(const int time_start, const int time_end);
+	void start_COM_record(const vector<bool>& sample_time_points_input, const bool V_flag, const bool I_flag);
 	
 	void start_LFP_record(const vector< vector<double> >& LFP_neurons);
 
@@ -76,6 +77,14 @@ public:
 	void load_file_current_input(string fname);
 	void get_current_from_file();
 
+	// shuffle membrane potential of local area for reducing #patterns
+	void add_shuffle_local_V(const vector<bool>& shuffle_time_points_input, const vector< vector<bool> >& shuffle_neuron_index);
+	void shuffle_local_V(const int step_current);
+
+
+	// randomly selecte some neuron and make the fire at setted time points
+	void set_spike_noise(const vector<bool>& noised_time_points, const double noised_neuron_ratio);
+	void add_spike_noise(const int step_current);
 
 	void add_JH_Learn(double noise_pre, double noise_post);
 	void get_all_rhat_JHLearn(vector<ChemSyn*> &ChemSynArray, const int step_current);
@@ -96,7 +105,8 @@ public:
 	void add_perturbation(const int step_perturb);
 	void add_spike_freq_adpt(); /// add spike-frequency adaptation	
 	void set_spike_freq_adpt_para(const double dg_K_input); /// add spike-frequency adaptation
-	void set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const int start_step, const int end_step); /// add heterogenous spike-frequency adaptation
+	void set_spike_freq_adpt_tau(const double tau_K_input); /// add tau of spike-frequency adaptation
+	void set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const vector<double>& tau_K_heter_input, const int start_step, const int end_step); /// add heterogenous spike-frequency adaptation
 
 private:
 	void generate_I_ext(const int step_current);
@@ -166,7 +176,9 @@ protected:
 	struct Stats {
 		bool
 			record, /// whether stats should be recorded (false by default)
-			record_cov;
+			record_cov,
+			record_COM_V,
+			record_COM_I;
 			vector<double>
 			V_mean, /// mean of membrane potential averaged over neurons at each time step
 			V_std, /// std of membrane potential averaged over neurons at each time step
@@ -181,15 +193,39 @@ protected:
 			V_time_mean, /// mean of membrane potential for each neuron
 			V_time_mean_dumb, /// mean of membrane potential for each neuron
 			V_time_var,
-			IE_ratio; /// I-E ratio for each neuron
+			IE_ratio, /// I-E ratio for each neuron
+			pos_x_I, // real-time center-of-mass of current
+			pos_y_I,
+			pos_x_V, // real-time center-of-mass of membrane potential
+			pos_y_V;
 			vector< vector <double> >
 			V_time_cov; /// covariance of membrane potential for each neuron
+			vector<bool>
+			time_points; /// specifies which time steps to get real-time COM;			
 			int
 			time_start_cov,
 			time_end_cov;
 		} stats;
 
-		struct Lfp {
+	struct Shuffle_V{
+		bool 
+			shuffle_V_flag;
+		vector<bool>
+			time_points; /// specifies which time steps to shuffle V;	
+		vector< vector <bool> >
+			neuron_index; /// each component vector defines a shuffle cluster by specifying which neurons should be shuffle		
+		}SHUFFLE_V;
+
+	struct Spike_noise{
+		bool
+			flag;
+		vector<bool>
+			time_points; // record the time points to add spike nosie
+		double
+			ratio;
+		}SPIKE_NOISE;
+
+	struct Lfp {
 			bool
 		record; /// whether LFP should be recorded (false by default)
 		vector< vector<double> >
@@ -234,7 +270,10 @@ protected:
 	vector<double>
 	g_K, /// potassium conductance that produces spike-frequency adaptation (nS)
 	I_K, /// potassium currents that produces spike-frequency adaptation (nS)
-	dg_K_heter; /// heterogeneous spike-freq-adap
+	dg_K_heter, /// heterogeneous spike-freq-adap dg_k
+	tau_K_heter, /// heterogeneous spike-freq-adap tau_k
+	exp_K_step_heter;
+
 	double
 	V_K, /// reversal potential for the potassium conductance
 	dg_K,
@@ -335,10 +374,23 @@ protected:
 	} jh_learn_pop;
 }; //class declaration must end with a semi-colon.
 
+/*It is a *numerically stable* scheme that calculates variance (and mean) of the data *online*, published in 1962.
+That is, you just keep feeding it new data at every time step and the variance will be updated.
+Any naive attempt at such online scheme will almost surely result in an unstable scheme.
+
+Currently it is used to give the variance of the total input current into each neuron.
+The output is “/pop_result_n/stats_I_tot_time_var” in the HDF5 file.  (R.pop_stats.I_tot_time_var” if you use PostProcessYG).
+When combined with “/pop_result_n/stats_I_tot_time_mean”, you can get a very good idea on if the dynamics is mean-driven or fluctuation-driven.*/
+
 void Welford_online(const vector<double>& new_data, vector<double>& M, vector<double>& S, const int K, const bool is_end); /// online mean and var calculation: Welford's method (1962, Technometrixcs)
 void Welford_online(const vector<double>& new_data, vector<double>& M, vector< vector <double> >& Cov, const int K, const bool is_end); 
 void Welford_online(const vector<double>& new_data, vector<double>& M, const int K);
 void Welford_online(const vector<double>& data, double& M, double& S);
+
+// get real-time center-of-mass of neural properteis such as membrane potential and current
+// it is only for excitatory population in Yifan's model since they are on integer grid postions.
+void real_time_COM(const vector<double>& data, double& pos_x, double& pos_y);
+
 
 inline NeuroPop::NeuroPop() {}; /// default constructor
 

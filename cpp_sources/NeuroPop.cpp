@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cmath>
 #include <algorithm>
+#include <complex>
 // for transform
 #include <stdio.h> // for printf
 #include <time.h>       /* time */
@@ -53,6 +54,8 @@ void NeuroPop::init()
 	ref_steps = (int)round(tau_ref / dt);
 	// heterogenous spike-freq-adap
 	dg_K_heter.assign(N,0.0);
+	tau_K_heter.assign(N,0.0);
+	exp_K_step_heter.assign(N,0.0);
 
 	spike_hist_tot.reserve(step_tot * 50); // reserve!
 	num_ref_pop.reserve(step_tot); // reserve and push_back so that it won't be affected by adapting step_tot
@@ -73,8 +76,16 @@ void NeuroPop::init()
 	//
 	stats.record = false;
 	stats.record_cov = false;
+	stats.record_COM_V = false;
+	stats.record_COM_I = false;
 	LFP.record = false;
 	spike_freq_adpt = false;
+
+	// shuffle V of local area
+	SHUFFLE_V.shuffle_V_flag = false;
+
+	// add spike noise
+	SPIKE_NOISE.flag = false;
 
 	// perturbation
 	step_perturb = -1;
@@ -238,6 +249,17 @@ void NeuroPop::start_LFP_record(const vector <vector<double> >& LFP_neurons_inpu
 			LFP.data[ind].reserve(step_tot);
 		}
 	}
+}
+
+void NeuroPop::start_COM_record(const vector<bool>& sample_time_points_input, const bool V_flag, const bool I_flag){	
+	if (V_flag){
+		stats.record_COM_V = true; // set flag
+	}
+
+	if (I_flag){
+		stats.record_COM_I = true; // set flag
+	}
+	stats.time_points = sample_time_points_input; // record the time points to get COM	
 }
 
 void NeuroPop::set_para(string para_str) {
@@ -515,17 +537,22 @@ void NeuroPop::update_V(const int step_current) {
 			for (unsigned int ind = 0; ind < spikes_current.size(); ++ind) {
 				g_K[ spikes_current[ind] ] += dg_K_heter[ spikes_current[ind] ];
 			}
+
+			for (int i = 0; i < N; ++i) {
+				g_K[i] *= exp_K_step_heter[i];
+				I_K[i] = -g_K[i] * (V[i] - V_K);
+			}
 		}
 		// homogenous potassium conductance for spike-frequency adaptation
 		else{
 			for (unsigned int ind = 0; ind < spikes_current.size(); ++ind) {
 				g_K[ spikes_current[ind] ] += dg_K;
-			}
-		}
+			}		
 
-		for (int i = 0; i < N; ++i) {
-			g_K[i] *= exp_K_step;
-			I_K[i] = -g_K[i] * (V[i] - V_K);
+			for (int i = 0; i < N; ++i) {
+				g_K[i] *= exp_K_step;
+				I_K[i] = -g_K[i] * (V[i] - V_K);
+			}
 		}
 	}
 
@@ -539,6 +566,11 @@ void NeuroPop::update_V(const int step_current) {
 	// Data sampling, which must be done here!
 	// sample_data(step_current);  // this is deprecated due to poor memory performance
 	output_sampled_data_real_time_HDF5(step_current);
+
+	// shuffle the V of local neurons
+	if (SHUFFLE_V.shuffle_V_flag) {
+		shuffle_local_V(step_current);
+	}
 
 	// update menbrane potentials
 	double Vdot;
@@ -559,6 +591,10 @@ void NeuroPop::update_V(const int step_current) {
 			V[i] += Vdot * dt;
 			// Note that delta-function coupling is very different from the above conductance-based model!
 		}
+	}
+	// randomly make some neuron fire
+	if (SPIKE_NOISE.flag){		
+		add_spike_noise(step_current);
 	}
 
 	// record mean and std of membrane potentials
@@ -703,6 +739,11 @@ void NeuroPop::add_perturbation(const int step_perturb_input) {
 
 void NeuroPop::add_spike_freq_adpt() {
 	spike_freq_adpt = true;
+	if (spike_freq_adpt_heter.on){
+		for (int ind = 0; ind < N; ++ind) {
+				exp_K_step_heter[ind] = exp( -dt / tau_K_heter[ind]);
+			}		
+	}
 	exp_K_step = exp( -dt / tau_K );
 	g_K.assign(N, 0.0);
 }
@@ -711,8 +752,13 @@ void NeuroPop::set_spike_freq_adpt_para(const double dg_K_input) {
 	dg_K = dg_K_input; // default value 0.01 (uS=miuSiemens)
 }
 
-void NeuroPop::set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const int start_step, const int end_step) {
+void NeuroPop::set_spike_freq_adpt_tau(const double tau_K_input) {
+	tau_K = tau_K_input; // default value 80 (ms)
+}
+
+void NeuroPop::set_spike_freq_adpt_para_heter(const vector<double>& dg_K_heter_input, const vector<double>& tau_K_heter_input, const int start_step, const int end_step) {
 	dg_K_heter = dg_K_heter_input; // default value 0.01 (uS=miuSiemens)
+	tau_K_heter = tau_K_heter_input; // default value 80 ms
 	spike_freq_adpt_heter.on = true;
 	spike_freq_adpt_heter.start_step = start_step;
 	spike_freq_adpt_heter.end_step = end_step;
@@ -750,6 +796,56 @@ void NeuroPop::runaway_check(const int step_current)
 	}
 }
 
+void NeuroPop::add_shuffle_local_V(const vector<bool>& shuffle_time_points_input, const vector< vector<bool> >& shuffle_neuron_index){
+	SHUFFLE_V.shuffle_V_flag = true;
+	SHUFFLE_V.time_points = shuffle_time_points_input; // record the time points to shuffle V
+	SHUFFLE_V.neuron_index = shuffle_neuron_index; // which neurons' V should be shuffled
+}
+
+void NeuroPop::shuffle_local_V(const int step_current){	
+	if (SHUFFLE_V.time_points[step_current]){		
+		vector<double> temp_V;
+		for (unsigned int ind = 0; ind < SHUFFLE_V.neuron_index.size(); ++ind) {
+			// clear queue
+			//temp_V.clear();
+			// push the V of neurons need shuffle to queue
+			for (int i = 0; i < N; ++i) {				
+				if (SHUFFLE_V.neuron_index[ind][i] > 0) {
+					temp_V.push_back(V[i]);
+				}				
+			}			
+			// shuffle
+			shuffle (temp_V.begin(), temp_V.end(), default_random_engine(my_seed));
+
+			// pop the V of neurons need shuffle to queue
+			for (int i = 0; i < N; ++i) {				
+				if (SHUFFLE_V.neuron_index[ind][i] > 0) {
+					V[i] = temp_V.back();
+					temp_V.pop_back();
+				}				
+			}			
+		}
+	}
+}	
+
+void NeuroPop::set_spike_noise(const vector<bool>& noised_time_points, const double noised_neuron_ratio){
+	SPIKE_NOISE.flag = true;
+	SPIKE_NOISE.time_points = noised_time_points; // record the time points to add spike nosie
+	SPIKE_NOISE.ratio = noised_neuron_ratio; // # noised neuron/ # all neurons
+}
+
+void NeuroPop::add_spike_noise(const int step_current){	
+	int neuron_index [N];
+		for (int ind = 0; ind < N; ++ind) {			
+			neuron_index[ind] = ind;
+		}
+	if (SPIKE_NOISE.time_points[step_current]){
+		random_shuffle (& neuron_index[0], & neuron_index[N-1]);
+		for (unsigned int ind = 0; ind < SPIKE_NOISE.ratio * N; ++ind) {
+			V[neuron_index[ind]] = V_th + 1;
+		}		
+	}
+}
 
 void NeuroPop::add_JH_Learn(double noise_pre, double noise_post){
 	jh_learn_pop.on=true;
@@ -839,6 +935,29 @@ void NeuroPop::record_stats(const int step_current) {
 				// also, the only source of I_ext is generated internally
 				stats.IE_ratio[i] = stats.I_GABA_time_avg[i] / (stats.I_AMPA_time_avg[i] + stats.I_NMDA_time_avg[i] + stats.I_ext_time_avg[i]);
 			}
+		}
+	}
+
+	if (stats.record_COM_V){
+		if (stats.time_points[step_current]){
+			double pos_x_temp, pos_y_temp;
+			real_time_COM(V, pos_x_temp, pos_y_temp);
+		// record center-of-mass
+			stats.pos_x_V.push_back(pos_x_temp);
+			stats.pos_y_V.push_back(pos_y_temp);
+		}		
+	}
+
+	if (stats.record_COM_I){		
+		if (stats.time_points[step_current]){
+			double pos_x_temp, pos_y_temp;
+			vector<double> I_temp; // total current
+			I_temp.resize(I_leak.size()); // allocate space
+			transform(I_leak.begin(), I_leak.end(), I_input.begin(), I_temp.begin(), plus<double>());			
+			real_time_COM(I_temp, pos_x_temp, pos_y_temp);
+		// record center-of-mass
+			stats.pos_x_I.push_back(pos_x_temp);
+			stats.pos_y_I.push_back(pos_y_temp);
 		}
 	}
 
@@ -933,6 +1052,40 @@ void Welford_online(const vector<double>& new_data, vector<double>& M, const int
 		M_old = M[i];
 		x = new_data[i];
 		M[i] += (x - M_old) / double(K + 1.0);
+	}
+}
+
+
+void real_time_COM(const vector<double>& data, double& pos_x, double& pos_y) {
+// get real-time center-of-mass of neural properteis such as membrane potential and current
+// it is only for excitatory population in Yifan's model since they are on integer grid postions.
+
+	unsigned int num_neurons = data.size();
+	unsigned int grid_size = (int)floor(sqrt((double)num_neurons));
+	if (grid_size*grid_size == num_neurons) {
+		complex<double> img_unit (0,1), initial_value (0,0), mux , muy;			
+		vector< complex<double> > X (num_neurons), Y (num_neurons);		
+		// [Y,X] = ndgrid(linspace(-pi,pi,grid_size));
+		// mux = s*exp(1i*X); %weighted mean of complex exponential
+		// maybe move this for loop outside the function to avoid run it every step, but the process is ok for me.
+		double step = 2*M_PI/(grid_size - 1);
+		for (unsigned int i = 0; i < grid_size; i++){
+			for (unsigned int j = 0; j < grid_size; j++){
+				Y[i + j*grid_size] = exp((-1*M_PI + i*step)*img_unit) * data[i + j*grid_size];
+				X[j + i*grid_size] = exp((-1*M_PI + i*step)*img_unit) * data[j + i*grid_size];
+			}		
+		}
+
+		mux = accumulate (X.begin(), X.end(), initial_value);
+		muy = accumulate (Y.begin(), Y.end(), initial_value);
+
+		pos_x = arg(mux);
+		pos_y = arg(muy);
+	}
+	else{		
+		cout << "Warning: the grid is not squre! So, you need change real_time_COM by yourself!" << endl;
+		pos_x = 0;
+		pos_y = 0;
 	}
 }
 
@@ -1212,6 +1365,10 @@ void NeuroPop::export_restart(Group& group) {
 		write_vector_HDF5(group_stats, stats.I_tot_time_mean, "I_tot_time_mean");
 		write_vector_HDF5(group_stats, stats.I_tot_time_var, "I_tot_time_var");
 		write_vector_HDF5(group_stats, stats.IE_ratio, "IE_ratio");
+		write_vector_HDF5(group_stats, stats.pos_x_I, "pos_x_I");
+		write_vector_HDF5(group_stats, stats.pos_y_I, "pos_y_I");
+		write_vector_HDF5(group_stats, stats.pos_x_V, "pos_x_V");
+		write_vector_HDF5(group_stats, stats.pos_y_V, "pos_y_V");
 	}
 
 	if (LFP.record) {
@@ -1338,6 +1495,10 @@ void NeuroPop::output_results(H5File& file) {
 		write_vector_HDF5(group_pop, stats.V_time_mean, string("stats_V_time_mean"));
 		write_vector_HDF5(group_pop, stats.V_time_var, string("stats_V_time_var"));
 		write_vector_HDF5(group_pop, stats.IE_ratio, string("stats_IE_ratio"));
+		write_vector_HDF5(group_pop, stats.pos_x_I, string("pos_x_I"));
+		write_vector_HDF5(group_pop, stats.pos_y_I, string("pos_y_I"));
+		write_vector_HDF5(group_pop, stats.pos_x_V, string("pos_x_V"));
+		write_vector_HDF5(group_pop, stats.pos_y_V, string("pos_y_V"));
 	}
 	if (stats.record_cov) {
 		write_matrix_HDF5(group_pop, stats.V_time_cov, string("stats_V_time_cov"));

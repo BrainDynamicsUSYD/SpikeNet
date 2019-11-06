@@ -309,21 +309,31 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 			if (group_exist_HDF5(in_filename, pop_n + string("/INIT010"))) {
 				cout << "\t\t Spike-frequency adaptation settings...";
 				//int spike_freq_adpt = read_scalar_HDF5<int>(file, pop_n + string("/INIT010/spike_freq_adpt"));
-				network.NeuroPopArray[ind]->add_spike_freq_adpt();
+				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/tau_K"))) {
+					cout << "reading tau_K...";
+					double tau_K = read_scalar_HDF5<double>(file, pop_n + string("/INIT010/tau_K"));
+					network.NeuroPopArray[ind]->set_spike_freq_adpt_tau(tau_K); 
+				}
+				
 				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/dg_K"))) {
 					cout << "reading dg_K...";
 					double dg_K = read_scalar_HDF5<double>(file, pop_n + string("/INIT010/dg_K"));
-					network.NeuroPopArray[ind]->set_spike_freq_adpt_para(dg_K);
-				}
+					network.NeuroPopArray[ind]->set_spike_freq_adpt_para(dg_K); 
+				}				
 				// read in heterogenous spike_freq_adpt para
-				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/dg_K_heter"))) {
-					cout << "reading dg_K_heter...";
-					vector<double> dg_K_heter;
+
+
+				if (dataset_exist_HDF5(file, pop_n + string("/INIT010/dg_K_heter")) & dataset_exist_HDF5(file, pop_n + string("/INIT010/tau_K_heter"))) {					
+					cout << "reading heterogenous params of SFA...";
+					vector<double> dg_K_heter, tau_K_heter;
 					int heter_SFA_start_step = read_scalar_HDF5<int>(file, pop_n + string("/INIT010/start_step"));
 					int heter_SFA_end_step = read_scalar_HDF5<int>(file, pop_n + string("/INIT010/end_step"));
 					read_vector_HDF5(file, pop_n + string("/INIT010/dg_K_heter"), dg_K_heter);
-					network.NeuroPopArray[ind]->set_spike_freq_adpt_para_heter(dg_K_heter,heter_SFA_start_step,heter_SFA_end_step);
+					read_vector_HDF5(file, pop_n + string("/INIT010/tau_K_heter"), tau_K_heter);
+					network.NeuroPopArray[ind]->set_spike_freq_adpt_para_heter(dg_K_heter,tau_K_heter,heter_SFA_start_step,heter_SFA_end_step); 
 				}
+				// set up SFA and deal with tau_K
+				network.NeuroPopArray[ind]->add_spike_freq_adpt();
 				cout << "done." << endl;
 			}
 
@@ -353,6 +363,38 @@ bool SimuInterface::import_HDF5(string in_filename_input) {
 				network.NeuroPopArray[ind]->start_cov_record(time_start, time_end);
 				cout << "done." << endl;
 			}
+			
+			// real-time centre-of-mass record settings
+			if (group_exist_HDF5(in_filename, pop_n + string("/SAMP006"))) {
+				cout << "\t\t Real-time centre-of-mass record settings...";
+				vector<bool> time_points;
+				read_vector_HDF5(file, pop_n + string("/SAMP006/time_points"), time_points);
+				bool V_flag = read_scalar_HDF5<int>(file, pop_n + string("/SAMP006/data_type/V_flag"));
+				bool I_flag = read_scalar_HDF5<int>(file, pop_n + string("/SAMP006/data_type/I_flag"));
+				network.NeuroPopArray[ind]->start_COM_record(time_points, V_flag, I_flag);
+				cout << "done." << endl;
+			}
+
+			// shuffle V of local neurons to reduce #patterns
+			if (group_exist_HDF5(in_filename, pop_n + string("/SHUFFLE_V"))) {
+				cout << "\t\t Shuffle V of local neurons settings...";
+				vector<bool> time_points;		
+				read_vector_HDF5(file, pop_n + string("/SHUFFLE_V/time_points"), time_points);		
+				vector< vector<bool> > shuffle_neuron_index;
+				read_matrix_HDF5(file, pop_n + string("/SHUFFLE_V/neurons"), shuffle_neuron_index);					
+				network.NeuroPopArray[ind]->add_shuffle_local_V(time_points, shuffle_neuron_index);
+				cout << "done." << endl;
+			}
+
+			// add spike nosie
+			if (group_exist_HDF5(in_filename, pop_n + string("/SPIKE_NOISE"))) {
+				cout << "\t\t Add spike noise settings...";
+				vector<bool> time_points;		
+				read_vector_HDF5(file, pop_n + string("/SPIKE_NOISE/time_points"), time_points);			
+				double noised_neuron_ratio = read_scalar_HDF5<double>(file, pop_n + string("/SPIKE_NOISE/ratio"));					
+				network.NeuroPopArray[ind]->set_spike_noise(time_points, noised_neuron_ratio);
+				cout << "done." << endl;
+			}			
 
 
 			// LFP record settings
