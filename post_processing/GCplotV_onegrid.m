@@ -45,7 +45,7 @@ for r_num = 1:Result_num
     MemP(2:2:gsize,2:2:gsize) = 1;
     ind_E = MemP == 0;
     ind_I = MemP == 1;
-    for i=2:10:(end_step-2000)
+    for i=2:10:end_step
         %i
         MemP(ind_E) = V{1}(:,i);        
         MemP(ind_I) = V{2}(:,i);                    

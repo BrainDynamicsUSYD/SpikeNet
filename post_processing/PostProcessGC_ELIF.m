@@ -37,9 +37,7 @@ for id_out = 1:num_files
 
     GCplotSpike_onegrid(R); % record the video of spike
     
-    get_initialV(R,R{1}.step_tot/50); % get the last V for external setting V
-
-    get_combinedSpikeHist(R)
+    %get_initialV(R,R{1}.step_tot/50); % get the last V for external setting V of initial conditions   
 end
 
 end

@@ -2,10 +2,12 @@ function main_Chen_and_Gong_2019(varargin)
 
 % Loop number for PBS array job
 loop_num = 0;
-% use /SpikeNet/ForExtCurrent/ImageProcess_DOG.m to generate the external
-% stimulus
+% detect stimulus file
 d_E=dir('*E.h5');
 d_I=dir('*I.h5');
+if length(d_E) < 1
+    error('use /SpikeNet/ForExtCurrent/ImageProcess_DOG.m to generate the external stimulus file')
+end
 for dump = 1:length(d_E)  
     
     ImageName_E=d_E(dump).name;
