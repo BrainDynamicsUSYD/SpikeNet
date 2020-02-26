@@ -101,7 +101,7 @@ PostProcessYG()
 7. Load the .mat file and do some basic visualization (in Matlab)
 ``` 
 d = dir('*RYG.mat')
-R = load(d(1).name)}
+R = load(d(1).name)
 raster_plot(R,1)
 ```
 
