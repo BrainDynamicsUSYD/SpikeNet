@@ -177,7 +177,7 @@ To reproduce the dynamics reported in Chen & Gong, 2019, please submit the PBS s
 
 * **Yifan Gu** - *Chief architect and initial work* - [yigu8115](https://github.com/yigu8115)
 * **James A Henderson** - *HDF5-based I/O and learning schemes* - [JamesAHenderson](https://github.com/JamesAHenderson)
-* **Guozhang Chen** - *Other functions* - [ifgovh](https://github.com/ifgovh)
+* **Guozhang Chen** - *The rest of functions* - [ifgovh](https://github.com/ifgovh)
 
 See also the list of [contributors](https://github.com/BrainDynamicsUSYD/SpikeNet/graphs/contributors) who participated in this project.
 
