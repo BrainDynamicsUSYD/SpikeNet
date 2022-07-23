@@ -185,7 +185,7 @@ See also the list of [contributors](https://github.com/BrainDynamicsUSYD/SpikeNe
 # Citation
 If you find this code useful in your research, please cite:
 
-```
+
 @article{10.1371/journal.pcbi.1006902,
     author = {Gu, Yifan AND Qi, Yang AND Gong, Pulin},
     journal = {PLOS Computational Biology},
