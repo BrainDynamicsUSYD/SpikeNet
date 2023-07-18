@@ -169,6 +169,8 @@ For MPI jobs with SpikeNet, please contact Yifan Gu for more technical details.
 
 Also the full documentation is available [here](https://github.com/BrainDynamicsUSYD/SpikeNet/blob/master/documentation/SpikeNet_Documentation.pdf).
 
+Guozhang Chen has a [video](https://www.youtube.com/watch?v=cGTxJyx3A_0) to introduce SpikeNet but unfortunately, it missed the first 15 min.
+
 # Reproduce published papers
 To reproduce the dynamics reported in Gu et al, 2019, please submit the PBS script ./shell_scripts/YG_all_in_one.sh.
 
